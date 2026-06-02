@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FlexOfficers
 
-## Getting Started
+## Overview
 
-First, run the development server:
+FlexOfficers is a marketplace that connects licensed security officers with security companies that need coverage.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Companies can post open shifts and find qualified officers quickly. Officers can browse available shifts, claim assignments, and work on a flexible schedule.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Our mission is to make security staffing faster, easier, and more reliable.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Problem
 
-## Learn More
+Security companies regularly face staffing challenges:
 
-To learn more about Next.js, take a look at the following resources:
+* Last-minute call-outs
+* Open shifts that need immediate coverage
+* Time-consuming phone calls and scheduling
+* Limited access to qualified backup officers
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+At the same time, licensed security officers often want additional work opportunities but have difficulty finding available shifts.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+FlexOfficers bridges this gap.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Solution
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+FlexOfficers provides a platform where:
+
+### Security Companies
+
+* Post available shifts
+* Specify requirements
+* Find qualified officers
+* Fill positions quickly
+
+### Security Officers
+
+* Create a professional profile
+* Upload licenses and certifications
+* Browse available shifts
+* Accept assignments
+* Build work history and reputation
+
+---
+
+## MVP Features
+
+### Company Features
+
+* Create company account
+* Post shifts
+* View applicants
+* Assign officers
+
+### Officer Features
+
+* Create officer profile
+* Upload licenses
+* Browse available shifts
+* Apply for shifts
+* View scheduled assignments
+
+### Platform Features
+
+* Authentication
+* Shift management
+* Role-based access
+* Responsive design
+
+---
+
+## Future Features
+
+* Real-time notifications
+* In-app messaging
+* Digital check-in/check-out
+* GPS verification
+* Ratings and reviews
+* Automated payments
+* AI-powered officer matching
+* Background verification integrations
+* Mobile applications
+
+---
+
+## Tech Stack
+
+### Frontend
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+
+### Backend
+
+* Next.js API Routes
+* PostgreSQL
+* Prisma ORM
+
+### Authentication
+
+* Clerk or NextAuth
+
+### Deployment
+
+* Vercel
+
+---
+
+## Vision
+
+Become the leading marketplace for licensed security professionals by making security staffing as simple as requesting a ride or booking a service online.
+
+---
+
+## Status
+
+Current Phase: MVP Development
+
+Version: 0.1.0
+
+Founder: Raul Pedro Montalvo Vazquez
+
