@@ -31,6 +31,29 @@ export default function Home() {
             View Available Shifts
           </a>
         </div>
+
+        <div className="mt-24 grid gap-8 md:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-xl font-bold">1. Post a Shift</h3>
+            <p className="mt-3 text-slate-300">
+              Security companies create open shifts and specify requirements.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-xl font-bold">2. Officers Apply</h3>
+            <p className="mt-3 text-slate-300">
+              Licensed officers browse opportunities and submit applications.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+            <h3 className="text-xl font-bold">3. Fill the Post</h3>
+            <p className="mt-3 text-slate-300">
+              Companies review applicants and assign qualified officers.
+            </p>
+          </div>
+        </div>
       </section>
     </main>
   );
