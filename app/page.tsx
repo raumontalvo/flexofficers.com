@@ -125,6 +125,26 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-white/10 py-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 text-sm text-slate-400 md:flex-row">
+          <p>© 2026 FlexOfficers. All rights reserved.</p>
+
+          <div className="flex gap-6">
+            <a href="#" className="hover:text-white">
+              Privacy
+            </a>
+
+            <a href="#" className="hover:text-white">
+              Terms
+            </a>
+
+            <a href="#" className="hover:text-white">
+              Contact
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
