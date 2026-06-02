@@ -1,3 +1,6 @@
+import { UserRole } from "@/app/generated/prisma/enums";
+import { setRole } from "./actions/set-role";
+
 export default function OnboardingPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
@@ -16,9 +19,14 @@ export default function OnboardingPage() {
               Browse shifts, apply for opportunities, and build your profile.
             </p>
 
-            <button className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold">
-              Continue as Officer
-            </button>
+            <form action={async () => {
+              "use server";
+              await setRole(UserRole.OFFICER);
+            }}>
+              <button className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400">
+                Continue as Officer
+              </button>
+            </form>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
@@ -28,9 +36,14 @@ export default function OnboardingPage() {
               Post shifts, review applicants, and manage staffing needs.
             </p>
 
-            <button className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold">
-              Continue as Company
-            </button>
+            <form action={async () => {
+              "use server";
+              await setRole(UserRole.COMPANY);
+            }}>
+              <button className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400">
+                Continue as Company
+              </button>
+            </form>
           </div>
         </div>
       </section>
