@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import ApplyButton from "./ApplyButton";
 
 export default async function ShiftsPage() {
   const shifts = await prisma.shift.findMany({
@@ -56,9 +57,7 @@ export default async function ShiftsPage() {
                     </div>
                   </div>
 
-                  <button className="rounded-xl border border-white/20 px-6 py-3 font-semibold hover:bg-white/10">
-                    Apply
-                  </button>
+                  <ApplyButton shiftId={shift.id} />
                 </div>
               </div>
             ))
