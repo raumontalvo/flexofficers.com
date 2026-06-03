@@ -10,29 +10,19 @@ export default async function DashboardPage() {
 
         <p className="mt-4 text-slate-300">
           Welcome{user?.firstName ? `, ${user.firstName}` : ""}. Manage your
-          FlexOfficers account and marketplace activity.
+          FlexOfficers marketplace activity.
         </p>
 
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <h2 className="mt-12 text-2xl font-bold">Officer Tools</h2>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-3">
           <a
             href="/officer/profile"
             className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
           >
-            <h2 className="text-xl font-semibold">Officer Profile</h2>
-
+            <h3 className="text-xl font-semibold">Officer Profile</h3>
             <p className="mt-3 text-slate-300">
-              Add licenses, experience, location, and availability.
-            </p>
-          </a>
-
-          <a
-            href="/company/profile"
-            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-          >
-            <h2 className="text-xl font-semibold">Company Profile</h2>
-
-            <p className="mt-3 text-slate-300">
-              Manage company information and staffing needs.
+              Manage licenses, experience, and availability.
             </p>
           </a>
 
@@ -40,10 +30,51 @@ export default async function DashboardPage() {
             href="/shifts"
             className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
           >
-            <h2 className="text-xl font-semibold">Shift Board</h2>
-
+            <h3 className="text-xl font-semibold">Available Shifts</h3>
             <p className="mt-3 text-slate-300">
-              Browse, post, apply, and manage security shifts.
+              Browse and apply to open shifts.
+            </p>
+          </a>
+
+          <a
+            href="/officer/applications"
+            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+          >
+            <h3 className="text-xl font-semibold">My Applications</h3>
+            <p className="mt-3 text-slate-300">
+              Track application status and decisions.
+            </p>
+          </a>
+        </div>
+
+        <h2 className="mt-16 text-2xl font-bold">Company Tools</h2>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-3">
+          <a
+            href="/company/profile"
+            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+          >
+            <h3 className="text-xl font-semibold">Company Profile</h3>
+            <p className="mt-3 text-slate-300">Manage company information.</p>
+          </a>
+
+          <a
+            href="/shifts/create"
+            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+          >
+            <h3 className="text-xl font-semibold">Post a Shift</h3>
+            <p className="mt-3 text-slate-300">
+              Create new security opportunities.
+            </p>
+          </a>
+
+          <a
+            href="/company/applications"
+            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+          >
+            <h3 className="text-xl font-semibold">Applicants</h3>
+            <p className="mt-3 text-slate-300">
+              Review and manage applicants.
             </p>
           </a>
         </div>
