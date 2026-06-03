@@ -51,7 +51,10 @@ export default async function CompanyApplicationsPage() {
                   </span>
                 </div>
 
-                <ApplicationStatusButtons applicationId={application.id} />
+                <ApplicationStatusButtons
+                  applicationId={application.id}
+                  status={application.status}
+                />
               </div>
             ))
           )}

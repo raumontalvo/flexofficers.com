@@ -2,9 +2,15 @@
 
 export default function ApplicationStatusButtons({
   applicationId,
+  status,
 }: {
   applicationId: string;
+  status: string;
 }) {
+  if (status !== "PENDING") {
+    return null;
+  }
+
   async function updateStatus(status: "ACCEPTED" | "REJECTED") {
     const response = await fetch("/api/applications/status", {
       method: "POST",
