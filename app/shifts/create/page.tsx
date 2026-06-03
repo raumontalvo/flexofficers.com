@@ -1,4 +1,36 @@
+"use client";
+
+import { useState } from "react";
+
 export default function CreateShiftPage() {
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    location: "",
+    startTime: "",
+    endTime: "",
+    hourlyRate: "",
+    requiredLicense: "",
+  });
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    const response = await fetch("/api/shifts", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+
+    if (response.ok) {
+      alert("Shift created!");
+    } else {
+      alert("Failed to create shift");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
       <section className="mx-auto max-w-4xl">
@@ -9,18 +41,26 @@ export default function CreateShiftPage() {
         </p>
 
         <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
-          <form className="grid gap-6">
+          <form onSubmit={handleSubmit} className="grid gap-6">
             <input
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
               className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
               placeholder="Shift Title"
             />
 
             <textarea
+              value={form.description}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               className="min-h-32 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
               placeholder="Shift Description"
             />
 
             <input
+              value={form.location}
+              onChange={(e) => setForm({ ...form, location: e.target.value })}
               className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
               placeholder="Location"
             />
@@ -28,27 +68,46 @@ export default function CreateShiftPage() {
             <div className="grid gap-6 md:grid-cols-2">
               <input
                 type="datetime-local"
+                value={form.startTime}
+                onChange={(e) =>
+                  setForm({ ...form, startTime: e.target.value })
+                }
                 className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
               />
 
               <input
                 type="datetime-local"
+                value={form.endTime}
+                onChange={(e) =>
+                  setForm({ ...form, endTime: e.target.value })
+                }
                 className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
               />
             </div>
 
             <input
               type="number"
+              value={form.hourlyRate}
+              onChange={(e) =>
+                setForm({ ...form, hourlyRate: e.target.value })
+              }
               className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
               placeholder="Hourly Rate"
             />
 
             <input
+              value={form.requiredLicense}
+              onChange={(e) =>
+                setForm({ ...form, requiredLicense: e.target.value })
+              }
               className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
               placeholder="Required License"
             />
 
-            <button className="rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400">
+            <button
+              type="submit"
+              className="rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400"
+            >
               Create Shift
             </button>
           </form>
