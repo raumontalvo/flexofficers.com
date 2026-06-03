@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/enums";
 
-export async function setRole(role: UserRole) {
+async function saveRole(role: UserRole) {
   const clerkUser = await currentUser();
 
   if (!clerkUser) {
@@ -19,13 +19,8 @@ export async function setRole(role: UserRole) {
   }
 
   await prisma.user.upsert({
-    where: {
-      clerkId: clerkUser.id,
-    },
-    update: {
-      role,
-      email,
-    },
+    where: { clerkId: clerkUser.id },
+    update: { role, email },
     create: {
       clerkId: clerkUser.id,
       email,
@@ -34,4 +29,12 @@ export async function setRole(role: UserRole) {
   });
 
   redirect("/dashboard");
+}
+
+export async function setOfficerRole() {
+  await saveRole(UserRole.OFFICER);
+}
+
+export async function setCompanyRole() {
+  await saveRole(UserRole.COMPANY);
 }

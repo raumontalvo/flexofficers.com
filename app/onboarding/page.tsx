@@ -1,7 +1,22 @@
-import { UserRole } from "@/app/generated/prisma/enums";
-import { setRole } from "./actions/set-role";
+"use client";
+
+import { useRouter } from "next/navigation";
 
 export default function OnboardingPage() {
+  const router = useRouter();
+
+  async function chooseRole(role: "OFFICER" | "COMPANY") {
+    await fetch("/api/onboarding/role", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ role }),
+    });
+
+    router.push("/dashboard");
+  }
+
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
       <section className="mx-auto max-w-3xl text-center">
@@ -19,14 +34,12 @@ export default function OnboardingPage() {
               Browse shifts, apply for opportunities, and build your profile.
             </p>
 
-            <form action={async () => {
-              "use server";
-              await setRole(UserRole.OFFICER);
-            }}>
-              <button className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400">
-                Continue as Officer
-              </button>
-            </form>
+            <button
+              onClick={() => chooseRole("OFFICER")}
+              className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400"
+            >
+              Continue as Officer
+            </button>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
@@ -36,14 +49,12 @@ export default function OnboardingPage() {
               Post shifts, review applicants, and manage staffing needs.
             </p>
 
-            <form action={async () => {
-              "use server";
-              await setRole(UserRole.COMPANY);
-            }}>
-              <button className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400">
-                Continue as Company
-              </button>
-            </form>
+            <button
+              onClick={() => chooseRole("COMPANY")}
+              className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400"
+            >
+              Continue as Company
+            </button>
           </div>
         </div>
       </section>
