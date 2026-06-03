@@ -9,31 +9,43 @@ export default async function DashboardPage() {
         <h1 className="text-4xl font-bold">Dashboard</h1>
 
         <p className="mt-4 text-slate-300">
-          Welcome{user?.firstName ? `, ${user.firstName}` : ""}. This is where
-          FlexOfficers users will manage shifts, profiles, and applications.
+          Welcome{user?.firstName ? `, ${user.firstName}` : ""}. Manage your
+          FlexOfficers account and marketplace activity.
         </p>
 
         <div className="mt-10 grid gap-6 md:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <a
+            href="/officer/profile"
+            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+          >
             <h2 className="text-xl font-semibold">Officer Profile</h2>
+
             <p className="mt-3 text-slate-300">
               Add licenses, experience, location, and availability.
             </p>
-          </div>
+          </a>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <a
+            href="/company/profile"
+            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+          >
             <h2 className="text-xl font-semibold">Company Profile</h2>
+
             <p className="mt-3 text-slate-300">
               Manage company information and staffing needs.
             </p>
-          </div>
+          </a>
 
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+          <a
+            href="/shifts"
+            className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+          >
             <h2 className="text-xl font-semibold">Shift Board</h2>
+
             <p className="mt-3 text-slate-300">
-              Post, browse, apply, and manage security shifts.
+              Browse, post, apply, and manage security shifts.
             </p>
-          </div>
+          </a>
         </div>
       </section>
     </main>
