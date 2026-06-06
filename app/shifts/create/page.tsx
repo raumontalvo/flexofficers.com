@@ -97,26 +97,16 @@ export default function CreateShiftPage() {
                 placeholder="Hourly Rate"
               />
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-300">
-                  Number of officers needed
-                </label>
-
-                <input
-                  type="number"
-                  min="1"
-                  value={form.positionsNeeded}
-                  onChange={(e) =>
-                    setForm({ ...form, positionsNeeded: e.target.value })
-                  }
-                  className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-                  placeholder="Number of officers needed"
-                />
-
-                <p className="mt-2 text-sm text-slate-400">
-                  This shift stays open until this many officers are accepted.
-                </p>
-              </div>
+              <input
+                type="number"
+                min="1"
+                value={form.positionsNeeded}
+                onChange={(e) =>
+                  setForm({ ...form, positionsNeeded: e.target.value })
+                }
+                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+                placeholder="Number of officers needed"
+              />
             </div>
 
             <input
