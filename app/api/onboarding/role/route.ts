@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@/app/generated/prisma/enums";
 
 export async function POST(req: Request) {
   const clerkUser = await currentUser();
