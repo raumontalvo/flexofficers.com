@@ -1,16 +1,30 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import ApplicationStatusButtons from "./ApplicationStatusButtons";
 
 export default async function CompanyApplicationsPage() {
-  const applications = await prisma.application.findMany({
-    include: {
-      shift: true,
-      officer: true,
-    },
-    orderBy: {
-      appliedAt: "desc",
-    },
-  });
+  const clerkUser = await currentUser();
+
+  const applications = clerkUser
+    ? await prisma.application.findMany({
+        where: {
+          shift: {
+            company: {
+              user: {
+                clerkId: clerkUser.id,
+              },
+            },
+          },
+        },
+        include: {
+          shift: true,
+          officer: true,
+        },
+        orderBy: {
+          appliedAt: "desc",
+        },
+      })
+    : [];
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">

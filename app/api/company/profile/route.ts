@@ -1,21 +1,34 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/enums";
 
 export async function POST(req: Request) {
+  const clerkUser = await currentUser();
+
+  if (!clerkUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const email = clerkUser.emailAddresses[0]?.emailAddress;
+
+  if (!email) {
+    return NextResponse.json({ error: "Email not found" }, { status: 400 });
+  }
+
   const data = await req.json();
 
   const user = await prisma.user.upsert({
     where: {
-      clerkId: "test-company-user",
+      clerkId: clerkUser.id,
     },
     update: {
-      email: "test-company@flexofficers.com",
+      email,
       role: UserRole.COMPANY,
     },
     create: {
-      clerkId: "test-company-user",
-      email: "test-company@flexofficers.com",
+      clerkId: clerkUser.id,
+      email,
       role: UserRole.COMPANY,
     },
   });
