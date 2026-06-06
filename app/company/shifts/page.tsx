@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import CancelShiftButton from "./CancelShiftButton";
 import DeleteShiftButton from "./DeleteShiftButton";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +40,7 @@ export default async function CompanyShiftsPage() {
             <h1 className="text-4xl font-bold">Manage Shifts</h1>
 
             <p className="mt-4 text-slate-300">
-              View, track, and delete shifts posted by your company.
+              View, track, cancel, and delete shifts posted by your company.
             </p>
           </div>
 
@@ -90,7 +91,10 @@ export default async function CompanyShiftsPage() {
                       </div>
                     </div>
 
-                    <DeleteShiftButton shiftId={shift.id} />
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <CancelShiftButton shiftId={shift.id} />
+                      <DeleteShiftButton shiftId={shift.id} />
+                    </div>
                   </div>
                 </div>
               );
