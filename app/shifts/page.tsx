@@ -1,5 +1,8 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import ApplyButton from "./ApplyButton";
+
+export const dynamic = "force-dynamic";
 
 export default async function ShiftsPage() {
   const shifts = await prisma.shift.findMany({
@@ -21,12 +24,12 @@ export default async function ShiftsPage() {
             </p>
           </div>
 
-          <a
+          <Link
             href="/shifts/create"
             className="rounded-xl bg-blue-500 px-6 py-3 text-center font-semibold hover:bg-blue-400"
           >
             Post a Shift
-          </a>
+          </Link>
         </div>
 
         <div className="mt-10 grid gap-6">
