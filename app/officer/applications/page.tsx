@@ -1,21 +1,26 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
 export default async function OfficerApplicationsPage() {
-  const applications = await prisma.application.findMany({
-    where: {
-      officer: {
-        user: {
-          clerkId: "test-officer-user",
+  const clerkUser = await currentUser();
+
+  const applications = clerkUser
+    ? await prisma.application.findMany({
+        where: {
+          officer: {
+            user: {
+              clerkId: clerkUser.id,
+            },
+          },
         },
-      },
-    },
-    include: {
-      shift: true,
-    },
-    orderBy: {
-      appliedAt: "desc",
-    },
-  });
+        include: {
+          shift: true,
+        },
+        orderBy: {
+          appliedAt: "desc",
+        },
+      })
+    : [];
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
