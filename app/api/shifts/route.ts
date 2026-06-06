@@ -37,6 +37,7 @@ export async function POST(req: Request) {
         startTime: new Date(data.startTime),
         endTime: new Date(data.endTime),
         requiredLicense: data.requiredLicense,
+        positionsNeeded: Number(data.positionsNeeded) || 1,
       },
     });
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import ApplyButton from "./ApplyButton";
 
@@ -6,6 +7,16 @@ export const dynamic = "force-dynamic";
 
 export default async function ShiftsPage() {
   const shifts = await prisma.shift.findMany({
+    where: {
+      status: ShiftStatus.OPEN,
+    },
+    include: {
+      applications: {
+        where: {
+          status: ApplicationStatus.ACCEPTED,
+        },
+      },
+    },
     orderBy: {
       createdAt: "desc",
     },
@@ -38,32 +49,40 @@ export default async function ShiftsPage() {
               No shifts posted yet.
             </div>
           ) : (
-            shifts.map((shift) => (
-              <div
-                key={shift.id}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6"
-              >
-                <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
-                  <div>
-                    <h2 className="text-2xl font-bold">{shift.title}</h2>
+            shifts.map((shift) => {
+              const filledCount = shift.applications.length;
 
-                    <p className="mt-2 text-slate-300">{shift.location}</p>
+              return (
+                <div
+                  key={shift.id}
+                  className="rounded-3xl border border-white/10 bg-white/5 p-6"
+                >
+                  <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
+                    <div>
+                      <h2 className="text-2xl font-bold">{shift.title}</h2>
 
-                    <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
-                      <span className="rounded-full bg-white/10 px-3 py-1">
-                        ${shift.hourlyRate.toString()}/hr
-                      </span>
+                      <p className="mt-2 text-slate-300">{shift.location}</p>
 
-                      <span className="rounded-full bg-white/10 px-3 py-1">
-                        {shift.requiredLicense}
-                      </span>
+                      <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
+                        <span className="rounded-full bg-white/10 px-3 py-1">
+                          ${shift.hourlyRate.toString()}/hr
+                        </span>
+
+                        <span className="rounded-full bg-white/10 px-3 py-1">
+                          {shift.requiredLicense}
+                        </span>
+
+                        <span className="rounded-full bg-white/10 px-3 py-1">
+                          {filledCount} of {shift.positionsNeeded} filled
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <ApplyButton shiftId={shift.id} />
+                    <ApplyButton shiftId={shift.id} />
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </section>

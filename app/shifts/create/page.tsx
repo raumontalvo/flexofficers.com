@@ -11,6 +11,7 @@ export default function CreateShiftPage() {
     endTime: "",
     hourlyRate: "",
     requiredLicense: "",
+    positionsNeeded: "1",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -85,15 +86,28 @@ export default function CreateShiftPage() {
               />
             </div>
 
-            <input
-              type="number"
-              value={form.hourlyRate}
-              onChange={(e) =>
-                setForm({ ...form, hourlyRate: e.target.value })
-              }
-              className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-              placeholder="Hourly Rate"
-            />
+            <div className="grid gap-6 md:grid-cols-2">
+              <input
+                type="number"
+                value={form.hourlyRate}
+                onChange={(e) =>
+                  setForm({ ...form, hourlyRate: e.target.value })
+                }
+                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+                placeholder="Hourly Rate"
+              />
+
+              <input
+                type="number"
+                min="1"
+                value={form.positionsNeeded}
+                onChange={(e) =>
+                  setForm({ ...form, positionsNeeded: e.target.value })
+                }
+                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+                placeholder="Number of officers needed"
+              />
+            </div>
 
             <input
               value={form.requiredLicense}
