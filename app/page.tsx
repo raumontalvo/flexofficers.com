@@ -1,10 +1,12 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <a href="/" className="text-xl font-bold tracking-tight">
+        <Link href="/" className="text-xl font-bold tracking-tight">
           FlexOfficers
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-8 text-sm text-slate-300 md:flex">
           <a href="#how-it-works" className="hover:text-white">
@@ -18,12 +20,12 @@ export default function Home() {
           </a>
         </div>
 
-        <a
+        <Link
           href="/sign-up"
           className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400"
         >
           Get Started
-        </a>
+        </Link>
       </nav>
 
       <section className="mx-auto flex max-w-6xl flex-col items-center justify-center px-6 py-24 text-center">
@@ -42,19 +44,19 @@ export default function Home() {
         </p>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <a
-            href="/post-shift"
+          <Link
+            href="/shifts/create"
             className="rounded-xl bg-blue-500 px-6 py-3 font-semibold text-white hover:bg-blue-400"
           >
             Post a Shift
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/shifts"
             className="rounded-xl border border-white/20 px-6 py-3 font-semibold text-white hover:bg-white/10"
           >
             View Available Shifts
-          </a>
+          </Link>
         </div>
       </section>
 

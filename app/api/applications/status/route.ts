@@ -16,9 +16,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(application);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
-      { error: "Failed to update application" },
+      { error: "Failed to update application status" },
       { status: 500 }
     );
   }

@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(shift);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to create shift" },
       { status: 500 }

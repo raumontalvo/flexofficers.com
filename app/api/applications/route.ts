@@ -57,7 +57,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(application);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to apply to shift" },
       { status: 500 }
