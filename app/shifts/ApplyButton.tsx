@@ -10,10 +10,12 @@ export default function ApplyButton({ shiftId }: { shiftId: string }) {
       body: JSON.stringify({ shiftId }),
     });
 
+    const data = await response.json();
+
     if (response.ok) {
       alert("Application submitted!");
     } else {
-      alert("Failed to apply to shift");
+      alert(data.error || "Failed to apply to shift");
     }
   }
 
