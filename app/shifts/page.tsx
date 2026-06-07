@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import ApplyButton from "./ApplyButton";
 
 export const dynamic = "force-dynamic";
 
@@ -78,7 +77,12 @@ export default async function ShiftsPage() {
                       </div>
                     </div>
 
-                    <ApplyButton shiftId={shift.id} />
+                    <Link
+                      href={`/shifts/${shift.id}`}
+                      className="rounded-xl border border-white/20 px-6 py-3 font-semibold hover:bg-white/10"
+                    >
+                      View Details
+                    </Link>
                   </div>
                 </div>
               );
