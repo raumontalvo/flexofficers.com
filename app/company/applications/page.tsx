@@ -24,9 +24,8 @@ export default async function CompanyApplicationsPage() {
             include: {
               licenses: {
                 orderBy: {
-                  createdAt: "desc",
+                  createdAt: "asc",
                 },
-                take: 1,
               },
             },
           },
@@ -52,55 +51,74 @@ export default async function CompanyApplicationsPage() {
               No applications yet.
             </div>
           ) : (
-            applications.map((application) => {
-              const latestLicense = application.officer.licenses[0];
+            applications.map((application) => (
+              <div
+                key={application.id}
+                className="rounded-3xl border border-white/10 bg-white/5 p-6"
+              >
+                <h2 className="text-2xl font-bold">
+                  {application.officer.firstName}{" "}
+                  {application.officer.lastName}
+                </h2>
 
-              return (
-                <div
-                  key={application.id}
-                  className="rounded-3xl border border-white/10 bg-white/5 p-6"
-                >
-                  <h2 className="text-2xl font-bold">
-                    {application.officer.firstName}{" "}
-                    {application.officer.lastName}
-                  </h2>
+                <p className="mt-2 text-slate-300">
+                  Applied for: {application.shift.title}
+                </p>
 
-                  <p className="mt-2 text-slate-300">
-                    Applied for: {application.shift.title}
+                {application.officer.bio && (
+                  <p className="mt-4 rounded-2xl border border-white/10 bg-slate-900 p-4 text-slate-300">
+                    {application.officer.bio}
                   </p>
+                )}
 
-                  {application.officer.bio && (
-                    <p className="mt-4 rounded-2xl border border-white/10 bg-slate-900 p-4 text-slate-300">
-                      {application.officer.bio}
-                    </p>
-                  )}
+                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
+                  <span className="rounded-full bg-white/10 px-3 py-1">
+                    {application.officer.city || "City not provided"},{" "}
+                    {application.officer.state || "State not provided"}
+                  </span>
 
-                  <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
-                    <span className="rounded-full bg-white/10 px-3 py-1">
-                      {application.officer.city || "City not provided"},{" "}
-                      {application.officer.state || "State not provided"}
-                    </span>
+                  <span className="rounded-full bg-white/10 px-3 py-1">
+                    Application: {application.status}
+                  </span>
 
-                    <span className="rounded-full bg-white/10 px-3 py-1">
-                      License: {latestLicense?.licenseType || "Not provided"}
-                    </span>
-
-                    <span className="rounded-full bg-white/10 px-3 py-1">
-                      Application: {application.status}
-                    </span>
-
-                    <span className="rounded-full bg-white/10 px-3 py-1">
-                      Shift: {application.shift.status}
-                    </span>
-                  </div>
-
-                  <ApplicationStatusButtons
-                    applicationId={application.id}
-                    status={application.status}
-                  />
+                  <span className="rounded-full bg-white/10 px-3 py-1">
+                    Shift: {application.shift.status}
+                  </span>
                 </div>
-              );
-            })
+
+                <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900 p-4">
+                  <h3 className="font-semibold">Licenses</h3>
+
+                  {application.officer.licenses.length === 0 ? (
+                    <p className="mt-3 text-sm text-slate-400">
+                      No licenses provided.
+                    </p>
+                  ) : (
+                    <div className="mt-3 grid gap-3">
+                      {application.officer.licenses.map((license) => (
+                        <div
+                          key={license.id}
+                          className="rounded-xl bg-white/5 p-3 text-sm text-slate-300"
+                        >
+                          <p>
+                            <span className="font-semibold text-white">
+                              {license.licenseType}
+                            </span>
+                          </p>
+                          <p>Number: {license.licenseNumber}</p>
+                          <p>Issuing state: {license.issuingState}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <ApplicationStatusButtons
+                  applicationId={application.id}
+                  status={application.status}
+                />
+              </div>
+            ))
           )}
         </div>
       </section>
