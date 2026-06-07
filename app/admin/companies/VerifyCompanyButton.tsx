@@ -16,11 +16,13 @@ export default function VerifyCompanyButton({
       body: JSON.stringify({ companyId, verified: !verified }),
     });
 
+    const data = await response.json();
+
     if (response.ok) {
       alert(verified ? "Company unverified!" : "Company verified!");
       window.location.reload();
     } else {
-      alert("Failed to update company verification");
+      alert(data.error || "Failed to update company verification");
     }
   }
 
