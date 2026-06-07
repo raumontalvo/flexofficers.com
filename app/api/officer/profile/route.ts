@@ -3,6 +3,12 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/enums";
 
+type LicenseInput = {
+  licenseType?: string;
+  licenseNumber?: string;
+  issuingState?: string;
+};
+
 export async function POST(req: Request) {
   const clerkUser = await currentUser();
 
@@ -60,10 +66,12 @@ export async function POST(req: Request) {
     },
   });
 
-  const licenses = Array.isArray(data.licenses) ? data.licenses : [];
+  const licenses: LicenseInput[] = Array.isArray(data.licenses)
+    ? data.licenses
+    : [];
 
   const validLicenses = licenses.filter(
-    (license) =>
+    (license: LicenseInput) =>
       license.licenseType?.trim() ||
       license.licenseNumber?.trim() ||
       license.issuingState?.trim()
@@ -71,7 +79,7 @@ export async function POST(req: Request) {
 
   if (validLicenses.length > 0) {
     await prisma.license.createMany({
-      data: validLicenses.map((license) => ({
+      data: validLicenses.map((license: LicenseInput) => ({
         officerId: officer.id,
         licenseType: license.licenseType || "Not provided",
         licenseNumber: license.licenseNumber || "Not provided",
