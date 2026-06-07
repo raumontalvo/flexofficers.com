@@ -28,6 +28,11 @@ export async function POST(req: Request) {
         id: data.shiftId,
       },
       include: {
+        company: {
+          include: {
+            user: true,
+          },
+        },
         applications: {
           where: {
             status: ApplicationStatus.ACCEPTED,
@@ -104,6 +109,14 @@ export async function POST(req: Request) {
       data: {
         shiftId: data.shiftId,
         officerId: officer.id,
+      },
+    });
+
+    await prisma.notification.create({
+      data: {
+        userId: shift.company.user.id,
+        title: "New application received",
+        message: `${officer.firstName} ${officer.lastName} applied to ${shift.title}.`,
       },
     });
 
