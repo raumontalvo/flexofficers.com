@@ -1,5 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import NotificationActions from "./NotificationActions";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,11 @@ export default async function NotificationsPage() {
                 <p className="mt-4 text-sm text-slate-500">
                   {notification.createdAt.toLocaleString()}
                 </p>
+
+                <NotificationActions
+                  notificationId={notification.id}
+                  isRead={notification.read}
+                />
               </div>
             ))
           )}
