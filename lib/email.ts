@@ -19,7 +19,7 @@ export async function sendNotificationEmail({
   const resend = new Resend(resendApiKey);
 
   await resend.emails.send({
-    from: "FlexOfficers <onboarding@resend.dev>",
+    from: "FlexOfficers <notifications@flexofficers.com>",
     to,
     subject,
     html: `
