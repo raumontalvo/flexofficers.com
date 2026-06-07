@@ -1,7 +1,11 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { UserRole } from "@/app/generated/prisma/enums";
+import {
+  ApplicationStatus,
+  ShiftStatus,
+  UserRole,
+} from "@/app/generated/prisma/enums";
 
 export async function POST(req: Request) {
   try {
@@ -18,6 +22,37 @@ export async function POST(req: Request) {
     }
 
     const data = await req.json();
+
+    const shift = await prisma.shift.findUnique({
+      where: {
+        id: data.shiftId,
+      },
+      include: {
+        applications: {
+          where: {
+            status: ApplicationStatus.ACCEPTED,
+          },
+        },
+      },
+    });
+
+    if (!shift) {
+      return NextResponse.json({ error: "Shift not found" }, { status: 404 });
+    }
+
+    if (shift.status !== ShiftStatus.OPEN) {
+      return NextResponse.json(
+        { error: "This shift is no longer open" },
+        { status: 400 }
+      );
+    }
+
+    if (shift.applications.length >= shift.positionsNeeded) {
+      return NextResponse.json(
+        { error: "This shift is already filled" },
+        { status: 400 }
+      );
+    }
 
     const user = await prisma.user.upsert({
       where: {
