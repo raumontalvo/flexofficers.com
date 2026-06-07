@@ -45,6 +45,9 @@ export async function POST(req: Request) {
       city: data.city,
       state: data.state,
       description: data.description,
+      licenseType: data.licenseType,
+      licenseNumber: data.licenseNumber,
+      licenseState: data.licenseState,
     },
     create: {
       userId: user.id,
@@ -55,6 +58,9 @@ export async function POST(req: Request) {
       city: data.city,
       state: data.state,
       description: data.description,
+      licenseType: data.licenseType,
+      licenseNumber: data.licenseNumber,
+      licenseState: data.licenseState,
     },
   });
 

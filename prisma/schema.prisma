@@ -73,17 +73,20 @@ model License {
 }
 
 model Company {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  companyName String
-  contactName String?
-  phone       String?
-  website     String?
-  city        String?
-  state       String?
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  companyName   String
+  contactName   String?
+  phone         String?
+  website       String?
+  city          String?
+  state         String?
+  description   String?
+  licenseType   String?
+  licenseNumber String?
+  licenseState  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   shifts Shift[]

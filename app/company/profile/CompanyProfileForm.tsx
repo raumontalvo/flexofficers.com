@@ -11,6 +11,9 @@ type CompanyProfileFormProps = {
     city: string;
     state: string;
     description: string;
+    licenseType: string;
+    licenseNumber: string;
+    licenseState: string;
   };
 };
 
@@ -41,18 +44,14 @@ export default function CompanyProfileForm({
     <form onSubmit={handleSubmit} className="grid gap-6">
       <input
         value={form.companyName}
-        onChange={(e) =>
-          setForm({ ...form, companyName: e.target.value })
-        }
+        onChange={(e) => setForm({ ...form, companyName: e.target.value })}
         className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
         placeholder="Company name"
       />
 
       <input
         value={form.contactName}
-        onChange={(e) =>
-          setForm({ ...form, contactName: e.target.value })
-        }
+        onChange={(e) => setForm({ ...form, contactName: e.target.value })}
         className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
         placeholder="Contact name"
       />
@@ -87,11 +86,40 @@ export default function CompanyProfileForm({
         />
       </div>
 
+      <div className="grid gap-4 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+        <h2 className="text-xl font-semibold">Company License</h2>
+
+        <input
+          value={form.licenseType}
+          onChange={(e) => setForm({ ...form, licenseType: e.target.value })}
+          className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+          placeholder="License type, example: Security Agency License"
+        />
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <input
+            value={form.licenseNumber}
+            onChange={(e) =>
+              setForm({ ...form, licenseNumber: e.target.value })
+            }
+            className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+            placeholder="License number"
+          />
+
+          <input
+            value={form.licenseState}
+            onChange={(e) =>
+              setForm({ ...form, licenseState: e.target.value })
+            }
+            className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+            placeholder="Issuing state"
+          />
+        </div>
+      </div>
+
       <textarea
         value={form.description}
-        onChange={(e) =>
-          setForm({ ...form, description: e.target.value })
-        }
+        onChange={(e) => setForm({ ...form, description: e.target.value })}
         className="min-h-32 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
         placeholder="Company description"
       />

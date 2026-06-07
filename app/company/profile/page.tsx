@@ -25,6 +25,9 @@ export default async function CompanyProfilePage() {
     city: company?.city ?? "",
     state: company?.state ?? "",
     description: company?.description ?? "",
+    licenseType: company?.licenseType ?? "",
+    licenseNumber: company?.licenseNumber ?? "",
+    licenseState: company?.licenseState ?? "",
   };
 
   return (
