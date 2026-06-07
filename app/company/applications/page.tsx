@@ -2,6 +2,8 @@ import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import ApplicationStatusButtons from "./ApplicationStatusButtons";
 
+export const dynamic = "force-dynamic";
+
 export default async function CompanyApplicationsPage() {
   const clerkUser = await currentUser();
 
@@ -18,7 +20,16 @@ export default async function CompanyApplicationsPage() {
         },
         include: {
           shift: true,
-          officer: true,
+          officer: {
+            include: {
+              licenses: {
+                orderBy: {
+                  createdAt: "desc",
+                },
+                take: 1,
+              },
+            },
+          },
         },
         orderBy: {
           appliedAt: "desc",
@@ -41,36 +52,55 @@ export default async function CompanyApplicationsPage() {
               No applications yet.
             </div>
           ) : (
-            applications.map((application) => (
-              <div
-                key={application.id}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6"
-              >
-                <h2 className="text-2xl font-bold">
-                  {application.officer.firstName}{" "}
-                  {application.officer.lastName}
-                </h2>
+            applications.map((application) => {
+              const latestLicense = application.officer.licenses[0];
 
-                <p className="mt-2 text-slate-300">
-                  Applied for: {application.shift.title}
-                </p>
+              return (
+                <div
+                  key={application.id}
+                  className="rounded-3xl border border-white/10 bg-white/5 p-6"
+                >
+                  <h2 className="text-2xl font-bold">
+                    {application.officer.firstName}{" "}
+                    {application.officer.lastName}
+                  </h2>
 
-                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    {application.officer.city}, {application.officer.state}
-                  </span>
+                  <p className="mt-2 text-slate-300">
+                    Applied for: {application.shift.title}
+                  </p>
 
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    {application.status}
-                  </span>
+                  {application.officer.bio && (
+                    <p className="mt-4 rounded-2xl border border-white/10 bg-slate-900 p-4 text-slate-300">
+                      {application.officer.bio}
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
+                    <span className="rounded-full bg-white/10 px-3 py-1">
+                      {application.officer.city || "City not provided"},{" "}
+                      {application.officer.state || "State not provided"}
+                    </span>
+
+                    <span className="rounded-full bg-white/10 px-3 py-1">
+                      License: {latestLicense?.licenseType || "Not provided"}
+                    </span>
+
+                    <span className="rounded-full bg-white/10 px-3 py-1">
+                      Application: {application.status}
+                    </span>
+
+                    <span className="rounded-full bg-white/10 px-3 py-1">
+                      Shift: {application.shift.status}
+                    </span>
+                  </div>
+
+                  <ApplicationStatusButtons
+                    applicationId={application.id}
+                    status={application.status}
+                  />
                 </div>
-
-                <ApplicationStatusButtons
-                  applicationId={application.id}
-                  status={application.status}
-                />
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </section>
