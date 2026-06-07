@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendNotificationEmail } from "@/lib/email";
 import {
   ApplicationStatus,
   ShiftStatus,
@@ -27,12 +28,21 @@ export async function POST(req: Request) {
     });
 
     if (status === "ACCEPTED") {
+      const title = "Application accepted";
+      const message = `Your application for ${application.shift.title} was accepted.`;
+
       await prisma.notification.create({
         data: {
           userId: application.officer.user.id,
-          title: "Application accepted",
-          message: `Your application for ${application.shift.title} was accepted.`,
+          title,
+          message,
         },
+      });
+
+      await sendNotificationEmail({
+        to: application.officer.user.email,
+        subject: title,
+        message,
       });
 
       const acceptedCount = await prisma.application.count({
@@ -55,12 +65,21 @@ export async function POST(req: Request) {
     }
 
     if (status === "REJECTED") {
+      const title = "Application rejected";
+      const message = `Your application for ${application.shift.title} was rejected.`;
+
       await prisma.notification.create({
         data: {
           userId: application.officer.user.id,
-          title: "Application rejected",
-          message: `Your application for ${application.shift.title} was rejected.`,
+          title,
+          message,
         },
+      });
+
+      await sendNotificationEmail({
+        to: application.officer.user.email,
+        subject: title,
+        message,
       });
     }
 
