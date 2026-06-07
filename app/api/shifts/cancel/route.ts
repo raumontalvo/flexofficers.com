@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendNotificationEmail } from "@/lib/email";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
 
 export async function POST(req: Request) {
@@ -58,13 +59,26 @@ export async function POST(req: Request) {
       },
     });
 
+    const title = "Shift cancelled";
+    const message = `The shift "${shift.title}" was cancelled by the company.`;
+
     await prisma.notification.createMany({
       data: shift.applications.map((application) => ({
         userId: application.officer.user.id,
-        title: "Shift cancelled",
-        message: `The shift "${shift.title}" was cancelled by the company.`,
+        title,
+        message,
       })),
     });
+
+    await Promise.all(
+      shift.applications.map((application) =>
+        sendNotificationEmail({
+          to: application.officer.user.email,
+          subject: title,
+          message,
+        })
+      )
+    );
 
     return NextResponse.json(updatedShift);
   } catch {
