@@ -10,10 +10,58 @@ export default async function DashboardPage() {
         where: {
           clerkId: clerkUser.id,
         },
+        include: {
+          officer: {
+            include: {
+              licenses: true,
+            },
+          },
+          company: true,
+          notifications: {
+            where: {
+              read: false,
+            },
+          },
+        },
       })
     : null;
 
   const role = user?.role;
+  const unreadCount = user?.notifications.length ?? 0;
+
+  const officerMissingItems =
+    role === "OFFICER"
+      ? [
+          !user?.officer?.city || !user?.officer?.state
+            ? "Add your city and state"
+            : null,
+          !user?.officer?.bio ? "Add your experience summary" : null,
+          !user?.officer?.licenses.length ? "Add at least one license" : null,
+        ].filter(Boolean)
+      : [];
+
+  const companyMissingItems =
+    role === "COMPANY"
+      ? [
+          !user?.company?.companyName ? "Add your company name" : null,
+          !user?.company?.city || !user?.company?.state
+            ? "Add your company city and state"
+            : null,
+          !user?.company?.licenseType ? "Add your company license type" : null,
+          !user?.company?.licenseNumber
+            ? "Add your company license number"
+            : null,
+          !user?.company?.licenseState
+            ? "Add your company license issuing state"
+            : null,
+        ].filter(Boolean)
+      : [];
+
+  const missingItems =
+    role === "OFFICER" ? officerMissingItems : companyMissingItems;
+
+  const profileLink =
+    role === "OFFICER" ? "/officer/profile" : "/company/profile";
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
@@ -39,6 +87,29 @@ export default async function DashboardPage() {
               className="mt-5 inline-block rounded-xl bg-yellow-500 px-6 py-3 font-semibold text-slate-950 hover:bg-yellow-400"
             >
               Go to Onboarding
+            </Link>
+          </div>
+        )}
+
+        {role && missingItems.length > 0 && (
+          <div className="mt-10 rounded-3xl border border-yellow-500/30 bg-yellow-500/10 p-6">
+            <h2 className="text-2xl font-bold">Complete your profile</h2>
+
+            <p className="mt-3 text-yellow-100">
+              Finish these items so your account is ready:
+            </p>
+
+            <ul className="mt-4 list-disc space-y-2 pl-6 text-yellow-100">
+              {missingItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+
+            <Link
+              href={profileLink}
+              className="mt-5 inline-block rounded-xl bg-yellow-500 px-6 py-3 font-semibold text-slate-950 hover:bg-yellow-400"
+            >
+              Complete Profile
             </Link>
           </div>
         )}
@@ -84,7 +155,7 @@ export default async function DashboardPage() {
               >
                 <h3 className="text-xl font-semibold">Notifications</h3>
                 <p className="mt-3 text-slate-300">
-                  View updates about applications and shift decisions.
+                  Unread: {unreadCount}
                 </p>
               </Link>
             </div>
@@ -142,7 +213,7 @@ export default async function DashboardPage() {
               >
                 <h3 className="text-xl font-semibold">Notifications</h3>
                 <p className="mt-3 text-slate-300">
-                  View updates about shifts, applicants, and decisions.
+                  Unread: {unreadCount}
                 </p>
               </Link>
             </div>
