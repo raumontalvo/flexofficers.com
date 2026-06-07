@@ -1,6 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import ApplicationStatusButtons from "./ApplicationStatusButtons";
+import ApplicationDetails from "./ApplicationDetails";
 
 export const dynamic = "force-dynamic";
 
@@ -65,12 +65,6 @@ export default async function CompanyApplicationsPage() {
                   Applied for: {application.shift.title}
                 </p>
 
-                {application.officer.bio && (
-                  <p className="mt-4 rounded-2xl border border-white/10 bg-slate-900 p-4 text-slate-300">
-                    {application.officer.bio}
-                  </p>
-                )}
-
                 <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
                   <span className="rounded-full bg-white/10 px-3 py-1">
                     {application.officer.city || "City not provided"},{" "}
@@ -86,36 +80,11 @@ export default async function CompanyApplicationsPage() {
                   </span>
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900 p-4">
-                  <h3 className="font-semibold">Licenses</h3>
-
-                  {application.officer.licenses.length === 0 ? (
-                    <p className="mt-3 text-sm text-slate-400">
-                      No licenses provided.
-                    </p>
-                  ) : (
-                    <div className="mt-3 grid gap-3">
-                      {application.officer.licenses.map((license) => (
-                        <div
-                          key={license.id}
-                          className="rounded-xl bg-white/5 p-3 text-sm text-slate-300"
-                        >
-                          <p>
-                            <span className="font-semibold text-white">
-                              {license.licenseType}
-                            </span>
-                          </p>
-                          <p>Number: {license.licenseNumber}</p>
-                          <p>Issuing state: {license.issuingState}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <ApplicationStatusButtons
+                <ApplicationDetails
                   applicationId={application.id}
-                  status={application.status}
+                  applicationStatus={application.status}
+                  bio={application.officer.bio}
+                  licenses={application.officer.licenses}
                 />
               </div>
             ))
