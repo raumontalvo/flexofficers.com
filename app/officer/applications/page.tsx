@@ -1,6 +1,8 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function OfficerApplicationsPage() {
   const clerkUser = await currentUser();
 
@@ -28,8 +30,8 @@ export default async function OfficerApplicationsPage() {
         <h1 className="text-4xl font-bold">My Applications</h1>
 
         <p className="mt-4 text-slate-300">
-          Track the shifts you applied to and see whether companies accepted or
-          rejected your application.
+          Track the shifts you applied to and see whether companies accepted,
+          rejected, filled, or cancelled the shift.
         </p>
 
         <div className="mt-10 grid gap-6">
@@ -51,6 +53,12 @@ export default async function OfficerApplicationsPage() {
                   {application.shift.location}
                 </p>
 
+                {application.shift.status === "CANCELLED" && (
+                  <p className="mt-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-yellow-100">
+                    This shift was cancelled by the company.
+                  </p>
+                )}
+
                 <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
                   <span className="rounded-full bg-white/10 px-3 py-1">
                     ${application.shift.hourlyRate.toString()}/hr
@@ -61,7 +69,11 @@ export default async function OfficerApplicationsPage() {
                   </span>
 
                   <span className="rounded-full bg-white/10 px-3 py-1">
-                    {application.status}
+                    Application: {application.status}
+                  </span>
+
+                  <span className="rounded-full bg-white/10 px-3 py-1">
+                    Shift: {application.shift.status}
                   </span>
                 </div>
               </div>
