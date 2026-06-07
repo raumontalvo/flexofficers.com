@@ -24,6 +24,19 @@ export async function POST(req: Request) {
 
     const data = await req.json();
 
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        clerkId: clerkUser.id,
+      },
+    });
+
+    if (existingUser && existingUser.role !== UserRole.OFFICER) {
+      return NextResponse.json(
+        { error: "Only officer accounts can apply to shifts." },
+        { status: 403 }
+      );
+    }
+
     const shift = await prisma.shift.findUnique({
       where: {
         id: data.shiftId,
@@ -66,7 +79,6 @@ export async function POST(req: Request) {
       },
       update: {
         email,
-        role: UserRole.OFFICER,
       },
       create: {
         clerkId: clerkUser.id,
