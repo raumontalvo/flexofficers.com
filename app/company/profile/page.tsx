@@ -1,35 +1,31 @@
-"use client";
+import { currentUser } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
+import CompanyProfileForm from "./CompanyProfileForm";
 
-import { useState } from "react";
+export const dynamic = "force-dynamic";
 
-export default function CompanyProfilePage() {
-  const [form, setForm] = useState({
-    companyName: "",
-    contactName: "",
-    phone: "",
-    website: "",
-    city: "",
-    state: "",
-    description: "",
-  });
+export default async function CompanyProfilePage() {
+  const clerkUser = await currentUser();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const company = clerkUser
+    ? await prisma.company.findFirst({
+        where: {
+          user: {
+            clerkId: clerkUser.id,
+          },
+        },
+      })
+    : null;
 
-    const response = await fetch("/api/company/profile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    if (response.ok) {
-      alert("Company profile saved!");
-    } else {
-      alert("Failed to save company profile");
-    }
-  }
+  const initialForm = {
+    companyName: company?.companyName ?? "",
+    contactName: company?.contactName ?? "",
+    phone: company?.phone ?? "",
+    website: company?.website ?? "",
+    city: company?.city ?? "",
+    state: company?.state ?? "",
+    description: company?.description ?? "",
+  };
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
@@ -42,79 +38,7 @@ export default function CompanyProfilePage() {
         </p>
 
         <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
-          <form onSubmit={handleSubmit} className="grid gap-6">
-            <input
-              value={form.companyName}
-              onChange={(e) =>
-                setForm({ ...form, companyName: e.target.value })
-              }
-              className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-              placeholder="Company name"
-            />
-
-            <input
-              value={form.contactName}
-              onChange={(e) =>
-                setForm({ ...form, contactName: e.target.value })
-              }
-              className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-              placeholder="Contact name"
-            />
-
-            <input
-              value={form.phone}
-              onChange={(e) =>
-                setForm({ ...form, phone: e.target.value })
-              }
-              className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-              placeholder="Phone number"
-            />
-
-            <input
-              value={form.website}
-              onChange={(e) =>
-                setForm({ ...form, website: e.target.value })
-              }
-              className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-              placeholder="Website"
-            />
-
-            <div className="grid gap-6 md:grid-cols-2">
-              <input
-                value={form.city}
-                onChange={(e) =>
-                  setForm({ ...form, city: e.target.value })
-                }
-                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-                placeholder="City"
-              />
-
-              <input
-                value={form.state}
-                onChange={(e) =>
-                  setForm({ ...form, state: e.target.value })
-                }
-                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-                placeholder="State"
-              />
-            </div>
-
-            <textarea
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-              className="min-h-32 rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-              placeholder="Company description"
-            />
-
-            <button
-              type="submit"
-              className="rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400"
-            >
-              Save Company Profile
-            </button>
-          </form>
+          <CompanyProfileForm initialForm={initialForm} />
         </div>
       </section>
     </main>
