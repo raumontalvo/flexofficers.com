@@ -18,10 +18,23 @@ export async function POST(req: Request) {
       },
       include: {
         shift: true,
+        officer: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
 
     if (status === "ACCEPTED") {
+      await prisma.notification.create({
+        data: {
+          userId: application.officer.user.id,
+          title: "Application accepted",
+          message: `Your application for ${application.shift.title} was accepted.`,
+        },
+      });
+
       const acceptedCount = await prisma.application.count({
         where: {
           shiftId: application.shiftId,
@@ -39,6 +52,16 @@ export async function POST(req: Request) {
           },
         });
       }
+    }
+
+    if (status === "REJECTED") {
+      await prisma.notification.create({
+        data: {
+          userId: application.officer.user.id,
+          title: "Application rejected",
+          message: `Your application for ${application.shift.title} was rejected.`,
+        },
+      });
     }
 
     return NextResponse.json(application);
