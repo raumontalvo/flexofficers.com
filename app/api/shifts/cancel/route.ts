@@ -14,7 +14,10 @@ export async function POST(req: Request) {
     const { shiftId } = await req.json();
 
     if (!shiftId) {
-      return NextResponse.json({ error: "Shift ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Shift ID is required" },
+        { status: 400 }
+      );
     }
 
     const shift = await prisma.shift.findFirst({
@@ -23,6 +26,17 @@ export async function POST(req: Request) {
         company: {
           user: {
             clerkId: clerkUser.id,
+          },
+        },
+      },
+      include: {
+        applications: {
+          include: {
+            officer: {
+              include: {
+                user: true,
+              },
+            },
           },
         },
       },
@@ -42,6 +56,14 @@ export async function POST(req: Request) {
       data: {
         status: ShiftStatus.CANCELLED,
       },
+    });
+
+    await prisma.notification.createMany({
+      data: shift.applications.map((application) => ({
+        userId: application.officer.user.id,
+        title: "Shift cancelled",
+        message: `The shift "${shift.title}" was cancelled by the company.`,
+      })),
     });
 
     return NextResponse.json(updatedShift);
