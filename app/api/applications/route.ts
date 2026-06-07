@@ -84,6 +84,22 @@ export async function POST(req: Request) {
       },
     });
 
+    const existingApplication = await prisma.application.findUnique({
+      where: {
+        shiftId_officerId: {
+          shiftId: data.shiftId,
+          officerId: officer.id,
+        },
+      },
+    });
+
+    if (existingApplication) {
+      return NextResponse.json(
+        { error: "You already applied to this shift." },
+        { status: 400 }
+      );
+    }
+
     const application = await prisma.application.create({
       data: {
         shiftId: data.shiftId,
