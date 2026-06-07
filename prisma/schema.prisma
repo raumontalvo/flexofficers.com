@@ -85,6 +85,7 @@ model Company {
   licenseType   String?
   licenseNumber String?
   licenseState  String?
+  verified      Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
