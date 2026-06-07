@@ -2,14 +2,20 @@
 
 import { useState } from "react";
 
+type LicenseForm = {
+  licenseType: string;
+  licenseNumber: string;
+  issuingState: string;
+};
+
 type OfficerProfileFormProps = {
   initialForm: {
     firstName: string;
     lastName: string;
     city: string;
     state: string;
-    licenseType: string;
     bio: string;
+    licenses: LicenseForm[];
   };
 };
 
@@ -17,6 +23,55 @@ export default function OfficerProfileForm({
   initialForm,
 }: OfficerProfileFormProps) {
   const [form, setForm] = useState(initialForm);
+
+  function updateLicense(
+    index: number,
+    field: keyof LicenseForm,
+    value: string
+  ) {
+    const updatedLicenses = [...form.licenses];
+    updatedLicenses[index] = {
+      ...updatedLicenses[index],
+      [field]: value,
+    };
+
+    setForm({
+      ...form,
+      licenses: updatedLicenses,
+    });
+  }
+
+  function addLicense() {
+    setForm({
+      ...form,
+      licenses: [
+        ...form.licenses,
+        {
+          licenseType: "",
+          licenseNumber: "",
+          issuingState: "",
+        },
+      ],
+    });
+  }
+
+  function removeLicense(index: number) {
+    const updatedLicenses = form.licenses.filter((_, i) => i !== index);
+
+    setForm({
+      ...form,
+      licenses:
+        updatedLicenses.length > 0
+          ? updatedLicenses
+          : [
+              {
+                licenseType: "",
+                licenseNumber: "",
+                issuingState: "",
+              },
+            ],
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,12 +125,66 @@ export default function OfficerProfileForm({
         />
       </div>
 
-      <input
-        value={form.licenseType}
-        onChange={(e) => setForm({ ...form, licenseType: e.target.value })}
-        className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
-        placeholder="License type, example: D License, G License"
-      />
+      <div className="grid gap-4 rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+        <div>
+          <h2 className="text-xl font-semibold">Licenses</h2>
+          <p className="mt-2 text-sm text-slate-400">
+            Add each license or certification separately.
+          </p>
+        </div>
+
+        {form.licenses.map((license, index) => (
+          <div
+            key={index}
+            className="grid gap-4 rounded-2xl border border-white/10 bg-slate-950 p-4"
+          >
+            <div className="grid gap-4 md:grid-cols-3">
+              <input
+                value={license.licenseType}
+                onChange={(e) =>
+                  updateLicense(index, "licenseType", e.target.value)
+                }
+                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+                placeholder="License type, example: D License"
+              />
+
+              <input
+                value={license.licenseNumber}
+                onChange={(e) =>
+                  updateLicense(index, "licenseNumber", e.target.value)
+                }
+                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+                placeholder="License number"
+              />
+
+              <input
+                value={license.issuingState}
+                onChange={(e) =>
+                  updateLicense(index, "issuingState", e.target.value)
+                }
+                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+                placeholder="Issuing state"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => removeLicense(index)}
+              className="w-fit rounded-xl border border-red-500/40 px-4 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/10"
+            >
+              Remove License
+            </button>
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={addLicense}
+          className="w-fit rounded-xl border border-white/20 px-5 py-3 font-semibold hover:bg-white/10"
+        >
+          Add Another License
+        </button>
+      </div>
 
       <textarea
         value={form.bio}

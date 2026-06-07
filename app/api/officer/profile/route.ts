@@ -54,34 +54,30 @@ export async function POST(req: Request) {
     },
   });
 
-  if (data.licenseType) {
-    const existingLicense = await prisma.license.findFirst({
-      where: {
-        officerId: officer.id,
-      },
-    });
+  await prisma.license.deleteMany({
+    where: {
+      officerId: officer.id,
+    },
+  });
 
-    if (existingLicense) {
-      await prisma.license.update({
-        where: {
-          id: existingLicense.id,
-        },
-        data: {
-          licenseType: data.licenseType,
-          licenseNumber: "Not provided",
-          issuingState: data.state || "Not provided",
-        },
-      });
-    } else {
-      await prisma.license.create({
-        data: {
-          officerId: officer.id,
-          licenseType: data.licenseType,
-          licenseNumber: "Not provided",
-          issuingState: data.state || "Not provided",
-        },
-      });
-    }
+  const licenses = Array.isArray(data.licenses) ? data.licenses : [];
+
+  const validLicenses = licenses.filter(
+    (license) =>
+      license.licenseType?.trim() ||
+      license.licenseNumber?.trim() ||
+      license.issuingState?.trim()
+  );
+
+  if (validLicenses.length > 0) {
+    await prisma.license.createMany({
+      data: validLicenses.map((license) => ({
+        officerId: officer.id,
+        licenseType: license.licenseType || "Not provided",
+        licenseNumber: license.licenseNumber || "Not provided",
+        issuingState: license.issuingState || "Not provided",
+      })),
+    });
   }
 
   return NextResponse.json(officer);

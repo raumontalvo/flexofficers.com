@@ -17,23 +17,36 @@ export default async function OfficerProfilePage() {
         include: {
           licenses: {
             orderBy: {
-              createdAt: "desc",
+              createdAt: "asc",
             },
-            take: 1,
           },
         },
       })
     : null;
 
-  const latestLicense = officer?.licenses[0];
+  const savedLicenses =
+    officer?.licenses.map((license) => ({
+      licenseType: license.licenseType,
+      licenseNumber: license.licenseNumber,
+      issuingState: license.issuingState,
+    })) ?? [];
 
   const initialForm = {
     firstName: officer?.firstName ?? clerkUser?.firstName ?? "",
     lastName: officer?.lastName ?? clerkUser?.lastName ?? "",
     city: officer?.city ?? "",
     state: officer?.state ?? "",
-    licenseType: latestLicense?.licenseType ?? "",
     bio: officer?.bio ?? "",
+    licenses:
+      savedLicenses.length > 0
+        ? savedLicenses
+        : [
+            {
+              licenseType: "",
+              licenseNumber: "",
+              issuingState: "",
+            },
+          ],
   };
 
   return (
