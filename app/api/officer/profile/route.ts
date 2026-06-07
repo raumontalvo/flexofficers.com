@@ -54,5 +54,35 @@ export async function POST(req: Request) {
     },
   });
 
+  if (data.licenseType) {
+    const existingLicense = await prisma.license.findFirst({
+      where: {
+        officerId: officer.id,
+      },
+    });
+
+    if (existingLicense) {
+      await prisma.license.update({
+        where: {
+          id: existingLicense.id,
+        },
+        data: {
+          licenseType: data.licenseType,
+          licenseNumber: "Not provided",
+          issuingState: data.state || "Not provided",
+        },
+      });
+    } else {
+      await prisma.license.create({
+        data: {
+          officerId: officer.id,
+          licenseType: data.licenseType,
+          licenseNumber: "Not provided",
+          issuingState: data.state || "Not provided",
+        },
+      });
+    }
+  }
+
   return NextResponse.json(officer);
 }

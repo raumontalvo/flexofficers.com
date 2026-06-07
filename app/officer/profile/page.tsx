@@ -14,15 +14,25 @@ export default async function OfficerProfilePage() {
             clerkId: clerkUser.id,
           },
         },
+        include: {
+          licenses: {
+            orderBy: {
+              createdAt: "desc",
+            },
+            take: 1,
+          },
+        },
       })
     : null;
+
+  const latestLicense = officer?.licenses[0];
 
   const initialForm = {
     firstName: officer?.firstName ?? clerkUser?.firstName ?? "",
     lastName: officer?.lastName ?? clerkUser?.lastName ?? "",
     city: officer?.city ?? "",
     state: officer?.state ?? "",
-    licenseType: "",
+    licenseType: latestLicense?.licenseType ?? "",
     bio: officer?.bio ?? "",
   };
 
