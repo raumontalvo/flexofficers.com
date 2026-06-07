@@ -77,6 +77,16 @@ export default async function DashboardPage() {
                   Track application status and decisions.
                 </p>
               </Link>
+
+              <Link
+                href="/notifications"
+                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+              >
+                <h3 className="text-xl font-semibold">Notifications</h3>
+                <p className="mt-3 text-slate-300">
+                  View updates about applications and shift decisions.
+                </p>
+              </Link>
             </div>
           </>
         )}
@@ -112,7 +122,7 @@ export default async function DashboardPage() {
               >
                 <h3 className="text-xl font-semibold">Manage Shifts</h3>
                 <p className="mt-3 text-slate-300">
-                  View and delete shifts your company posted.
+                  View, cancel, and delete shifts your company posted.
                 </p>
               </Link>
 
@@ -123,6 +133,16 @@ export default async function DashboardPage() {
                 <h3 className="text-xl font-semibold">Applicants</h3>
                 <p className="mt-3 text-slate-300">
                   Review and manage applicants.
+                </p>
+              </Link>
+
+              <Link
+                href="/notifications"
+                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
+              >
+                <h3 className="text-xl font-semibold">Notifications</h3>
+                <p className="mt-3 text-slate-300">
+                  View updates about shifts, applicants, and decisions.
                 </p>
               </Link>
             </div>
