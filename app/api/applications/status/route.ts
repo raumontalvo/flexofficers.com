@@ -1,21 +1,115 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendNotificationEmail } from "@/lib/email";
 import {
   ApplicationStatus,
   ShiftStatus,
+  UserRole,
 } from "@/app/generated/prisma/enums";
 
 export async function POST(req: Request) {
   try {
+    const clerkUser = await currentUser();
+
+    if (!clerkUser) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const actor = await prisma.user.findUnique({
+      where: {
+        clerkId: clerkUser.id,
+      },
+    });
+
+    if (!actor || actor.role !== UserRole.COMPANY) {
+      return NextResponse.json(
+        { error: "Only company accounts can update application status." },
+        { status: 403 }
+      );
+    }
+
     const { applicationId, status } = await req.json();
+
+    if (!applicationId) {
+      return NextResponse.json(
+        { error: "applicationId is required" },
+        { status: 400 }
+      );
+    }
+
+    if (
+      status !== ApplicationStatus.ACCEPTED &&
+      status !== ApplicationStatus.REJECTED
+    ) {
+      return NextResponse.json(
+        { error: "Invalid status. Allowed values: ACCEPTED, REJECTED." },
+        { status: 400 }
+      );
+    }
+
+    const existing = await prisma.application.findUnique({
+      where: {
+        id: applicationId,
+      },
+      include: {
+        shift: {
+          include: {
+            company: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+        officer: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
+
+    if (existing.shift.company.user.clerkId !== clerkUser.id) {
+      return NextResponse.json(
+        { error: "You can only manage applications for your own shifts." },
+        { status: 403 }
+      );
+    }
+
+    if (existing.status !== ApplicationStatus.PENDING) {
+      return NextResponse.json(
+        { error: "Only pending applications can be updated." },
+        { status: 400 }
+      );
+    }
+
+    if (status === ApplicationStatus.ACCEPTED) {
+      const acceptedCount = await prisma.application.count({
+        where: {
+          shiftId: existing.shiftId,
+          status: ApplicationStatus.ACCEPTED,
+        },
+      });
+
+      if (acceptedCount >= existing.shift.positionsNeeded) {
+        return NextResponse.json(
+          { error: "This shift is already filled." },
+          { status: 400 }
+        );
+      }
+    }
 
     const application = await prisma.application.update({
       where: {
         id: applicationId,
       },
       data: {
-        status: status as ApplicationStatus,
+        status,
       },
       include: {
         shift: true,
