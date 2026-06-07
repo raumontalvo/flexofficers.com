@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import DashboardSignOutButton from "./SignOutButton";
 
 export default async function DashboardPage() {
   const clerkUser = await currentUser();
@@ -66,12 +67,18 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
       <section className="mx-auto max-w-6xl">
-        <h1 className="text-4xl font-bold">Dashboard</h1>
+        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
+          <div>
+            <h1 className="text-4xl font-bold">Dashboard</h1>
 
-        <p className="mt-4 text-slate-300">
-          Welcome{clerkUser?.firstName ? `, ${clerkUser.firstName}` : ""}.
-          Manage your FlexOfficers marketplace activity.
-        </p>
+            <p className="mt-4 text-slate-300">
+              Welcome{clerkUser?.firstName ? `, ${clerkUser.firstName}` : ""}.
+              Manage your FlexOfficers marketplace activity.
+            </p>
+          </div>
+
+          <DashboardSignOutButton />
+        </div>
 
         {!role && (
           <div className="mt-10 rounded-3xl border border-yellow-500/30 bg-yellow-500/10 p-6">
@@ -154,9 +161,7 @@ export default async function DashboardPage() {
                 className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
               >
                 <h3 className="text-xl font-semibold">Notifications</h3>
-                <p className="mt-3 text-slate-300">
-                  Unread: {unreadCount}
-                </p>
+                <p className="mt-3 text-slate-300">Unread: {unreadCount}</p>
               </Link>
             </div>
           </>
@@ -212,9 +217,7 @@ export default async function DashboardPage() {
                 className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
               >
                 <h3 className="text-xl font-semibold">Notifications</h3>
-                <p className="mt-3 text-slate-300">
-                  Unread: {unreadCount}
-                </p>
+                <p className="mt-3 text-slate-300">Unread: {unreadCount}</p>
               </Link>
             </div>
           </>
