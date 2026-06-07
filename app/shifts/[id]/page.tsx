@@ -36,7 +36,10 @@ export default async function ShiftDetailPage({
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
       <section className="mx-auto max-w-4xl">
-        <Link href="/shifts" className="text-sm text-blue-300 hover:text-blue-200">
+        <Link
+          href="/shifts"
+          className="text-sm text-blue-300 hover:text-blue-200"
+        >
           ← Back to available shifts
         </Link>
 
@@ -80,6 +83,33 @@ export default async function ShiftDetailPage({
               <p className="mt-2 text-slate-300">
                 {shift.endTime.toLocaleString()}
               </p>
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-white/10 bg-slate-900 p-5">
+            <h2 className="font-semibold">Company</h2>
+
+            <p className="mt-3 text-slate-300">
+              {shift.company.companyName}
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                {shift.company.city || "City not provided"},{" "}
+                {shift.company.state || "State not provided"}
+              </span>
+
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                License: {shift.company.licenseType || "Not provided"}
+              </span>
+
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                License #: {shift.company.licenseNumber || "Not provided"}
+              </span>
+
+              <span className="rounded-full bg-white/10 px-3 py-1">
+                Issuing state: {shift.company.licenseState || "Not provided"}
+              </span>
             </div>
           </div>
 
