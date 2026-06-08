@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { LicenseVerificationStatus } from "@/app/generated/prisma/enums";
 import {
   buildAdminLicenseReviewData,
+  hasUploadedLicenseDocument,
   isValidAdminLicenseDecision,
 } from "@/app/api/admin/licenses/review/rules";
 
@@ -36,5 +37,14 @@ describe("admin license review rules", () => {
 
     expect(rejectedData.verificationStatus).toBe(LicenseVerificationStatus.REJECTED);
     expect(rejectedData.verified).toBe(false);
+  });
+
+  it("requires non-empty document key for review eligibility", () => {
+    expect(hasUploadedLicenseDocument("licenses/officer/license/file.pdf")).toBe(
+      true
+    );
+    expect(hasUploadedLicenseDocument("   ")).toBe(false);
+    expect(hasUploadedLicenseDocument(undefined)).toBe(false);
+    expect(hasUploadedLicenseDocument(null)).toBe(false);
   });
 });

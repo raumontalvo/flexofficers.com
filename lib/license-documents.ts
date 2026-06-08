@@ -45,6 +45,10 @@ function sanitizeSegment(value: string) {
   return value.replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
 }
 
+export function normalizeUploadPrefix(value: string) {
+  return (sanitizeSegment(value) || "licenses").toLowerCase();
+}
+
 export function validateLicenseUploadInput(
   input: LicenseUploadValidationInput,
   options: LicenseUploadValidationOptions
@@ -90,7 +94,7 @@ export function generateLicenseDocumentObjectKey(params: {
   fileName: string;
   now?: Date;
 }) {
-  const prefix = sanitizeSegment(params.uploadPrefix) || "licenses";
+  const prefix = normalizeUploadPrefix(params.uploadPrefix);
   const officerId = sanitizeSegment(params.officerId);
   const licenseId = sanitizeSegment(params.licenseId);
 

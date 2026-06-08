@@ -26,6 +26,17 @@ describe("license upload complete rules", () => {
     ).toBe(false);
   });
 
+  it("normalizes uploadPrefix consistently when validating object key scope", () => {
+    expect(
+      validateLicenseDocumentObjectKeyScope({
+        uploadPrefix: "Licenses Root",
+        officerId: "officer_1",
+        licenseId: "license_1",
+        objectKey: "licenses-root/officer_1/license_1/2026-file.pdf",
+      })
+    ).toBe(true);
+  });
+
   it("resets verification state to pending when document is replaced", () => {
     const now = new Date("2026-06-08T00:00:00.000Z");
     const data = buildLicenseDocumentReplacementData(

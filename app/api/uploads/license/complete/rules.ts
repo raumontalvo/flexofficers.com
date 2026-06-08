@@ -1,4 +1,5 @@
 import { LicenseVerificationStatus } from "@/app/generated/prisma/enums";
+import { normalizeUploadPrefix } from "@/lib/license-documents";
 
 type LicenseDocumentMetadata = {
   objectKey: string;
@@ -13,7 +14,8 @@ export function validateLicenseDocumentObjectKeyScope(params: {
   licenseId: string;
   objectKey: string;
 }) {
-  const expectedPrefix = `${params.uploadPrefix}/${params.officerId}/${params.licenseId}/`;
+  const normalizedPrefix = normalizeUploadPrefix(params.uploadPrefix);
+  const expectedPrefix = `${normalizedPrefix}/${params.officerId}/${params.licenseId}/`;
 
   return params.objectKey.startsWith(expectedPrefix);
 }

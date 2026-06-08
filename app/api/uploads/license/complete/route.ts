@@ -1,5 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { HeadObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -123,6 +124,38 @@ export async function POST(req: Request) {
             {
               field: "objectKey",
               message: "objectKey is invalid for this license",
+            },
+          ],
+        },
+        { status: 400 }
+      );
+    }
+
+    const s3Client = new S3Client({
+      region: storageConfig.region,
+      endpoint: storageConfig.endpoint,
+      forcePathStyle: storageConfig.forcePathStyle,
+      credentials: {
+        accessKeyId: storageConfig.accessKeyId,
+        secretAccessKey: storageConfig.secretAccessKey,
+      },
+    });
+
+    try {
+      await s3Client.send(
+        new HeadObjectCommand({
+          Bucket: storageConfig.bucket,
+          Key: objectKey,
+        })
+      );
+    } catch {
+      return NextResponse.json(
+        {
+          error: "Invalid request payload",
+          details: [
+            {
+              field: "objectKey",
+              message: "Uploaded object was not found in storage",
             },
           ],
         },

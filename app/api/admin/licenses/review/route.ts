@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   buildAdminLicenseReviewData,
+  hasUploadedLicenseDocument,
   isValidAdminLicenseDecision,
 } from "./rules";
 
@@ -118,11 +119,21 @@ export async function POST(req: Request) {
       },
       select: {
         id: true,
+        documentKey: true,
       },
     });
 
     if (!license) {
       return NextResponse.json({ error: "License not found" }, { status: 404 });
+    }
+
+    if (!hasUploadedLicenseDocument(license.documentKey)) {
+      return NextResponse.json(
+        {
+          error: "License document is required before review",
+        },
+        { status: 400 }
+      );
     }
 
     const reviewedLicense = await prisma.license.update({

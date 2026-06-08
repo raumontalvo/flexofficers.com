@@ -7,6 +7,10 @@ export function isValidAdminLicenseDecision(value: unknown): value is "VERIFIED"
   );
 }
 
+export function hasUploadedLicenseDocument(documentKey: string | null | undefined) {
+  return typeof documentKey === "string" && documentKey.trim().length > 0;
+}
+
 export function buildAdminLicenseReviewData(params: {
   decision: "VERIFIED" | "REJECTED";
   verifiedByUserId: string;
