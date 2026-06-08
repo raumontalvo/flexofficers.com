@@ -125,3 +125,29 @@ Version: 0.1.0
 
 Founder: Raul Pedro Montalvo Vazquez
 
+---
+
+## First Admin Bootstrap
+
+Use the one-time admin bootstrap command to promote exactly one existing user to ADMIN.
+
+Requirements:
+
+* `DATABASE_URL` must be set
+* `ADMIN_BOOTSTRAP_SECRET` must be set
+* Use `--secret` with the same value as `ADMIN_BOOTSTRAP_SECRET`
+* Provide either `--clerk-id` or `--email`
+* Include `--confirm`
+
+Command:
+
+```bash
+ADMIN_BOOTSTRAP_SECRET="your-secret" npm run bootstrap:admin -- --secret "your-secret" --confirm --clerk-id "clerk_user_id"
+```
+
+Or by email:
+
+```bash
+ADMIN_BOOTSTRAP_SECRET="your-secret" npm run bootstrap:admin -- --secret "your-secret" --confirm --email "user@example.com"
+```
+
