@@ -151,3 +151,79 @@ Or by email:
 ADMIN_BOOTSTRAP_SECRET="your-secret" npm run bootstrap:admin -- --secret "your-secret" --confirm --email "user@example.com"
 ```
 
+## License Document Storage Configuration
+
+Set the following environment variables before using license upload and download endpoints.
+
+Required:
+
+* `STORAGE_PROVIDER` (`s3` or `r2`)
+* `STORAGE_BUCKET`
+* `STORAGE_REGION`
+* `STORAGE_ACCESS_KEY_ID`
+* `STORAGE_SECRET_ACCESS_KEY`
+
+Conditionally required:
+
+* `STORAGE_ENDPOINT` (required when `STORAGE_PROVIDER=r2`)
+
+Optional with defaults:
+
+* `STORAGE_FORCE_PATH_STYLE` (default: `false` for S3, `true` for R2)
+* `LICENSE_UPLOAD_PREFIX` (default: `licenses`)
+* `LICENSE_UPLOAD_MAX_BYTES` (default: `5242880`)
+* `LICENSE_UPLOAD_ALLOWED_MIME` (default: `application/pdf,image/jpeg,image/png`)
+* `LICENSE_UPLOAD_PRESIGN_TTL_SECONDS` (default: `300`)
+* `LICENSE_DOWNLOAD_PRESIGN_TTL_SECONDS` (default: `120`)
+
+### AWS S3 Setup Notes
+
+1. Create an S3 bucket for license documents.
+2. Create an IAM user (or role) with least-privilege access to that bucket.
+3. Configure CORS on the bucket to allow browser `PUT` uploads from your app origin.
+4. Set environment variables:
+
+```bash
+STORAGE_PROVIDER=s3
+STORAGE_BUCKET=your-s3-bucket
+STORAGE_REGION=us-east-1
+STORAGE_ACCESS_KEY_ID=...
+STORAGE_SECRET_ACCESS_KEY=...
+# Optional
+STORAGE_FORCE_PATH_STYLE=false
+LICENSE_UPLOAD_PREFIX=licenses
+```
+
+### Cloudflare R2 Setup Notes
+
+1. Create an R2 bucket for license documents.
+2. Create an R2 API token with object read/write for that bucket.
+3. Use your account-specific S3 endpoint.
+4. Configure CORS on the bucket to allow browser `PUT` uploads from your app origin.
+5. Set environment variables:
+
+```bash
+STORAGE_PROVIDER=r2
+STORAGE_BUCKET=your-r2-bucket
+STORAGE_REGION=auto
+STORAGE_ENDPOINT=https://<accountid>.r2.cloudflarestorage.com
+STORAGE_ACCESS_KEY_ID=...
+STORAGE_SECRET_ACCESS_KEY=...
+# Optional
+STORAGE_FORCE_PATH_STYLE=true
+LICENSE_UPLOAD_PREFIX=licenses
+```
+
+## Manual License Review Test Flow
+
+Use this manual flow to validate upload and admin review end-to-end.
+
+1. Sign in as an officer and open the officer profile page.
+2. Add or update a license and save the profile (license record must exist first).
+3. Upload a document for that license (PDF/JPEG/PNG).
+4. Sign in as an admin and open `/admin/licenses`.
+5. Confirm the queue row shows officer info, license info, uploaded file name, and status.
+6. Click Open Document and confirm the file opens from a signed URL.
+7. Click Verify and confirm status updates to `VERIFIED`.
+8. Repeat with Reject and optional notes, then confirm status is `REJECTED` and notes are saved.
+

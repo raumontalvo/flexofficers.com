@@ -97,15 +97,38 @@ Store officer license information.
 
 ## Fields
 
-| Field           | Type    |
-| --------------- | ------- |
-| id              | UUID    |
-| officer_id      | UUID    |
-| license_type    | String  |
-| license_number  | String  |
-| expiration_date | Date    |
-| issuing_state   | String  |
-| verified        | Boolean |
+| Field                | Type      |
+| -------------------- | --------- |
+| id                   | UUID      |
+| officer_id           | UUID      |
+| license_type         | String    |
+| license_number       | String    |
+| expiration_date      | Date      |
+| issuing_state        | String    |
+| verified             | Boolean   |
+| verification_status  | Enum      |
+| verification_notes   | String    |
+| verified_at          | Timestamp |
+| verified_by_user_id  | UUID      |
+| document_key         | String    |
+| document_file_name   | String    |
+| document_mime_type   | String    |
+| document_size_bytes  | Integer   |
+| document_uploaded_at | Timestamp |
+
+## License Verification Status Enum
+
+```text
+PENDING
+VERIFIED
+REJECTED
+```
+
+Meaning:
+
+* `PENDING`: License document was uploaded and is awaiting admin review, or was re-uploaded and reset for review.
+* `VERIFIED`: Admin approved the license after review.
+* `REJECTED`: Admin rejected the license; review notes may explain the reason.
 
 ## Examples
 
