@@ -104,22 +104,111 @@ export async function POST(req: Request) {
       }
     }
 
-    const application = await prisma.application.update({
-      where: {
-        id: applicationId,
-      },
-      data: {
-        status,
-      },
-      include: {
-        shift: true,
-        officer: {
-          include: {
-            user: true,
+    const decisionResult = await prisma.$transaction(async (tx) => {
+      const transactionalApplication = await tx.application.findUnique({
+        where: {
+          id: applicationId,
+        },
+        include: {
+          shift: true,
+          officer: {
+            include: {
+              user: true,
+            },
           },
         },
-      },
+      });
+
+      if (!transactionalApplication) {
+        return {
+          error: {
+            status: 404,
+            body: { error: "Application not found" },
+          },
+        };
+      }
+
+      if (transactionalApplication.status !== ApplicationStatus.PENDING) {
+        return {
+          error: {
+            status: 400,
+            body: { error: "Only pending applications can be updated." },
+          },
+        };
+      }
+
+      if (status === ApplicationStatus.ACCEPTED) {
+        const acceptedCount = await tx.application.count({
+          where: {
+            shiftId: transactionalApplication.shiftId,
+            status: ApplicationStatus.ACCEPTED,
+          },
+        });
+
+        if (acceptedCount >= transactionalApplication.shift.positionsNeeded) {
+          return {
+            error: {
+              status: 400,
+              body: { error: "This shift is already filled." },
+            },
+          };
+        }
+      }
+
+      const updatedApplication = await tx.application.update({
+        where: {
+          id: applicationId,
+        },
+        data: {
+          status,
+        },
+        include: {
+          shift: true,
+          officer: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      let shiftFilled = false;
+
+      if (status === ApplicationStatus.ACCEPTED) {
+        const acceptedCount = await tx.application.count({
+          where: {
+            shiftId: updatedApplication.shiftId,
+            status: ApplicationStatus.ACCEPTED,
+          },
+        });
+
+        if (acceptedCount >= updatedApplication.shift.positionsNeeded) {
+          await tx.shift.update({
+            where: {
+              id: updatedApplication.shiftId,
+            },
+            data: {
+              status: ShiftStatus.FILLED,
+            },
+          });
+
+          shiftFilled = true;
+        }
+      }
+
+      return {
+        application: updatedApplication,
+        shiftFilled,
+      };
     });
+
+    if (decisionResult.error) {
+      return NextResponse.json(decisionResult.error.body, {
+        status: decisionResult.error.status,
+      });
+    }
+
+    const application = decisionResult.application;
 
     if (status === "ACCEPTED") {
       const title = "Application accepted";
@@ -139,23 +228,6 @@ export async function POST(req: Request) {
         message,
       });
 
-      const acceptedCount = await prisma.application.count({
-        where: {
-          shiftId: application.shiftId,
-          status: ApplicationStatus.ACCEPTED,
-        },
-      });
-
-      if (acceptedCount >= application.shift.positionsNeeded) {
-        await prisma.shift.update({
-          where: {
-            id: application.shiftId,
-          },
-          data: {
-            status: ShiftStatus.FILLED,
-          },
-        });
-      }
     }
 
     if (status === "REJECTED") {
