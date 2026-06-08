@@ -136,11 +136,19 @@ export async function POST(req: Request) {
       },
     });
 
-    await sendNotificationEmail({
-      to: shift.company.user.email,
-      subject: title,
-      message,
-    });
+    try {
+      await sendNotificationEmail({
+        to: shift.company.user.email,
+        subject: title,
+        message,
+      });
+    } catch (error) {
+      console.error("Failed to send new application email", {
+        shiftId: shift.id,
+        companyUserId: shift.company.user.id,
+        error,
+      });
+    }
 
     return NextResponse.json(application);
   } catch {

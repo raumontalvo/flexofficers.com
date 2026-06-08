@@ -71,13 +71,21 @@ export async function POST(req: Request) {
     });
 
     await Promise.all(
-      shift.applications.map((application) =>
-        sendNotificationEmail({
-          to: application.officer.user.email,
-          subject: title,
-          message,
-        })
-      )
+      shift.applications.map(async (application) => {
+        try {
+          await sendNotificationEmail({
+            to: application.officer.user.email,
+            subject: title,
+            message,
+          });
+        } catch (error) {
+          console.error("Failed to send shift cancellation email", {
+            shiftId: shift.id,
+            officerUserId: application.officer.user.id,
+            error,
+          });
+        }
+      })
     );
 
     return NextResponse.json(updatedShift);

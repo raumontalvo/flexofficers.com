@@ -222,11 +222,19 @@ export async function POST(req: Request) {
         },
       });
 
-      await sendNotificationEmail({
-        to: application.officer.user.email,
-        subject: title,
-        message,
-      });
+      try {
+        await sendNotificationEmail({
+          to: application.officer.user.email,
+          subject: title,
+          message,
+        });
+      } catch (error) {
+        console.error("Failed to send acceptance email", {
+          applicationId: application.id,
+          officerUserId: application.officer.user.id,
+          error,
+        });
+      }
 
     }
 
@@ -242,11 +250,19 @@ export async function POST(req: Request) {
         },
       });
 
-      await sendNotificationEmail({
-        to: application.officer.user.email,
-        subject: title,
-        message,
-      });
+      try {
+        await sendNotificationEmail({
+          to: application.officer.user.email,
+          subject: title,
+          message,
+        });
+      } catch (error) {
+        console.error("Failed to send rejection email", {
+          applicationId: application.id,
+          officerUserId: application.officer.user.id,
+          error,
+        });
+      }
     }
 
     return NextResponse.json(application);
