@@ -27,6 +27,12 @@ enum ApplicationStatus {
   WITHDRAWN
 }
 
+enum LicenseVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
 model User {
   id        String   @id @default(uuid())
   clerkId   String   @unique
@@ -38,6 +44,7 @@ model User {
   officer       Officer?
   company       Company?
   notifications Notification[]
+  reviewedLicenses License[] @relation("LicenseReviewedBy")
 }
 
 model Officer {
@@ -59,17 +66,27 @@ model Officer {
 }
 
 model License {
-  id             String   @id @default(uuid())
-  officerId      String
-  licenseType    String
-  licenseNumber  String
-  expirationDate DateTime?
-  issuingState   String
-  verified       Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                  String                    @id @default(uuid())
+  officerId           String
+  licenseType         String
+  licenseNumber       String
+  expirationDate      DateTime?
+  issuingState        String
+  verified            Boolean                   @default(false)
+  verificationStatus  LicenseVerificationStatus @default(PENDING)
+  verificationNotes   String?
+  verifiedAt          DateTime?
+  verifiedByUserId    String?
+  documentKey         String?
+  documentFileName    String?
+  documentMimeType    String?
+  documentSizeBytes   Int?
+  documentUploadedAt  DateTime?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
 
-  officer Officer @relation(fields: [officerId], references: [id], onDelete: Cascade)
+  officer    Officer @relation(fields: [officerId], references: [id], onDelete: Cascade)
+  reviewedBy User?   @relation("LicenseReviewedBy", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
 }
 
 model Company {
