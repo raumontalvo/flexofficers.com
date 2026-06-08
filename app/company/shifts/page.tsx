@@ -1,36 +1,35 @@
 import Link from "next/link";
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
-import { currentUser } from "@clerk/nextjs/server";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { requirePageRole } from "@/lib/page-rbac";
 import CancelShiftButton from "./CancelShiftButton";
 import DeleteShiftButton from "./DeleteShiftButton";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompanyShiftsPage() {
-  const clerkUser = await currentUser();
+  const clerkUser = await requirePageRole(UserRole.COMPANY);
 
-  const shifts = clerkUser
-    ? await prisma.shift.findMany({
+  const shifts = await prisma.shift.findMany({
+    where: {
+      company: {
+        user: {
+          clerkId: clerkUser.id,
+        },
+      },
+    },
+    include: {
+      applications: {
         where: {
-          company: {
-            user: {
-              clerkId: clerkUser.id,
-            },
-          },
+          status: ApplicationStatus.ACCEPTED,
         },
-        include: {
-          applications: {
-            where: {
-              status: ApplicationStatus.ACCEPTED,
-            },
-          },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      })
-    : [];
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">

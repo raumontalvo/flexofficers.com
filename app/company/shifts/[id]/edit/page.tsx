@@ -1,6 +1,7 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { UserRole } from "@/app/generated/prisma/enums";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import EditShiftForm from "./EditShiftForm";
 
@@ -21,12 +22,8 @@ export default async function EditCompanyShiftPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const clerkUser = await currentUser();
+  const clerkUser = await requirePageRole(UserRole.COMPANY);
   const { id } = await params;
-
-  if (!clerkUser) {
-    notFound();
-  }
 
   const shift = await prisma.shift.findFirst({
     where: {

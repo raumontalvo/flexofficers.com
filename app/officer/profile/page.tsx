@@ -1,28 +1,27 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import OfficerProfileForm from "./OfficerProfileForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function OfficerProfilePage() {
-  const clerkUser = await currentUser();
+  const clerkUser = await requirePageRole(UserRole.OFFICER);
 
-  const officer = clerkUser
-    ? await prisma.officer.findFirst({
-        where: {
-          user: {
-            clerkId: clerkUser.id,
-          },
+  const officer = await prisma.officer.findFirst({
+    where: {
+      user: {
+        clerkId: clerkUser.id,
+      },
+    },
+    include: {
+      licenses: {
+        orderBy: {
+          createdAt: "asc",
         },
-        include: {
-          licenses: {
-            orderBy: {
-              createdAt: "asc",
-            },
-          },
-        },
-      })
-    : null;
+      },
+    },
+  });
 
   const savedLicenses =
     officer?.licenses.map((license) => ({

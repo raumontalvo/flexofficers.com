@@ -1,40 +1,39 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import ApplicationDetails from "./ApplicationDetails";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompanyApplicationsPage() {
-  const clerkUser = await currentUser();
+  const clerkUser = await requirePageRole(UserRole.COMPANY);
 
-  const applications = clerkUser
-    ? await prisma.application.findMany({
-        where: {
-          shift: {
-            company: {
-              user: {
-                clerkId: clerkUser.id,
-              },
-            },
+  const applications = await prisma.application.findMany({
+    where: {
+      shift: {
+        company: {
+          user: {
+            clerkId: clerkUser.id,
           },
         },
+      },
+    },
+    include: {
+      shift: true,
+      officer: {
         include: {
-          shift: true,
-          officer: {
-            include: {
-              licenses: {
-                orderBy: {
-                  createdAt: "asc",
-                },
-              },
+          licenses: {
+            orderBy: {
+              createdAt: "asc",
             },
           },
         },
-        orderBy: {
-          appliedAt: "desc",
-        },
-      })
-    : [];
+      },
+    },
+    orderBy: {
+      appliedAt: "desc",
+    },
+  });
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">

@@ -1,33 +1,12 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { requirePageRole } from "@/lib/page-rbac";
 import VerifyCompanyButton from "./VerifyCompanyButton";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminCompaniesPage() {
-  const clerkUser = await currentUser();
-
-  const adminUser = clerkUser
-    ? await prisma.user.findUnique({
-        where: {
-          clerkId: clerkUser.id,
-        },
-      })
-    : null;
-
-  if (adminUser?.role !== UserRole.ADMIN) {
-    return (
-      <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-        <section className="mx-auto max-w-4xl">
-          <h1 className="text-4xl font-bold">Admin Access Required</h1>
-          <p className="mt-4 text-slate-300">
-            You do not have permission to view this page.
-          </p>
-        </section>
-      </main>
-    );
-  }
+  await requirePageRole(UserRole.ADMIN);
 
   const companies = await prisma.company.findMany({
     include: {

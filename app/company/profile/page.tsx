@@ -1,21 +1,20 @@
-import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { requirePageRole } from "@/lib/page-rbac";
 import CompanyProfileForm from "./CompanyProfileForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompanyProfilePage() {
-  const clerkUser = await currentUser();
+  const clerkUser = await requirePageRole(UserRole.COMPANY);
 
-  const company = clerkUser
-    ? await prisma.company.findFirst({
-        where: {
-          user: {
-            clerkId: clerkUser.id,
-          },
-        },
-      })
-    : null;
+  const company = await prisma.company.findFirst({
+    where: {
+      user: {
+        clerkId: clerkUser.id,
+      },
+    },
+  });
 
   const initialForm = {
     companyName: company?.companyName ?? "",
