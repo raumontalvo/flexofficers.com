@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendNotificationEmail } from "@/lib/email";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { validateApplicationDecisionTransition } from "./decision-rules";
 import {
   ApplicationStatus,
   ShiftStatus,
@@ -108,9 +109,16 @@ export async function POST(req: Request) {
         },
       });
 
-      if (acceptedCount >= existing.shift.positionsNeeded) {
+      const transition = validateApplicationDecisionTransition({
+        currentStatus: existing.status,
+        nextStatus: status,
+        acceptedCount,
+        positionsNeeded: existing.shift.positionsNeeded,
+      });
+
+      if (!transition.allowed) {
         return NextResponse.json(
-          { error: "This shift is already filled." },
+          { error: transition.message },
           { status: 400 }
         );
       }
@@ -141,10 +149,17 @@ export async function POST(req: Request) {
       }
 
       if (transactionalApplication.status !== ApplicationStatus.PENDING) {
+        const transition = validateApplicationDecisionTransition({
+          currentStatus: transactionalApplication.status,
+          nextStatus: status,
+          acceptedCount: 0,
+          positionsNeeded: transactionalApplication.shift.positionsNeeded,
+        });
+
         return {
           error: {
             status: 400,
-            body: { error: "Only pending applications can be updated." },
+            body: { error: transition.message },
           },
         };
       }
@@ -157,11 +172,18 @@ export async function POST(req: Request) {
           },
         });
 
-        if (acceptedCount >= transactionalApplication.shift.positionsNeeded) {
+        const transition = validateApplicationDecisionTransition({
+          currentStatus: transactionalApplication.status,
+          nextStatus: status,
+          acceptedCount,
+          positionsNeeded: transactionalApplication.shift.positionsNeeded,
+        });
+
+        if (!transition.allowed) {
           return {
             error: {
               status: 400,
-              body: { error: "This shift is already filled." },
+              body: { error: transition.message },
             },
           };
         }
