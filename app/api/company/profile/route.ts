@@ -18,20 +18,46 @@ export async function POST(req: Request) {
 
   const data = await req.json();
 
-  const user = await prisma.user.upsert({
+  const existingUser = await prisma.user.findUnique({
     where: {
       clerkId: clerkUser.id,
     },
-    update: {
-      email,
-      role: UserRole.COMPANY,
-    },
-    create: {
-      clerkId: clerkUser.id,
-      email,
-      role: UserRole.COMPANY,
+    select: {
+      id: true,
+      role: true,
     },
   });
+
+  if (existingUser?.role === UserRole.OFFICER) {
+    return NextResponse.json(
+      { error: "Officer accounts cannot create or update company profiles." },
+      { status: 403 }
+    );
+  }
+
+  if (existingUser?.role && existingUser.role !== UserRole.COMPANY) {
+    return NextResponse.json(
+      { error: "Only company accounts can create or update company profiles." },
+      { status: 403 }
+    );
+  }
+
+  const user = existingUser
+    ? await prisma.user.update({
+        where: {
+          id: existingUser.id,
+        },
+        data: {
+          email,
+        },
+      })
+    : await prisma.user.create({
+        data: {
+          clerkId: clerkUser.id,
+          email,
+          role: UserRole.COMPANY,
+        },
+      });
 
   const company = await prisma.company.upsert({
     where: {

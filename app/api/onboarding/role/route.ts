@@ -47,20 +47,41 @@ export async function POST(req: Request) {
       );
     }
 
-    await prisma.user.upsert({
+    const existingUser = await prisma.user.findUnique({
       where: {
         clerkId: clerkUser.id,
       },
-      update: {
-        role: parsed.role,
-        email,
-      },
-      create: {
-        clerkId: clerkUser.id,
-        email,
-        role: parsed.role,
+      select: {
+        id: true,
+        role: true,
       },
     });
+
+    if (existingUser?.role && existingUser.role !== parsed.role) {
+      return NextResponse.json(
+        { error: "Role is already set and cannot be changed." },
+        { status: 403 }
+      );
+    }
+
+    if (existingUser) {
+      await prisma.user.update({
+        where: {
+          id: existingUser.id,
+        },
+        data: {
+          email,
+        },
+      });
+    } else {
+      await prisma.user.create({
+        data: {
+          clerkId: clerkUser.id,
+          email,
+          role: parsed.role,
+        },
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch {
