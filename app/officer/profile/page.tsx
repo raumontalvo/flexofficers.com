@@ -33,10 +33,17 @@ export default async function OfficerProfilePage() {
 
   const savedLicenses =
     officer?.licenses.map((license) => ({
+      id: license.id,
       licenseType: license.licenseType,
       licenseNumber: license.licenseNumber,
       issuingState: license.issuingState,
       expirationDate: formatDateForInput(license.expirationDate),
+      documentKey: license.documentKey ?? undefined,
+      documentFileName: license.documentFileName ?? undefined,
+      documentMimeType: license.documentMimeType ?? undefined,
+      documentSizeBytes: license.documentSizeBytes ?? undefined,
+      documentUploadedAt: license.documentUploadedAt?.toISOString() ?? undefined,
+      verificationStatus: license.verificationStatus,
     })) ?? [];
 
   const initialForm = {
@@ -51,10 +58,17 @@ export default async function OfficerProfilePage() {
         ? savedLicenses
         : [
             {
+              id: undefined,
               licenseType: "",
               licenseNumber: "",
               issuingState: "",
               expirationDate: "",
+              documentKey: undefined,
+              documentFileName: undefined,
+              documentMimeType: undefined,
+              documentSizeBytes: undefined,
+              documentUploadedAt: undefined,
+              verificationStatus: undefined,
             },
           ],
   };

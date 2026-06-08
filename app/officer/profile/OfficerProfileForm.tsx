@@ -3,10 +3,17 @@
 import { useState } from "react";
 
 type LicenseForm = {
+  id?: string;
   licenseType: string;
   licenseNumber: string;
   issuingState: string;
   expirationDate: string;
+  documentKey?: string;
+  documentFileName?: string;
+  documentMimeType?: string;
+  documentSizeBytes?: number;
+  documentUploadedAt?: string;
+  verificationStatus?: string;
 };
 
 type OfficerProfileFormProps = {
@@ -25,10 +32,15 @@ export default function OfficerProfileForm({
   initialForm,
 }: OfficerProfileFormProps) {
   const [form, setForm] = useState(initialForm);
+  const [uploadStatusByRow, setUploadStatusByRow] = useState<Record<string, string>>({});
+
+  function getRowKey(license: LicenseForm, index: number) {
+    return license.id ?? `new-${index}`;
+  }
 
   function updateLicense(
     index: number,
-    field: keyof LicenseForm,
+    field: "licenseType" | "licenseNumber" | "issuingState" | "expirationDate",
     value: string
   ) {
     const updatedLicenses = [...form.licenses];
@@ -49,10 +61,17 @@ export default function OfficerProfileForm({
       licenses: [
         ...form.licenses,
         {
+          id: undefined,
           licenseType: "",
           licenseNumber: "",
           issuingState: "",
           expirationDate: "",
+          documentKey: undefined,
+          documentFileName: undefined,
+          documentMimeType: undefined,
+          documentSizeBytes: undefined,
+          documentUploadedAt: undefined,
+          verificationStatus: undefined,
         },
       ],
     });
@@ -68,13 +87,148 @@ export default function OfficerProfileForm({
           ? updatedLicenses
           : [
               {
+                id: undefined,
                 licenseType: "",
                 licenseNumber: "",
                 issuingState: "",
                 expirationDate: "",
+                documentKey: undefined,
+                documentFileName: undefined,
+                documentMimeType: undefined,
+                documentSizeBytes: undefined,
+                documentUploadedAt: undefined,
+                verificationStatus: undefined,
               },
             ],
     });
+  }
+
+  async function uploadLicenseDocument(index: number, file: File) {
+    const license = form.licenses[index];
+    const rowKey = getRowKey(license, index);
+
+    if (!license.id) {
+      setUploadStatusByRow((prev) => ({
+        ...prev,
+        [rowKey]: "Save the profile once to create this license before uploading a document.",
+      }));
+      return;
+    }
+
+    setUploadStatusByRow((prev) => ({
+      ...prev,
+      [rowKey]: "Requesting upload URL...",
+    }));
+
+    try {
+      const presignResponse = await fetch("/api/uploads/license/presign", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          licenseId: license.id,
+          fileName: file.name,
+          fileType: file.type,
+          fileSizeBytes: file.size,
+        }),
+      });
+
+      const presignPayload = (await presignResponse.json()) as {
+        uploadUrl?: string;
+        objectKey?: string;
+        requiredHeaders?: Record<string, string>;
+        error?: string;
+      };
+
+      if (!presignResponse.ok || !presignPayload.uploadUrl || !presignPayload.objectKey) {
+        throw new Error(presignPayload.error || "Failed to create upload URL");
+      }
+
+      setUploadStatusByRow((prev) => ({
+        ...prev,
+        [rowKey]: "Uploading document...",
+      }));
+
+      const uploadResponse = await fetch(presignPayload.uploadUrl, {
+        method: "PUT",
+        headers: presignPayload.requiredHeaders,
+        body: file,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload file");
+      }
+
+      setUploadStatusByRow((prev) => ({
+        ...prev,
+        [rowKey]: "Finalizing upload...",
+      }));
+
+      const completeResponse = await fetch("/api/uploads/license/complete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          licenseId: license.id,
+          objectKey: presignPayload.objectKey,
+          fileName: file.name,
+          fileType: file.type,
+          fileSizeBytes: file.size,
+        }),
+      });
+
+      const completePayload = (await completeResponse.json()) as {
+        error?: string;
+        success?: boolean;
+        license?: {
+          id: string;
+          documentKey?: string | null;
+          documentFileName?: string | null;
+          documentMimeType?: string | null;
+          documentSizeBytes?: number | null;
+          documentUploadedAt?: string | null;
+          verificationStatus?: string | null;
+        };
+      };
+
+      if (!completeResponse.ok || !completePayload.license) {
+        throw new Error(completePayload.error || "Failed to finalize upload");
+      }
+
+      const completedLicense = completePayload.license;
+
+      setForm((prev) => {
+        const updatedLicenses = [...prev.licenses];
+        updatedLicenses[index] = {
+          ...updatedLicenses[index],
+          id: completedLicense.id,
+          documentKey: completedLicense.documentKey ?? undefined,
+          documentFileName: completedLicense.documentFileName ?? undefined,
+          documentMimeType: completedLicense.documentMimeType ?? undefined,
+          documentSizeBytes: completedLicense.documentSizeBytes ?? undefined,
+          documentUploadedAt: completedLicense.documentUploadedAt ?? undefined,
+          verificationStatus: completedLicense.verificationStatus ?? undefined,
+        };
+
+        return {
+          ...prev,
+          licenses: updatedLicenses,
+        };
+      });
+
+      setUploadStatusByRow((prev) => ({
+        ...prev,
+        [rowKey]: "Upload complete",
+      }));
+    } catch (error) {
+      setUploadStatusByRow((prev) => ({
+        ...prev,
+        [rowKey]:
+          error instanceof Error ? error.message : "Failed to upload document",
+      }));
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -185,6 +339,39 @@ export default function OfficerProfileForm({
                   }
                   className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
                 />
+            </div>
+
+            <div className="grid gap-3">
+              <input
+                type="file"
+                accept="application/pdf,image/jpeg,image/png"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+
+                  if (file) {
+                    void uploadLicenseDocument(index, file);
+                  }
+                }}
+                className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-slate-700 file:px-3 file:py-2 file:text-white"
+              />
+
+              {uploadStatusByRow[getRowKey(license, index)] && (
+                <p className="text-sm text-slate-300">
+                  {uploadStatusByRow[getRowKey(license, index)]}
+                </p>
+              )}
+
+              {license.documentFileName && (
+                <p className="text-sm text-slate-300">
+                  Uploaded file: {license.documentFileName}
+                </p>
+              )}
+
+              {license.verificationStatus && (
+                <p className="text-sm text-slate-300">
+                  Verification status: {license.verificationStatus}
+                </p>
+              )}
             </div>
 
             <button
