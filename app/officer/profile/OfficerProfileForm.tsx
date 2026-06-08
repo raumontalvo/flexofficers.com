@@ -6,12 +6,14 @@ type LicenseForm = {
   licenseType: string;
   licenseNumber: string;
   issuingState: string;
+  expirationDate: string;
 };
 
 type OfficerProfileFormProps = {
   initialForm: {
     firstName: string;
     lastName: string;
+    phone: string;
     city: string;
     state: string;
     bio: string;
@@ -50,6 +52,7 @@ export default function OfficerProfileForm({
           licenseType: "",
           licenseNumber: "",
           issuingState: "",
+          expirationDate: "",
         },
       ],
     });
@@ -68,6 +71,7 @@ export default function OfficerProfileForm({
                 licenseType: "",
                 licenseNumber: "",
                 issuingState: "",
+                expirationDate: "",
               },
             ],
     });
@@ -111,6 +115,13 @@ export default function OfficerProfileForm({
 
       <div className="grid gap-6 md:grid-cols-2">
         <input
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+          placeholder="Phone"
+        />
+
+        <input
           value={form.city}
           onChange={(e) => setForm({ ...form, city: e.target.value })}
           className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
@@ -138,7 +149,7 @@ export default function OfficerProfileForm({
             key={index}
             className="grid gap-4 rounded-2xl border border-white/10 bg-slate-950 p-4"
           >
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <input
                 value={license.licenseType}
                 onChange={(e) =>
@@ -165,6 +176,15 @@ export default function OfficerProfileForm({
                 className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
                 placeholder="Issuing state"
               />
+
+                <input
+                  type="date"
+                  value={license.expirationDate}
+                  onChange={(e) =>
+                    updateLicense(index, "expirationDate", e.target.value)
+                  }
+                  className="rounded-xl border border-white/10 bg-slate-900 px-4 py-3 text-white"
+                />
             </div>
 
             <button

@@ -5,6 +5,14 @@ import OfficerProfileForm from "./OfficerProfileForm";
 
 export const dynamic = "force-dynamic";
 
+function formatDateForInput(value: Date | null) {
+  if (!value) {
+    return "";
+  }
+
+  return value.toISOString().slice(0, 10);
+}
+
 export default async function OfficerProfilePage() {
   const clerkUser = await requirePageRole(UserRole.OFFICER);
 
@@ -28,11 +36,13 @@ export default async function OfficerProfilePage() {
       licenseType: license.licenseType,
       licenseNumber: license.licenseNumber,
       issuingState: license.issuingState,
+      expirationDate: formatDateForInput(license.expirationDate),
     })) ?? [];
 
   const initialForm = {
     firstName: officer?.firstName ?? clerkUser?.firstName ?? "",
     lastName: officer?.lastName ?? clerkUser?.lastName ?? "",
+    phone: officer?.phone ?? "",
     city: officer?.city ?? "",
     state: officer?.state ?? "",
     bio: officer?.bio ?? "",
@@ -44,6 +54,7 @@ export default async function OfficerProfilePage() {
               licenseType: "",
               licenseNumber: "",
               issuingState: "",
+              expirationDate: "",
             },
           ],
   };
