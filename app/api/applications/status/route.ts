@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendNotificationEmail } from "@/lib/email";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   ApplicationStatus,
   ShiftStatus,
@@ -14,6 +15,17 @@ export async function POST(req: Request) {
 
     if (!clerkUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResponse = enforceRateLimit({
+      request: req,
+      clerkUserId: clerkUser.id,
+      bucket: "application-status-update",
+      profile: "strict",
+    });
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     const actor = await prisma.user.findUnique({

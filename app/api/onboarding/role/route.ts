@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { UserRole } from "@/app/generated/prisma/enums";
 
 type OnboardingPayload = {
@@ -29,6 +30,17 @@ export async function POST(req: Request) {
         { error: "Unauthorized" },
         { status: 401 }
       );
+    }
+
+    const rateLimitResponse = enforceRateLimit({
+      request: req,
+      clerkUserId: clerkUser.id,
+      bucket: "onboarding-role",
+      profile: "moderate",
+    });
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     const body = (await req.json()) as OnboardingPayload;
