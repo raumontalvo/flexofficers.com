@@ -1,7 +1,11 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseShiftPayload, type ShiftPayload } from "./validation";
+import { parseShiftPayload, type ShiftPayload } from "../validation";
+
+type UpdateShiftPayload = ShiftPayload & {
+  shiftId?: unknown;
+};
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +15,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = (await req.json()) as ShiftPayload;
+    const body = (await req.json()) as UpdateShiftPayload;
+    const shiftId = typeof body.shiftId === "string" ? body.shiftId : "";
+
+    if (!shiftId) {
+      return NextResponse.json(
+        { error: "shiftId is required" },
+        { status: 400 }
+      );
+    }
+
     const parsed = parseShiftPayload(body);
 
     if ("errors" in parsed) {
@@ -24,24 +37,29 @@ export async function POST(req: Request) {
       );
     }
 
-    const company = await prisma.company.findFirst({
+    const shift = await prisma.shift.findFirst({
       where: {
-        user: {
-          clerkId: clerkUser.id,
+        id: shiftId,
+        company: {
+          user: {
+            clerkId: clerkUser.id,
+          },
         },
       },
     });
 
-    if (!company) {
+    if (!shift) {
       return NextResponse.json(
-        { error: "Company profile not found. Save company profile first." },
-        { status: 400 }
+        { error: "Shift not found or you do not own this shift" },
+        { status: 404 }
       );
     }
 
-    const shift = await prisma.shift.create({
+    const updatedShift = await prisma.shift.update({
+      where: {
+        id: shift.id,
+      },
       data: {
-        companyId: company.id,
         title: parsed.data.title,
         description: parsed.data.description,
         location: parsed.data.location,
@@ -53,10 +71,10 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(shift);
+    return NextResponse.json(updatedShift);
   } catch {
     return NextResponse.json(
-      { error: "Failed to create shift" },
+      { error: "Failed to update shift" },
       { status: 500 }
     );
   }

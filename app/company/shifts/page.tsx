@@ -92,6 +92,12 @@ export default async function CompanyShiftsPage() {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row">
+                      <Link
+                        href={`/company/shifts/${shift.id}/edit`}
+                        className="rounded-xl border border-white/20 px-5 py-3 text-center font-semibold hover:bg-white/10"
+                      >
+                        Edit Shift
+                      </Link>
                       <CancelShiftButton shiftId={shift.id} />
                       <DeleteShiftButton shiftId={shift.id} />
                     </div>
