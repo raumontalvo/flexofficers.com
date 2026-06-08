@@ -10,6 +10,7 @@ export type OfficerProfilePayload = {
 };
 
 type RawLicenseInput = {
+  id?: unknown;
   licenseType?: unknown;
   licenseNumber?: unknown;
   issuingState?: unknown;
@@ -17,6 +18,7 @@ type RawLicenseInput = {
 };
 
 export type ParsedLicense = {
+  id?: string;
   licenseType: string;
   licenseNumber: string;
   issuingState: string;
@@ -96,6 +98,18 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
       payload.licenses.forEach((license, index) => {
         const entry = (license ?? {}) as RawLicenseInput;
 
+        let id: string | undefined;
+        if (typeof entry.id !== "undefined" && entry.id !== null && entry.id !== "") {
+          if (typeof entry.id !== "string") {
+            errors.push({
+              field: `licenses[${index}].id`,
+              message: "id must be a string",
+            });
+          } else {
+            id = entry.id.trim() || undefined;
+          }
+        }
+
         const licenseType =
           typeof entry.licenseType === "string" ? entry.licenseType.trim() : "";
         const licenseNumber =
@@ -158,6 +172,7 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
 
         if (licenseType && licenseNumber && issuingState) {
           parsedLicenses.push({
+            id,
             licenseType,
             licenseNumber,
             issuingState,

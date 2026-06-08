@@ -5,7 +5,6 @@ import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   parseOfficerPayload,
   type OfficerProfilePayload,
-  type ParsedLicense,
 } from "./validation";
 import { UserRole } from "@/app/generated/prisma/enums";
 
@@ -88,65 +87,136 @@ export async function POST(req: Request) {
     );
   }
 
-  const user = existingUser
-    ? await prisma.user.update({
+  const result = await prisma.$transaction(async (tx) => {
+    const user = existingUser
+      ? await tx.user.update({
+          where: {
+            id: existingUser.id,
+          },
+          data: {
+            email,
+          },
+        })
+      : await tx.user.create({
+          data: {
+            clerkId: clerkUser.id,
+            email,
+            role: UserRole.OFFICER,
+          },
+        });
+
+    const officer = await tx.officer.upsert({
+      where: {
+        userId: user.id,
+      },
+      update: {
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        phone: parsed.data.phone,
+        city: parsed.data.city,
+        state: parsed.data.state,
+        bio: parsed.data.bio,
+        experienceYears: parsed.data.experienceYears,
+      },
+      create: {
+        userId: user.id,
+        firstName: parsed.data.firstName,
+        lastName: parsed.data.lastName,
+        phone: parsed.data.phone,
+        city: parsed.data.city,
+        state: parsed.data.state,
+        bio: parsed.data.bio,
+        experienceYears: parsed.data.experienceYears,
+      },
+    });
+
+    const existingLicenses = await tx.license.findMany({
+      where: {
+        officerId: officer.id,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const existingLicenseIds = new Set(existingLicenses.map((license) => license.id));
+    const requestedLicenseIds = parsed.data.licenses
+      .map((license) => license.id)
+      .filter((id): id is string => Boolean(id));
+
+    const invalidLicenseIds = requestedLicenseIds.filter(
+      (id) => !existingLicenseIds.has(id)
+    );
+
+    if (invalidLicenseIds.length > 0) {
+      return {
+        error: {
+          status: 400,
+          body: {
+            error: "Invalid request payload",
+            details: [
+              {
+                field: "licenses",
+                message: "One or more license ids are invalid for this officer",
+              },
+            ],
+          },
+        },
+      };
+    }
+
+    for (const license of parsed.data.licenses) {
+      if (license.id) {
+        await tx.license.update({
+          where: {
+            id: license.id,
+          },
+          data: {
+            licenseType: license.licenseType,
+            licenseNumber: license.licenseNumber,
+            issuingState: license.issuingState,
+            expirationDate: license.expirationDate,
+          },
+        });
+      } else {
+        await tx.license.create({
+          data: {
+            officerId: officer.id,
+            licenseType: license.licenseType,
+            licenseNumber: license.licenseNumber,
+            issuingState: license.issuingState,
+            expirationDate: license.expirationDate,
+          },
+        });
+      }
+    }
+
+    const requestedLicenseIdSet = new Set(requestedLicenseIds);
+    const licenseIdsToDelete = existingLicenses
+      .map((license) => license.id)
+      .filter((id) => !requestedLicenseIdSet.has(id));
+
+    if (licenseIdsToDelete.length > 0) {
+      await tx.license.deleteMany({
         where: {
-          id: existingUser.id,
-        },
-        data: {
-          email,
-        },
-      })
-    : await prisma.user.create({
-        data: {
-          clerkId: clerkUser.id,
-          email,
-          role: UserRole.OFFICER,
+          officerId: officer.id,
+          id: {
+            in: licenseIdsToDelete,
+          },
         },
       });
+    }
 
-  const officer = await prisma.officer.upsert({
-    where: {
-      userId: user.id,
-    },
-    update: {
-      firstName: parsed.data.firstName,
-      lastName: parsed.data.lastName,
-      phone: parsed.data.phone,
-      city: parsed.data.city,
-      state: parsed.data.state,
-      bio: parsed.data.bio,
-      experienceYears: parsed.data.experienceYears,
-    },
-    create: {
-      userId: user.id,
-      firstName: parsed.data.firstName,
-      lastName: parsed.data.lastName,
-      phone: parsed.data.phone,
-      city: parsed.data.city,
-      state: parsed.data.state,
-      bio: parsed.data.bio,
-      experienceYears: parsed.data.experienceYears,
-    },
+    return { officer };
   });
 
-  await prisma.license.deleteMany({
-    where: {
-      officerId: officer.id,
-    },
-  });
+  const transactionError = "error" in result ? result.error : undefined;
 
-  if (parsed.data.licenses.length > 0) {
-    await prisma.license.createMany({
-      data: parsed.data.licenses.map((license: ParsedLicense) => ({
-        officerId: officer.id,
-        licenseType: license.licenseType,
-        licenseNumber: license.licenseNumber,
-        issuingState: license.issuingState,
-        expirationDate: license.expirationDate,
-      })),
+  if (transactionError) {
+    return NextResponse.json(transactionError.body, {
+      status: transactionError.status,
     });
   }
 
-  return NextResponse.json(officer);
+  return NextResponse.json(result.officer);
 }
