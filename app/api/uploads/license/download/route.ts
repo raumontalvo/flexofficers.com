@@ -6,6 +6,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { getStorageConfig } from "@/lib/storage";
+import { canAccessLicenseDocument } from "./rules";
 
 type DownloadPayload = {
   licenseId?: unknown;
@@ -67,35 +68,36 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const isAdmin = actor.role === UserRole.ADMIN;
-    const isOfficer = actor.role === UserRole.OFFICER && Boolean(actor.officer);
-
-    if (!isAdmin && !isOfficer) {
-      return NextResponse.json(
-        { error: "Only admins or officer owners can access license documents." },
-        { status: 403 }
-      );
-    }
-
     const license = await prisma.license.findFirst({
-      where: isAdmin
-        ? {
-            id: licenseId,
-          }
-        : {
-            id: licenseId,
-            officerId: actor.officer?.id,
-          },
+      where: {
+        id: licenseId,
+      },
       select: {
         id: true,
+        officerId: true,
         documentKey: true,
       },
     });
 
     if (!license) {
       return NextResponse.json(
-        { error: "License not found or you do not have access." },
+        { error: "License not found." },
         { status: 404 }
+      );
+    }
+
+    if (
+      !canAccessLicenseDocument({
+        actor: {
+          role: actor.role,
+          officerId: actor.officer?.id,
+        },
+        licenseOfficerId: license.officerId,
+      })
+    ) {
+      return NextResponse.json(
+        { error: "Only admins or officer owners can access license documents." },
+        { status: 403 }
       );
     }
 

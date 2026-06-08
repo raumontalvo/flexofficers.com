@@ -1,13 +1,14 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import {
-  LicenseVerificationStatus,
-  UserRole,
-} from "@/app/generated/prisma/enums";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { getStorageConfig } from "@/lib/storage";
 import { parseLicenseUploadPayload } from "../validation";
+import {
+  buildLicenseDocumentReplacementData,
+  validateLicenseDocumentObjectKeyScope,
+} from "./rules";
 
 type CompleteUploadPayload = {
   licenseId?: unknown;
@@ -106,9 +107,15 @@ export async function POST(req: Request) {
     }
 
     const storageConfig = getStorageConfig();
-    const expectedPrefix = `${storageConfig.uploadPrefix}/${user.officer.id}/${license.id}/`;
 
-    if (!objectKey.startsWith(expectedPrefix)) {
+    if (
+      !validateLicenseDocumentObjectKeyScope({
+        uploadPrefix: storageConfig.uploadPrefix,
+        officerId: user.officer.id,
+        licenseId: license.id,
+        objectKey,
+      })
+    ) {
       return NextResponse.json(
         {
           error: "Invalid request payload",
@@ -127,18 +134,12 @@ export async function POST(req: Request) {
       where: {
         id: license.id,
       },
-      data: {
-        documentKey: objectKey,
-        documentFileName: parsed.data.fileName,
-        documentMimeType: parsed.data.fileType,
-        documentSizeBytes: parsed.data.fileSizeBytes,
-        documentUploadedAt: new Date(),
-        verificationStatus: LicenseVerificationStatus.PENDING,
-        verified: false,
-        verificationNotes: null,
-        verifiedAt: null,
-        verifiedByUserId: null,
-      },
+      data: buildLicenseDocumentReplacementData({
+        objectKey,
+        fileName: parsed.data.fileName,
+        fileType: parsed.data.fileType,
+        fileSizeBytes: parsed.data.fileSizeBytes,
+      }),
       select: {
         id: true,
         documentKey: true,

@@ -6,6 +6,10 @@ import {
 } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import {
+  buildAdminLicenseReviewData,
+  isValidAdminLicenseDecision,
+} from "./rules";
 
 type ReviewPayload = {
   licenseId?: unknown;
@@ -69,10 +73,7 @@ export async function POST(req: Request) {
       );
     }
 
-    if (
-      payload.decision !== LicenseVerificationStatus.VERIFIED &&
-      payload.decision !== LicenseVerificationStatus.REJECTED
-    ) {
+    if (!isValidAdminLicenseDecision(payload.decision)) {
       return NextResponse.json(
         {
           error: "Invalid request payload",
@@ -128,13 +129,11 @@ export async function POST(req: Request) {
       where: {
         id: license.id,
       },
-      data: {
-        verificationStatus: payload.decision,
-        verified: payload.decision === LicenseVerificationStatus.VERIFIED,
-        verifiedAt: new Date(),
+      data: buildAdminLicenseReviewData({
+        decision: payload.decision,
         verifiedByUserId: adminUser.id,
         verificationNotes,
-      },
+      }),
       select: {
         id: true,
         verificationStatus: true,
