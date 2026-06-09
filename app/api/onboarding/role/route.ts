@@ -1,8 +1,8 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
-import { UserRole } from "@/app/generated/prisma/enums";
 
 type OnboardingPayload = {
   role?: unknown;
@@ -11,8 +11,7 @@ type OnboardingPayload = {
 function parseRole(payload: OnboardingPayload) {
   if (payload.role !== UserRole.OFFICER && payload.role !== UserRole.COMPANY) {
     return {
-      error:
-        "Invalid role. Allowed values are OFFICER or COMPANY.",
+      error: "Invalid role. Allowed values are OFFICER or COMPANY.",
     };
   }
 
@@ -26,10 +25,7 @@ export async function POST(req: Request) {
     const clerkUser = await currentUser();
 
     if (!clerkUser) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const rateLimitResponse = enforceRateLimit({
@@ -53,10 +49,7 @@ export async function POST(req: Request) {
     const email = clerkUser.emailAddresses[0]?.emailAddress;
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email not found" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email not found" }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -69,10 +62,10 @@ export async function POST(req: Request) {
       },
     });
 
-    if (existingUser?.role && existingUser.role !== parsed.role) {
+    if (existingUser?.role) {
       return NextResponse.json(
-        { error: "Role is already set and cannot be changed." },
-        { status: 403 }
+        { error: "Role has already been selected and cannot be changed." },
+        { status: 409 }
       );
     }
 
@@ -83,6 +76,7 @@ export async function POST(req: Request) {
         },
         data: {
           email,
+          role: parsed.role,
         },
       });
     } else {

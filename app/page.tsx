@@ -29,7 +29,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/onboarding"
+            href="/onboarding?force=1"
             className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400"
           >
             Get Started
@@ -54,7 +54,7 @@ export default function Home() {
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
           <Link
-            href="/onboarding"
+            href="/onboarding?force=1"
             className="rounded-xl bg-blue-500 px-6 py-3 font-semibold text-white hover:bg-blue-400"
           >
             Get Started

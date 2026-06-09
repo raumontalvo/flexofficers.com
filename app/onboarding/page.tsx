@@ -4,10 +4,21 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import OnboardingRoleChoice from "./OnboardingRoleChoice";
 
-export default async function OnboardingPage() {
+type OnboardingPageProps = {
+  searchParams?: Promise<{
+    force?: string;
+  }>;
+};
+
+export default async function OnboardingPage({
+  searchParams,
+}: OnboardingPageProps) {
+  const params = await searchParams;
+  const forceRoleChoice = params?.force === "1";
+
   const clerkUser = await currentUser();
 
-  if (clerkUser) {
+  if (clerkUser && !forceRoleChoice) {
     const user = await prisma.user.findUnique({
       where: {
         clerkId: clerkUser.id,
