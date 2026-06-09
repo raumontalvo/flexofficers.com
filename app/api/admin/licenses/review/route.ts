@@ -120,6 +120,15 @@ export async function POST(req: Request) {
       select: {
         id: true,
         documentKey: true,
+        officer: {
+          select: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -152,6 +161,22 @@ export async function POST(req: Request) {
         verifiedAt: true,
         verifiedByUserId: true,
         verificationNotes: true,
+      },
+    });
+
+    const notificationMessage =
+      payload.decision === LicenseVerificationStatus.VERIFIED
+        ? "License verified: Your License has been verified."
+        : `License rejected: ${verificationNotes ?? "No reason provided."}`;
+
+    await prisma.notification.create({
+      data: {
+        userId: license.officer.user.id,
+        title:
+          payload.decision === LicenseVerificationStatus.VERIFIED
+            ? "License verified"
+            : "License rejected",
+        message: notificationMessage,
       },
     });
 
