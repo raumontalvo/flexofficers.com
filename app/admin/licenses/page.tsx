@@ -1,4 +1,7 @@
-import { UserRole } from "@/app/generated/prisma/enums";
+import {
+  LicenseVerificationStatus,
+  UserRole,
+} from "@/app/generated/prisma/enums";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import ReviewLicenseButton from "./ReviewLicenseButton";
@@ -21,6 +24,7 @@ export default async function AdminLicensesPage() {
       documentKey: {
         not: null,
       },
+      verificationStatus: LicenseVerificationStatus.PENDING,
     },
     include: {
       officer: {
@@ -49,7 +53,7 @@ export default async function AdminLicensesPage() {
         <div className="mt-10 grid gap-6">
           {licenses.length === 0 ? (
             <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
-              No uploaded license documents found.
+              No pending license documents found.
             </div>
           ) : (
             licenses.map((license) => (
