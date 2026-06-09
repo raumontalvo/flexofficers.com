@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import DashboardSignOutButton from "./SignOutButton";
 
@@ -28,6 +29,11 @@ export default async function DashboardPage() {
     : null;
 
   const role = user?.role;
+
+  if (role === "ADMIN") {
+    redirect("/admin");
+  }
+
   const unreadCount = user?.notifications.length ?? 0;
 
   const officerMissingItems =
