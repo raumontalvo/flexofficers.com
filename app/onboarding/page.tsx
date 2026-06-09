@@ -7,6 +7,7 @@ import OnboardingRoleChoice from "./OnboardingRoleChoice";
 type OnboardingPageProps = {
   searchParams?: Promise<{
     force?: string;
+    role?: string;
   }>;
 };
 
@@ -15,10 +16,14 @@ export default async function OnboardingPage({
 }: OnboardingPageProps) {
   const params = await searchParams;
   const forceRoleChoice = params?.force === "1";
+  const selectedRole =
+    params?.role === UserRole.OFFICER || params?.role === UserRole.COMPANY
+      ? params.role
+      : null;
 
   const clerkUser = await currentUser();
 
-  if (clerkUser && !forceRoleChoice) {
+  if (clerkUser && !forceRoleChoice && !selectedRole) {
     const user = await prisma.user.findUnique({
       where: {
         clerkId: clerkUser.id,
@@ -37,5 +42,5 @@ export default async function OnboardingPage({
     }
   }
 
-  return <OnboardingRoleChoice />;
+  return <OnboardingRoleChoice initialRole={selectedRole} />;
 }
