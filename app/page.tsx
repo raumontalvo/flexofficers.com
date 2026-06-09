@@ -20,12 +20,21 @@ export default function Home() {
           </a>
         </div>
 
-        <Link
-          href="/sign-up"
-          className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400"
-        >
-          Get Started
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/sign-in"
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            Log In
+          </Link>
+
+          <Link
+            href="/onboarding"
+            className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400"
+          >
+            Get Started
+          </Link>
+        </div>
       </nav>
 
       <section className="mx-auto flex max-w-6xl flex-col items-center justify-center px-6 py-24 text-center">
@@ -45,17 +54,17 @@ export default function Home() {
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
           <Link
-            href="/shifts/create"
+            href="/onboarding"
             className="rounded-xl bg-blue-500 px-6 py-3 font-semibold text-white hover:bg-blue-400"
           >
-            Post a Shift
+            Get Started
           </Link>
 
           <Link
-            href="/shifts"
+            href="/sign-in"
             className="rounded-xl border border-white/20 px-6 py-3 font-semibold text-white hover:bg-white/10"
           >
-            View Available Shifts
+            Log In
           </Link>
         </div>
       </section>
@@ -72,23 +81,23 @@ export default function Home() {
 
         <div className="grid gap-8 md:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-            <h3 className="text-xl font-bold">1. Post a Shift</h3>
+            <h3 className="text-xl font-bold">1. Choose Your Role</h3>
             <p className="mt-3 text-slate-300">
-              Security companies create open shifts and specify requirements.
+              Officers and companies start by selecting the right account type.
             </p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-            <h3 className="text-xl font-bold">2. Officers Apply</h3>
+            <h3 className="text-xl font-bold">2. Build Your Profile</h3>
             <p className="mt-3 text-slate-300">
-              Licensed officers browse opportunities and submit applications.
+              Officers add licenses. Companies add business and license details.
             </p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-            <h3 className="text-xl font-bold">3. Fill the Post</h3>
+            <h3 className="text-xl font-bold">3. Fill Security Shifts</h3>
             <p className="mt-3 text-slate-300">
-              Companies review applicants and assign qualified officers.
+              Companies post opportunities and officers apply to open shifts.
             </p>
           </div>
         </div>
