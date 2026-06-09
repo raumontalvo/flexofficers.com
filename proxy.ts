@@ -2,7 +2,6 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isPrivatePage = createRouteMatcher([
   "/dashboard(.*)",
-  "/onboarding(.*)",
   "/company(.*)",
   "/officer(.*)",
   "/notifications(.*)",
