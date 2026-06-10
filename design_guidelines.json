@@ -1,0 +1,119 @@
+{
+  "project_context": {
+    "app_name": "FlexOfficers",
+    "domain": "Security Staffing Platform",
+    "app_type": "React Native Expo Mobile App (or Mobile-First PWA if restricted to React.js)",
+    "file_extension_preference": ".js files (avoid .tsx)"
+  },
+  "theme_and_archetype": {
+    "theme": "DARK",
+    "archetype": "Archetype 2 (Performance Pro) - Modified for Tactical Security",
+    "rationale": "High visibility, command-center focus suitable for security operations. High-contrast overlays for job shift cards."
+  },
+  "colors": {
+    "background": {
+      "main": "#0A0E1A",
+      "surface": "#111827",
+      "surface_elevated": "#1F2937"
+    },
+    "brand": {
+      "primary": "#2C7BFF",
+      "primary_active": "#1A5ECC",
+      "secondary": "#10B981",
+      "secondary_active": "#059669"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#9CA3AF",
+      "tertiary": "#6B7280",
+      "inverse": "#0A0E1A"
+    },
+    "status": {
+      "filling_fast": "#10B981",
+      "open": "#2C7BFF",
+      "warning": "#F59E0B",
+      "danger": "#EF4444"
+    },
+    "borders": {
+      "subtle": "#1F2937",
+      "active": "#374151"
+    }
+  },
+  "typography": {
+    "fonts": {
+      "headings": "Barlow Condensed (or generic sans-serif bold if custom fonts aren't loaded)",
+      "body": "DM Sans (or Inter/System Default)"
+    },
+    "hierarchy": {
+      "h1": "text-3xl font-black tracking-tight",
+      "h2": "text-2xl font-bold tracking-tight",
+      "h3": "text-lg font-semibold",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm text-gray-400",
+      "badge": "text-xs font-bold uppercase tracking-widest"
+    }
+  },
+  "layout_and_spacing": {
+    "global_padding": "px-4 py-2",
+    "card_padding": "p-4",
+    "gap_standard": "gap-4",
+    "gap_large": "gap-6",
+    "border_radius": {
+      "cards": "rounded-xl",
+      "buttons": "rounded-lg",
+      "badges": "rounded-md"
+    }
+  },
+  "components": {
+    "cards": {
+      "shift_card": "Background #111827, 1px solid border #1F2937. Subtle inner padding. Header with Job Title and Pay Rate right-aligned. Status badges absolute positioned or top row.",
+      "shadows": "Minimal shadow, rely on 1px solid borders for definition (Tactical Minimalism)."
+    },
+    "buttons": {
+      "primary": "Background #2C7BFF, text white. Fully rounded corners (rounded-lg). Min height 48px for touch targets.",
+      "secondary": "Background transparent, 1px solid #374151, text white."
+    },
+    "badges": {
+      "filling_fast": "Background rgba(16,185,129,0.1), Text #10B981. High contrast.",
+      "open": "Background rgba(44,123,255,0.1), Text #2C7BFF."
+    },
+    "navigation": {
+      "bottom_tabs": "Background #0A0E1A, top border 1px solid #1F2937. Active icon color #2C7BFF, inactive #6B7280.",
+      "top_header": "Background #0A0E1A, displays 'Miami, FL' with location pin icon and notification bell."
+    }
+  },
+  "accessibility": {
+    "contrast": "Ensure all text against #0A0E1A and #111827 meets minimum 4.5:1 ratio.",
+    "touch_targets": "All interactive elements must be at least 44x44 points for mobile tap accuracy.",
+    "testing": "All interactive elements MUST include 'data-testid' (if React DOM) or 'testID' (if React Native) following kebab-case role-based convention (e.g., 'shift-card-view-button')."
+  },
+  "image_urls": [
+    {
+      "category": "header_location",
+      "url": "https://images.unsplash.com/photo-1590477330634-ba4fb18090f8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNDR8MHwxfHNlYXJjaHwyfHxtaWFtaSUyMHNreWxpbmUlMjBuaWdodHxlbnwwfHx8fDE3ODEwNTI2Mzd8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Miami skyline night for location headers"
+    },
+    {
+      "category": "shift_venue",
+      "url": "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxjb25jZXJ0JTIwc3RhZ2UlMjBuaWdodCUyMGNyb3dkfGVufDB8fHx8MTc4MTA1MjYzN3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Concert stage night crowd for Hard Rock Stadium shifts"
+    },
+    {
+      "category": "profile_avatar",
+      "url": "https://images.unsplash.com/photo-1618371731836-2b9bff9ac72a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2OTV8MHwxfHNlYXJjaHwyfHxzZWN1cml0eSUyMGd1YXJkJTIwZGFyayUyMHVuaWZvcm18ZW58MHx8fHwxNzgxMDUyNjM4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Professional security guard avatar"
+    }
+  ],
+  "instructions_to_main_agent": [
+    "You are building a mobile application. If your environment is set up for React Native Expo, use Expo components (View, Text, ScrollView) and write .js files.",
+    "If your environment only supports React.js web, build a mobile-first Web App layout: restrict the main container to max-width (e.g., max-w-md mx-auto), use a fixed bottom navigation bar, and emulate a mobile experience.",
+    "ONLY output .js files (not .tsx) as requested by the system constraints.",
+    "Implement the 'Performance Pro' archetype: Deep navy backgrounds, bright blue and neon green accents. Use 1px solid borders for card definitions instead of heavy drop shadows.",
+    "MUST assign 'data-testid' (web) or 'testID' (React Native) to all interactive elements following kebab-case role-based convention (e.g., testID='login-submit-button', testID='shift-card-1').",
+    "The app requires 4 bottom tabs: Browse, My Shifts, Messages, Profile.",
+    "Shift cards must display: Job Title, Venue, Location Pin, Time Range, Pay Rate (top right), Status Badges (OPEN/FILLING FAST), Officers needed, and a primary 'View Shift' button.",
+    "Profile screen must feature specific verification badges: Background Checked, State Licensed, ID Verified, Insured & Bonded.",
+    "DO NOT use raw HTML tags (div, span) if in React Native. DO NOT use Shadcn-web primitives if in React Native. If in Web, you may use Shadcn but apply heavy custom Tailwind classes to override the default white/light theme into our deep navy tactical theme.",
+    "Avoid generic 'SaaS blue'. Use the precise HEX codes provided."
+  ]
+}
