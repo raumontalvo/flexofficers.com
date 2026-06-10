@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/src/theme";
 import { Shift } from "@/src/api/client";
@@ -36,7 +36,7 @@ const ShiftCard: React.FC<Props> = ({ shift, onPress, testID }) => {
   const badgeColor = isFilling ? theme.colors.fillingFast : theme.colors.open;
 
   return (
-    <View style={styles.card} testID={testID}>
+    <TouchableOpacity style={styles.card} testID={testID} onPress={onPress} activeOpacity={0.85}>
       <View style={styles.headerRow}>
         <View style={{ flex: 1, paddingRight: 12 }}>
           <Text style={styles.title} numberOfLines={1}>
@@ -83,7 +83,7 @@ const ShiftCard: React.FC<Props> = ({ shift, onPress, testID }) => {
       >
         <Text style={styles.ctaText}>View Shift</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 };
 
