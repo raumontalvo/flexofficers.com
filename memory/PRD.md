@@ -47,6 +47,19 @@ A native React Native (Expo) mobile app for FlexOfficers — a security staffing
 - Inspired by FlexOfficers website reference screenshot
 - Shield logo, "America's #1 Security Staffing Platform" tagline
 
+## Phase 1 Additions (Feb 2026)
+- **Emergent Google sign-in** — `POST /api/auth/google` exchanges session_token for app JWT; UI button on Welcome + Login screens
+- **Geo-based distance sorting** — `GET /api/shifts?lat=&lng=` returns shifts sorted by Haversine distance; Browse screen auto-requests location on mount
+- **City/state location selector** — `GET /api/shifts/cities` lists available cities; Browse header opens a bottom-sheet modal to switch
+- **Officer/Company ratings** — `POST /api/ratings`, `GET /api/users/{id}/ratings`; star UI on shift detail (officer rates company after applying) and rating pill on profile
+
+## API Endpoints (Phase 1 additions)
+- `POST /api/auth/google` — exchange Emergent session_token for JWT
+- `GET  /api/shifts/cities` — distinct city list with "All Cities" prefix
+- `GET  /api/shifts?lat=&lng=&city=&status_filter=` — geo distance, city filter
+- `POST /api/ratings` — create rating (auth, role-aware)
+- `GET  /api/users/{user_id}/ratings` — public ratings summary + list
+
 ## Known Limitations / Future Work
 - Messages tab is stubbed (no real-time chat)
 - No payment integration yet (pay rate display only)
