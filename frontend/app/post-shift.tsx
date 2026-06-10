@@ -6,7 +6,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { apiCreateShift } from "@/src/api/client";
+import * as WebBrowser from "expo-web-browser";
+import { apiCreateShift, apiStartCheckout } from "@/src/api/client";
 import { theme } from "@/src/theme";
 
 export default function PostShift() {
@@ -39,7 +40,7 @@ export default function PostShift() {
       const now = new Date();
       const start = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +1 day
       const end = new Date(start.getTime() + 6 * 60 * 60 * 1000); // +6 hrs
-      await apiCreateShift({
+      const shift = await apiCreateShift({
         title: title.trim(),
         venue: venue.trim(),
         city: city.trim(),
@@ -51,6 +52,18 @@ export default function PostShift() {
         description: description.trim(),
         requirements: reqs.split(",").map((s) => s.trim()).filter(Boolean),
       });
+
+      // Immediately launch Stripe Checkout for the shift
+      try {
+        const ck = await apiStartCheckout(shift.id);
+        if (Platform.OS === "web") {
+          if (typeof window !== "undefined") window.location.href = ck.checkout_url;
+        } else {
+          await WebBrowser.openBrowserAsync(ck.checkout_url);
+        }
+      } catch (e: any) {
+        setError(`Shift created, but checkout failed: ${e.message || e}`);
+      }
       router.replace("/(tabs)/my-shifts");
     } catch (e: any) {
       setError(e.message || "Could not post shift");
@@ -120,9 +133,10 @@ export default function PostShift() {
             {submitting ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.btnText}>Post Shift</Text>
+              <Text style={styles.btnText}>Post Shift &amp; Pay</Text>
             )}
           </TouchableOpacity>
+          <Text style={styles.feeHint}>You&apos;ll be redirected to Stripe Checkout. $5 platform fee added.</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -175,4 +189,5 @@ const styles = StyleSheet.create({
   },
   btnText: { color: "#FFFFFF", fontSize: 16, fontWeight: "800" },
   error: { color: theme.colors.danger, fontSize: 13, marginVertical: 8 },
+  feeHint: { color: theme.colors.textTertiary, fontSize: 12, textAlign: "center", marginTop: 10 },
 });

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Header
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Header, WebSocket, WebSocketDisconnect, Query, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
@@ -6,13 +6,15 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 import math
+import json as jsonlib
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict, Set
 import uuid
 from datetime import datetime, timedelta, timezone
 import bcrypt
 import httpx
+import stripe
 from jose import jwt, JWTError
 
 
@@ -35,6 +37,11 @@ db = client[os.environ['DB_NAME']]
 JWT_SECRET = os.environ.get('JWT_SECRET', 'flexofficers-dev-secret-key-change-in-prod-9f8a7c6d5e4b')
 JWT_ALGORITHM = 'HS256'
 JWT_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+
+# Stripe config
+stripe.api_key = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')  # optional in dev
+PLATFORM_FEE_CENTS = 500  # $5/shift
 
 app = FastAPI(title="FlexOfficers API")
 api_router = APIRouter(prefix="/api")
@@ -113,6 +120,15 @@ class Shift(BaseModel):
     created_at: str
     lat: Optional[float] = None
     lng: Optional[float] = None
+    # Payment / completion state
+    payment_status: str = "unpaid"  # unpaid | paid | paid_out
+    stripe_checkout_session_id: Optional[str] = None
+    stripe_payment_intent_id: Optional[str] = None
+    stripe_transfer_id: Optional[str] = None
+    completed_by_officer: Optional[str] = None
+    # Aggregate (set in response, not stored)
+    posted_by_rating: Optional[float] = None
+    posted_by_rating_count: Optional[int] = None
 
 
 class ApplyRequest(BaseModel):
@@ -334,6 +350,7 @@ async def list_shifts(
             if d.get("lat") is not None and d.get("lng") is not None:
                 d["distance_mi"] = round(haversine_miles(lat, lng, d["lat"], d["lng"]), 1)
         docs.sort(key=lambda d: d["distance_mi"] if d.get("distance_mi") is not None else 9999)
+    await _attach_ratings(docs)
     return [Shift(**d) for d in docs]
 
 
@@ -356,6 +373,7 @@ async def get_shift(shift_id: str):
     doc = await db.shifts.find_one({"id": shift_id}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Shift not found")
+    await _attach_ratings([doc])
     return Shift(**doc)
 
 
@@ -481,34 +499,518 @@ async def get_user_ratings(user_id: str):
     )
 
 
-# ============== MESSAGES (stub) ==============
+# ============== HELPERS ==============
 
-@api_router.get("/messages")
-async def list_messages(current_user: dict = Depends(get_current_user)):
-    # Static stub conversations for MVP
-    return [
-        {
-            "id": "m1",
-            "name": "Dispatch — Hard Rock Stadium",
-            "last_message": "Your shift is confirmed for Friday 8 PM.",
-            "time": "2m ago",
-            "unread": 2,
-        },
-        {
-            "id": "m2",
-            "name": "FlexOfficers Support",
-            "last_message": "Welcome to FlexOfficers! Tap here to start.",
-            "time": "1h ago",
-            "unread": 0,
-        },
-        {
-            "id": "m3",
-            "name": "Site Lead — Downtown Miami",
-            "last_message": "Briefing starts 30 min before shift.",
-            "time": "Yesterday",
-            "unread": 0,
-        },
+async def _attach_ratings(shifts: List[dict]) -> None:
+    poster_ids = list({s["posted_by"] for s in shifts if s.get("posted_by")})
+    if not poster_ids:
+        return
+    pipeline = [
+        {"$match": {"ratee_id": {"$in": poster_ids}}},
+        {"$group": {"_id": "$ratee_id", "avg": {"$avg": "$stars"}, "count": {"$sum": 1}}},
     ]
+    agg = {doc["_id"]: doc async for doc in db.ratings.aggregate(pipeline)}
+    for s in shifts:
+        pid = s.get("posted_by")
+        if pid and pid in agg:
+            s["posted_by_rating"] = round(agg[pid]["avg"], 2)
+            s["posted_by_rating_count"] = agg[pid]["count"]
+
+
+# ============== CHAT (WebSocket + REST) ==============
+
+class ChatMessageOut(BaseModel):
+    id: str
+    shift_id: str
+    sender_id: str
+    sender_name: str
+    text: str
+    created_at: str
+
+
+class ChatMessageIn(BaseModel):
+    text: str
+
+
+class ConversationSummary(BaseModel):
+    shift_id: str
+    shift_title: str
+    venue: str
+    other_party_name: str
+    last_message: Optional[str] = None
+    last_time: Optional[str] = None
+    unread: int = 0
+
+
+# In-memory WS hub
+class ChatHub:
+    def __init__(self) -> None:
+        self.rooms: Dict[str, Set[WebSocket]] = {}
+
+    async def connect(self, shift_id: str, ws: WebSocket) -> None:
+        await ws.accept()
+        self.rooms.setdefault(shift_id, set()).add(ws)
+
+    def disconnect(self, shift_id: str, ws: WebSocket) -> None:
+        if shift_id in self.rooms:
+            self.rooms[shift_id].discard(ws)
+            if not self.rooms[shift_id]:
+                self.rooms.pop(shift_id, None)
+
+    async def broadcast(self, shift_id: str, payload: dict) -> None:
+        room = self.rooms.get(shift_id, set())
+        dead = []
+        for ws in room:
+            try:
+                await ws.send_json(payload)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(shift_id, ws)
+
+
+hub = ChatHub()
+
+
+async def _user_can_access_shift_chat(user: dict, shift: dict) -> bool:
+    return (
+        shift.get("posted_by") == user["id"]
+        or user["id"] in shift.get("applicants", [])
+    )
+
+
+@api_router.get("/conversations", response_model=List[ConversationSummary])
+async def list_conversations(current_user: dict = Depends(get_current_user)):
+    me_id = current_user["id"]
+    if current_user["role"] == "company":
+        shifts = await db.shifts.find({"posted_by": me_id}, {"_id": 0}).to_list(200)
+    else:
+        shifts = await db.shifts.find({"applicants": me_id}, {"_id": 0}).to_list(200)
+
+    out: List[ConversationSummary] = []
+    for s in shifts:
+        # Determine other party name
+        if current_user["role"] == "company":
+            other_name = f"{len(s.get('applicants', []))} applicant" + ("s" if len(s.get('applicants', [])) != 1 else "")
+        else:
+            other_name = s.get("posted_by_company") or "Hiring Company"
+        last = await db.messages.find_one(
+            {"shift_id": s["id"]}, {"_id": 0}, sort=[("created_at", -1)]
+        )
+        out.append(ConversationSummary(
+            shift_id=s["id"],
+            shift_title=s["title"],
+            venue=s["venue"],
+            other_party_name=other_name,
+            last_message=last["text"] if last else None,
+            last_time=last["created_at"] if last else None,
+            unread=0,
+        ))
+    out.sort(key=lambda c: c.last_time or "", reverse=True)
+    return out
+
+
+@api_router.get("/conversations/{shift_id}/messages", response_model=List[ChatMessageOut])
+async def get_messages(shift_id: str, current_user: dict = Depends(get_current_user)):
+    shift = await db.shifts.find_one({"id": shift_id})
+    if not shift:
+        raise HTTPException(status_code=404, detail="Shift not found")
+    if not await _user_can_access_shift_chat(current_user, shift):
+        raise HTTPException(status_code=403, detail="Not a participant of this shift")
+    docs = await db.messages.find({"shift_id": shift_id}, {"_id": 0}).sort("created_at", 1).to_list(500)
+    return [ChatMessageOut(**d) for d in docs]
+
+
+@api_router.post("/conversations/{shift_id}/messages", response_model=ChatMessageOut)
+async def post_message(shift_id: str, body: ChatMessageIn, current_user: dict = Depends(get_current_user)):
+    shift = await db.shifts.find_one({"id": shift_id})
+    if not shift:
+        raise HTTPException(status_code=404, detail="Shift not found")
+    if not await _user_can_access_shift_chat(current_user, shift):
+        raise HTTPException(status_code=403, detail="Not a participant of this shift")
+    msg = {
+        "id": str(uuid.uuid4()),
+        "shift_id": shift_id,
+        "sender_id": current_user["id"],
+        "sender_name": current_user.get("company_name") or current_user["full_name"],
+        "text": body.text.strip(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    if not msg["text"]:
+        raise HTTPException(status_code=400, detail="Empty message")
+    await db.messages.insert_one(dict(msg))
+    msg.pop("_id", None)
+    await hub.broadcast(shift_id, msg)
+    return ChatMessageOut(**msg)
+
+
+@app.websocket("/api/ws/chat/{shift_id}")
+async def chat_ws(websocket: WebSocket, shift_id: str, token: str = Query(...)):
+    # JWT-auth via query param (WebSockets can't easily set Authorization header on RN)
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        user_id = payload.get("sub")
+    except JWTError:
+        await websocket.close(code=4401)
+        return
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        await websocket.close(code=4401)
+        return
+    shift = await db.shifts.find_one({"id": shift_id})
+    if not shift or not await _user_can_access_shift_chat(user, shift):
+        await websocket.close(code=4403)
+        return
+
+    await hub.connect(shift_id, websocket)
+    try:
+        while True:
+            raw = await websocket.receive_text()
+            try:
+                data = jsonlib.loads(raw)
+            except Exception:
+                continue
+            text = (data.get("text") or "").strip()
+            if not text:
+                continue
+            msg = {
+                "id": str(uuid.uuid4()),
+                "shift_id": shift_id,
+                "sender_id": user["id"],
+                "sender_name": user.get("company_name") or user["full_name"],
+                "text": text,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+            await db.messages.insert_one(dict(msg))
+            msg.pop("_id", None)
+            await hub.broadcast(shift_id, msg)
+    except WebSocketDisconnect:
+        pass
+    except Exception:
+        pass
+    finally:
+        hub.disconnect(shift_id, websocket)
+
+
+# ============== STRIPE: CHECKOUT + CONNECT ==============
+
+class CheckoutResp(BaseModel):
+    checkout_url: str
+    session_id: str
+    shift_id: str
+
+
+def _compute_shift_total_cents(shift: dict) -> int:
+    try:
+        start = datetime.fromisoformat(shift["start_time"])
+        end = datetime.fromisoformat(shift["end_time"])
+        hours = max(1.0, (end - start).total_seconds() / 3600.0)
+    except Exception:
+        hours = 8.0
+    pay = int(shift["pay_rate"] * hours * shift["officers_needed"] * 100)
+    return pay + PLATFORM_FEE_CENTS
+
+
+@api_router.post("/shifts/{shift_id}/checkout", response_model=CheckoutResp)
+async def create_shift_checkout(shift_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "company":
+        raise HTTPException(status_code=403, detail="Only companies can pay for shifts")
+    shift = await db.shifts.find_one({"id": shift_id})
+    if not shift:
+        raise HTTPException(status_code=404, detail="Shift not found")
+    if shift.get("posted_by") != current_user["id"]:
+        raise HTTPException(status_code=403, detail="Not your shift")
+    if shift.get("payment_status") == "paid":
+        raise HTTPException(status_code=400, detail="Shift already paid")
+
+    total_cents = _compute_shift_total_cents(shift)
+    frontend = os.environ.get("FRONTEND_URL", "https://flexofficers-mobile.preview.emergentagent.com")
+    success_url = f"{frontend}/checkout-success?shift_id={shift_id}&session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{frontend}/checkout-cancel?shift_id={shift_id}"
+
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            success_url=success_url,
+            cancel_url=cancel_url,
+            client_reference_id=shift_id,
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "unit_amount": total_cents,
+                    "product_data": {
+                        "name": f"{shift['title']} @ {shift['venue']}",
+                        "description": f"{shift['officers_needed']} officer(s) at ${shift['pay_rate']}/hr + $5 platform fee",
+                    },
+                },
+                "quantity": 1,
+            }],
+            payment_intent_data={
+                "metadata": {
+                    "shift_id": shift_id,
+                    "company_id": current_user["id"],
+                    "platform_fee_cents": str(PLATFORM_FEE_CENTS),
+                }
+            },
+            metadata={"shift_id": shift_id, "company_id": current_user["id"]},
+        )
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=502, detail=f"Stripe error: {e.user_message or str(e)}")
+
+    await db.shifts.update_one(
+        {"id": shift_id},
+        {"$set": {
+            "stripe_checkout_session_id": session.id,
+            "stripe_payment_intent_id": session.payment_intent,
+            "payment_status": "pending",
+            "total_cents": total_cents,
+        }},
+    )
+    return CheckoutResp(checkout_url=session.url, session_id=session.id, shift_id=shift_id)
+
+
+class CheckoutStatusResp(BaseModel):
+    payment_status: str
+    shift_id: str
+
+
+@api_router.get("/shifts/{shift_id}/payment-status", response_model=CheckoutStatusResp)
+async def shift_payment_status(shift_id: str):
+    shift = await db.shifts.find_one({"id": shift_id}, {"_id": 0, "payment_status": 1, "stripe_checkout_session_id": 1})
+    if not shift:
+        raise HTTPException(status_code=404, detail="Shift not found")
+    # If still pending and we have a session, ask Stripe (in case webhook not configured)
+    if shift.get("payment_status") in (None, "unpaid", "pending") and shift.get("stripe_checkout_session_id"):
+        try:
+            s = stripe.checkout.Session.retrieve(shift["stripe_checkout_session_id"])
+            if s.payment_status == "paid":
+                await db.shifts.update_one({"id": shift_id}, {"$set": {"payment_status": "paid"}})
+                return CheckoutStatusResp(payment_status="paid", shift_id=shift_id)
+        except stripe.error.StripeError:
+            pass
+    return CheckoutStatusResp(payment_status=shift.get("payment_status") or "unpaid", shift_id=shift_id)
+
+
+class ConnectLinkResp(BaseModel):
+    url: str
+    account_id: str
+
+
+@api_router.post("/officers/stripe/onboard", response_model=ConnectLinkResp)
+async def officer_onboard(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "officer":
+        raise HTTPException(status_code=403, detail="Officers only")
+
+    account_id = current_user.get("stripe_account_id")
+    try:
+        if not account_id:
+            account = stripe.Account.create(
+                type="express",
+                capabilities={
+                    "card_payments": {"requested": True},
+                    "transfers": {"requested": True},
+                },
+                business_type="individual",
+                email=current_user["email"],
+                metadata={"user_id": current_user["id"]},
+            )
+            account_id = account.id
+            await db.users.update_one(
+                {"id": current_user["id"]},
+                {"$set": {"stripe_account_id": account_id, "stripe_payouts_enabled": False}},
+            )
+
+        frontend = os.environ.get("FRONTEND_URL", "https://flexofficers-mobile.preview.emergentagent.com")
+        link = stripe.AccountLink.create(
+            account=account_id,
+            refresh_url=f"{frontend}/connect-refresh",
+            return_url=f"{frontend}/connect-return",
+            type="account_onboarding",
+        )
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=502, detail=f"Stripe error: {e.user_message or str(e)}")
+
+    return ConnectLinkResp(url=link.url, account_id=account_id)
+
+
+@api_router.get("/officers/stripe/status")
+async def officer_stripe_status(current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "officer":
+        return {"payouts_enabled": False, "account_id": None}
+    account_id = current_user.get("stripe_account_id")
+    if not account_id:
+        return {"payouts_enabled": False, "account_id": None}
+    try:
+        acct = stripe.Account.retrieve(account_id)
+        payouts_enabled = bool(acct.get("payouts_enabled"))
+        details_submitted = bool(acct.get("details_submitted"))
+        await db.users.update_one(
+            {"id": current_user["id"]},
+            {"$set": {"stripe_payouts_enabled": payouts_enabled, "stripe_details_submitted": details_submitted}},
+        )
+        return {
+            "payouts_enabled": payouts_enabled,
+            "details_submitted": details_submitted,
+            "account_id": account_id,
+        }
+    except stripe.error.StripeError:
+        return {"payouts_enabled": False, "account_id": account_id}
+
+
+@api_router.post("/shifts/{shift_id}/complete")
+async def complete_shift(shift_id: str, current_user: dict = Depends(get_current_user)):
+    if current_user["role"] != "officer":
+        raise HTTPException(status_code=403, detail="Only officers can mark complete")
+    shift = await db.shifts.find_one({"id": shift_id})
+    if not shift:
+        raise HTTPException(status_code=404, detail="Shift not found")
+    if current_user["id"] not in shift.get("applicants", []):
+        raise HTTPException(status_code=403, detail="You did not apply to this shift")
+    if shift.get("payment_status") != "paid":
+        raise HTTPException(status_code=400, detail="Company has not paid for this shift yet")
+    if shift.get("payment_status") == "paid_out":
+        return {"ok": True, "already_paid_out": True}
+
+    account_id = current_user.get("stripe_account_id")
+    if not account_id or not current_user.get("stripe_payouts_enabled"):
+        raise HTTPException(status_code=400, detail="Officer has not completed Stripe onboarding")
+
+    total = shift.get("total_cents") or _compute_shift_total_cents(shift)
+    officer_amount = max(0, total - PLATFORM_FEE_CENTS)
+    # Split equally among needed officers (simple model)
+    per_officer = officer_amount // max(1, shift.get("officers_needed", 1))
+
+    try:
+        transfer = stripe.Transfer.create(
+            amount=per_officer,
+            currency="usd",
+            destination=account_id,
+            metadata={
+                "shift_id": shift_id,
+                "officer_id": current_user["id"],
+            },
+        )
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=502, detail=f"Stripe transfer failed: {e.user_message or str(e)}")
+
+    await db.shifts.update_one(
+        {"id": shift_id},
+        {"$set": {
+            "payment_status": "paid_out",
+            "stripe_transfer_id": transfer.id,
+            "completed_by_officer": current_user["id"],
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+        }},
+    )
+    return {"ok": True, "transfer_id": transfer.id, "amount_cents": per_officer}
+
+
+@app.post("/api/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature", "")
+    try:
+        if STRIPE_WEBHOOK_SECRET:
+            event = stripe.Webhook.construct_event(payload, sig, STRIPE_WEBHOOK_SECRET)
+        else:
+            event = jsonlib.loads(payload)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid webhook: {e}")
+
+    event_type = event.get("type")
+    obj = (event.get("data") or {}).get("object") or {}
+
+    if event_type == "checkout.session.completed":
+        shift_id = obj.get("client_reference_id") or (obj.get("metadata") or {}).get("shift_id")
+        if shift_id and obj.get("payment_status") == "paid":
+            await db.shifts.update_one(
+                {"id": shift_id},
+                {"$set": {"payment_status": "paid", "stripe_payment_intent_id": obj.get("payment_intent")}},
+            )
+    elif event_type == "account.updated":
+        account_id = obj.get("id")
+        if account_id:
+            await db.users.update_one(
+                {"stripe_account_id": account_id},
+                {"$set": {
+                    "stripe_payouts_enabled": bool(obj.get("payouts_enabled")),
+                    "stripe_details_submitted": bool(obj.get("details_submitted")),
+                }},
+            )
+    return {"received": True}
+
+
+# ============== USER PROFILE (location override) ==============
+
+class LocationUpdate(BaseModel):
+    location: Optional[str] = None
+    lat: Optional[float] = None
+    lng: Optional[float] = None
+
+
+@api_router.patch("/users/me/location", response_model=UserOut)
+async def update_my_location(body: LocationUpdate, current_user: dict = Depends(get_current_user)):
+    update: dict = {}
+    if body.location is not None:
+        update["location"] = body.location
+    if body.lat is not None:
+        update["lat"] = body.lat
+    if body.lng is not None:
+        update["lng"] = body.lng
+    if update:
+        await db.users.update_one({"id": current_user["id"]}, {"$set": update})
+    user = await db.users.find_one({"id": current_user["id"]}, {"_id": 0, "hashed_password": 0})
+    return user_doc_to_out(user)
+
+
+# ============== APPLE SIGN-IN ==============
+
+class AppleAuthRequest(BaseModel):
+    identity_token: str  # JWT from Apple
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    role: Optional[Role] = "officer"
+
+
+@api_router.post("/auth/apple", response_model=TokenResponse)
+async def apple_auth(body: AppleAuthRequest):
+    # Decode (don't verify signature — Apple's keys rotate; for production verify via JWKS).
+    # We extract `sub` (stable Apple user id) and `email` if present.
+    try:
+        claims = jwt.get_unverified_claims(body.identity_token)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid Apple identity token")
+
+    apple_sub = claims.get("sub")
+    if not apple_sub:
+        raise HTTPException(status_code=400, detail="No Apple subject in token")
+
+    email = (body.email or claims.get("email") or f"{apple_sub}@privaterelay.appleid.com").lower()
+    existing = await db.users.find_one({"$or": [{"apple_sub": apple_sub}, {"email": email}]})
+    if existing:
+        if not existing.get("apple_sub"):
+            await db.users.update_one({"id": existing["id"]}, {"$set": {"apple_sub": apple_sub}})
+        token = create_access_token(existing["id"], existing["email"], existing["role"])
+        return TokenResponse(access_token=token, user=user_doc_to_out(existing))
+
+    user_id = str(uuid.uuid4())
+    role = body.role or "officer"
+    doc = {
+        "id": user_id,
+        "email": email,
+        "hashed_password": "",
+        "full_name": body.full_name or email.split("@")[0],
+        "role": role,
+        "company_name": None,
+        "location": "Miami, FL",
+        "apple_sub": apple_sub,
+        "auth_provider": "apple",
+        "verified": {"background": True, "licensed": True, "id_verified": True, "insured": True},
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.insert_one(doc)
+    token = create_access_token(user_id, email, role)
+    return TokenResponse(access_token=token, user=user_doc_to_out(doc))
 
 
 # ============== HEALTH ==============

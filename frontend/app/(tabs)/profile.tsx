@@ -1,19 +1,31 @@
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Platform, ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as WebBrowser from "expo-web-browser";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { theme } from "@/src/theme";
-import { apiGetUserRatings, RatingsSummary } from "@/src/api/client";
+import {
+  apiGetUserRatings,
+  apiOfficerOnboard,
+  apiOfficerStripeStatus,
+  apiUpdateLocation,
+  RatingsSummary,
+} from "@/src/api/client";
 import StarRating from "@/src/components/StarRating";
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, refresh } = useAuth();
   const [ratings, setRatings] = useState<RatingsSummary | null>(null);
+  const [stripeStatus, setStripeStatus] = useState<{ payouts_enabled: boolean; account_id: string | null } | null>(null);
+  const [editingLoc, setEditingLoc] = useState(false);
+  const [locationDraft, setLocationDraft] = useState(user?.location || "Miami, FL");
+  const [savingLoc, setSavingLoc] = useState(false);
+  const [connectLoading, setConnectLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -22,12 +34,53 @@ export default function Profile() {
         const r = await apiGetUserRatings(user.id);
         setRatings(r);
       } catch {}
+      if (user.role === "officer") {
+        try {
+          const s = await apiOfficerStripeStatus();
+          setStripeStatus(s);
+        } catch {}
+      }
     })();
   }, [user]);
 
   const onLogout = async () => {
     await logout();
     router.replace("/(auth)/welcome");
+  };
+
+  const onSaveLocation = async () => {
+    if (!locationDraft.trim()) return;
+    setSavingLoc(true);
+    try {
+      await apiUpdateLocation({ location: locationDraft.trim() });
+      await refresh();
+      setEditingLoc(false);
+    } finally {
+      setSavingLoc(false);
+    }
+  };
+
+  const onConnectStripe = async () => {
+    setConnectLoading(true);
+    try {
+      const { url } = await apiOfficerOnboard();
+      if (Platform.OS === "web") {
+        if (typeof window !== "undefined") window.location.href = url;
+      } else {
+        await WebBrowser.openBrowserAsync(url);
+      }
+      // Refresh status after returning
+      setTimeout(async () => {
+        try {
+          const s = await apiOfficerStripeStatus();
+          setStripeStatus(s);
+        } catch {}
+      }, 1500);
+    } catch (e) {
+      console.log("Stripe onboarding error:", e);
+    } finally {
+      setConnectLoading(false);
+    }
   };
 
   if (!user) return null;
@@ -95,12 +148,86 @@ export default function Profile() {
 
         <Text style={styles.sectionTitle}>Account</Text>
         <View style={styles.card}>
-          <Row icon="location" label="Location" value={user.location || "Miami, FL"} />
+          <View style={styles.row}>
+            <View style={styles.rowLeft}>
+              <Ionicons name="location" size={18} color={theme.colors.textSecondary} />
+              <Text style={styles.rowLabel}>Location</Text>
+            </View>
+            {editingLoc ? (
+              <View style={styles.locEdit}>
+                <TextInput
+                  value={locationDraft}
+                  onChangeText={setLocationDraft}
+                  style={styles.locInput}
+                  placeholder="City, ST"
+                  placeholderTextColor={theme.colors.textTertiary}
+                  testID="profile-location-input"
+                />
+                <TouchableOpacity
+                  onPress={onSaveLocation}
+                  disabled={savingLoc}
+                  style={styles.locSave}
+                  testID="profile-location-save"
+                >
+                  {savingLoc ? (
+                    <ActivityIndicator color="#FFFFFF" size="small" />
+                  ) : (
+                    <Text style={styles.locSaveText}>Save</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => { setLocationDraft(user.location || ""); setEditingLoc(true); }}
+                style={styles.rowRight}
+                testID="profile-location-edit"
+              >
+                <Text style={styles.rowValue}>{user.location || "Miami, FL"}</Text>
+                <Ionicons name="pencil" size={14} color={theme.colors.textTertiary} />
+              </TouchableOpacity>
+            )}
+          </View>
           <View style={styles.divider} />
           <Row icon="notifications-outline" label="Notifications" value="On" />
           <View style={styles.divider} />
           <Row icon="help-circle-outline" label="Help & Support" value="" chevron />
         </View>
+
+        {user.role === "officer" && (
+          <>
+            <Text style={styles.sectionTitle}>Payouts</Text>
+            <View style={styles.card}>
+              <View style={styles.payoutRow}>
+                <View style={styles.rowLeft}>
+                  <Ionicons name="card" size={18} color={theme.colors.secondary} />
+                  <View>
+                    <Text style={styles.rowLabel}>Stripe Express</Text>
+                    <Text style={styles.payoutSub}>
+                      {stripeStatus?.payouts_enabled
+                        ? "Connected — ready to receive payouts."
+                        : "Connect to get paid after completing shifts."}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={[styles.connectBtn, stripeStatus?.payouts_enabled && { backgroundColor: theme.colors.secondary }]}
+                onPress={onConnectStripe}
+                disabled={connectLoading}
+                testID="stripe-connect-button"
+                activeOpacity={0.85}
+              >
+                {connectLoading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.connectBtnText}>
+                    {stripeStatus?.payouts_enabled ? "Manage Stripe Account" : "Connect Stripe"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
 
         <TouchableOpacity
           style={styles.logoutBtn}
@@ -190,6 +317,24 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.borderSubtle,
   },
   logoutText: { color: theme.colors.danger, fontWeight: "700", fontSize: 14 },
+  locEdit: { flexDirection: "row", alignItems: "center", gap: 8 },
+  locInput: {
+    backgroundColor: theme.colors.bg, color: theme.colors.textPrimary,
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, fontSize: 13,
+    borderWidth: 1, borderColor: theme.colors.borderActive, minWidth: 130,
+  },
+  locSave: {
+    backgroundColor: theme.colors.primary, paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 8,
+  },
+  locSaveText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
+  payoutRow: { paddingHorizontal: 14, paddingVertical: 14, flexDirection: "row" },
+  payoutSub: { color: theme.colors.textSecondary, fontSize: 12, marginTop: 2, maxWidth: 220 },
+  connectBtn: {
+    backgroundColor: theme.colors.primary, marginHorizontal: 14, marginBottom: 14,
+    paddingVertical: 12, borderRadius: 10, alignItems: "center",
+  },
+  connectBtnText: { color: "#FFFFFF", fontWeight: "800", fontSize: 14 },
   brandFooter: {
     textAlign: "center", color: theme.colors.textTertiary,
     fontSize: 11, marginTop: 28,

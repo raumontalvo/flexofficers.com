@@ -87,14 +87,30 @@ export type Shift = {
   posted_by_company?: string | null;
   applicants: string[];
   created_at: string;
+  payment_status?: "unpaid" | "pending" | "paid" | "paid_out";
+  stripe_checkout_session_id?: string | null;
+  completed_by_officer?: string | null;
+  posted_by_rating?: number | null;
+  posted_by_rating_count?: number | null;
 };
 
 export type Conversation = {
-  id: string;
-  name: string;
-  last_message: string;
-  time: string;
+  shift_id: string;
+  shift_title: string;
+  venue: string;
+  other_party_name: string;
+  last_message?: string | null;
+  last_time?: string | null;
   unread: number;
+};
+
+export type ChatMessage = {
+  id: string;
+  shift_id: string;
+  sender_id: string;
+  sender_name: string;
+  text: string;
+  created_at: string;
 };
 
 // ============== AUTH ==============
@@ -193,10 +209,81 @@ export async function apiCreateShift(body: {
   return request<Shift>("/shifts", { method: "POST", body });
 }
 
-// ============== MESSAGES ==============
+// ============== MESSAGES / CHAT ==============
 
-export async function apiListMessages() {
-  return request<Conversation[]>("/messages");
+export async function apiListConversations() {
+  return request<Conversation[]>("/conversations");
+}
+
+export async function apiGetMessages(shiftId: string) {
+  return request<ChatMessage[]>(`/conversations/${shiftId}/messages`);
+}
+
+export async function apiPostMessage(shiftId: string, text: string) {
+  return request<ChatMessage>(`/conversations/${shiftId}/messages`, {
+    method: "POST",
+    body: { text },
+  });
+}
+
+export function buildChatWsUrl(shiftId: string, token: string): string {
+  const base = (process.env.EXPO_PUBLIC_BACKEND_URL || "").replace(/^http/, "ws");
+  return `${base}/api/ws/chat/${shiftId}?token=${encodeURIComponent(token)}`;
+}
+
+// ============== STRIPE ==============
+
+export async function apiStartCheckout(shiftId: string) {
+  return request<{ checkout_url: string; session_id: string; shift_id: string }>(
+    `/shifts/${shiftId}/checkout`,
+    { method: "POST" }
+  );
+}
+
+export async function apiShiftPaymentStatus(shiftId: string) {
+  return request<{ payment_status: string; shift_id: string }>(
+    `/shifts/${shiftId}/payment-status`,
+    { auth: false }
+  );
+}
+
+export async function apiOfficerOnboard() {
+  return request<{ url: string; account_id: string }>("/officers/stripe/onboard", {
+    method: "POST",
+  });
+}
+
+export async function apiOfficerStripeStatus() {
+  return request<{ payouts_enabled: boolean; details_submitted?: boolean; account_id: string | null }>(
+    "/officers/stripe/status"
+  );
+}
+
+export async function apiCompleteShift(shiftId: string) {
+  return request<{ ok: boolean; transfer_id?: string; amount_cents?: number; already_paid_out?: boolean }>(
+    `/shifts/${shiftId}/complete`,
+    { method: "POST" }
+  );
+}
+
+// ============== USER LOCATION ==============
+
+export async function apiUpdateLocation(body: { location?: string; lat?: number; lng?: number }) {
+  return request<User>("/users/me/location", { method: "PATCH", body });
+}
+
+// ============== APPLE AUTH ==============
+
+export async function apiAppleAuth(body: {
+  identity_token: string;
+  email?: string;
+  full_name?: string;
+  role?: Role;
+}) {
+  return request<{ access_token: string; token_type: string; user: User }>(
+    "/auth/apple",
+    { method: "POST", body, auth: false }
+  );
 }
 
 // ============== RATINGS ==============
@@ -227,6 +314,5 @@ export async function apiCreateRating(body: {
   return request<Rating>("/ratings", { method: "POST", body });
 }
 
-export async function apiGetUserRatings(userId: string) {
-  return request<RatingsSummary>(`/users/${userId}/ratings`, { auth: false });
-}
+// Re-export Token utility
+export { getToken as getAccessToken };

@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { theme } from "@/src/theme";
 import GoogleSignInButton from "@/src/components/GoogleSignInButton";
+import AppleSignInButton from "@/src/components/AppleSignInButton";
 import { useGoogleWebReturnHandler } from "@/src/hooks/use-google-web-return";
 
 export default function Welcome() {
@@ -90,6 +91,7 @@ export default function Welcome() {
         </View>
 
         <GoogleSignInButton role="officer" label="Continue with Google" testID="welcome-google-button" />
+        <AppleSignInButton role="officer" testID="welcome-apple-button" />
 
         <Link href="/(auth)/login" asChild>
           <TouchableOpacity style={styles.loginRow} testID="welcome-login-link">

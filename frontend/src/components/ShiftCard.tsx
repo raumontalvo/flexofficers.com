@@ -72,7 +72,16 @@ const ShiftCard: React.FC<Props> = ({ shift, onPress, testID }) => {
             {shift.officers_needed} Officer{shift.officers_needed > 1 ? "s" : ""} Needed
           </Text>
         </View>
-        <Text style={styles.metaText}>{shift.distance_mi.toFixed(1)} mi away</Text>
+        {shift.posted_by_rating ? (
+          <View style={styles.metaItem}>
+            <Ionicons name="star" size={12} color="#F59E0B" />
+            <Text style={styles.metaText}>
+              {shift.posted_by_rating.toFixed(1)} ({shift.posted_by_rating_count})
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.metaText}>{shift.distance_mi.toFixed(1)} mi away</Text>
+        )}
       </View>
 
       <TouchableOpacity

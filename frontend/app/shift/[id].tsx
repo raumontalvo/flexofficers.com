@@ -213,24 +213,54 @@ export default function ShiftDetail() {
         )}
       </ScrollView>
 
-      {user?.role === "officer" && (
+      {user?.role === "officer" && applied && (
+        <View style={styles.footerBar}>
+          {shift.payment_status === "paid" && shift.completed_by_officer !== user.id && (
+            <TouchableOpacity
+              style={[styles.applyBtn, { backgroundColor: theme.colors.secondary, marginBottom: 8 }]}
+              onPress={async () => {
+                try {
+                  await (await import("@/src/api/client")).apiCompleteShift(shift.id);
+                  setToast("Marked complete — payout sent!");
+                  setTimeout(() => setToast(null), 2200);
+                  const s = await apiGetShift(shift.id);
+                  setShift(s);
+                } catch (e: any) {
+                  setToast(e.message || "Could not complete shift");
+                  setTimeout(() => setToast(null), 2500);
+                }
+              }}
+              testID="mark-complete-button"
+              activeOpacity={0.85}
+            >
+              <Text style={styles.applyText}>Mark Complete &amp; Get Paid</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.chatBtn}
+            onPress={() => router.push(`/chat/${shift.id}`)}
+            testID="open-chat-button"
+            activeOpacity={0.85}
+          >
+            <Ionicons name="chatbubble-ellipses" size={18} color="#FFFFFF" />
+            <Text style={styles.chatBtnText}>Chat with Hiring Team</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {user?.role === "officer" && !applied && (
         <View style={styles.footerBar}>
           <TouchableOpacity
-            style={[
-              styles.applyBtn,
-              (applied || applying) && { backgroundColor: theme.colors.secondary },
-            ]}
+            style={styles.applyBtn}
             onPress={onApply}
-            disabled={applying || applied}
+            disabled={applying}
             testID="shift-apply-button"
             activeOpacity={0.85}
           >
             {applying ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.applyText}>
-                {applied ? "Applied ✓" : "Apply Now"}
-              </Text>
+              <Text style={styles.applyText}>Apply Now</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -308,6 +338,12 @@ const styles = StyleSheet.create({
     paddingVertical: 16, alignItems: "center",
   },
   applyText: { color: "#FFFFFF", fontWeight: "800", fontSize: 16 },
+  chatBtn: {
+    flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+    backgroundColor: theme.colors.surfaceElevated, borderRadius: 12,
+    paddingVertical: 14, borderWidth: 1, borderColor: theme.colors.borderActive,
+  },
+  chatBtnText: { color: "#FFFFFF", fontWeight: "700", fontSize: 14 },
   toast: {
     position: "absolute", left: 20, right: 20, bottom: 100,
     backgroundColor: theme.colors.surfaceElevated, borderRadius: 12,

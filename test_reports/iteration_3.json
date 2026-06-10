@@ -1,0 +1,48 @@
+{
+  "summary": "Phase 2 (WebSocket chat, Stripe Checkout/Connect, Apple sign-in, location override, posted_by ratings on /shifts). Backend: 19/21 pytest tests pass; 2 SKIPPED because the configured STRIPE_API_KEY='sk_test_emergent' is rejected by Stripe with 'Invalid API Key provided: sk_test_****gent' (real-Stripe-test key required for end-to-end /checkout and /officers/stripe/onboard). All contract behavior around Stripe endpoints is correct: 403 enforcement for officer-vs-company and non-owner on /shifts/{id}/checkout, 403 for company on /officers/stripe/onboard, /officers/stripe/status returns {payouts_enabled:false} when no account_id, /shifts/{id}/complete returns 400 'Company has not paid for this shift yet' when payment_status!=paid. Webhook simulation works without signing secret: POST /api/webhooks/stripe with a fake checkout.session.completed event marks shift payment_status='paid' (verified via subsequent /shifts/{id}/payment-status). Conversations REST: officer's GET /api/conversations returns shifts they applied to (with shift_title+venue), company's returns shifts they posted; GET /api/conversations/{shift_id}/messages 403s for outsiders, 200 for participants; POST with empty text=400; POST stores and is returned by subsequent GET. WebSocket /api/ws/chat/{shift_id}?token=BAD closes with code 4401 (verified); ?token=VALID accepts, broadcasts message back, persists to DB (subsequent REST GET includes it). PATCH /api/users/me/location persists and GET /api/auth/me reflects new location. GET /api/shifts now includes posted_by_rating + posted_by_rating_count (5.0/1) when poster has ratings, null otherwise. Apple auth: malformed identity_token returns 400 'Invalid Apple identity token'. Google auth (regression): invalid session_token returns 401.\n\nFrontend mobile-viewport (390x844): Welcome shows Google button (testID welcome-google-button) — Apple absent on web as expected. Login shows email/password + Google button + back/register links. After logging in as test_officer@example.com/test1234, Browse displays shift cards; rated shifts show '5.0 (1)' with star icon next to officers-needed AND unrated shifts show '2.4 mi away' (distance) instead — exact per spec. Messages tab navigates to /messages, conv-0 testID is present and tapping it navigates to /chat/{shift_id}. Chat screen: filling chat-input + tapping chat-send-button caused the message bubble 'TEST_ui_phase2_msg' to appear (WebSocket round-trip working). Profile screen testIDs: stripe-connect-button, profile-location-edit, profile-location-input, profile-location-save all present. Post Shift screen has 'Post Shift & Pay' text and feeHint 'You'll be redirected to Stripe Checkout. $5 platform fee added.' (verified by code inspection).\n\nOne UI hiccup: when saving the location override from /profile (via 'profile-location-save'), the fetch returned 502 once during the browser test (Cloudflare/preview transient). The same PATCH /api/users/me/location succeeds via curl (200) and via backend pytest. Most likely a transient 502 or DOM staleness; main agent should self-verify by tapping the pencil → Save and reload to confirm persistence.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/shifts/{id}/checkout", "issue": "Returns 502 'Invalid API Key provided: sk_test_****gent' because STRIPE_API_KEY in /app/backend/.env (env-passthrough 'sk_test_emergent') is a placeholder, not a real Stripe test key. Set STRIPE_API_KEY to a real sk_test_... key (Stripe test mode) so the Checkout Session can be created."},
+      {"endpoint": "POST /api/officers/stripe/onboard", "issue": "Same root cause as above: Stripe rejects sk_test_emergent. The endpoint contract works (403 for companies, account creation+AccountLink logic is correct); only the live Stripe call fails."},
+      {"endpoint": "POST /api/webhooks/stripe", "issue": "In dev (STRIPE_WEBHOOK_SECRET unset), payload is parsed without verification — fine for local testing but should be documented; for production, set STRIPE_WEBHOOK_SECRET to enforce signatures."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Profile / Location override", "issue": "Save returned 502 once in browser test; appears flaky/transient — backend PATCH /api/users/me/location works (200) via curl and pytest. May be Cloudflare proxy hiccup or a stale-token race. Please self-verify in-app.", "testID": "profile-location-save", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Company posts shift → pay via Stripe Checkout → officer completes → transfer", "issue": "Cannot complete end-to-end because STRIPE_API_KEY is a placeholder. Officer onboarding URL cannot be generated either. Webhook-simulation path was used to verify payment_status transitions (works).", "affected_testIDs": ["post-submit-button", "stripe-connect-button"]}
+    ],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "third-party (carryover)", "issue": "Console warning 'props.pointerEvents is deprecated. Use style.pointerEvents' still appears from a dependency, not app code."}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_phase2_chat_stripe.py",
+    "/app/backend/tests/test_flexofficers_api.py",
+    "/app/test_reports/pytest/phase2_results.xml"
+  ],
+  "action_items": [
+    "Replace STRIPE_API_KEY in /app/backend/.env with a real Stripe TEST secret key (sk_test_...) so /shifts/{id}/checkout and /officers/stripe/onboard can succeed. Current value 'sk_test_emergent' is rejected by Stripe.",
+    "(Optional) Set STRIPE_WEBHOOK_SECRET and switch /api/webhooks/stripe back to signature verification before production.",
+    "Self-verify location save in /profile: tap pencil → edit → Save → reload; if it still 502s, capture the Network tab to confirm whether the PATCH itself failed or a subsequent /auth/me refresh."
+  ],
+  "critical_code_review_comments": [
+    "server.py mixes API routes registered on api_router (/api/...) with the webhook + websocket registered directly on app (@app.post('/api/webhooks/stripe'), @app.websocket('/api/ws/chat/{shift_id}')). This is intentional (avoid /api double prefix and avoid Pydantic body parsing on webhook), but worth a one-line comment for future maintainers.",
+    "/api/auth/apple uses jwt.get_unverified_claims — explicit comment says signature is intentionally not verified for now; for production, switch to Apple JWKS verification. Acceptable for Phase 2 contract.",
+    "post_message in REST raises 400 'Empty message' only AFTER trimming — good. Same trimming on the WS path (silently dropped). Both consistent.",
+    "Chat WS auth via query-string token is acceptable for RN, but consider logging connection metadata for audit."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_phase2_chat_stripe.py (new: 21 tests covering Phase 2)"
+  ],
+  "success_rate": {"backend": "100% executed (19/21 passed, 2 skipped due to Stripe key)", "frontend": "100% smoke (welcome google, login, browse rating stars, messages list→chat→send WS message, profile testIDs present)"},
+  "seed_data_creation": "Tests create TEST_-prefixed officer, company, other_company, shifts (TEST_P2_Shift, TEST_P2_WebhookShift, TEST_P2_RatedShift) and a rating. Cleanup not required (uniquely prefixed).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend URL via EXPO_PUBLIC_BACKEND_URL (/app/frontend/.env). WebSocket URL form: wss://flexofficers-mobile.preview.emergentagent.com/api/ws/chat/{shift_id}?token=<JWT> — bad token closes with code 4401. /api/webhooks/stripe accepts unsigned JSON when STRIPE_WEBHOOK_SECRET unset; payload format {type:'checkout.session.completed', data:{object:{client_reference_id|metadata.shift_id, payment_status:'paid', payment_intent:'pi_test_...'}}}. Stripe-dependent tests (checkout/onboard) skip with pytest.skip when backend returns 502 'Invalid API Key' — main agent must set a real sk_test_... key in /app/backend/.env then re-run pytest /app/backend/tests/test_phase2_chat_stripe.py. /api/shifts now attaches posted_by_rating + posted_by_rating_count via _attach_ratings; null when poster has 0 ratings or posted_by is None (seeded shifts). Phase 2 testIDs added: welcome-login-link, login-go-register, conv-{n}, chat-input, chat-send-button, chat-back-button, message-{id}, stripe-connect-button, profile-location-edit, profile-location-input, profile-location-save, post-submit-button.",
+  "rca_of_issue": "Stripe 502s — Root cause: backend/.env has STRIPE_API_KEY=sk_test_emergent which Stripe rejects ('Invalid API Key provided: sk_test_****gent'). All Stripe-touching endpoints catch stripe.error.StripeError and return 502. Fix: replace with a real Stripe test secret key. Mitigation in tests: skip Stripe-network tests when 502 is returned so the rest of the suite still gives meaningful pass/fail. Webhook path is independent of the API key (only event parsing) and works in dev mode."
+}
