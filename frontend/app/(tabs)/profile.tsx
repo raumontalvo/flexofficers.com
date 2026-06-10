@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
 } from "react-native";
@@ -7,10 +7,23 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { theme } from "@/src/theme";
+import { apiGetUserRatings, RatingsSummary } from "@/src/api/client";
+import StarRating from "@/src/components/StarRating";
 
 export default function Profile() {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [ratings, setRatings] = useState<RatingsSummary | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      try {
+        const r = await apiGetUserRatings(user.id);
+        setRatings(r);
+      } catch {}
+    })();
+  }, [user]);
 
   const onLogout = async () => {
     await logout();
@@ -49,6 +62,14 @@ export default function Profile() {
           </View>
           {user.company_name && (
             <Text style={styles.company}>{user.company_name}</Text>
+          )}
+          {ratings && ratings.count > 0 && (
+            <View style={styles.ratingPill} testID="profile-rating-pill">
+              <StarRating value={ratings.average} size={14} />
+              <Text style={styles.ratingPillText}>
+                {ratings.average.toFixed(1)} ({ratings.count})
+              </Text>
+            </View>
           )}
         </View>
 
@@ -133,6 +154,12 @@ const styles = StyleSheet.create({
   },
   roleBadgeText: { color: theme.colors.primary, fontSize: 11, fontWeight: "700", letterSpacing: 0.5 },
   company: { color: theme.colors.textSecondary, marginTop: 6, fontSize: 13 },
+  ratingPill: {
+    flexDirection: "row", alignItems: "center", gap: 6, marginTop: 10,
+    paddingHorizontal: 10, paddingVertical: 5,
+    backgroundColor: "rgba(245,158,11,0.12)", borderRadius: 8,
+  },
+  ratingPillText: { color: "#F59E0B", fontSize: 12, fontWeight: "700" },
   sectionTitle: {
     color: theme.colors.textTertiary, fontSize: 11, fontWeight: "800",
     letterSpacing: 1, marginTop: 24, marginBottom: 10, textTransform: "uppercase",

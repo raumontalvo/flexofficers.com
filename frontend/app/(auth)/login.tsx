@@ -8,6 +8,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuth } from "@/src/context/AuthContext";
 import { theme } from "@/src/theme";
+import GoogleSignInButton from "@/src/components/GoogleSignInButton";
 
 export default function Login() {
   const router = useRouter();
@@ -92,6 +93,14 @@ export default function Login() {
             )}
           </TouchableOpacity>
 
+          <View style={styles.dividerRow}>
+            <View style={styles.divLine} />
+            <Text style={styles.divText}>OR</Text>
+            <View style={styles.divLine} />
+          </View>
+
+          <GoogleSignInButton role="officer" testID="login-google-button" />
+
           <TouchableOpacity
             onPress={() => router.replace("/(auth)/welcome")}
             style={styles.altRow}
@@ -129,4 +138,7 @@ const styles = StyleSheet.create({
   altRow: { flexDirection: "row", justifyContent: "center", marginTop: 20 },
   altText: { color: theme.colors.textSecondary, fontSize: 14 },
   altLink: { color: theme.colors.primary, fontSize: 14, fontWeight: "700" },
+  dividerRow: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 16 },
+  divLine: { flex: 1, height: 1, backgroundColor: theme.colors.borderSubtle },
+  divText: { color: theme.colors.textTertiary, fontSize: 11, fontWeight: "700", letterSpacing: 1 },
 });

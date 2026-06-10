@@ -1,16 +1,18 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import math
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Literal
 import uuid
 from datetime import datetime, timedelta, timezone
 import bcrypt
+import httpx
 from jose import jwt, JWTError
 
 
@@ -109,10 +111,41 @@ class Shift(BaseModel):
     posted_by_company: Optional[str] = None
     applicants: List[str] = Field(default_factory=list)
     created_at: str
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 
 
 class ApplyRequest(BaseModel):
     pass
+
+
+class GoogleSessionRequest(BaseModel):
+    session_token: str
+    role: Optional[Role] = "officer"  # default role when creating new account via Google
+
+
+class RatingCreate(BaseModel):
+    shift_id: str
+    ratee_id: str  # user being rated
+    stars: int = Field(ge=1, le=5)
+    comment: Optional[str] = ""
+
+
+class Rating(BaseModel):
+    id: str
+    shift_id: str
+    rater_id: str
+    ratee_id: str
+    stars: int
+    comment: str
+    created_at: str
+
+
+class RatingsSummary(BaseModel):
+    user_id: str
+    average: float
+    count: int
+    ratings: List[Rating] = Field(default_factory=list)
 
 
 # ============== AUTH HELPERS ==============
@@ -207,17 +240,107 @@ async def logout(current_user: dict = Depends(get_current_user)):
     return {"ok": True}
 
 
+# ============== GOOGLE OAUTH (Emergent-managed) ==============
+
+EMERGENT_OAUTH_URL = "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data"
+
+
+@api_router.post("/auth/google", response_model=TokenResponse)
+async def google_auth(body: GoogleSessionRequest):
+    """Exchange Emergent session_token for FlexOfficers JWT. Upserts user by email."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http:
+            resp = await http.get(
+                EMERGENT_OAUTH_URL,
+                headers={"X-Session-ID": body.session_token},
+            )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=401, detail="Invalid Google session")
+        data = resp.json()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"OAuth provider error: {e}")
+
+    email = (data.get("email") or "").lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="No email returned from Google")
+
+    existing = await db.users.find_one({"email": email})
+    if existing:
+        token = create_access_token(existing["id"], existing["email"], existing["role"])
+        return TokenResponse(access_token=token, user=user_doc_to_out(existing))
+
+    # Create new user via Google
+    user_id = str(uuid.uuid4())
+    role = body.role or "officer"
+    user_doc = {
+        "id": user_id,
+        "email": email,
+        "hashed_password": "",  # Google-only account
+        "full_name": data.get("name") or email.split("@")[0],
+        "role": role,
+        "company_name": None,
+        "location": "Miami, FL",
+        "picture": data.get("picture"),
+        "auth_provider": "google",
+        "verified": {"background": True, "licensed": True, "id_verified": True, "insured": True},
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.users.insert_one(user_doc)
+    token = create_access_token(user_id, email, role)
+    return TokenResponse(access_token=token, user=user_doc_to_out(user_doc))
+
+
 # ============== SHIFTS ==============
 
+VENUE_COORDS = {
+    "Hard Rock Stadium": (25.9580, -80.2389),
+    "Downtown Miami Conference Center": (25.7740, -80.1918),
+    "Aventura Mall": (25.9569, -80.1430),
+    "Miami General Hospital": (25.7900, -80.2100),
+    "Brickell Heights Project": (25.7616, -80.1917),
+    "Kaseya Center": (25.7814, -80.1870),
+    "LIV Nightclub": (25.8198, -80.1228),
+    "Miami International Airport": (25.7959, -80.2870),
+    "Doral Distribution Hub": (25.8195, -80.3553),
+    "Star Island Residence": (25.7783, -80.1547),
+}
+
+
+def haversine_miles(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    R = 3958.8  # miles
+    p1 = math.radians(lat1)
+    p2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dl = math.radians(lng2 - lng1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(a))
+
+
 @api_router.get("/shifts", response_model=List[Shift])
-async def list_shifts(city: Optional[str] = None, status_filter: Optional[str] = None):
+async def list_shifts(
+    city: Optional[str] = None,
+    status_filter: Optional[str] = None,
+    lat: Optional[float] = None,
+    lng: Optional[float] = None,
+):
     query: dict = {}
-    if city:
+    if city and city != "All Cities":
         query["city"] = city
     if status_filter and status_filter != "all":
         query["status"] = status_filter
     docs = await db.shifts.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
+    if lat is not None and lng is not None:
+        for d in docs:
+            if d.get("lat") is not None and d.get("lng") is not None:
+                d["distance_mi"] = round(haversine_miles(lat, lng, d["lat"], d["lng"]), 1)
+        docs.sort(key=lambda d: d["distance_mi"] if d.get("distance_mi") is not None else 9999)
     return [Shift(**d) for d in docs]
+
+
+@api_router.get("/shifts/cities", response_model=List[str])
+async def list_cities():
+    cities = await db.shifts.distinct("city")
+    return ["All Cities"] + sorted([c for c in cities if c])
 
 
 @api_router.get("/shifts/mine", response_model=List[Shift])
@@ -290,6 +413,72 @@ async def my_applications(current_user: dict = Depends(get_current_user)):
         return []
     docs = await db.shifts.find({"id": {"$in": shift_ids}}, {"_id": 0}).to_list(200)
     return [Shift(**d) for d in docs]
+
+
+# ============== RATINGS ==============
+
+@api_router.post("/ratings", response_model=Rating)
+async def create_rating(body: RatingCreate, current_user: dict = Depends(get_current_user)):
+    # Verify shift exists and current user was associated with it
+    shift = await db.shifts.find_one({"id": body.shift_id}, {"_id": 0})
+    if not shift:
+        raise HTTPException(status_code=404, detail="Shift not found")
+
+    me_id = current_user["id"]
+    role = current_user["role"]
+
+    # Authorization rules:
+    # - Officer can rate the company that posted the shift (if officer applied to shift)
+    # - Company that posted can rate any officer that applied
+    if role == "officer":
+        if me_id not in shift.get("applicants", []):
+            raise HTTPException(status_code=403, detail="You must apply to a shift before rating it")
+        if shift.get("posted_by") != body.ratee_id:
+            raise HTTPException(status_code=400, detail="Officer can only rate the posting company")
+    elif role == "company":
+        if shift.get("posted_by") != me_id:
+            raise HTTPException(status_code=403, detail="You can only rate shifts you posted")
+        if body.ratee_id not in shift.get("applicants", []):
+            raise HTTPException(status_code=400, detail="Ratee must be an applicant on this shift")
+    else:
+        raise HTTPException(status_code=403, detail="Unknown role")
+
+    # Prevent duplicate (rater, ratee, shift) ratings
+    existing = await db.ratings.find_one({
+        "shift_id": body.shift_id,
+        "rater_id": me_id,
+        "ratee_id": body.ratee_id,
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="You've already rated this user for this shift")
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "shift_id": body.shift_id,
+        "rater_id": me_id,
+        "ratee_id": body.ratee_id,
+        "stars": body.stars,
+        "comment": body.comment or "",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.ratings.insert_one(doc)
+    doc.pop("_id", None)
+    return Rating(**doc)
+
+
+@api_router.get("/users/{user_id}/ratings", response_model=RatingsSummary)
+async def get_user_ratings(user_id: str):
+    docs = await db.ratings.find({"ratee_id": user_id}, {"_id": 0}).sort("created_at", -1).to_list(200)
+    if not docs:
+        return RatingsSummary(user_id=user_id, average=0.0, count=0, ratings=[])
+    total = sum(d["stars"] for d in docs)
+    avg = round(total / len(docs), 2)
+    return RatingsSummary(
+        user_id=user_id,
+        average=avg,
+        count=len(docs),
+        ratings=[Rating(**d) for d in docs],
+    )
 
 
 # ============== MESSAGES (stub) ==============
@@ -453,6 +642,7 @@ async def seed_data():
     now = datetime.now(timezone.utc).isoformat()
     docs = []
     for s in SEED_SHIFTS:
+        coords = VENUE_COORDS.get(s["venue"], (None, None))
         docs.append({
             "id": str(uuid.uuid4()),
             **s,
@@ -461,6 +651,8 @@ async def seed_data():
             "posted_by": None,
             "posted_by_company": "FlexOfficers Network",
             "applicants": [],
+            "lat": coords[0],
+            "lng": coords[1],
             "created_at": now,
         })
     await db.shifts.insert_many(docs)
@@ -470,7 +662,15 @@ async def seed_data():
 @app.on_event("startup")
 async def startup():
     await db.users.create_index("email", unique=True)
+    await db.ratings.create_index([("ratee_id", 1)])
+    await db.ratings.create_index([("shift_id", 1), ("rater_id", 1), ("ratee_id", 1)], unique=True)
     await seed_data()
+    # Backfill lat/lng on existing shifts (idempotent)
+    cursor = db.shifts.find({"$or": [{"lat": {"$exists": False}}, {"lat": None}]}, {"_id": 0, "id": 1, "venue": 1})
+    async for doc in cursor:
+        coords = VENUE_COORDS.get(doc.get("venue"))
+        if coords:
+            await db.shifts.update_one({"id": doc["id"]}, {"$set": {"lat": coords[0], "lng": coords[1]}})
 
 
 app.include_router(api_router)

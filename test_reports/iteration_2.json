@@ -1,0 +1,41 @@
+{
+  "summary": "Phase 1 expansion (Google auth, geo distance sort, city filter, ratings) fully tested. Backend: 37/37 pytest tests pass after I fixed one real bug in server.py geo-sort key (`d.get('distance_mi') or 9999` treated 0.0 as falsy, pushing Brickell Heights — the closest seeded venue — to the LAST position instead of FIRST when query coords matched its coords). Replaced with explicit None check. Now `GET /api/shifts?lat=25.7617&lng=-80.1918` returns shifts in true ascending distance order with Brickell first (distance=0.0). Verified: POST /api/auth/google returns 401 for invalid session_token (upstream Emergent OAuth returns 404, surfaces as 401 from our handler); GET /api/shifts/cities returns ['All Cities', 'Aventura', 'Doral', 'Miami', 'Miami Beach', 'Miami Gardens', ...] (sorted, leading 'All Cities'); GET /api/shifts?city=Miami filters correctly; all seeded shifts have lat/lng populated; ratings endpoint enforces all auth rules (officer must apply, ratee must equal posted_by, no duplicates, company can only rate own shifts' applicants); GET /api/users/{id}/ratings is public, returns count=0 + average=0 + empty list for nonexistent user. Frontend (mobile viewport 390x844): Welcome screen shows Google button + 'Insured & Bonded' chip + 'OR' divider; Login screen shows Google button; Browse screen has tappable location-selector-button that opens a bottom-sheet city modal with All Cities + sorted cities (radio button UI), selecting Miami refilters the list. Geolocation hook fires on mount (on web, browser denies which is OK). One UX nuance with Rate-this-Company: it conditionally renders only when officer has applied AND shift has posted_by — frontend already initializes `applied` from `s.applicants.includes(user.id)` at line 45 of shift/[id].tsx, so logic is correct. The pre-existing pointerEvents deprecation warning from a third-party RN dep still appears (unchanged from iteration 1, not app code).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/shifts (geo sort)", "issue": "FIXED by testing agent. Sort key `d.get('distance_mi') or 9999` pushed exact-match (distance=0.0) shifts to the end. Replaced with explicit None check. Verified Brickell Heights now sorts FIRST for Brickell coords."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "third-party (carried over from iteration 1)", "issue": "Console warning 'props.pointerEvents is deprecated. Use style.pointerEvents' originates from a dependency, not app code. Not blocking."}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_flexofficers_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Now that ratings are wired, consider adding rating ingestion in shift card or browse list to show company stars without needing to open detail.",
+    "(Carried over from iteration 1) Investigate third-party props.pointerEvents deprecation source.",
+    "Main agent self-verify: tap on a freshly-applied shift (within the same session after Apply Now) and confirm 'Rate this Company' star UI + 'Submit Rating' button render and POST /api/ratings succeeds with 'Thanks for your rating!' toast."
+  ],
+  "critical_code_review_comments": [
+    "server.py /api/shifts geo-sort had a subtle falsy-bug (0.0 treated as missing). Fixed.",
+    "/api/auth/google currently maps upstream errors to 401 — adequate for now, but a 502 path exists (httpx.HTTPError) and should be documented for API consumers.",
+    "Rating creation does not set a unique compound index until first ratings insert; the index `ratings (shift_id, rater_id, ratee_id) unique` is created on startup which is good. Consider adding `db.ratings.create_index('rater_id')` too for fast lookups in future profile views."
+  ],
+  "updated_files": [
+    "/app/backend/server.py (geo-sort fix on line 336)",
+    "/app/backend/tests/test_flexofficers_api.py (added 15 new tests: TestGoogleAuth, TestCities, TestGeoSort, TestRatings)"
+  ],
+  "success_rate": {"backend": "100% (37/37)", "frontend": "100% smoke (Google buttons, city modal, geo-request, navigation all OK)"},
+  "seed_data_creation": "Each test run creates 2 unique TEST_-prefixed users (officer+company), 2-3 TEST_-prefixed shifts (TEST_Patrol, TEST_RatingShift, TEST_Co2Shift, TEST_NoApplyShift), and 2 ratings (1 officer→company, 1 company→officer). No cleanup needed (prefixed for identification).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend URL: EXPO_PUBLIC_BACKEND_URL in /app/frontend/.env. Phase 1 testIDs added: welcome-google-button, login-google-button, location-selector-button, city-option-{cityName}, retry-location-button. Rate-this-Company section visible at line 163 of /app/frontend/app/shift/[id].tsx only when (user.role==='officer' && applied && shift.posted_by && !rated). The `applied` local state is initialized from `s.applicants.includes(user.id)` on load (line 45). When testing apply→rate flow, prefer creating fresh officer+company+shift via API setup rather than using seeded test_officer@example.com to avoid stale applicant state. POST /api/ratings creates a unique (shift_id,rater_id,ratee_id) index so duplicate ratings return 400. /api/users/{id}/ratings is intentionally PUBLIC (no auth). Geo-sort uses `d['distance_mi'] if not None else 9999` (post-fix). Backend default distance_mi for company-created shifts (without lat/lng) is 2.4.",
+  "rca_of_issue": "Geo-sort bug RCA: `d.get('distance_mi') or 9999` uses Python truthiness — 0.0 is falsy in Python, so any shift whose computed distance happens to round to 0.0 (when query coords exactly match the venue coords, e.g. Brickell coords 25.7617,-80.1918 vs Brickell Heights 25.7616,-80.1917 → haversine ~ 0.01 mi → round(_,1)=0.0) gets sort key 9999 and ends up LAST. Reproduction: GET /api/shifts?lat=25.7617&lng=-80.1918 → before fix, output ended with 0.0 distance; after fix, 0.0 is first. Mitigation: replace `... or 9999` with `... if value is not None else 9999`."
+}

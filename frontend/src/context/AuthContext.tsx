@@ -4,6 +4,7 @@ import {
   apiRegister,
   apiMe,
   apiLogout,
+  apiGoogleAuth,
   setToken,
   getToken,
   User,
@@ -21,6 +22,7 @@ type AuthState = {
     role: Role;
     company_name?: string;
   }) => Promise<User>;
+  loginWithGoogle: (sessionToken: string, role?: Role) => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -75,8 +77,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
   };
 
+  const loginWithGoogle = async (sessionToken: string, role: Role = "officer") => {
+    const res = await apiGoogleAuth(sessionToken, role);
+    await setToken(res.access_token);
+    setUser(res.user);
+    return res.user;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh: bootstrap }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, refresh: bootstrap }}>
       {children}
     </AuthContext.Provider>
   );

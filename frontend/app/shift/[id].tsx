@@ -5,9 +5,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { apiGetShift, apiApplyShift, Shift } from "@/src/api/client";
+import { apiGetShift, apiApplyShift, apiCreateRating, apiGetUserRatings, Shift, RatingsSummary } from "@/src/api/client";
 import { useAuth } from "@/src/context/AuthContext";
 import { theme } from "@/src/theme";
+import StarRating from "@/src/components/StarRating";
 
 function fmtDateTime(iso: string) {
   try {
@@ -30,6 +31,10 @@ export default function ShiftDetail() {
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [companyRatings, setCompanyRatings] = useState<RatingsSummary | null>(null);
+  const [myStars, setMyStars] = useState(0);
+  const [submittingRating, setSubmittingRating] = useState(false);
+  const [rated, setRated] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -38,6 +43,12 @@ export default function ShiftDetail() {
         const s = await apiGetShift(id);
         setShift(s);
         if (user && s.applicants.includes(user.id)) setApplied(true);
+        if (s.posted_by) {
+          try {
+            const r = await apiGetUserRatings(s.posted_by);
+            setCompanyRatings(r);
+          } catch {}
+        }
       } catch (e: any) {
         setToast(e.message || "Failed to load shift");
       } finally {
@@ -133,6 +144,73 @@ export default function ShiftDetail() {
             </View>
           ))}
         </View>
+
+        {companyRatings && companyRatings.count > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Company Rating</Text>
+            <View style={styles.cardSimple}>
+              <View style={styles.ratingRow}>
+                <StarRating value={companyRatings.average} size={20} />
+                <Text style={styles.ratingText}>
+                  {companyRatings.average.toFixed(1)} ({companyRatings.count} review
+                  {companyRatings.count > 1 ? "s" : ""})
+                </Text>
+              </View>
+            </View>
+          </>
+        )}
+
+        {user?.role === "officer" && applied && shift.posted_by && !rated && (
+          <>
+            <Text style={styles.sectionTitle}>Rate this Company</Text>
+            <View style={styles.cardSimple}>
+              <Text style={styles.rateHint}>Help other officers — tap stars to rate.</Text>
+              <View style={{ alignItems: "center", marginVertical: 8 }}>
+                <StarRating
+                  value={myStars}
+                  onChange={setMyStars}
+                  testIDPrefix="rate-star"
+                />
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.rateBtn,
+                  (myStars === 0 || submittingRating) && { opacity: 0.5 },
+                ]}
+                disabled={myStars === 0 || submittingRating}
+                onPress={async () => {
+                  if (!shift.posted_by) return;
+                  setSubmittingRating(true);
+                  try {
+                    await apiCreateRating({
+                      shift_id: shift.id,
+                      ratee_id: shift.posted_by,
+                      stars: myStars,
+                    });
+                    setRated(true);
+                    setToast("Thanks for your rating!");
+                    setTimeout(() => setToast(null), 2000);
+                    const r = await apiGetUserRatings(shift.posted_by);
+                    setCompanyRatings(r);
+                  } catch (e: any) {
+                    setToast(e.message || "Could not submit rating");
+                    setTimeout(() => setToast(null), 2200);
+                  } finally {
+                    setSubmittingRating(false);
+                  }
+                }}
+                testID="submit-rating-button"
+                activeOpacity={0.85}
+              >
+                {submittingRating ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.rateBtnText}>Submit Rating</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </ScrollView>
 
       {user?.role === "officer" && (
@@ -237,4 +315,12 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: theme.colors.borderActive,
   },
   toastText: { color: theme.colors.textPrimary, fontSize: 14, textAlign: "center" },
+  ratingRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  ratingText: { color: theme.colors.textPrimary, fontSize: 14, fontWeight: "600" },
+  rateHint: { color: theme.colors.textSecondary, fontSize: 13, textAlign: "center" },
+  rateBtn: {
+    backgroundColor: theme.colors.primary, borderRadius: 10,
+    paddingVertical: 12, alignItems: "center", marginTop: 8,
+  },
+  rateBtnText: { color: "#FFFFFF", fontWeight: "800", fontSize: 14 },
 });

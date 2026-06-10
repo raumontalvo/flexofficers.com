@@ -4,8 +4,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { theme } from "@/src/theme";
+import GoogleSignInButton from "@/src/components/GoogleSignInButton";
+import { useGoogleWebReturnHandler } from "@/src/hooks/use-google-web-return";
 
 export default function Welcome() {
+  useGoogleWebReturnHandler();
   const router = useRouter();
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -80,6 +83,14 @@ export default function Welcome() {
           <VerifyChip icon="ribbon" label="Insured & Bonded" />
         </View>
 
+        <View style={styles.dividerRow}>
+          <View style={styles.divLine} />
+          <Text style={styles.divText}>OR</Text>
+          <View style={styles.divLine} />
+        </View>
+
+        <GoogleSignInButton role="officer" label="Continue with Google" testID="welcome-google-button" />
+
         <Link href="/(auth)/login" asChild>
           <TouchableOpacity style={styles.loginRow} testID="welcome-login-link">
             <Text style={styles.loginText}>Already have an account?</Text>
@@ -147,4 +158,7 @@ const styles = StyleSheet.create({
   loginRow: { flexDirection: "row", justifyContent: "center", marginTop: 8 },
   loginText: { color: theme.colors.textSecondary, fontSize: 14 },
   loginLink: { color: theme.colors.primary, fontSize: 14, fontWeight: "700" },
+  dividerRow: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 16 },
+  divLine: { flex: 1, height: 1, backgroundColor: theme.colors.borderSubtle },
+  divText: { color: theme.colors.textTertiary, fontSize: 11, fontWeight: "700", letterSpacing: 1 },
 });

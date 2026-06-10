@@ -248,3 +248,255 @@ class TestMessages:
         assert isinstance(data, list)
         assert len(data) >= 1
         assert "name" in data[0] and "last_message" in data[0]
+
+
+
+# -------- Google Auth (Emergent) --------
+class TestGoogleAuth:
+    def test_invalid_session_token_returns_401(self, session):
+        r = session.post(f"{API}/auth/google", json={"session_token": "definitely-not-a-valid-token", "role": "officer"})
+        # 401 expected from upstream; 502 acceptable if provider not reachable
+        assert r.status_code in (401, 502), r.text
+
+
+# -------- Cities --------
+class TestCities:
+    def test_cities_endpoint(self, session):
+        r = session.get(f"{API}/shifts/cities")
+        assert r.status_code == 200
+        data = r.json()
+        assert isinstance(data, list)
+        assert len(data) >= 2
+        assert data[0] == "All Cities"
+        # Remaining must be sorted
+        tail = data[1:]
+        assert tail == sorted(tail)
+
+    def test_filter_by_city(self, session):
+        r = session.get(f"{API}/shifts", params={"city": "Miami"})
+        assert r.status_code == 200
+        data = r.json()
+        assert len(data) >= 1
+        for s in data:
+            assert s["city"] == "Miami"
+
+    def test_filter_all_cities_returns_all(self, session):
+        r = session.get(f"{API}/shifts", params={"city": "All Cities"})
+        assert r.status_code == 200
+        assert len(r.json()) >= 10
+
+
+# -------- Geo Distance Sort --------
+class TestGeoSort:
+    def test_seed_shifts_have_lat_lng(self, session):
+        r = session.get(f"{API}/shifts")
+        assert r.status_code == 200
+        data = r.json()
+        # Seeded shifts are FlexOfficers Network (have coords). User-created shifts may not.
+        seeded = [s for s in data if s.get("posted_by_company") == "FlexOfficers Network"]
+        assert len(seeded) >= 10
+        for s in seeded:
+            assert s.get("lat") is not None, f"Seed shift missing lat: {s['title']}"
+            assert s.get("lng") is not None, f"Seed shift missing lng: {s['title']}"
+
+    def test_geo_sort_ascending(self, session):
+        # Brickell coords -> closest seeded venue is Brickell Heights
+        r = session.get(f"{API}/shifts", params={"lat": 25.7617, "lng": -80.1918})
+        assert r.status_code == 200
+        data = r.json()
+        # Filter to seeded shifts (others may lack lat/lng)
+        with_dist = [s for s in data if s.get("lat") is not None]
+        distances = [s["distance_mi"] for s in with_dist]
+        assert distances == sorted(distances), f"Distances not ascending: {distances}"
+        # Brickell should be #1 amongst seeded
+        seed_with_dist = [s for s in with_dist if s.get("posted_by_company") == "FlexOfficers Network"]
+        assert seed_with_dist[0]["venue"] == "Brickell Heights Project"
+
+
+# -------- Ratings --------
+class TestRatings:
+    @pytest.fixture(scope="class")
+    def rating_setup(self, session, officer_auth, company_auth):
+        """Company posts a shift; officer applies. Returns (shift_id, officer_user, company_user)."""
+        body = {
+            "title": "TEST_RatingShift",
+            "venue": "TEST Rating Venue",
+            "city": "Miami", "state": "FL",
+            "start_time": "2026-07-01T20:00:00",
+            "end_time": "2026-07-02T04:00:00",
+            "pay_rate": 25.0, "officers_needed": 1,
+            "description": "for rating tests", "requirements": [],
+        }
+        r = session.post(
+            f"{API}/shifts", json=body,
+            headers={"Authorization": f"Bearer {company_auth['token']}"},
+        )
+        assert r.status_code == 200, r.text
+        shift_id = r.json()["id"]
+
+        # Officer applies
+        r2 = session.post(
+            f"{API}/shifts/{shift_id}/apply",
+            headers={"Authorization": f"Bearer {officer_auth['token']}"},
+        )
+        assert r2.status_code == 200
+        return {
+            "shift_id": shift_id,
+            "officer": officer_auth,
+            "company": company_auth,
+        }
+
+    def test_officer_rates_company_success(self, session, rating_setup):
+        r = session.post(
+            f"{API}/ratings",
+            json={
+                "shift_id": rating_setup["shift_id"],
+                "ratee_id": rating_setup["company"]["user"]["id"],
+                "stars": 5,
+                "comment": "Great gig",
+            },
+            headers={"Authorization": f"Bearer {rating_setup['officer']['token']}"},
+        )
+        assert r.status_code == 200, r.text
+        data = r.json()
+        assert data["stars"] == 5
+        assert data["ratee_id"] == rating_setup["company"]["user"]["id"]
+
+    def test_officer_rate_duplicate_rejected(self, session, rating_setup):
+        r = session.post(
+            f"{API}/ratings",
+            json={
+                "shift_id": rating_setup["shift_id"],
+                "ratee_id": rating_setup["company"]["user"]["id"],
+                "stars": 4,
+            },
+            headers={"Authorization": f"Bearer {rating_setup['officer']['token']}"},
+        )
+        assert r.status_code == 400
+
+    def test_officer_rate_wrong_ratee_rejected(self, session, rating_setup):
+        # Officer tries to rate a different user (not posted_by)
+        r = session.post(
+            f"{API}/ratings",
+            json={
+                "shift_id": rating_setup["shift_id"],
+                "ratee_id": "some-other-user-id",
+                "stars": 5,
+            },
+            headers={"Authorization": f"Bearer {rating_setup['officer']['token']}"},
+        )
+        assert r.status_code == 400
+
+    def test_officer_rate_without_applying_rejected(self, session, company_auth):
+        # Create a brand new officer who did NOT apply
+        suffix = uuid.uuid4().hex[:8]
+        reg = session.post(f"{API}/auth/register", json={
+            "email": f"TEST_unapplied_{suffix}@example.com",
+            "password": "test1234",
+            "full_name": "TEST Unapplied",
+            "role": "officer",
+        })
+        assert reg.status_code == 200
+        tok = reg.json()["access_token"]
+
+        # Company posts a shift
+        body = {
+            "title": "TEST_NoApplyShift", "venue": "TEST V", "city": "Miami", "state": "FL",
+            "start_time": "2026-07-10T20:00:00", "end_time": "2026-07-11T04:00:00",
+            "pay_rate": 22.0, "officers_needed": 1, "description": "", "requirements": [],
+        }
+        sr = session.post(
+            f"{API}/shifts", json=body,
+            headers={"Authorization": f"Bearer {company_auth['token']}"},
+        )
+        assert sr.status_code == 200
+        shift_id = sr.json()["id"]
+
+        r = session.post(
+            f"{API}/ratings",
+            json={"shift_id": shift_id, "ratee_id": company_auth["user"]["id"], "stars": 5},
+            headers={"Authorization": f"Bearer {tok}"},
+        )
+        assert r.status_code == 403
+
+    def test_company_rates_officer_success(self, session, rating_setup):
+        r = session.post(
+            f"{API}/ratings",
+            json={
+                "shift_id": rating_setup["shift_id"],
+                "ratee_id": rating_setup["officer"]["user"]["id"],
+                "stars": 4,
+                "comment": "Solid officer",
+            },
+            headers={"Authorization": f"Bearer {rating_setup['company']['token']}"},
+        )
+        assert r.status_code == 200
+        assert r.json()["stars"] == 4
+
+    def test_company_rate_other_shift_rejected(self, session, company_auth, officer_auth):
+        # Another company posts a shift; first company tries to rate
+        suffix = uuid.uuid4().hex[:8]
+        reg = session.post(f"{API}/auth/register", json={
+            "email": f"TEST_co2_{suffix}@example.com",
+            "password": "test1234",
+            "full_name": "TEST Co2 Owner",
+            "role": "company",
+            "company_name": "TEST Co2",
+        })
+        assert reg.status_code == 200
+        co2_token = reg.json()["access_token"]
+
+        body = {
+            "title": "TEST_Co2Shift", "venue": "TEST V2", "city": "Miami", "state": "FL",
+            "start_time": "2026-08-01T20:00:00", "end_time": "2026-08-02T04:00:00",
+            "pay_rate": 23.0, "officers_needed": 1, "description": "", "requirements": [],
+        }
+        sr = session.post(
+            f"{API}/shifts", json=body,
+            headers={"Authorization": f"Bearer {co2_token}"},
+        )
+        shift_id = sr.json()["id"]
+
+        # Officer applies to co2 shift
+        session.post(
+            f"{API}/shifts/{shift_id}/apply",
+            headers={"Authorization": f"Bearer {officer_auth['token']}"},
+        )
+
+        # First company tries to rate officer on co2's shift
+        r = session.post(
+            f"{API}/ratings",
+            json={
+                "shift_id": shift_id,
+                "ratee_id": officer_auth["user"]["id"],
+                "stars": 3,
+            },
+            headers={"Authorization": f"Bearer {company_auth['token']}"},
+        )
+        assert r.status_code == 403
+
+    def test_get_user_ratings(self, session, rating_setup):
+        # Company should have 1 rating (the 5-star from officer)
+        company_id = rating_setup["company"]["user"]["id"]
+        r = session.get(f"{API}/users/{company_id}/ratings")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["user_id"] == company_id
+        assert data["count"] >= 1
+        assert data["average"] >= 1.0
+        assert isinstance(data["ratings"], list)
+        assert len(data["ratings"]) == data["count"]
+
+    def test_get_ratings_no_auth_required(self, session, rating_setup):
+        # No Authorization header should still work
+        company_id = rating_setup["company"]["user"]["id"]
+        r = requests.get(f"{API}/users/{company_id}/ratings")
+        assert r.status_code == 200
+
+    def test_get_ratings_nonexistent_user(self, session):
+        r = session.get(f"{API}/users/nonexistent-user-zzz/ratings")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["count"] == 0
+        assert data["average"] == 0
+        assert data["ratings"] == []

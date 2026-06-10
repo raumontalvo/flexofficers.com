@@ -119,6 +119,13 @@ export async function apiLogin(email: string, password: string) {
   );
 }
 
+export async function apiGoogleAuth(session_token: string, role: Role = "officer") {
+  return request<{ access_token: string; token_type: string; user: User }>(
+    "/auth/google",
+    { method: "POST", body: { session_token, role }, auth: false }
+  );
+}
+
 export async function apiMe() {
   return request<User>("/auth/me");
 }
@@ -132,9 +139,25 @@ export async function apiLogout() {
 
 // ============== SHIFTS ==============
 
-export async function apiListShifts(statusFilter?: string) {
-  const q = statusFilter && statusFilter !== "all" ? `?status_filter=${statusFilter}` : "";
+export async function apiListShifts(
+  statusFilter?: string,
+  city?: string,
+  lat?: number | null,
+  lng?: number | null,
+) {
+  const params = new URLSearchParams();
+  if (statusFilter && statusFilter !== "all") params.set("status_filter", statusFilter);
+  if (city && city !== "All Cities") params.set("city", city);
+  if (lat != null && lng != null) {
+    params.set("lat", String(lat));
+    params.set("lng", String(lng));
+  }
+  const q = params.toString() ? `?${params.toString()}` : "";
   return request<Shift[]>(`/shifts${q}`, { auth: false });
+}
+
+export async function apiListCities() {
+  return request<string[]>("/shifts/cities", { auth: false });
 }
 
 export async function apiGetShift(id: string) {
@@ -174,4 +197,36 @@ export async function apiCreateShift(body: {
 
 export async function apiListMessages() {
   return request<Conversation[]>("/messages");
+}
+
+// ============== RATINGS ==============
+
+export type Rating = {
+  id: string;
+  shift_id: string;
+  rater_id: string;
+  ratee_id: string;
+  stars: number;
+  comment: string;
+  created_at: string;
+};
+
+export type RatingsSummary = {
+  user_id: string;
+  average: number;
+  count: number;
+  ratings: Rating[];
+};
+
+export async function apiCreateRating(body: {
+  shift_id: string;
+  ratee_id: string;
+  stars: number;
+  comment?: string;
+}) {
+  return request<Rating>("/ratings", { method: "POST", body });
+}
+
+export async function apiGetUserRatings(userId: string) {
+  return request<RatingsSummary>(`/users/${userId}/ratings`, { auth: false });
 }
