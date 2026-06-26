@@ -29,7 +29,7 @@ export function PhoneFrame({
       )}
       style={style}
     >
-      <div className="relative">
+      <div className="relative max-lg:w-full max-lg:min-w-0">
         <div
           className="pointer-events-none absolute -inset-6 max-lg:-inset-3 rounded-[3rem] bg-gradient-to-br from-fo-primary/25 via-blue-500/5 to-transparent opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
           aria-hidden="true"
@@ -46,7 +46,7 @@ export function PhoneFrame({
           </div>
         </div>
       </div>
-      <p className="text-center text-xs font-medium tracking-wide text-fo-text-subtle">
+      <p className="text-center text-xs font-medium tracking-wide text-fo-text-subtle max-lg:w-full max-lg:min-w-0 max-lg:max-w-full max-lg:overflow-hidden max-[429px]:break-words max-[429px]:leading-snug">
         {label}
       </p>
     </div>
