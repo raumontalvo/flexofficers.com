@@ -1,5 +1,6 @@
 import Link from "next/link";
-import type { Company } from "@/app/generated/prisma/client";
+import type { Prisma } from "@/app/generated/prisma/client";
+import { companyDashboardSelect } from "@/lib/officer-fields";
 import {
   ApplicationStatus,
   ShiftStatus,
@@ -23,7 +24,7 @@ import DashboardSignOutButton from "./SignOutButton";
 
 type CompanyDashboardProps = {
   firstName?: string | null;
-  company: Company;
+  company: Prisma.CompanyGetPayload<{ select: typeof companyDashboardSelect }>;
   missingItems: string[];
 };
 

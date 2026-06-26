@@ -1,5 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { officerWithUserSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { validateApplicationDecisionTransition } from "./decision-rules";
@@ -75,9 +76,7 @@ export async function POST(req: Request) {
           },
         },
         officer: {
-          include: {
-            user: true,
-          },
+          select: officerWithUserSelect,
         },
       },
     });
@@ -131,9 +130,7 @@ export async function POST(req: Request) {
         include: {
           shift: true,
           officer: {
-            include: {
-              user: true,
-            },
+            select: officerWithUserSelect,
           },
         },
       });
@@ -198,9 +195,7 @@ export async function POST(req: Request) {
         include: {
           shift: true,
           officer: {
-            include: {
-              user: true,
-            },
+            select: officerWithUserSelect,
           },
         },
       });

@@ -1,5 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { officerWithUserSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { validateApplicationWithdrawal } from "./rules";
@@ -52,9 +53,7 @@ export async function POST(req: Request) {
       },
       include: {
         officer: {
-          include: {
-            user: true,
-          },
+          select: officerWithUserSelect,
         },
       },
     });

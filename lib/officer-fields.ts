@@ -60,3 +60,55 @@ export const officerApplicantSelect = {
 export type OfficerApplicantRecord = Prisma.OfficerGetPayload<{
   select: typeof officerApplicantSelect;
 }>;
+
+export const officerWithUserSelect = {
+  id: true,
+  userId: true,
+  firstName: true,
+  lastName: true,
+  armedStatuses: true,
+  user: {
+    select: {
+      id: true,
+      clerkId: true,
+      email: true,
+    },
+  },
+} satisfies Prisma.OfficerSelect;
+
+export const companyDashboardSelect = {
+  id: true,
+  userId: true,
+  companyName: true,
+  contactName: true,
+  phone: true,
+  email: true,
+  website: true,
+  address: true,
+  logoUrl: true,
+  city: true,
+  state: true,
+  description: true,
+  licenseType: true,
+  licenseNumber: true,
+  licenseState: true,
+  verified: true,
+  subscriptionStatus: true,
+  subscriptionCurrentPeriodEnd: true,
+  stripeCustomerId: true,
+  stripeSubscriptionId: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.CompanySelect;
+
+export const dashboardUserSelect = {
+  id: true,
+  email: true,
+  role: true,
+  officer: {
+    select: officerProfileSelect,
+  },
+  company: {
+    select: companyDashboardSelect,
+  },
+} satisfies Prisma.UserSelect;

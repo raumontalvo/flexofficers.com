@@ -2,7 +2,7 @@ import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { FlexOfficersLogoLink } from "@/components/brand";
-import { officerProfileSelect } from "@/lib/officer-fields";
+import { dashboardUserSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
 import CompanyDashboard from "./CompanyDashboard";
 import DashboardSignOutButton from "./SignOutButton";
@@ -16,12 +16,7 @@ export default async function DashboardPage() {
         where: {
           clerkId: clerkUser.id,
         },
-        include: {
-          officer: {
-            select: officerProfileSelect,
-          },
-          company: true,
-        },
+        select: dashboardUserSelect,
       })
     : null;
 

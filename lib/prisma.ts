@@ -9,13 +9,15 @@ if (!connectionString) {
 
 const adapter = new PrismaPg({ connectionString });
 
-/** Bump when Officer schema fields change to avoid stale dev client caches. */
-const PRISMA_CLIENT_VERSION = "officer-armedStatuses-v1";
+/** Bump when Officer schema fields change to invalidate stale dev clients. */
+const PRISMA_CLIENT_VERSION = "officer-armedStatuses-v2";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-  prismaClientVersion: string | undefined;
+type PrismaGlobal = typeof globalThis & {
+  prisma?: PrismaClient;
+  prismaClientVersion?: string;
 };
+
+const globalForPrisma = globalThis as PrismaGlobal;
 
 function createPrismaClient() {
   return new PrismaClient({
@@ -23,20 +25,34 @@ function createPrismaClient() {
   });
 }
 
-export const prisma =
-  globalForPrisma.prismaClientVersion === PRISMA_CLIENT_VERSION &&
-  globalForPrisma.prisma
-    ? globalForPrisma.prisma
-    : createPrismaClient();
+function getPrismaClient() {
+  const cachedVersion = globalForPrisma.prismaClientVersion;
+  const cachedClient = globalForPrisma.prisma;
 
-if (process.env.NODE_ENV !== "production") {
-  if (
-    globalForPrisma.prisma &&
-    globalForPrisma.prismaClientVersion !== PRISMA_CLIENT_VERSION
-  ) {
-    void globalForPrisma.prisma.$disconnect();
+  if (cachedClient && cachedVersion === PRISMA_CLIENT_VERSION) {
+    return cachedClient;
   }
 
+  if (cachedClient && cachedVersion !== PRISMA_CLIENT_VERSION) {
+    void cachedClient.$disconnect();
+  }
+
+  const client = createPrismaClient();
+
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = client;
+    globalForPrisma.prismaClientVersion = PRISMA_CLIENT_VERSION;
+  }
+
+  return client;
+}
+
+export const prisma =
+  process.env.NODE_ENV === "production"
+    ? globalForPrisma.prisma ?? createPrismaClient()
+    : getPrismaClient();
+
+if (process.env.NODE_ENV === "production" && !globalForPrisma.prisma) {
   globalForPrisma.prisma = prisma;
   globalForPrisma.prismaClientVersion = PRISMA_CLIENT_VERSION;
 }
