@@ -186,7 +186,7 @@ export default function Home() {
             </div>
 
             <div
-              className="landing-hero-showcase landing-fade-up relative z-0 grid grid-cols-2 gap-8 max-lg:order-2 max-lg:mx-auto max-lg:w-full max-lg:max-w-[min(100%,30rem)] sm:gap-10 lg:gap-12 xl:gap-14"
+              className="landing-hero-showcase landing-fade-up relative z-0 grid grid-cols-2 max-lg:order-2 max-lg:mx-auto max-lg:w-full max-lg:max-w-[min(100%,30rem)] max-lg:gap-x-6 max-lg:gap-y-3 sm:max-lg:gap-x-8 lg:gap-12 xl:gap-14"
               style={{ animationDelay: "120ms" }}
             >
               <PhoneFrame label="Officer Browse" style={{ animationDelay: "180ms" }}>
