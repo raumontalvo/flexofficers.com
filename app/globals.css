@@ -120,6 +120,14 @@ html {
     radial-gradient(ellipse 50% 40% at 20% 60%, rgba(59, 130, 246, 0.08), transparent 70%);
 }
 
+/* Hero — stack copy above app previews on mobile/tablet */
+@media (max-width: 1023px) {
+  .landing-hero-showcase {
+    margin-top: 0;
+    scroll-margin-top: var(--landing-header-h);
+  }
+}
+
 /* Landing header — premium sticky bar on mobile/tablet */
 .landing-header {
   -webkit-backdrop-filter: blur(16px);

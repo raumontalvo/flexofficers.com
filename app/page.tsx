@@ -147,9 +147,9 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-hidden">
         <div className="landing-hero-glow absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-5 pb-24 pt-28 sm:px-8 sm:pb-32 sm:pt-32 lg:px-8 lg:py-40">
-          <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20 xl:gap-28">
-            <div className="landing-fade-up max-w-xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] lg:pb-0">
+        <div className="relative mx-auto max-w-7xl px-5 pb-24 max-lg:pt-[calc(var(--landing-header-h)+0.5rem)] sm:px-8 sm:pb-32 sm:max-lg:pt-[calc(var(--landing-header-h)+0.75rem)] lg:px-8 lg:py-40">
+          <div className="flex flex-col max-lg:gap-16 lg:grid lg:grid-cols-2 lg:items-center lg:gap-20 xl:gap-28">
+            <div className="landing-fade-up relative z-10 max-w-xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] max-lg:order-1 lg:pb-0">
               <HeroBadge />
               <LandingEyebrow>Security staffing marketplace</LandingEyebrow>
               <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl xl:text-[4.75rem]">
@@ -186,7 +186,7 @@ export default function Home() {
             </div>
 
             <div
-              className="landing-fade-up grid grid-cols-2 gap-8 sm:gap-10 lg:gap-12 xl:gap-14"
+              className="landing-hero-showcase landing-fade-up relative z-0 grid grid-cols-2 gap-8 max-lg:order-2 max-lg:mx-auto max-lg:w-full max-lg:max-w-[min(100%,30rem)] sm:gap-10 lg:gap-12 xl:gap-14"
               style={{ animationDelay: "120ms" }}
             >
               <PhoneFrame label="Officer Browse" style={{ animationDelay: "180ms" }}>
@@ -194,7 +194,7 @@ export default function Home() {
               </PhoneFrame>
               <PhoneFrame
                 label="Company Dashboard"
-                className="mt-10 sm:mt-14 lg:mt-20"
+                className="max-lg:mt-0 lg:mt-20"
                 style={{ animationDelay: "260ms" }}
               >
                 <DashboardPreview />
@@ -204,7 +204,7 @@ export default function Home() {
               </PhoneFrame>
               <PhoneFrame
                 label="Accepted Shift"
-                className="mt-10 sm:mt-14 lg:mt-20"
+                className="max-lg:mt-0 lg:mt-20"
                 style={{ animationDelay: "420ms" }}
               >
                 <AcceptedPreview />
