@@ -10,7 +10,7 @@ type PhoneFrameProps = {
 };
 
 const sizeClasses = {
-  hero: "w-[230px] sm:w-[250px]",
+  hero: "max-lg:w-full lg:w-[250px]",
   showcase: "w-[260px] sm:w-[300px]",
 };
 
@@ -24,14 +24,14 @@ export function PhoneFrame({
   return (
     <div
       className={cn(
-        "landing-fade-up group flex flex-col items-center gap-4",
+        "landing-fade-up group flex flex-col items-center gap-4 max-lg:min-w-0 max-lg:w-full",
         className
       )}
       style={style}
     >
       <div className="relative">
         <div
-          className="pointer-events-none absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-fo-primary/25 via-blue-500/5 to-transparent opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
+          className="pointer-events-none absolute -inset-6 max-lg:-inset-3 rounded-[3rem] bg-gradient-to-br from-fo-primary/25 via-blue-500/5 to-transparent opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
           aria-hidden="true"
         />
         <div
