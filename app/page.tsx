@@ -141,7 +141,7 @@ function StepCard({
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-fo-bg text-fo-text">
+    <main className="min-h-screen overflow-x-hidden bg-fo-bg text-fo-text">
       <LandingNavbar />
 
       {/* Hero */}
@@ -149,7 +149,7 @@ export default function Home() {
         <div className="landing-hero-glow absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto max-w-7xl px-5 py-24 sm:px-8 sm:py-32 lg:py-40">
           <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-20 xl:gap-28">
-            <div className="landing-fade-up max-w-xl">
+            <div className="landing-fade-up max-w-xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] lg:pb-0">
               <HeroBadge />
               <LandingEyebrow>Security staffing marketplace</LandingEyebrow>
               <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl xl:text-[4.75rem]">

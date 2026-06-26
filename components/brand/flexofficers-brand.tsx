@@ -30,7 +30,11 @@ export function FlexOfficersLogo({
       alt="FlexOfficers"
       width={width}
       height={height}
-      sizes="(max-width: 767px) 200px, (max-width: 1023px) 240px, 280px"
+      sizes={
+        className?.includes("landing-nav-logo-image")
+          ? "(max-width: 767px) 66px, (max-width: 1023px) 78px, 280px"
+          : "(max-width: 767px) 200px, (max-width: 1023px) 240px, 280px"
+      }
       quality={100}
       className={cn("block h-auto w-auto max-w-full object-contain", className)}
       style={

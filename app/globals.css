@@ -97,33 +97,62 @@ html {
     radial-gradient(ellipse 50% 40% at 20% 60%, rgba(59, 130, 246, 0.08), transparent 70%);
 }
 
-/* Landing navbar logo — width-scaled, tagline clipped for readability */
+/* Landing header — mobile menu anchor offset */
+.landing-header {
+  --landing-header-h: 3.75rem;
+}
+
+@media (min-width: 640px) {
+  .landing-header {
+    --landing-header-h: 4.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .landing-header {
+    --landing-header-h: 5.25rem;
+  }
+}
+
+/* Landing navbar logo — compact on mobile/tablet, clipped tagline on desktop */
 .landing-nav-logo-clip {
-  --landing-nav-logo-w: min(62vw, 200px);
+  --landing-nav-logo-h: 44px;
   display: inline-flex;
-  overflow: hidden;
+  flex-shrink: 1;
+  min-width: 0;
   line-height: 0;
-  width: var(--landing-nav-logo-w);
-  height: calc(var(--landing-nav-logo-w) / 1.5 * 0.72);
+  max-height: var(--landing-nav-logo-h);
 }
 
 .landing-nav-logo-image {
   display: block !important;
-  width: var(--landing-nav-logo-w) !important;
-  height: auto !important;
-  max-width: none !important;
-  max-height: none !important;
+  height: var(--landing-nav-logo-h) !important;
+  width: auto !important;
+  max-width: 100%;
+  object-fit: contain;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .landing-nav-logo-clip {
-    --landing-nav-logo-w: 240px;
+    --landing-nav-logo-h: 52px;
   }
 }
 
 @media (min-width: 1024px) {
   .landing-nav-logo-clip {
     --landing-nav-logo-w: 280px;
+    flex-shrink: 0;
+    overflow: hidden;
+    width: var(--landing-nav-logo-w);
+    height: calc(var(--landing-nav-logo-w) / 1.5 * 0.72);
+    max-height: none;
+  }
+
+  .landing-nav-logo-image {
+    width: var(--landing-nav-logo-w) !important;
+    height: auto !important;
+    max-width: none !important;
+    object-fit: unset;
   }
 }
 

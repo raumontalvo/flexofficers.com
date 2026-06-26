@@ -64,9 +64,9 @@ export function LandingNavbar() {
   }, [open, closeMenu]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/[0.04] bg-fo-bg/80 backdrop-blur-xl">
-      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:py-5">
-        <div className="flex shrink-0 items-center justify-self-start">
+    <header className="landing-header sticky top-0 z-40 border-b border-white/[0.04] bg-fo-bg/80 backdrop-blur-xl">
+      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:px-8 lg:py-5">
+        <div className="flex min-w-0 items-center justify-self-start">
           <FlexOfficersLogoLink
             href="/"
             height={320}
@@ -88,7 +88,7 @@ export function LandingNavbar() {
           ))}
         </div>
 
-        <div className="col-start-2 flex shrink-0 items-center justify-end gap-2 sm:gap-3 lg:col-start-3">
+        <div className="col-start-2 flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 lg:col-start-3 lg:gap-3">
           <Link
             href="/sign-in"
             className={buttonClassName({
@@ -103,7 +103,8 @@ export function LandingNavbar() {
             href="/onboarding?force=1"
             className={buttonClassName({
               size: "md",
-              className: "inline-flex shrink-0 whitespace-nowrap lg:inline-flex",
+              className:
+                "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-10 max-lg:px-3.5 max-lg:text-xs lg:min-h-11 lg:px-5 lg:text-sm",
             })}
           >
             Get Started
@@ -114,7 +115,8 @@ export function LandingNavbar() {
               buttonClassName({
                 variant: "secondary",
                 size: "md",
-                className: "inline-flex min-w-11 px-3 lg:hidden",
+                className:
+                  "inline-flex min-h-10 min-w-10 shrink-0 px-2.5 lg:hidden",
               })
             )}
             aria-label={open ? "Close menu" : "Open menu"}
@@ -136,13 +138,13 @@ export function LandingNavbar() {
             onClick={closeMenu}
           />
 
-          <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center px-4 pt-[4.75rem]">
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center px-3 pt-[calc(var(--landing-header-h)+0.5rem)] sm:px-4">
             <div
               id={menuId}
               role="dialog"
               aria-modal="true"
               aria-label="Mobile navigation"
-              className="landing-mobile-menu pointer-events-auto w-full max-w-lg rounded-fo-card border border-white/[0.06] bg-fo-bg-elevated p-5 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.75)]"
+              className="landing-mobile-menu pointer-events-auto w-full max-w-lg max-h-[min(32rem,calc(100dvh-var(--landing-header-h)-env(safe-area-inset-bottom,0px)-1rem))] overflow-y-auto rounded-fo-card border border-white/[0.06] bg-fo-bg-elevated p-4 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.75)] sm:p-5"
             >
             <div className="mb-4 flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-fo-primary-hover">
@@ -167,7 +169,7 @@ export function LandingNavbar() {
                 <a
                   key={link.href}
                   href={link.href}
-                  className="rounded-xl px-4 py-3.5 text-base font-medium text-fo-text transition hover:bg-fo-surface hover:text-fo-primary-hover"
+                  className="rounded-xl px-4 py-4 text-base font-medium text-fo-text transition hover:bg-fo-surface hover:text-fo-primary-hover"
                   onClick={closeMenu}
                 >
                   {link.label}
