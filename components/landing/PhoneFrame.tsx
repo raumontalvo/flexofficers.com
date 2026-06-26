@@ -21,15 +21,23 @@ export function PhoneFrame({
   size = "hero",
   style,
 }: PhoneFrameProps) {
+  const isHero = size === "hero";
+
   return (
     <div
       className={cn(
-        "landing-fade-up group flex flex-col items-center gap-4 max-lg:min-w-0 max-lg:w-full",
+        "landing-fade-up group flex flex-col items-center gap-4",
+        isHero && "max-lg:min-w-0 max-lg:w-full",
         className
       )}
       style={style}
     >
-      <div className="relative max-lg:w-full max-lg:min-w-0">
+      <div
+        className={cn(
+          "relative",
+          isHero ? "max-lg:w-full max-lg:min-w-0" : "max-lg:mx-auto"
+        )}
+      >
         <div
           className="pointer-events-none absolute -inset-6 max-lg:-inset-3 rounded-[3rem] bg-gradient-to-br from-fo-primary/25 via-blue-500/5 to-transparent opacity-70 blur-2xl transition-opacity duration-500 group-hover:opacity-100"
           aria-hidden="true"
@@ -46,7 +54,13 @@ export function PhoneFrame({
           </div>
         </div>
       </div>
-      <p className="text-center text-xs font-medium tracking-wide text-fo-text-subtle max-lg:w-full max-lg:min-w-0 max-lg:max-w-full max-lg:overflow-hidden max-[429px]:break-words max-[429px]:leading-snug">
+      <p
+        className={cn(
+          "text-center text-xs font-medium tracking-wide text-fo-text-subtle",
+          isHero &&
+            "max-lg:w-full max-lg:min-w-0 max-lg:max-w-full max-lg:overflow-hidden max-[429px]:break-words max-[429px]:leading-snug"
+        )}
+      >
         {label}
       </p>
     </div>

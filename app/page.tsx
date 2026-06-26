@@ -296,11 +296,11 @@ export default function Home() {
           />
 
           <div className="mt-20 grid gap-20 lg:grid-cols-2 lg:gap-16 xl:gap-24">
-            <div>
+            <div className="max-lg:mx-auto max-lg:w-full">
               <h3 className="text-center text-2xl font-semibold tracking-tight text-fo-text">
                 Officer Flow
               </h3>
-              <div className="mt-10 flex flex-col items-center">
+              <div className="mt-10 flex w-full flex-col items-center">
                 <PhoneFrame size="showcase" label="Browse">
                   <BrowsePreview />
                 </PhoneFrame>
@@ -323,11 +323,11 @@ export default function Home() {
               </div>
             </div>
 
-            <div>
+            <div className="max-lg:mx-auto max-lg:w-full">
               <h3 className="text-center text-2xl font-semibold tracking-tight text-fo-text">
                 Company Flow
               </h3>
-              <div className="mt-10 flex flex-col items-center">
+              <div className="mt-10 flex w-full flex-col items-center">
                 <PhoneFrame size="showcase" label="Dashboard">
                   <DashboardPreview />
                 </PhoneFrame>
