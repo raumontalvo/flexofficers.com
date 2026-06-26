@@ -32,7 +32,7 @@ export function FlexOfficersLogo({
       height={height}
       sizes={
         className?.includes("landing-nav-logo-image")
-          ? "(max-width: 767px) 66px, (max-width: 1023px) 78px, 280px"
+          ? "(max-width: 389px) 88px, (max-width: 767px) 100px, (max-width: 1023px) 113px, 280px"
           : "(max-width: 767px) 200px, (max-width: 1023px) 240px, 280px"
       }
       quality={100}

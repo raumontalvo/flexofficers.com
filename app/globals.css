@@ -99,12 +99,18 @@ html {
 
 /* Landing header — mobile menu anchor offset */
 .landing-header {
-  --landing-header-h: 3.75rem;
+  --landing-header-h: 4.25rem;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 390px) {
   .landing-header {
-    --landing-header-h: 4.25rem;
+    --landing-header-h: 4.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .landing-header {
+    --landing-header-h: 4.75rem;
   }
 }
 
@@ -114,27 +120,37 @@ html {
   }
 }
 
-/* Landing navbar logo — compact on mobile/tablet, clipped tagline on desktop */
+/* Landing navbar logo — clipped wordmark on mobile/tablet, full desktop treatment */
 .landing-nav-logo-clip {
-  --landing-nav-logo-h: 44px;
+  --landing-nav-logo-h: 42px;
+  --landing-nav-logo-w: calc(var(--landing-nav-logo-h) * 1.5 / 0.72);
   display: inline-flex;
-  flex-shrink: 1;
-  min-width: 0;
+  flex-shrink: 0;
+  overflow: hidden;
   line-height: 0;
-  max-height: var(--landing-nav-logo-h);
+  height: var(--landing-nav-logo-h);
+  width: var(--landing-nav-logo-w);
+  max-width: min(46vw, var(--landing-nav-logo-w));
 }
 
 .landing-nav-logo-image {
   display: block !important;
-  height: var(--landing-nav-logo-h) !important;
-  width: auto !important;
-  max-width: 100%;
+  width: var(--landing-nav-logo-w) !important;
+  height: auto !important;
+  max-width: none !important;
   object-fit: contain;
+}
+
+@media (min-width: 390px) and (max-width: 1023px) {
+  .landing-nav-logo-clip {
+    --landing-nav-logo-h: 48px;
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .landing-nav-logo-clip {
-    --landing-nav-logo-h: 52px;
+    --landing-nav-logo-h: 54px;
+    max-width: min(40vw, var(--landing-nav-logo-w));
   }
 }
 
