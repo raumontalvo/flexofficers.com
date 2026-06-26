@@ -1,0 +1,209 @@
+"use client";
+
+import { useCallback, useEffect, useId, useState } from "react";
+import Link from "next/link";
+import { FlexOfficersLogoLink } from "@/components/brand";
+import { buttonClassName } from "@/components/ui";
+import { cn } from "@/lib/cn";
+
+const SECTION_LINKS = [
+  { href: "#how-it-works", label: "How It Works" },
+  { href: "#companies", label: "For Companies" },
+  { href: "#officers", label: "For Officers" },
+  { href: "#pricing", label: "Pricing" },
+] as const;
+
+function MenuIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      {open ? (
+        <>
+          <path d="M6 6l12 12M18 6 6 18" />
+        </>
+      ) : (
+        <>
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+export function LandingNavbar() {
+  const [open, setOpen] = useState(false);
+  const menuId = useId();
+
+  const closeMenu = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, closeMenu]);
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-white/[0.04] bg-fo-bg/80 backdrop-blur-xl">
+      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:py-5">
+        <div className="flex shrink-0 items-center justify-self-start">
+          <FlexOfficersLogoLink
+            href="/"
+            height={320}
+            priority
+            className="landing-nav-logo-clip"
+            imageClassName="landing-nav-logo-image"
+          />
+        </div>
+
+        <div className="hidden items-center justify-center gap-8 whitespace-nowrap text-sm text-fo-text-muted lg:flex lg:gap-10 xl:gap-12">
+          {SECTION_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="transition hover:text-fo-text"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <div className="col-start-2 flex shrink-0 items-center justify-end gap-2 sm:gap-3 lg:col-start-3">
+          <Link
+            href="/sign-in"
+            className={buttonClassName({
+              variant: "ghost",
+              size: "md",
+              className: "hidden shrink-0 whitespace-nowrap lg:inline-flex",
+            })}
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/onboarding?force=1"
+            className={buttonClassName({
+              size: "md",
+              className: "inline-flex shrink-0 whitespace-nowrap lg:inline-flex",
+            })}
+          >
+            Get Started
+          </Link>
+          <button
+            type="button"
+            className={cn(
+              buttonClassName({
+                variant: "secondary",
+                size: "md",
+                className: "inline-flex min-w-11 px-3 lg:hidden",
+              })
+            )}
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls={menuId}
+            onClick={() => setOpen((value) => !value)}
+          >
+            <MenuIcon open={open} />
+          </button>
+        </div>
+      </nav>
+
+      {open ? (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-fo-bg/80 backdrop-blur-sm"
+            aria-label="Close menu"
+            onClick={closeMenu}
+          />
+
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center px-4 pt-[4.75rem]">
+            <div
+              id={menuId}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
+              className="landing-mobile-menu pointer-events-auto w-full max-w-lg rounded-fo-card border border-white/[0.06] bg-fo-bg-elevated p-5 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.75)]"
+            >
+            <div className="mb-4 flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-fo-primary-hover">
+                Menu
+              </p>
+              <button
+                type="button"
+                className={buttonClassName({
+                  variant: "ghost",
+                  size: "md",
+                  className: "min-h-10 min-w-10 px-0",
+                })}
+                aria-label="Close menu"
+                onClick={closeMenu}
+              >
+                <MenuIcon open />
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-1">
+              {SECTION_LINKS.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="rounded-xl px-4 py-3.5 text-base font-medium text-fo-text transition hover:bg-fo-surface hover:text-fo-primary-hover"
+                  onClick={closeMenu}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
+
+            <div className="mt-4 flex flex-col gap-3 border-t border-white/[0.06] pt-4">
+              <Link
+                href="/sign-in"
+                className={buttonClassName({
+                  variant: "secondary",
+                  size: "lg",
+                  fullWidth: true,
+                  className: "w-full",
+                })}
+                onClick={closeMenu}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/onboarding?force=1"
+                className={buttonClassName({
+                  size: "lg",
+                  fullWidth: true,
+                  className: "w-full",
+                })}
+                onClick={closeMenu}
+              >
+                Get Started
+              </Link>
+            </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </header>
+  );
+}

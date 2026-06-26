@@ -1,4 +1,5 @@
 import { HeroBadge } from "@/components/landing/HeroBadge";
+import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FlexOfficersLogoLink } from "@/components/brand";
 import Link from "next/link";
 import {
@@ -141,65 +142,7 @@ function StepCard({
 export default function Home() {
   return (
     <main className="min-h-screen bg-fo-bg text-fo-text">
-      <header className="sticky top-0 z-40 border-b border-white/[0.04] bg-fo-bg/80 backdrop-blur-xl">
-        <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:py-5">
-          <div className="flex shrink-0 items-center justify-self-start">
-            <FlexOfficersLogoLink
-              href="/"
-              height={320}
-              priority
-              className="landing-nav-logo-clip"
-              imageClassName="landing-nav-logo-image"
-            />
-          </div>
-
-          <div className="hidden items-center justify-center gap-8 whitespace-nowrap text-sm text-fo-text-muted lg:flex lg:gap-10 xl:gap-12">
-            <a
-              href="#how-it-works"
-              className="transition hover:text-fo-text"
-            >
-              How It Works
-            </a>
-            <a
-              href="#companies"
-              className="transition hover:text-fo-text"
-            >
-              For Companies
-            </a>
-            <a
-              href="#officers"
-              className="transition hover:text-fo-text"
-            >
-              For Officers
-            </a>
-            <a href="#pricing" className="transition hover:text-fo-text">
-              Pricing
-            </a>
-          </div>
-
-          <div className="col-start-2 flex shrink-0 items-center justify-end gap-2 sm:gap-3 lg:col-start-3">
-            <Link
-              href="/sign-in"
-              className={buttonClassName({
-                variant: "ghost",
-                size: "md",
-                className: "hidden shrink-0 whitespace-nowrap sm:inline-flex",
-              })}
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/onboarding?force=1"
-              className={buttonClassName({
-                size: "md",
-                className: "shrink-0 whitespace-nowrap",
-              })}
-            >
-              Get Started
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <LandingNavbar />
 
       {/* Hero */}
       <section className="relative overflow-hidden">
@@ -210,7 +153,8 @@ export default function Home() {
               <HeroBadge />
               <LandingEyebrow>Security staffing marketplace</LandingEyebrow>
               <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl xl:text-[4.75rem]">
-                The Modern Workforce Platform for Security Companies
+                The Modern Workforce Platform for Security Companies & Security
+                Officers
               </h1>
               <p className="mt-8 max-w-lg text-xl leading-8 text-fo-text-muted/90 sm:text-2xl sm:leading-9">
                 Post shifts, discover qualified security officers, and fill open
