@@ -4,13 +4,14 @@ import {
   ProfileAvatar,
   StatusBadge,
 } from "@/components/ui";
+import { formatArmedStatuses } from "@/lib/profile-options";
 
 type OfficerSearchCardProps = {
   firstName: string;
   lastName: string;
   profilePhotoUrl?: string | null;
   city?: string | null;
-  armedStatus?: ArmedStatus | null;
+  armedStatuses: ArmedStatus[];
   experienceYears?: number | null;
   certifications: string[];
   availability: string[];
@@ -20,18 +21,6 @@ type OfficerSearchCardProps = {
   phone?: string | null;
   email?: string | null;
 };
-
-function formatArmedStatus(value: ArmedStatus | null | undefined) {
-  if (value === "ARMED") {
-    return "Armed";
-  }
-
-  if (value === "UNARMED") {
-    return "Unarmed";
-  }
-
-  return "Not provided";
-}
 
 function TagList({ label, values }: { label: string; values: string[] }) {
   return (
@@ -78,7 +67,7 @@ export function OfficerSearchCard({
   lastName,
   profilePhotoUrl,
   city,
-  armedStatus,
+  armedStatuses,
   experienceYears,
   certifications,
   availability,
@@ -100,7 +89,7 @@ export function OfficerSearchCard({
           <div className="flex flex-wrap gap-2">
             <StatusBadge variant="info">{city || "City not provided"}</StatusBadge>
             <StatusBadge variant="neutral">
-              {formatArmedStatus(armedStatus)}
+              {formatArmedStatuses(armedStatuses)}
             </StatusBadge>
             <StatusBadge variant="neutral">
               {experienceYears !== null && experienceYears !== undefined

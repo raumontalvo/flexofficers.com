@@ -1,6 +1,7 @@
 import { UserRole } from "@/app/generated/prisma/enums";
 import { Card, PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
+import { officerApplicantSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
 import { ApplicantCard } from "./ApplicantCard";
 
@@ -21,7 +22,9 @@ export default async function CompanyApplicationsPage() {
     },
     include: {
       shift: true,
-      officer: true,
+      officer: {
+        select: officerApplicantSelect,
+      },
     },
     orderBy: {
       appliedAt: "desc",
@@ -60,7 +63,7 @@ export default async function CompanyApplicationsPage() {
               officerLastName={application.officer.lastName}
               profilePhotoUrl={application.officer.profilePhotoUrl}
               city={application.officer.city}
-              armedStatus={application.officer.armedStatus}
+              armedStatuses={application.officer.armedStatuses}
               experienceYears={application.officer.experienceYears}
               certifications={application.officer.certifications}
               experienceCategories={application.officer.experienceCategories}

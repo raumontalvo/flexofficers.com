@@ -28,7 +28,7 @@ export default async function ShiftsPage() {
   });
 
   return (
-    <PageShell nav="officer" maxWidth="2xl">
+    <PageShell nav="officer" maxWidth="2xl" sidebar>
       <SectionHeading
         title="Available Shifts"
         subtitle="Find open security shifts near you."

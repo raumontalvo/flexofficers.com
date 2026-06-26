@@ -1,7 +1,9 @@
 import { UserRole } from "@/app/generated/prisma/enums";
 import { PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
+import { officerProfileSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
+import type { ArmedStatusOption } from "@/lib/profile-options";
 import OfficerProfileForm from "./OfficerProfileForm";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +24,9 @@ export default async function OfficerProfilePage() {
       clerkId: clerkUser.id,
     },
     include: {
-      officer: true,
+      officer: {
+        select: officerProfileSelect,
+      },
     },
   });
 
@@ -35,7 +39,7 @@ export default async function OfficerProfilePage() {
     email: user?.email ?? clerkUser.emailAddresses[0]?.emailAddress ?? "",
     city: officer?.city ?? "",
     profilePhotoUrl: officer?.profilePhotoUrl ?? "",
-    armedStatus: (officer?.armedStatus ?? "") as "" | "ARMED" | "UNARMED",
+    armedStatuses: (officer?.armedStatuses ?? []) as ArmedStatusOption[],
     experienceYears:
       officer?.experienceYears !== null && officer?.experienceYears !== undefined
         ? String(officer.experienceYears)
@@ -48,7 +52,7 @@ export default async function OfficerProfilePage() {
   };
 
   return (
-    <PageShell nav="officer" maxWidth="lg">
+    <PageShell nav="officer" maxWidth="lg" sidebar>
       <SectionHeading
         title="Officer Profile"
         subtitle="Keep your profile ready so companies can review you."

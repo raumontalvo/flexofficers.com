@@ -2,6 +2,7 @@ import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { FlexOfficersLogoLink } from "@/components/brand";
+import { officerProfileSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
 import CompanyDashboard from "./CompanyDashboard";
 import DashboardSignOutButton from "./SignOutButton";
@@ -16,7 +17,9 @@ export default async function DashboardPage() {
           clerkId: clerkUser.id,
         },
         include: {
-          officer: true,
+          officer: {
+            select: officerProfileSelect,
+          },
           company: true,
         },
       })
@@ -27,23 +30,6 @@ export default async function DashboardPage() {
   if (role === "ADMIN") {
     redirect("/admin");
   }
-
-  const officerMissingItems =
-    role === "OFFICER"
-      ? ([
-          !user?.officer?.city ? "Add your city" : null,
-          !user?.officer?.phone ? "Add your phone number" : null,
-          !user?.email ? "Add your email" : null,
-          !user?.officer?.armedStatus ? "Select armed or unarmed" : null,
-          user?.officer?.experienceYears === null ||
-          user?.officer?.experienceYears === undefined
-            ? "Add your years of experience"
-            : null,
-          !user?.officer?.licenseExpirationDate
-            ? "Add your license expiration date"
-            : null,
-        ].filter((item): item is string => Boolean(item)))
-      : [];
 
   const companyMissingItems =
     role === "COMPANY"
@@ -70,8 +56,7 @@ export default async function DashboardPage() {
     return (
       <OfficerDashboard
         firstName={clerkUser?.firstName}
-        officerId={user?.officer?.id}
-        missingItems={officerMissingItems}
+        officer={user?.officer ?? null}
       />
     );
   }

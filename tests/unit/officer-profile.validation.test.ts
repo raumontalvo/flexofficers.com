@@ -52,4 +52,42 @@ describe("parseOfficerPayload", () => {
       );
     }
   });
+
+  it("accepts both armed and unarmed selections", () => {
+    const result = parseOfficerPayload({
+      firstName: "Alex",
+      lastName: "Stone",
+      phone: "555-0100",
+      email: "alex@example.com",
+      city: "Miami",
+      armedStatuses: ["ARMED", "UNARMED"],
+      experienceYears: 5,
+      licenseExpirationDate: "2027-01-01",
+    });
+
+    expect("errors" in result).toBe(false);
+
+    if (!("errors" in result)) {
+      expect(result.data.armedStatuses).toEqual(["ARMED", "UNARMED"]);
+    }
+  });
+
+  it("accepts legacy single armedStatus field", () => {
+    const result = parseOfficerPayload({
+      firstName: "Alex",
+      lastName: "Stone",
+      phone: "555-0100",
+      email: "alex@example.com",
+      city: "Miami",
+      armedStatus: "ARMED",
+      experienceYears: 3,
+      licenseExpirationDate: "2027-01-01",
+    });
+
+    expect("errors" in result).toBe(false);
+
+    if (!("errors" in result)) {
+      expect(result.data.armedStatuses).toEqual(["ARMED"]);
+    }
+  });
 });

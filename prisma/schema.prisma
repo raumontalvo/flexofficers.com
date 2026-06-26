@@ -68,7 +68,7 @@ model Officer {
   city                  String?
   state                 String?
   profilePhotoUrl       String?
-  armedStatus           ArmedStatus?
+  armedStatuses         ArmedStatus[] @default([])
   experienceYears       Int?
   licenseExpirationDate DateTime?
   availability          String[]     @default([])

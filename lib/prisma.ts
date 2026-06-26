@@ -9,16 +9,34 @@ if (!connectionString) {
 
 const adapter = new PrismaPg({ connectionString });
 
+/** Bump when Officer schema fields change to avoid stale dev client caches. */
+const PRISMA_CLIENT_VERSION = "officer-armedStatuses-v1";
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  prismaClientVersion: string | undefined;
 };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+function createPrismaClient() {
+  return new PrismaClient({
     adapter,
   });
+}
+
+export const prisma =
+  globalForPrisma.prismaClientVersion === PRISMA_CLIENT_VERSION &&
+  globalForPrisma.prisma
+    ? globalForPrisma.prisma
+    : createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
+  if (
+    globalForPrisma.prisma &&
+    globalForPrisma.prismaClientVersion !== PRISMA_CLIENT_VERSION
+  ) {
+    void globalForPrisma.prisma.$disconnect();
+  }
+
   globalForPrisma.prisma = prisma;
+  globalForPrisma.prismaClientVersion = PRISMA_CLIENT_VERSION;
 }

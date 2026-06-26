@@ -93,3 +93,38 @@ export function BillingIcon(props: IconProps) {
     </IconBase>
   );
 }
+
+export function UpcomingIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M8 3v4M16 3v4M4 10h16M8 14h2M12 14h4" />
+    </IconBase>
+  );
+}
+
+export function MessagesIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M5 6.5h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z" />
+    </IconBase>
+  );
+}
+
+export function NotificationsIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M12 4a4 4 0 0 1 4 4v2.5c0 .8.3 1.6.8 2.2L18 15H6l1.2-2.3c.5-.6.8-1.4.8-2.2V8a4 4 0 0 1 4-4z" />
+      <path d="M10 17a2 2 0 0 0 4 0" />
+    </IconBase>
+  );
+}
+
+export function SettingsIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" />
+    </IconBase>
+  );
+}

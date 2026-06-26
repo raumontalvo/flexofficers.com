@@ -60,7 +60,7 @@ export default async function ShiftDetailPage({
     user?.role === UserRole.OFFICER && shift.status === ShiftStatus.OPEN;
 
   return (
-    <PageShell nav="officer" maxWidth="lg">
+    <PageShell nav="officer" maxWidth="lg" sidebar>
       <Link
         href="/shifts"
         className="inline-flex min-h-11 items-center text-sm font-medium text-fo-primary-hover hover:text-fo-primary-bright"

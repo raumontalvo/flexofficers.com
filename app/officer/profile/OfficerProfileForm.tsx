@@ -11,9 +11,12 @@ import {
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
+  ARMED_STATUS_OPTIONS,
   AVAILABILITY_OPTIONS,
   CERTIFICATION_OPTIONS,
   EXPERIENCE_CATEGORIES,
+  formatArmedStatusLabel,
+  type ArmedStatusOption,
 } from "@/lib/profile-options";
 
 type OfficerProfileFormState = {
@@ -23,7 +26,7 @@ type OfficerProfileFormState = {
   email: string;
   city: string;
   profilePhotoUrl: string;
-  armedStatus: "" | "ARMED" | "UNARMED";
+  armedStatuses: ArmedStatusOption[];
   experienceYears: string;
   licenseExpirationDate: string;
   availability: string[];
@@ -260,31 +263,20 @@ export default function OfficerProfileForm({
           </CardDescription>
         </CardHeader>
 
-        <div className="space-y-3">
-          <FieldLabel>Armed status</FieldLabel>
-          <div className="grid grid-cols-2 gap-3">
-            {(["ARMED", "UNARMED"] as const).map((status) => {
-              const isSelected = form.armedStatus === status;
-
-              return (
-                <button
-                  key={status}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onClick={() => setForm({ ...form, armedStatus: status })}
-                  className={cn(
-                    "min-h-12 rounded-fo-button border px-4 py-3 text-sm font-semibold transition active:scale-[0.98]",
-                    isSelected
-                      ? "border-fo-primary-bright bg-fo-primary/15 text-fo-primary-hover"
-                      : "border-fo-border bg-fo-bg-elevated text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text"
-                  )}
-                >
-                  {status === "ARMED" ? "Armed" : "Unarmed"}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <TagToggleGroup
+          label="Armed status"
+          description="Select all that apply. Choose both if you can work armed and unarmed assignments."
+          options={ARMED_STATUS_OPTIONS.map(formatArmedStatusLabel)}
+          selected={form.armedStatuses.map(formatArmedStatusLabel)}
+          onChange={(labels) =>
+            setForm({
+              ...form,
+              armedStatuses: labels.map((label) =>
+                label === "Armed" ? "ARMED" : "UNARMED"
+              ) as ArmedStatusOption[],
+            })
+          }
+        />
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

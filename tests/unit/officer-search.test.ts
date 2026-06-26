@@ -9,20 +9,20 @@ describe("parseOfficerSearchFilters", () => {
   it("parses valid filter values", () => {
     const filters = parseOfficerSearchFilters({
       city: " Miami ",
-      armedStatus: "armed",
+      armedStatuses: "armed",
       minExperienceYears: "3",
       certification: "CPR / First Aid",
       availability: "Night Shift",
-      experienceCategory: "Hospital",
+      experienceCategory: "Hospital security",
     });
 
     expect(filters).toEqual({
       city: "Miami",
-      armedStatus: ArmedStatus.ARMED,
+      armedStatuses: [ArmedStatus.ARMED],
       minExperienceYears: 3,
       certification: "CPR / First Aid",
       availability: "Night Shift",
-      experienceCategory: "Hospital",
+      experienceCategory: "Hospital security",
     });
   });
 
@@ -31,7 +31,7 @@ describe("parseOfficerSearchFilters", () => {
       certification: "Invalid Cert",
       availability: "Invalid Availability",
       experienceCategory: "Invalid Category",
-      armedStatus: "maybe",
+      armedStatuses: "maybe",
     });
 
     expect(filters).toEqual({});
@@ -42,11 +42,11 @@ describe("buildOfficerSearchWhere", () => {
   it("builds a Prisma where clause for officer search", () => {
     const where = buildOfficerSearchWhere({
       city: "Austin",
-      armedStatus: ArmedStatus.UNARMED,
+      armedStatuses: [ArmedStatus.UNARMED],
       minExperienceYears: 2,
       certification: "Taser",
       availability: "Weekends",
-      experienceCategory: "Retail",
+      experienceCategory: "Retail security",
     });
 
     expect(where).toEqual({
@@ -57,7 +57,9 @@ describe("buildOfficerSearchWhere", () => {
         contains: "Austin",
         mode: "insensitive",
       },
-      armedStatus: ArmedStatus.UNARMED,
+      armedStatuses: {
+        has: ArmedStatus.UNARMED,
+      },
       experienceYears: {
         gte: 2,
       },
@@ -68,7 +70,7 @@ describe("buildOfficerSearchWhere", () => {
         has: "Weekends",
       },
       experienceCategories: {
-        has: "Retail",
+        has: "Retail security",
       },
     });
   });

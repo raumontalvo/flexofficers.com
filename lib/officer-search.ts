@@ -7,7 +7,7 @@ import {
 
 export type OfficerSearchFilters = {
   city?: string;
-  armedStatus?: ArmedStatus;
+  armedStatuses?: ArmedStatus[];
   minExperienceYears?: number;
   certification?: string;
   availability?: string;
@@ -28,6 +28,16 @@ function isAllowedOption(value: string, options: readonly string[]) {
   return options.includes(value);
 }
 
+function parseArmedStatusFilter(value: string): ArmedStatus | undefined {
+  const normalized = value.toUpperCase();
+
+  if (normalized === ArmedStatus.ARMED || normalized === ArmedStatus.UNARMED) {
+    return normalized as ArmedStatus;
+  }
+
+  return undefined;
+}
+
 export function parseOfficerSearchFilters(
   searchParams: Record<string, SearchParamValue>
 ): OfficerSearchFilters {
@@ -38,9 +48,12 @@ export function parseOfficerSearchFilters(
     filters.city = city;
   }
 
-  const armedStatusRaw = readParam(searchParams.armedStatus).toUpperCase();
-  if (armedStatusRaw === ArmedStatus.ARMED || armedStatusRaw === ArmedStatus.UNARMED) {
-    filters.armedStatus = armedStatusRaw as ArmedStatus;
+  const selectedArmedStatus = parseArmedStatusFilter(
+    readParam(searchParams.armedStatuses)
+  );
+
+  if (selectedArmedStatus) {
+    filters.armedStatuses = [selectedArmedStatus];
   }
 
   const minExperienceYearsRaw = readParam(searchParams.minExperienceYears);
@@ -88,8 +101,14 @@ export function buildOfficerSearchWhere(
     };
   }
 
-  if (filters.armedStatus) {
-    where.armedStatus = filters.armedStatus;
+  if (filters.armedStatuses?.length === 1) {
+    where.armedStatuses = {
+      has: filters.armedStatuses[0],
+    };
+  } else if (filters.armedStatuses && filters.armedStatuses.length > 1) {
+    where.armedStatuses = {
+      hasSome: filters.armedStatuses,
+    };
   }
 
   if (typeof filters.minExperienceYears === "number") {

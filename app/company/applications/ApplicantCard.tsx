@@ -6,6 +6,7 @@ import {
   ShiftStatusBadge,
   StatusBadge,
 } from "@/components/ui";
+import { formatArmedStatuses } from "@/lib/profile-options";
 import { formatHourlyRate, formatShiftDateTime } from "@/lib/format-shift";
 import ApplicationStatusButtons from "./ApplicationStatusButtons";
 
@@ -22,24 +23,12 @@ type ApplicantCardProps = {
   officerLastName: string;
   profilePhotoUrl?: string | null;
   city?: string | null;
-  armedStatus?: ArmedStatus | null;
+  armedStatuses: ArmedStatus[];
   experienceYears?: number | null;
   certifications: string[];
   experienceCategories: string[];
   introduction?: string | null;
 };
-
-function formatArmedStatus(value: ArmedStatus | null | undefined) {
-  if (value === "ARMED") {
-    return "Armed";
-  }
-
-  if (value === "UNARMED") {
-    return "Unarmed";
-  }
-
-  return "Not provided";
-}
 
 function TagList({ label, values }: { label: string; values: string[] }) {
   return (
@@ -94,7 +83,7 @@ export function ApplicantCard({
   officerLastName,
   profilePhotoUrl,
   city,
-  armedStatus,
+  armedStatuses,
   experienceYears,
   certifications,
   experienceCategories,
@@ -144,7 +133,7 @@ export function ApplicantCard({
           <div className="flex flex-wrap gap-2">
             <StatusBadge variant="info">{city || "City not provided"}</StatusBadge>
             <StatusBadge variant="neutral">
-              {formatArmedStatus(armedStatus)}
+              {formatArmedStatuses(armedStatuses)}
             </StatusBadge>
             <StatusBadge variant="neutral">
               {experienceYears !== null && experienceYears !== undefined

@@ -35,7 +35,7 @@ export default async function OfficerApplicationsPage() {
   });
 
   return (
-    <PageShell nav="officer" maxWidth="2xl">
+    <PageShell nav="officer" maxWidth="2xl" sidebar>
       <SectionHeading
         title="My Shifts"
         subtitle="Shifts you've applied to."

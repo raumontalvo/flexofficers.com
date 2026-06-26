@@ -4,6 +4,7 @@ import {
   buildOfficerSearchWhere,
   parseOfficerSearchFilters,
 } from "@/lib/officer-search";
+import { officerSearchCardSelect } from "@/lib/officer-fields";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import { OfficerSearchCard } from "./OfficerSearchCard";
@@ -25,7 +26,8 @@ export default async function CompanyOfficersPage({
   const [officers, companyApplications] = await Promise.all([
     prisma.officer.findMany({
       where: buildOfficerSearchWhere(filters),
-      include: {
+      select: {
+        ...officerSearchCardSelect,
         user: {
           select: {
             email: true,
@@ -90,7 +92,7 @@ export default async function CompanyOfficersPage({
                 lastName={officer.lastName}
                 profilePhotoUrl={officer.profilePhotoUrl}
                 city={officer.city}
-                armedStatus={officer.armedStatus}
+                armedStatuses={officer.armedStatuses}
                 experienceYears={officer.experienceYears}
                 certifications={officer.certifications}
                 availability={officer.availability}

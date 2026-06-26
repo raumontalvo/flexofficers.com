@@ -54,11 +54,11 @@ export function OfficerSearchFiltersForm({
         </div>
 
         <div className="space-y-2">
-          <FieldLabel htmlFor="armedStatus">Armed status</FieldLabel>
+          <FieldLabel htmlFor="armedStatuses">Armed status</FieldLabel>
           <select
-            id="armedStatus"
-            name="armedStatus"
-            defaultValue={filters.armedStatus ?? ""}
+            id="armedStatuses"
+            name="armedStatuses"
+            defaultValue={filters.armedStatuses?.[0] ?? ""}
             className={fieldClassName}
           >
             <option value="">Any</option>

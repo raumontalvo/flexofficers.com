@@ -1,7 +1,8 @@
 import {
+  ALL_EXPERIENCE_CATEGORIES,
+  ARMED_STATUS_OPTIONS,
   AVAILABILITY_OPTIONS,
   CERTIFICATION_OPTIONS,
-  EXPERIENCE_CATEGORIES,
 } from "@/lib/profile-options";
 import { ArmedStatus } from "@/app/generated/prisma/enums";
 
@@ -13,6 +14,7 @@ export type OfficerProfilePayload = {
   city?: unknown;
   profilePhotoUrl?: unknown;
   armedStatus?: unknown;
+  armedStatuses?: unknown;
   experienceYears?: unknown;
   licenseExpirationDate?: unknown;
   availability?: unknown;
@@ -138,6 +140,69 @@ function parseStringArrayFromOptions(
   return parsed;
 }
 
+function parseArmedStatuses(
+  payload: OfficerProfilePayload,
+  errors: FieldError[]
+): ArmedStatus[] {
+  const allowed = new Set(ARMED_STATUS_OPTIONS);
+  const parsed: ArmedStatus[] = [];
+
+  const rawValues: unknown[] = [];
+
+  if (Array.isArray(payload.armedStatuses)) {
+    rawValues.push(...payload.armedStatuses);
+  } else if (
+    typeof payload.armedStatuses === "string" &&
+    payload.armedStatuses.trim() !== ""
+  ) {
+    rawValues.push(payload.armedStatuses);
+  } else if (
+    typeof payload.armedStatus === "string" &&
+    payload.armedStatus.trim() !== ""
+  ) {
+    rawValues.push(payload.armedStatus);
+  }
+
+  if (rawValues.length === 0) {
+    errors.push({
+      field: "armedStatuses",
+      message: "armedStatuses is required",
+    });
+
+    return parsed;
+  }
+
+  rawValues.forEach((entry, index) => {
+    if (typeof entry !== "string") {
+      errors.push({
+        field: `armedStatuses[${index}]`,
+        message: "must be a string",
+      });
+
+      return;
+    }
+
+    const normalized = entry.trim().toUpperCase();
+
+    if (!allowed.has(normalized as (typeof ARMED_STATUS_OPTIONS)[number])) {
+      errors.push({
+        field: `armedStatuses[${index}]`,
+        message: "must be ARMED or UNARMED",
+      });
+
+      return;
+    }
+
+    const status = normalized as ArmedStatus;
+
+    if (!parsed.includes(status)) {
+      parsed.push(status);
+    }
+  });
+
+  return parsed;
+}
+
 export function parseOfficerPayload(payload: OfficerProfilePayload) {
   const errors: FieldError[] = [];
 
@@ -152,27 +217,7 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
     errors
   );
 
-  let armedStatus: ArmedStatus | undefined;
-  if (typeof payload.armedStatus !== "string" || payload.armedStatus.trim() === "") {
-    errors.push({
-      field: "armedStatus",
-      message: "armedStatus is required",
-    });
-  } else {
-    const normalized = payload.armedStatus.trim().toUpperCase();
-
-    if (
-      normalized !== ArmedStatus.ARMED &&
-      normalized !== ArmedStatus.UNARMED
-    ) {
-      errors.push({
-        field: "armedStatus",
-        message: "armedStatus must be ARMED or UNARMED",
-      });
-    } else {
-      armedStatus = normalized as ArmedStatus;
-    }
-  }
+  const armedStatuses = parseArmedStatuses(payload, errors);
 
   let experienceYears: number | undefined;
   if (
@@ -236,7 +281,7 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
   const experienceCategories = parseStringArrayFromOptions(
     payload.experienceCategories,
     "experienceCategories",
-    EXPERIENCE_CATEGORIES,
+    ALL_EXPERIENCE_CATEGORIES,
     errors
   );
 
@@ -277,7 +322,7 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
       email,
       city,
       profilePhotoUrl,
-      armedStatus: armedStatus!,
+      armedStatuses,
       experienceYears: experienceYears!,
       licenseExpirationDate: licenseExpirationDate!,
       availability,

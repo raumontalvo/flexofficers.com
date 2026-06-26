@@ -49,7 +49,7 @@ export default async function OfficerAcceptedShiftsPage() {
   });
 
   return (
-    <PageShell nav="officer" maxWidth="2xl">
+    <PageShell nav="officer" maxWidth="2xl" sidebar>
       <SectionHeading
         title="Accepted Shifts"
         subtitle="Company contact details unlock after acceptance."

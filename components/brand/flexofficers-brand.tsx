@@ -4,6 +4,8 @@ import {
   BRAND_BADGE_ASPECT,
   BRAND_BADGE_PNG,
   BRAND_BADGE_SIZE,
+  BRAND_BADGE_TRANSPARENT_ASPECT,
+  BRAND_BADGE_TRANSPARENT_PNG,
   BRAND_LOGO_ASPECT,
   BRAND_LOGO_HEIGHT,
   BRAND_LOGO_PNG,
@@ -51,17 +53,22 @@ export function FlexOfficersBadge({
   className,
   height = 44,
   priority = false,
-}: BrandImageProps) {
+  transparent = false,
+}: BrandImageProps & { transparent?: boolean }) {
+  const src = transparent ? BRAND_BADGE_TRANSPARENT_PNG : BRAND_BADGE_PNG;
+  const aspect = transparent ? BRAND_BADGE_TRANSPARENT_ASPECT : 1;
+  const width = transparent ? Math.round(height * aspect) : height;
+
   return (
     <Image
-      src={BRAND_BADGE_PNG}
+      src={src}
       alt="FlexOfficers"
-      width={height}
+      width={width}
       height={height}
-      sizes={`${height}px`}
+      sizes={`${width}px`}
       quality={100}
       className={cn("block h-auto w-auto shrink-0 object-contain", className)}
-      style={{ height, width: height }}
+      style={{ height, width: transparent ? "auto" : height, maxHeight: height }}
       priority={priority}
     />
   );
@@ -92,6 +99,7 @@ export function FlexOfficersLogoLink({
 
 type FlexOfficersBadgeLinkProps = BrandImageProps & {
   href?: string;
+  transparent?: boolean;
 };
 
 export function FlexOfficersBadgeLink({
@@ -99,10 +107,11 @@ export function FlexOfficersBadgeLink({
   className,
   height = 40,
   priority = false,
+  transparent = false,
 }: FlexOfficersBadgeLinkProps) {
   return (
     <Link href={href} className={cn("inline-flex shrink-0 items-center", className)}>
-      <FlexOfficersBadge height={height} priority={priority} />
+      <FlexOfficersBadge height={height} priority={priority} transparent={transparent} />
     </Link>
   );
 }

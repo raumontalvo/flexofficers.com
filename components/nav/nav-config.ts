@@ -5,9 +5,13 @@ import {
   BillingIcon,
   BrowseIcon,
   DashboardIcon,
+  MessagesIcon,
+  NotificationsIcon,
   ProfileIcon,
   SearchIcon,
+  SettingsIcon,
   ShiftsIcon,
+  UpcomingIcon,
 } from "./icons";
 
 export type NavItem = {
@@ -19,6 +23,12 @@ export type NavItem = {
 
 export const officerNavItems: NavItem[] = [
   {
+    href: "/dashboard",
+    label: "Home",
+    icon: DashboardIcon,
+    match: (pathname) => pathname === "/dashboard",
+  },
+  {
     href: "/shifts",
     label: "Browse",
     icon: BrowseIcon,
@@ -27,21 +37,73 @@ export const officerNavItems: NavItem[] = [
   },
   {
     href: "/officer/applications",
-    label: "My Shifts",
+    label: "Applications",
     icon: ShiftsIcon,
     match: (pathname) => pathname.startsWith("/officer/applications"),
-  },
-  {
-    href: "/officer/accepted-shifts",
-    label: "Accepted",
-    icon: AcceptedIcon,
-    match: (pathname) => pathname.startsWith("/officer/accepted-shifts"),
   },
   {
     href: "/officer/profile",
     label: "Profile",
     icon: ProfileIcon,
     match: (pathname) => pathname.startsWith("/officer/profile"),
+  },
+];
+
+export const officerSidebarItems: NavItem[] = [
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: DashboardIcon,
+    match: (pathname) => pathname === "/dashboard",
+  },
+  {
+    href: "/shifts",
+    label: "Browse Shifts",
+    icon: BrowseIcon,
+    match: (pathname) =>
+      pathname === "/shifts" || pathname.startsWith("/shifts/"),
+  },
+  {
+    href: "/officer/applications",
+    label: "Applications",
+    icon: ShiftsIcon,
+    match: (pathname) => pathname.startsWith("/officer/applications"),
+  },
+  {
+    href: "/officer/accepted-shifts",
+    label: "Accepted Shifts",
+    icon: AcceptedIcon,
+    match: (pathname) => pathname.startsWith("/officer/accepted-shifts"),
+  },
+  {
+    href: "/officer/upcoming-shifts",
+    label: "Upcoming Shifts",
+    icon: UpcomingIcon,
+    match: (pathname) => pathname.startsWith("/officer/upcoming-shifts"),
+  },
+  {
+    href: "/officer/messages",
+    label: "Messages",
+    icon: MessagesIcon,
+    match: (pathname) => pathname.startsWith("/officer/messages"),
+  },
+  {
+    href: "/officer/notifications",
+    label: "Notifications",
+    icon: NotificationsIcon,
+    match: (pathname) => pathname.startsWith("/officer/notifications"),
+  },
+  {
+    href: "/officer/profile",
+    label: "My Profile",
+    icon: ProfileIcon,
+    match: (pathname) => pathname.startsWith("/officer/profile"),
+  },
+  {
+    href: "/officer/settings",
+    label: "Settings",
+    icon: SettingsIcon,
+    match: (pathname) => pathname.startsWith("/officer/settings"),
   },
 ];
 
