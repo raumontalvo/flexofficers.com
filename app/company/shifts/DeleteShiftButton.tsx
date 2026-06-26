@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui";
+
 export default function DeleteShiftButton({ shiftId }: { shiftId: string }) {
   async function deleteShift() {
     const confirmed = window.confirm(
@@ -27,11 +29,14 @@ export default function DeleteShiftButton({ shiftId }: { shiftId: string }) {
   }
 
   return (
-    <button
+    <Button
+      type="button"
+      variant="danger"
+      fullWidth
+      className="w-full"
       onClick={deleteShift}
-      className="rounded-xl bg-red-600 px-5 py-3 font-semibold hover:bg-red-500"
     >
       Delete Shift
-    </button>
+    </Button>
   );
 }

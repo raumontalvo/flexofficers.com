@@ -1,7 +1,8 @@
 import { UserRole } from "@/app/generated/prisma/enums";
+import { Card, PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
-import ApplicationDetails from "./ApplicationDetails";
+import { ApplicantCard } from "./ApplicantCard";
 
 export const dynamic = "force-dynamic";
 
@@ -20,15 +21,7 @@ export default async function CompanyApplicationsPage() {
     },
     include: {
       shift: true,
-      officer: {
-        include: {
-          licenses: {
-            orderBy: {
-              createdAt: "asc",
-            },
-          },
-        },
-      },
+      officer: true,
     },
     orderBy: {
       appliedAt: "desc",
@@ -36,60 +29,46 @@ export default async function CompanyApplicationsPage() {
   });
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <section className="mx-auto max-w-6xl">
-        <h1 className="text-4xl font-bold">Applicants</h1>
+    <PageShell nav="company" maxWidth="2xl">
+      <SectionHeading
+        title="Applicants"
+        subtitle="Review officers who applied to your shifts."
+      />
 
-        <p className="mt-4 text-slate-300">
-          Review officers who applied to your shifts.
-        </p>
-
-        <div className="mt-10 grid gap-6">
-          {applications.length === 0 ? (
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
-              No applications yet.
-            </div>
-          ) : (
-            applications.map((application) => (
-              <div
-                key={application.id}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6"
-              >
-                <h2 className="text-2xl font-bold">
-                  {application.officer.firstName}{" "}
-                  {application.officer.lastName}
-                </h2>
-
-                <p className="mt-2 text-slate-300">
-                  Applied for: {application.shift.title}
-                </p>
-
-                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    {application.officer.city || "City not provided"},{" "}
-                    {application.officer.state || "State not provided"}
-                  </span>
-
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    Application: {application.status}
-                  </span>
-
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    Shift: {application.shift.status}
-                  </span>
-                </div>
-
-                <ApplicationDetails
-                  applicationId={application.id}
-                  applicationStatus={application.status}
-                  bio={application.officer.bio}
-                  licenses={application.officer.licenses}
-                />
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-    </main>
+      <div className="mt-8 space-y-4">
+        {applications.length === 0 ? (
+          <Card variant="muted" className="text-center">
+            <p className="text-lg font-medium text-fo-text">No applications yet.</p>
+            <p className="mt-2 text-sm text-fo-text-muted">
+              When officers apply to your shifts, they will appear here for
+              review.
+            </p>
+          </Card>
+        ) : (
+          applications.map((application) => (
+            <ApplicantCard
+              key={application.id}
+              applicationId={application.id}
+              applicationStatus={application.status}
+              shiftTitle={application.shift.title}
+              shiftStatus={application.shift.status}
+              hourlyRate={application.shift.hourlyRate}
+              location={application.shift.location}
+              startTime={application.shift.startTime}
+              endTime={application.shift.endTime}
+              officerFirstName={application.officer.firstName}
+              officerLastName={application.officer.lastName}
+              profilePhotoUrl={application.officer.profilePhotoUrl}
+              city={application.officer.city}
+              armedStatus={application.officer.armedStatus}
+              experienceYears={application.officer.experienceYears}
+              certifications={application.officer.certifications}
+              experienceCategories={application.officer.experienceCategories}
+              introduction={application.officer.introduction}
+            />
+          ))
+        )}
+      </div>
+    </PageShell>
   );
 }

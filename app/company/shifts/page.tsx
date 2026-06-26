@@ -1,15 +1,32 @@
 import Link from "next/link";
-import { ApplicationStatus } from "@/app/generated/prisma/enums";
-import { UserRole } from "@/app/generated/prisma/enums";
+import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
+import {
+  buttonClassName,
+  Card,
+  PageShell,
+  SectionHeading,
+} from "@/components/ui";
+import { isCompanySubscriptionActive } from "@/lib/company-subscription";
 import { prisma } from "@/lib/prisma";
 import { requirePageRole } from "@/lib/page-rbac";
-import CancelShiftButton from "./CancelShiftButton";
-import DeleteShiftButton from "./DeleteShiftButton";
+import { CompanyShiftCard } from "./CompanyShiftCard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CompanyShiftsPage() {
   const clerkUser = await requirePageRole(UserRole.COMPANY);
+
+  const company = await prisma.company.findFirst({
+    where: {
+      user: {
+        clerkId: clerkUser.id,
+      },
+    },
+  });
+
+  const subscriptionActive = company
+    ? isCompanySubscriptionActive(company)
+    : false;
 
   const shifts = await prisma.shift.findMany({
     where: {
@@ -32,81 +49,97 @@ export default async function CompanyShiftsPage() {
   });
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <section className="mx-auto max-w-6xl">
-        <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <div>
-            <h1 className="text-4xl font-bold">Manage Shifts</h1>
-
-            <p className="mt-4 text-slate-300">
-              View, track, cancel, and delete shifts posted by your company.
-            </p>
-          </div>
-
-          <Link
-            href="/shifts/create"
-            className="rounded-xl bg-blue-500 px-6 py-3 text-center font-semibold hover:bg-blue-400"
-          >
-            Post a Shift
-          </Link>
-        </div>
-
-        <div className="mt-10 grid gap-6">
-          {shifts.length === 0 ? (
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
-              You have not posted any shifts yet.
-            </div>
+    <PageShell nav="company" maxWidth="2xl">
+      <SectionHeading
+        title="Manage Shifts"
+        subtitle="Track open, filled, and cancelled shifts."
+        action={
+          subscriptionActive ? (
+            <Link
+              href="/shifts/create"
+              className={buttonClassName({ size: "md" })}
+            >
+              Post a Shift
+            </Link>
           ) : (
-            shifts.map((shift) => {
-              const filledCount = shift.applications.length;
+            <Link
+              href="/company/billing"
+              className={buttonClassName({ size: "md" })}
+            >
+              Subscribe to Post Shifts
+            </Link>
+          )
+        }
+      />
 
-              return (
-                <div
-                  key={shift.id}
-                  className="rounded-3xl border border-white/10 bg-white/5 p-6"
-                >
-                  <div className="flex flex-col justify-between gap-6 md:flex-row md:items-center">
-                    <div>
-                      <h2 className="text-2xl font-bold">{shift.title}</h2>
+      <div className="mt-8 space-y-4">
+        {!subscriptionActive ? (
+          <Card variant="muted">
+            <p className="text-sm leading-relaxed text-fo-text-muted">
+              Your subscription is inactive. You can still manage existing
+              shifts, but posting new shifts requires an active subscription.
+            </p>
+            <Link
+              href="/company/billing"
+              className={buttonClassName({
+                variant: "secondary",
+                size: "md",
+                className: "mt-4",
+              })}
+            >
+              View Billing
+            </Link>
+          </Card>
+        ) : null}
 
-                      <p className="mt-2 text-slate-300">{shift.location}</p>
-
-                      <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
-                        <span className="rounded-full bg-white/10 px-3 py-1">
-                          ${shift.hourlyRate.toString()}/hr
-                        </span>
-
-                        <span className="rounded-full bg-white/10 px-3 py-1">
-                          {shift.requiredLicense}
-                        </span>
-
-                        <span className="rounded-full bg-white/10 px-3 py-1">
-                          {filledCount} of {shift.positionsNeeded} filled
-                        </span>
-
-                        <span className="rounded-full bg-white/10 px-3 py-1">
-                          {shift.status}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <Link
-                        href={`/company/shifts/${shift.id}/edit`}
-                        className="rounded-xl border border-white/20 px-5 py-3 text-center font-semibold hover:bg-white/10"
-                      >
-                        Edit Shift
-                      </Link>
-                      <CancelShiftButton shiftId={shift.id} />
-                      <DeleteShiftButton shiftId={shift.id} />
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </section>
-    </main>
+        {shifts.length === 0 ? (
+          <Card variant="muted" className="text-center">
+            <p className="text-lg font-medium text-fo-text">
+              You have not posted any shifts yet.
+            </p>
+            <p className="mt-2 text-sm text-fo-text-muted">
+              Post your first shift to start receiving officer applications.
+            </p>
+            {subscriptionActive ? (
+              <Link
+                href="/shifts/create"
+                className={buttonClassName({
+                  fullWidth: true,
+                  className: "mt-6 w-full sm:w-auto",
+                })}
+              >
+                Post a Shift
+              </Link>
+            ) : (
+              <Link
+                href="/company/billing"
+                className={buttonClassName({
+                  fullWidth: true,
+                  className: "mt-6 w-full sm:w-auto",
+                })}
+              >
+                View Billing
+              </Link>
+            )}
+          </Card>
+        ) : (
+          shifts.map((shift) => (
+            <CompanyShiftCard
+              key={shift.id}
+              shiftId={shift.id}
+              title={shift.title}
+              hourlyRate={shift.hourlyRate}
+              location={shift.location}
+              startTime={shift.startTime}
+              endTime={shift.endTime}
+              positionsNeeded={shift.positionsNeeded}
+              filledCount={shift.applications.length}
+              specialRequirements={shift.specialRequirements}
+              status={shift.status}
+            />
+          ))
+        )}
+      </div>
+    </PageShell>
   );
 }

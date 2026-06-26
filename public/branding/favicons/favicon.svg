@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="FlexOfficers">
+  <defs>
+    <linearGradient id="chrome" x1="18%" y1="6%" x2="82%" y2="94%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="42%" stop-color="#9aa6b6"/>
+      <stop offset="100%" stop-color="#4b5568"/>
+    </linearGradient>
+    <radialGradient id="field" cx="50%" cy="42%" r="62%">
+      <stop offset="0%" stop-color="#12233f"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    <linearGradient id="blue-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="blue-f" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#1e40af"/>
+    </linearGradient>
+    <linearGradient id="star-metal" x1="30%" y1="10%" x2="70%" y2="90%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#7b8798"/>
+    </linearGradient>
+    <path id="shield-outer" d="M100 8 115 14 128 22 142 32 156 52 170 82 176 112 174 142 164 172 148 196 128 212 100 222 72 212 52 196 36 172 26 142 24 112 30 82 44 52 58 32 72 22 85 14Z"/>
+    <path id="shield-inner" d="M100 20 112 24 123 31 134 40 145 56 154 78 158 104 156 128 149 152 136 172 118 186 100 192 82 186 64 172 51 152 44 128 42 104 46 78 55 56 66 40 77 31 88 24Z"/>
+    <path id="star-lg" d="M0 -11 3.2 -3.4 11.4 -3.4 4.1 1.2 6.6 9.2 0 4.6 -6.6 9.2 -4.1 1.2 -11.4 -3.4 -3.2 -3.4Z"/>
+    <path id="star-sm" d="M0 -7.5 2.2 -2.3 7.8 -2.3 2.8 0.8 4.5 6.3 0 3.1 -4.5 6.3 -2.8 0.8 -7.8 -2.3 -2.2 -2.3Z"/>
+  </defs>
+  <rect width="32" height="32" rx="6" fill="#020617"/>
+  <g transform="translate(16 16.5) scale(0.124) translate(-100 -115)">
+    <use href="#shield-outer" fill="url(#chrome)"/>
+    <use href="#shield-inner" fill="url(#field)"/>
+    <use href="#shield-inner" fill="none" stroke="url(#blue-glow)" stroke-width="2.4"/>
+    <g fill="url(#star-metal)">
+      <use href="#star-sm" transform="translate(74 56)"/>
+      <use href="#star-lg" transform="translate(100 48)"/>
+      <use href="#star-sm" transform="translate(126 56)"/>
+    </g>
+    <g transform="skewX(-10) translate(8 0)">
+      <path fill="url(#chrome)" d="M78 98 78 150 86 142 86 118 121 118 136 104 124 94 86 94 86 98Z"/>
+      <path fill="url(#blue-f)" d="M92 124 92 184 100 176 100 142 126 142 139 129 127 119 100 119 100 124Z"/>
+    </g>
+  </g>
+</svg>

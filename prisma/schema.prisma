@@ -27,6 +27,18 @@ enum ApplicationStatus {
   WITHDRAWN
 }
 
+enum ArmedStatus {
+  ARMED
+  UNARMED
+}
+
+enum CompanySubscriptionStatus {
+  INACTIVE
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
 enum LicenseVerificationStatus {
   PENDING
   VERIFIED
@@ -48,17 +60,24 @@ model User {
 }
 
 model Officer {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  firstName       String
-  lastName        String
-  phone           String?
-  city            String?
-  state           String?
-  experienceYears Int?
-  bio             String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                    String       @id @default(uuid())
+  userId                String       @unique
+  firstName             String
+  lastName              String
+  phone                 String?
+  city                  String?
+  state                 String?
+  profilePhotoUrl       String?
+  armedStatus           ArmedStatus?
+  experienceYears       Int?
+  licenseExpirationDate DateTime?
+  availability          String[]     @default([])
+  certifications        String[]     @default([])
+  experienceCategories  String[]     @default([])
+  introduction          String?
+  bio                   String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   licenses     License[]
@@ -90,42 +109,50 @@ model License {
 }
 
 model Company {
-  id            String   @id @default(uuid())
-  userId        String   @unique
-  companyName   String
-  contactName   String?
-  phone         String?
-  website       String?
-  city          String?
-  state         String?
-  description   String?
-  licenseType   String?
-  licenseNumber String?
-  licenseState  String?
-  verified      Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                         String                    @id @default(uuid())
+  userId                     String                    @unique
+  companyName                String
+  contactName                String?
+  phone                      String?
+  email                      String?
+  website                    String?
+  address                    String?
+  logoUrl                    String?
+  city                       String?
+  state                      String?
+  description                String?
+  licenseType                String?
+  licenseNumber              String?
+  licenseState               String?
+  verified                   Boolean                   @default(false)
+  subscriptionStatus         CompanySubscriptionStatus @default(INACTIVE)
+  subscriptionCurrentPeriodEnd DateTime?
+  stripeCustomerId           String?                   @unique
+  stripeSubscriptionId       String?                   @unique
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
 
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   shifts Shift[]
 }
 
 model Shift {
-  id              String      @id @default(uuid())
-  companyId       String
-  title           String
-  description     String?
-  location        String
-  city            String?
-  state           String?
-  hourlyRate      Decimal
-  startTime       DateTime
-  endTime         DateTime
-  requiredLicense String
-  positionsNeeded Int         @default(1)
-  status          ShiftStatus @default(OPEN)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                    String      @id @default(uuid())
+  companyId             String
+  title                 String
+  description           String?
+  location              String
+  city                  String?
+  state                 String?
+  hourlyRate            Decimal
+  startTime             DateTime
+  endTime               DateTime
+  specialRequirements   String
+  reportingInstructions String?
+  positionsNeeded       Int         @default(1)
+  status                ShiftStatus @default(OPEN)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 
   company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   applications Application[]

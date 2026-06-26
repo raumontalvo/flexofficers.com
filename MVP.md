@@ -2,7 +2,7 @@
 
 # FlexOfficers
 
-Version: 0.1.0
+Version: 1.0.0
 
 Status: MVP Scope Lock
 
@@ -10,13 +10,19 @@ Status: MVP Scope Lock
 
 # Purpose
 
-This document defines the exact scope of the first version of FlexOfficers.
+This document defines the exact scope of FlexOfficers Version 1.0.
 
-The goal is not to build a complete platform.
+FlexOfficers is a marketplace that connects security companies with licensed security officers for open shifts.
 
-The goal is to validate whether security companies and security officers will use the marketplace.
+FlexOfficers is **not** responsible for verifying licenses, conducting background checks, hiring employees, payroll, messaging, GPS tracking, or time clocks.
 
-Every feature must support this objective.
+The hiring company is responsible for verifying credentials before accepting an officer.
+
+Every feature must support this objective:
+
+> Help security companies fill shifts faster, or help FlexOfficers generate subscription revenue.
+
+If the answer is no, it does not belong in Version 1.0.
 
 ---
 
@@ -26,22 +32,38 @@ Enable:
 
 1. A security company to post a shift.
 2. A security officer to apply.
-3. A company to assign an officer.
-4. A shift to be successfully filled.
+3. A company to review the officer profile and verify credentials through its own hiring process.
+4. A company to accept or reject the application.
+5. A shift to be successfully filled.
 
-If these four actions work, the MVP is successful.
+If these actions work, the MVP is successful.
 
 ---
 
-# Success Criteria
+# Business Model
 
-The MVP is considered validated when:
+## Security Companies
 
-* At least 5 companies create accounts
-* At least 25 officers create accounts
-* At least 10 shifts are posted
-* At least 10 applications are submitted
-* At least 5 shifts are successfully filled
+Annual subscription only.
+
+One subscription includes:
+
+* Unlimited shift postings
+* Unlimited officer applications
+* Unlimited hires
+* Unlimited usage
+
+## Security Officers
+
+Free forever.
+
+Officers can:
+
+* Create a profile
+* Browse shifts
+* Apply to unlimited shifts
+* Track application status
+* View accepted shifts
 
 ---
 
@@ -53,11 +75,15 @@ Can:
 
 * Register
 * Login
-* Create profile
-* Add license information
+* Create and edit profile
 * Browse shifts
 * Apply to shifts
-* View application status
+* Track application status
+* View accepted shifts and company contact details (after acceptance)
+
+Cannot:
+
+* Upload resumes, license photos, or background documents
 
 ---
 
@@ -67,98 +93,116 @@ Can:
 
 * Register
 * Login
-* Create company profile
-* Post shifts
-* Edit shifts
-* View applicants
-* Accept applicants
+* Create and edit company profile
+* Post, edit, and cancel shifts
+* Browse and filter officer profiles
+* Review applicants
+* Accept or reject applicants
+* Verify officer credentials through its own hiring process
 
 ---
 
-## Admin
+# Officer Profile
 
-Can:
+Fields:
 
-* View users
-* View shifts
-* Manage platform records
-
----
-
-# MVP Features
-
-## Authentication
-
-Included:
-
-* Register
-* Login
-* Logout
-* Session management
-
-Provider:
-
-* Clerk
-
----
-
-## Officer Profiles
-
-Included:
-
-* Name
-* Phone
+* Profile Photo
+* First Name
+* Last Name
+* Phone Number
+* Email
 * City
-* State
-* Experience
-* Bio
-* License information
+* Armed / Unarmed
+* Years of Experience
+* License Expiration Date
+* Availability
+* Certifications
+* Experience Categories (multi-select)
+* Short Introduction (max 300 characters)
+
+## Experience Categories
+
+Officers may select multiple:
+
+* Apartment Communities
+* Gated Communities
+* Construction Sites
+* Retail
+* Shopping Mall
+* Hospital
+* School
+* Hotel
+* Event Security
+* Bar / Nightclub
+* Corporate Office
+* Warehouse
+* Fire Watch
+* Patrol
+* Executive Protection
+* Loss Prevention
+
+## Not Included on Officer Profile
+
+* Resume upload
+* License photo upload
+* Background documents
 
 ---
 
-## Company Profiles
+# Company Profile
 
-Included:
+Fields:
 
-* Company name
-* Contact name
-* Phone
-* Website
-* Description
+* Company Name
+* Contact Person
+* Phone Number
+* Email
+* Address
+* Website (optional)
+* Company Logo (optional)
 
 ---
 
-## Shift Board
+# Shift
 
-Included:
-
-* Create shift
-* Edit shift
-* Cancel shift
-* View open shifts
-
-Shift Information:
+Fields:
 
 * Title
 * Description
+* Hourly Rate
+* Date
+* Time
 * Location
-* Start time
-* End time
-* Hourly rate
-* Required license
+* Officers Needed
+* Special Requirements
+* Reporting Instructions (shown to accepted officers)
 
 ---
 
-## Applications
+# Application Flow
 
-Included:
+```text
+Officer browses shift
+        ↓
+Officer applies
+        ↓
+Company reviews officer profile
+        ↓
+Company verifies credentials (outside FlexOfficers)
+        ↓
+Company accepts or rejects
+        ↓
+If accepted, officer sees:
+  - Company phone number
+  - Contact person
+  - Company email
+  - Company address
+  - Reporting instructions
+```
 
-* Submit application
-* View application status
-* Accept application
-* Reject application
+No messaging system.
 
-Statuses:
+Application statuses:
 
 ```text
 PENDING
@@ -169,141 +213,68 @@ WITHDRAWN
 
 ---
 
+# Company Search
+
+Companies can filter officers by:
+
+* City
+* Armed / Unarmed
+* Years of Experience
+* Certifications
+* Availability
+* Experience Categories
+
+---
+
 # MVP Pages
 
 ## Public
 
-### Home Page
+* Home page (value proposition, sign up, login)
 
-Purpose:
+## Officer
 
-Explain platform value.
-
-Actions:
-
-* Sign Up
-* Login
-
----
-
-## Officer Pages
-
-### Officer Dashboard
-
-Displays:
-
+* Dashboard
+* Profile
 * Available shifts
-* Applied shifts
-* Assigned shifts
+* My applications
+* Accepted shifts (with company contact details)
+
+## Company
+
+* Dashboard
+* Company profile
+* Post shift
+* Manage shifts
+* Review applicants
+* Search / filter officers
 
 ---
 
-### Officer Profile
+# Features NOT Included
 
-Displays:
+Do **not** build:
 
-* Personal information
-* License information
+* Messaging
+* SMS
+* Push notifications
+* In-app notifications
+* Email notifications
+* AI matching
+* GPS tracking
+* Payroll
+* Time clock
+* Video uploads
+* Resume upload
+* License upload
+* Background check system
+* Admin license verification
+* Admin company verification
+* Ratings
+* Reviews
+* Mobile apps
 
----
-
-## Company Pages
-
-### Company Dashboard
-
-Displays:
-
-* Posted shifts
-* Applicants
-* Assigned officers
-
----
-
-### Post Shift Page
-
-Allows companies to create shifts.
-
----
-
-### Manage Shift Page
-
-Allows companies to review applicants.
-
----
-
-# Not Included
-
-The following features are intentionally excluded.
-
-## Payments
-
-Reason:
-
-Not required for validation.
-
----
-
-## Messaging
-
-Reason:
-
-Can be handled manually.
-
----
-
-## Mobile Apps
-
-Reason:
-
-Web platform first.
-
----
-
-## Ratings
-
-Reason:
-
-Not required for early adoption.
-
----
-
-## Reviews
-
-Reason:
-
-Not required for validation.
-
----
-
-## GPS Tracking
-
-Reason:
-
-Adds complexity without validation.
-
----
-
-## AI Matching
-
-Reason:
-
-Marketplace must work manually first.
-
----
-
-## Payroll
-
-Reason:
-
-Not required for MVP.
-
----
-
-## Notifications
-
-Reason:
-
-Can be added later.
+These are future features and are out of scope for Version 1.0.
 
 ---
 
@@ -340,51 +311,39 @@ Deployment:
 
 # Build Order
 
-## Phase 1
+## Phase 1 — Documentation & Safe Removal Plan
 
-Authentication
+* Lock MVP scope (this document)
+* Update task tracker
+* Create removal checklist for out-of-scope code
+* Remove out-of-scope features without breaking core marketplace loop
 
-* Register
-* Login
-* User roles
+## Phase 2 — Schema & Profile Realignment
 
----
+* Reshape officer, company, and shift models
+* Update profile forms to match Version 1.0 fields
+* Remove license upload and verification data paths
 
-## Phase 2
+## Phase 3 — Application & Contact Reveal
 
-Profiles
+* Accepted-shift view for officers
+* Reveal company contact details only after acceptance
+* Reporting instructions on accepted applications
 
-* Officer profiles
-* Company profiles
+## Phase 4 — Company Officer Search
 
----
+* Filter officers by city, armed status, experience, certifications, availability, categories
 
-## Phase 3
+## Phase 5 — Subscription (Revenue)
 
-Shifts
+* Annual company subscription gate
+* Payment integration
 
-* Create shifts
-* Browse shifts
+## Phase 6 — Launch
 
----
-
-## Phase 4
-
-Applications
-
-* Apply
-* Review applicants
-* Accept applicant
-
----
-
-## Phase 5
-
-Testing
-
-* End-to-end workflow
-* Bug fixes
+* End-to-end manual validation
 * Production deployment
+* Bug fixes
 
 ---
 
@@ -392,9 +351,11 @@ Testing
 
 Before adding a new feature, ask:
 
-Does this directly help a company fill a shift or help an officer get assigned?
+> Does this help security companies fill shifts faster or help FlexOfficers generate revenue?
 
-If the answer is no, it does not belong in the MVP.
+If the answer is no, do not build it.
+
+Keep the application simple, fast, and inexpensive to operate.
 
 ---
 

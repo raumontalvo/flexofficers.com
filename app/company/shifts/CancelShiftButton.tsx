@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui";
+
 export default function CancelShiftButton({ shiftId }: { shiftId: string }) {
   async function cancelShift() {
     const confirmed = window.confirm(
@@ -27,11 +29,14 @@ export default function CancelShiftButton({ shiftId }: { shiftId: string }) {
   }
 
   return (
-    <button
+    <Button
+      type="button"
+      variant="secondary"
+      fullWidth
+      className="w-full border-yellow-500/30 text-fo-pending hover:bg-fo-pending-bg"
       onClick={cancelShift}
-      className="rounded-xl bg-yellow-600 px-5 py-3 font-semibold hover:bg-yellow-500"
     >
       Cancel Shift
-    </button>
+    </Button>
   );
 }

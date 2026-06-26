@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { PageShell } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import OnboardingRoleChoice from "./OnboardingRoleChoice";
 
@@ -42,5 +43,9 @@ export default async function OnboardingPage({
     }
   }
 
-  return <OnboardingRoleChoice initialRole={selectedRole} />;
+  return (
+    <PageShell maxWidth="lg" brand>
+      <OnboardingRoleChoice initialRole={selectedRole} />
+    </PageShell>
+  );
 }

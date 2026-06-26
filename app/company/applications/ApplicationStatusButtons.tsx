@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui";
+
 export default function ApplicationStatusButtons({
   applicationId,
   status,
@@ -11,17 +13,17 @@ export default function ApplicationStatusButtons({
     return null;
   }
 
-  async function updateStatus(status: "ACCEPTED" | "REJECTED") {
+  async function updateStatus(nextStatus: "ACCEPTED" | "REJECTED") {
     const response = await fetch("/api/applications/status", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ applicationId, status }),
+      body: JSON.stringify({ applicationId, status: nextStatus }),
     });
 
     if (response.ok) {
-      alert(`Application ${status.toLowerCase()}!`);
+      alert(`Application ${nextStatus.toLowerCase()}!`);
       window.location.reload();
     } else {
       alert("Failed to update application");
@@ -29,20 +31,25 @@ export default function ApplicationStatusButtons({
   }
 
   return (
-    <div className="mt-6 flex flex-wrap gap-3">
-      <button
+    <div className="grid grid-cols-2 gap-3">
+      <Button
+        type="button"
+        fullWidth
+        className="w-full bg-fo-success hover:bg-green-500"
         onClick={() => updateStatus("ACCEPTED")}
-        className="rounded-xl bg-green-600 px-5 py-3 font-semibold hover:bg-green-500"
       >
         Accept
-      </button>
+      </Button>
 
-      <button
+      <Button
+        type="button"
+        variant="danger"
+        fullWidth
+        className="w-full"
         onClick={() => updateStatus("REJECTED")}
-        className="rounded-xl bg-red-600 px-5 py-3 font-semibold hover:bg-red-500"
       >
         Reject
-      </button>
+      </Button>
     </div>
   );
 }

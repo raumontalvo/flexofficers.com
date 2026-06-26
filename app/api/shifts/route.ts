@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isCompanySubscriptionActive } from "@/lib/company-subscription";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { parseShiftPayload, type ShiftPayload } from "./validation";
 
@@ -51,6 +52,16 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!isCompanySubscriptionActive(company)) {
+      return NextResponse.json(
+        {
+          error:
+            "An active annual subscription is required to post new shifts.",
+        },
+        { status: 403 }
+      );
+    }
+
     const shift = await prisma.shift.create({
       data: {
         companyId: company.id,
@@ -60,7 +71,8 @@ export async function POST(req: Request) {
         hourlyRate: parsed.data.hourlyRate,
         startTime: parsed.data.startTime,
         endTime: parsed.data.endTime,
-        requiredLicense: parsed.data.requiredLicense,
+        specialRequirements: parsed.data.specialRequirements,
+        reportingInstructions: parsed.data.reportingInstructions,
         positionsNeeded: parsed.data.positionsNeeded,
       },
     });

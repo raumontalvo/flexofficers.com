@@ -1,6 +1,7 @@
 import { UserRole } from "@/app/generated/prisma/enums";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import EditShiftForm from "./EditShiftForm";
@@ -47,30 +48,30 @@ export default async function EditCompanyShiftPage({
     startTime: toDateTimeLocalValue(shift.startTime),
     endTime: toDateTimeLocalValue(shift.endTime),
     hourlyRate: shift.hourlyRate.toString(),
-    requiredLicense: shift.requiredLicense,
+    specialRequirements: shift.specialRequirements,
+    reportingInstructions: shift.reportingInstructions ?? "",
     positionsNeeded: String(shift.positionsNeeded),
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <section className="mx-auto max-w-4xl">
-        <Link
-          href="/company/shifts"
-          className="text-sm text-blue-300 hover:text-blue-200"
-        >
-          ← Back to Manage Shifts
-        </Link>
+    <PageShell nav="company" maxWidth="lg">
+      <Link
+        href="/company/shifts"
+        className="inline-flex min-h-11 items-center text-sm font-medium text-fo-primary-hover hover:text-fo-primary-bright"
+      >
+        ← Back to Manage Shifts
+      </Link>
 
-        <h1 className="mt-6 text-4xl font-bold">Edit Shift</h1>
+      <div className="mt-4">
+        <SectionHeading
+          title="Edit Shift"
+          subtitle="Update this shift posting for your company."
+        />
+      </div>
 
-        <p className="mt-4 text-slate-300">
-          Update this shift posting for your company.
-        </p>
-
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
-          <EditShiftForm shiftId={shift.id} initialForm={initialForm} />
-        </div>
-      </section>
-    </main>
+      <div className="mt-8">
+        <EditShiftForm shiftId={shift.id} initialForm={initialForm} />
+      </div>
+    </PageShell>
   );
 }

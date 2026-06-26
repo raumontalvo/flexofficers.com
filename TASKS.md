@@ -2,350 +2,214 @@
 
 # FlexOfficers
 
-Version: 0.1.0
+Version: 1.0.0
 
-Status: Development Plan
+Status: MVP Realignment — Phase 1 (Documentation)
 
 ---
 
 # Project Goal
 
-Build a functional MVP that allows:
+Build Version 1.0 of the FlexOfficers marketplace:
 
-1. Companies to post shifts.
-2. Officers to apply for shifts.
-3. Companies to assign officers.
-4. Shifts to be filled.
+1. Companies post shifts.
+2. Officers apply for shifts.
+3. Companies review profiles and accept or reject applicants.
+4. Accepted officers receive company contact details.
+5. Shifts are successfully filled.
 
----
-
-# Phase 1 — Project Setup
-
-## Repository Setup
-
-* [ ] Create GitHub repository
-* [ ] Create Next.js project
-* [ ] Configure TypeScript
-* [ ] Configure Tailwind CSS
-* [ ] Configure ESLint
-* [ ] Configure Prettier
-* [ ] Create GitHub project board
+See `MVP.md` for the locked scope.
 
 ---
 
-## Environment Setup
-
-* [ ] Create `.env.local`
-* [ ] Configure Clerk
-* [ ] Configure PostgreSQL
-* [ ] Configure Prisma
-* [ ] Configure Vercel deployment
-
----
+# Phase 1 — Documentation & Safe Removal Plan
 
 ## Documentation
 
-* [ ] README.md
-* [ ] ROADMAP.md
-* [ ] PRD.md
-* [ ] DATABASE.md
-* [ ] ARCHITECTURE.md
-* [ ] USER-STORIES.md
-* [ ] MVP.md
-* [ ] TASKS.md
+* [x] MVP.md — locked to Version 1.0 vision
+* [x] TASKS.md — updated to reflect new scope
+* [x] REMOVAL-CHECKLIST.md — out-of-scope removal plan (do not delete blindly)
+
+## Safe Removal (next step — see REMOVAL-CHECKLIST.md)
+
+* [ ] Remove license document upload system (API, storage, UI)
+* [ ] Remove admin license verification
+* [ ] Remove admin company verification
+* [ ] Remove in-app notifications (pages, APIs, dashboard links)
+* [ ] Remove email notifications (Resend integration)
+* [ ] Verify core marketplace loop still works after each removal batch
 
 ---
 
-# Phase 2 — Authentication
+# Phase 2 — Core Marketplace (Keep — Already Built)
 
-## Clerk Setup
-
-* [ ] Install Clerk
-* [ ] Configure Sign In
-* [ ] Configure Sign Up
-* [ ] Configure Middleware
-* [ ] Protect Routes
-
----
-
-## User Roles
-
-* [ ] Officer role
-* [ ] Company role
-* [ ] Admin role
-
----
-
-## Authentication Testing
-
-* [ ] Register officer
-* [ ] Register company
-* [ ] Login flow
-* [ ] Logout flow
-
----
-
-# Phase 3 — Database
-
-## PostgreSQL
-
-* [ ] Create database
-* [ ] Connect Prisma
-
----
-
-## Prisma Schema
-
-### User
-
-* [ ] Create model
-
-### Officer
-
-* [ ] Create model
-
-### Company
-
-* [ ] Create model
-
-### License
-
-* [ ] Create model
-
-### Shift
-
-* [ ] Create model
-
-### Application
-
-* [ ] Create model
-
----
-
-## Database Migration
-
-* [ ] Generate migration
-* [ ] Run migration
-* [ ] Verify tables
-
----
-
-# Phase 4 — UI Foundation
-
-## Layout
-
-* [ ] Navigation
-* [ ] Footer
-* [ ] Responsive design
-
----
-
-## Pages
-
-* [ ] Home page
-* [ ] Sign In page
-* [ ] Sign Up page
-* [ ] Dashboard page
-
----
-
-# Phase 5 — Officer Features
-
-## Officer Profile
-
-* [ ] Create profile page
-* [ ] Edit profile page
-* [ ] Save profile data
-
----
-
-## Licenses
-
-* [ ] Add license form
-* [ ] Edit license
-* [ ] Delete license
-
----
-
-## Officer Dashboard
-
-* [ ] Available shifts
-* [ ] Applied shifts
-* [ ] Assigned shifts
-
----
-
-# Phase 6 — Company Features
-
-## Company Profile
-
-* [ ] Create company profile
-* [ ] Edit company profile
-
----
-
-## Company Dashboard
-
-* [ ] View shifts
-* [ ] View applicants
-* [ ] View assigned officers
-
----
-
-# Phase 7 — Shift Management
-
-## Create Shift
-
-* [ ] Shift form
-* [ ] Validation
-* [ ] Database save
-
----
-
-## Edit Shift
-
-* [ ] Update shift
-* [ ] Save changes
-
----
-
-## Cancel Shift
-
-* [ ] Cancel action
-* [ ] Status update
-
----
-
-## Browse Shifts
-
-* [ ] Shift listings
-* [ ] Shift details page
-
----
-
-# Phase 8 — Applications
-
-## Apply for Shift
-
-* [ ] Apply button
-* [ ] Create application record
-* [ ] Prevent duplicate applications
-
----
-
-## Application Status
-
-* [ ] Pending
-* [ ] Accepted
-* [ ] Rejected
-* [ ] Withdrawn
-
----
-
-## Company Review
-
-* [ ] View applicants
-* [ ] Accept applicant
-* [ ] Reject applicant
-
----
-
-# Phase 9 — Admin
-
-## Admin Dashboard
-
-* [ ] View users
-* [ ] View companies
-* [ ] View officers
-* [ ] View shifts
-
----
-
-# Phase 10 — Testing
+These features are **in scope** and must not be removed.
 
 ## Authentication
 
-* [ ] Registration test
-* [ ] Login test
+* [x] Clerk installed
+* [x] Sign in / sign up pages
+* [x] Route protection (`proxy.ts`)
+* [x] Officer, company, and admin roles
+* [x] Onboarding role selection
+* [ ] Manual auth flow validation (officer + company register/login/logout)
+
+## Database & Models
+
+* [x] PostgreSQL + Prisma connected
+* [x] User, Officer, Company, Shift, Application models
+* [x] Migrations generated and applied
+* [ ] Reshape schema for Version 1.0 profile and shift fields (see Phase 3)
+
+## Shift Management
+
+* [x] Create shift
+* [x] Edit shift
+* [x] Cancel shift
+* [x] Browse shift listings
+* [x] Shift details page
+* [ ] Rename/replace `requiredLicense` → `specialRequirements`
+* [ ] Add `reportingInstructions` field
+
+## Applications
+
+* [x] Apply button
+* [x] Create application record
+* [x] Prevent duplicate applications
+* [x] Pending / accepted / rejected statuses
+* [x] Company view applicants
+* [x] Company accept / reject
+* [x] Shift status updates to FILLED on accept
+* [ ] Withdraw application (WITHDRAWN status)
+* [ ] Reveal company contact details to officer on acceptance
 
 ---
 
-## Officer Workflow
+# Phase 3 — Profile Realignment (Version 1.0 Fields)
 
-* [ ] Create profile
-* [ ] Add license
-* [ ] Apply to shift
+## Officer Profile
+
+* [x] Create profile page (needs reshape)
+* [x] Edit profile page (needs reshape)
+* [x] Save profile data (needs reshape)
+* [ ] Profile photo
+* [ ] Armed / unarmed
+* [ ] License expiration date (single field — no upload)
+* [ ] Availability
+* [ ] Certifications
+* [ ] Experience categories (multi-select)
+* [ ] Short introduction (max 300 characters)
+* [ ] Remove multi-license records and document upload UI
+
+## Company Profile
+
+* [x] Create company profile (needs reshape)
+* [x] Edit company profile (needs reshape)
+* [ ] Address field (replace city/state split)
+* [ ] Email on profile
+* [ ] Optional company logo
+* [ ] Remove company license fields and verification requirements
 
 ---
 
-## Company Workflow
+# Phase 4 — Officer Experience
 
-* [ ] Create profile
-* [ ] Post shift
-* [ ] Review applicants
-* [ ] Assign officer
-
----
-
-## Full Marketplace Flow
-
-* [ ] Company posts shift
-* [ ] Officer applies
-* [ ] Company accepts
-* [ ] Shift status updates
+* [x] Available shifts (`/shifts`)
+* [x] My applications (`/officer/applications`)
+* [ ] Accepted shifts view (with company contact + reporting instructions)
+* [ ] Separate applied vs accepted sections on dashboard
 
 ---
 
-# Phase 11 — Deployment
+# Phase 5 — Company Officer Search
+
+* [ ] Officer search page for companies
+* [ ] Filter by city
+* [ ] Filter by armed / unarmed
+* [ ] Filter by years of experience
+* [ ] Filter by certifications
+* [ ] Filter by availability
+* [ ] Filter by experience categories
+
+---
+
+# Phase 6 — UI Foundation
+
+* [x] Home page with nav and footer
+* [x] Sign in / sign up pages
+* [x] Role-based dashboard
+* [ ] Shared nav/footer on authenticated pages
+* [ ] Privacy, Terms, Contact pages (home footer links are placeholders)
+
+---
+
+# Phase 7 — Subscription (Revenue)
+
+* [ ] Annual subscription model for companies
+* [ ] Payment integration (e.g. Stripe)
+* [ ] Gate shift posting behind active subscription
+* [ ] Officers remain free
+
+---
+
+# Phase 8 — Testing & Deployment
+
+## Unit Tests
+
+* [x] Validation and business-rule unit tests (12 files)
+* [ ] Update tests after out-of-scope removal
+* [ ] Add tests for Version 1.0 profile validation
+
+## Manual / E2E
+
+* [ ] Full marketplace happy path (post → apply → accept → contact reveal)
+* [ ] Officer profile save with new fields
+* [ ] Company officer search filters
 
 ## Production
 
 * [ ] Deploy to Vercel
 * [ ] Configure production database
-* [ ] Configure environment variables
+* [ ] Configure production environment variables (Clerk only — no storage/email)
+* [ ] Final launch validation
 
 ---
 
-## Final Validation
+# Explicitly Out of Scope (Do Not Build)
 
-* [ ] Create company account
-* [ ] Create officer account
-* [ ] Post shift
-* [ ] Submit application
-* [ ] Accept application
+* Messaging
+* SMS
+* Push notifications
+* In-app notifications
+* Email notifications
+* AI matching
+* GPS tracking
+* Payroll
+* Time clock
+* Resume upload
+* License upload
+* Background checks
+* Admin license verification
+* Admin company verification
+* Ratings
+* Reviews
+* Mobile apps
+
+Removal tracking: `REMOVAL-CHECKLIST.md`
 
 ---
 
 # MVP Completion Criteria
 
-The MVP is complete when:
+Version 1.0 is complete when:
 
-✅ Companies can post shifts
-
-✅ Officers can apply
-
-✅ Companies can assign officers
-
-✅ Shifts can be successfully filled
-
----
-
-# Post-MVP Backlog
-
-Future Features:
-
-* Messaging
-* Notifications
-* Ratings
-* Reviews
-* Payments
-* Mobile Apps
-* AI Matching
-* GPS Tracking
-* Payroll
-* Background Verification
-
-These features must not be started until the MVP has been validated.
+* [ ] Companies can subscribe and post shifts
+* [ ] Officers can create Version 1.0 profiles and apply
+* [ ] Companies can search/filter officers and accept applicants
+* [ ] Accepted officers see company contact details and reporting instructions
+* [ ] Shifts can be successfully filled
+* [ ] Out-of-scope features are removed
+* [ ] Application is deployed to production
 
 ---
 

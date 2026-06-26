@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { buttonClassName, Card, PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
+import { ApplicationCard } from "./ApplicationCard";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +19,15 @@ export default async function OfficerApplicationsPage() {
       },
     },
     include: {
-      shift: true,
+      shift: {
+        include: {
+          company: {
+            select: {
+              companyName: true,
+            },
+          },
+        },
+      },
     },
     orderBy: {
       appliedAt: "desc",
@@ -24,62 +35,61 @@ export default async function OfficerApplicationsPage() {
   });
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <section className="mx-auto max-w-6xl">
-        <h1 className="text-4xl font-bold">My Applications</h1>
+    <PageShell nav="officer" maxWidth="2xl">
+      <SectionHeading
+        title="My Shifts"
+        subtitle="Shifts you've applied to."
+        action={
+          applications.some((application) => application.status === "ACCEPTED") ? (
+            <Link
+              href="/officer/accepted-shifts"
+              className={buttonClassName({ variant: "secondary", size: "md" })}
+            >
+              Accepted Shifts
+            </Link>
+          ) : undefined
+        }
+      />
 
-        <p className="mt-4 text-slate-300">
-          Track the shifts you applied to and see whether companies accepted,
-          rejected, filled, or cancelled the shift.
-        </p>
-
-        <div className="mt-10 grid gap-6">
-          {applications.length === 0 ? (
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
+      <div className="mt-8 space-y-4">
+        {applications.length === 0 ? (
+          <Card variant="muted" className="text-center">
+            <p className="text-lg font-medium text-fo-text">
               You have not applied to any shifts yet.
-            </div>
-          ) : (
-            applications.map((application) => (
-              <div
-                key={application.id}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6"
-              >
-                <h2 className="text-2xl font-bold">
-                  {application.shift.title}
-                </h2>
-
-                <p className="mt-2 text-slate-300">
-                  {application.shift.location}
-                </p>
-
-                {application.shift.status === "CANCELLED" && (
-                  <p className="mt-4 rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-yellow-100">
-                    This shift was cancelled by the company.
-                  </p>
-                )}
-
-                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    ${application.shift.hourlyRate.toString()}/hr
-                  </span>
-
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    {application.shift.requiredLicense}
-                  </span>
-
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    Application: {application.status}
-                  </span>
-
-                  <span className="rounded-full bg-white/10 px-3 py-1">
-                    Shift: {application.shift.status}
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
-    </main>
+            </p>
+            <p className="mt-2 text-sm text-fo-text-muted">
+              Browse open shifts and apply to start building your schedule.
+            </p>
+            <Link
+              href="/shifts"
+              className={buttonClassName({
+                fullWidth: true,
+                className: "mt-6 w-full sm:w-auto",
+              })}
+            >
+              Browse Shifts
+            </Link>
+          </Card>
+        ) : (
+          applications.map((application) => (
+            <ApplicationCard
+              key={application.id}
+              applicationId={application.id}
+              applicationStatus={application.status}
+              shiftId={application.shift.id}
+              title={application.shift.title}
+              hourlyRate={application.shift.hourlyRate}
+              companyName={application.shift.company.companyName}
+              location={application.shift.location}
+              startTime={application.shift.startTime}
+              endTime={application.shift.endTime}
+              positionsNeeded={application.shift.positionsNeeded}
+              specialRequirements={application.shift.specialRequirements}
+              shiftStatus={application.shift.status}
+            />
+          ))
+        )}
+      </div>
+    </PageShell>
   );
 }

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import CompanyProfileForm from "./CompanyProfileForm";
 
@@ -8,41 +9,37 @@ export const dynamic = "force-dynamic";
 export default async function CompanyProfilePage() {
   const clerkUser = await requirePageRole(UserRole.COMPANY);
 
-  const company = await prisma.company.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
-      user: {
-        clerkId: clerkUser.id,
-      },
+      clerkId: clerkUser.id,
+    },
+    include: {
+      company: true,
     },
   });
 
+  const company = user?.company;
+
   const initialForm = {
+    logoUrl: company?.logoUrl ?? "",
     companyName: company?.companyName ?? "",
     contactName: company?.contactName ?? "",
     phone: company?.phone ?? "",
+    email: company?.email ?? user?.email ?? clerkUser.emailAddresses[0]?.emailAddress ?? "",
+    address: company?.address ?? "",
     website: company?.website ?? "",
-    city: company?.city ?? "",
-    state: company?.state ?? "",
-    description: company?.description ?? "",
-    licenseType: company?.licenseType ?? "",
-    licenseNumber: company?.licenseNumber ?? "",
-    licenseState: company?.licenseState ?? "",
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <section className="mx-auto max-w-4xl">
-        <h1 className="text-4xl font-bold">Company Profile</h1>
+    <PageShell nav="company" maxWidth="lg">
+      <SectionHeading
+        title="Company Profile"
+        subtitle="Keep your company contact information ready for accepted officers."
+      />
 
-        <p className="mt-4 text-slate-300">
-          Add your company details so officers can learn who they are applying
-          to work with.
-        </p>
-
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
-          <CompanyProfileForm initialForm={initialForm} />
-        </div>
-      </section>
-    </main>
+      <div className="mt-8">
+        <CompanyProfileForm initialForm={initialForm} />
+      </div>
+    </PageShell>
   );
 }

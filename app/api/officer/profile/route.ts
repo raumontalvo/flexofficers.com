@@ -26,12 +26,6 @@ export async function POST(req: Request) {
     return rateLimitResponse;
   }
 
-  const email = clerkUser.emailAddresses[0]?.emailAddress;
-
-  if (!email) {
-    return NextResponse.json({ error: "Email not found" }, { status: 400 });
-  }
-
   let payload: OfficerProfilePayload;
 
   try {
@@ -94,13 +88,13 @@ export async function POST(req: Request) {
             id: existingUser.id,
           },
           data: {
-            email,
+            email: parsed.data.email,
           },
         })
       : await tx.user.create({
           data: {
             clerkId: clerkUser.id,
-            email,
+            email: parsed.data.email,
             role: UserRole.OFFICER,
           },
         });
@@ -114,9 +108,14 @@ export async function POST(req: Request) {
         lastName: parsed.data.lastName,
         phone: parsed.data.phone,
         city: parsed.data.city,
-        state: parsed.data.state,
-        bio: parsed.data.bio,
+        profilePhotoUrl: parsed.data.profilePhotoUrl,
+        armedStatus: parsed.data.armedStatus,
         experienceYears: parsed.data.experienceYears,
+        licenseExpirationDate: parsed.data.licenseExpirationDate,
+        availability: parsed.data.availability,
+        certifications: parsed.data.certifications,
+        experienceCategories: parsed.data.experienceCategories,
+        introduction: parsed.data.introduction,
       },
       create: {
         userId: user.id,
@@ -124,99 +123,19 @@ export async function POST(req: Request) {
         lastName: parsed.data.lastName,
         phone: parsed.data.phone,
         city: parsed.data.city,
-        state: parsed.data.state,
-        bio: parsed.data.bio,
+        profilePhotoUrl: parsed.data.profilePhotoUrl,
+        armedStatus: parsed.data.armedStatus,
         experienceYears: parsed.data.experienceYears,
+        licenseExpirationDate: parsed.data.licenseExpirationDate,
+        availability: parsed.data.availability,
+        certifications: parsed.data.certifications,
+        experienceCategories: parsed.data.experienceCategories,
+        introduction: parsed.data.introduction,
       },
     });
-
-    const existingLicenses = await tx.license.findMany({
-      where: {
-        officerId: officer.id,
-      },
-      select: {
-        id: true,
-      },
-    });
-
-    const existingLicenseIds = new Set(existingLicenses.map((license) => license.id));
-    const requestedLicenseIds = parsed.data.licenses
-      .map((license) => license.id)
-      .filter((id): id is string => Boolean(id));
-
-    const invalidLicenseIds = requestedLicenseIds.filter(
-      (id) => !existingLicenseIds.has(id)
-    );
-
-    if (invalidLicenseIds.length > 0) {
-      return {
-        error: {
-          status: 400,
-          body: {
-            error: "Invalid request payload",
-            details: [
-              {
-                field: "licenses",
-                message: "One or more license ids are invalid for this officer",
-              },
-            ],
-          },
-        },
-      };
-    }
-
-    for (const license of parsed.data.licenses) {
-      if (license.id) {
-        await tx.license.update({
-          where: {
-            id: license.id,
-          },
-          data: {
-            licenseType: license.licenseType,
-            licenseNumber: license.licenseNumber,
-            issuingState: license.issuingState,
-            expirationDate: license.expirationDate,
-          },
-        });
-      } else {
-        await tx.license.create({
-          data: {
-            officerId: officer.id,
-            licenseType: license.licenseType,
-            licenseNumber: license.licenseNumber,
-            issuingState: license.issuingState,
-            expirationDate: license.expirationDate,
-          },
-        });
-      }
-    }
-
-    const requestedLicenseIdSet = new Set(requestedLicenseIds);
-    const licenseIdsToDelete = existingLicenses
-      .map((license) => license.id)
-      .filter((id) => !requestedLicenseIdSet.has(id));
-
-    if (licenseIdsToDelete.length > 0) {
-      await tx.license.deleteMany({
-        where: {
-          officerId: officer.id,
-          id: {
-            in: licenseIdsToDelete,
-          },
-        },
-      });
-    }
 
     return { officer };
   });
-
-  const transactionError = "error" in result ? result.error : undefined;
-
-  if (transactionError) {
-    return NextResponse.json(transactionError.body, {
-      status: transactionError.status,
-    });
-  }
 
   return NextResponse.json(result.officer);
 }

@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendNotificationEmail } from "@/lib/email";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
 
@@ -42,17 +41,6 @@ export async function POST(req: Request) {
           },
         },
       },
-      include: {
-        applications: {
-          include: {
-            officer: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
     });
 
     if (!shift) {
@@ -70,35 +58,6 @@ export async function POST(req: Request) {
         status: ShiftStatus.CANCELLED,
       },
     });
-
-    const title = "Shift cancelled";
-    const message = `The shift "${shift.title}" was cancelled by the company.`;
-
-    await prisma.notification.createMany({
-      data: shift.applications.map((application) => ({
-        userId: application.officer.user.id,
-        title,
-        message,
-      })),
-    });
-
-    await Promise.all(
-      shift.applications.map(async (application) => {
-        try {
-          await sendNotificationEmail({
-            to: application.officer.user.email,
-            subject: title,
-            message,
-          });
-        } catch (error) {
-          console.error("Failed to send shift cancellation email", {
-            shiftId: shift.id,
-            officerUserId: application.officer.user.id,
-            error,
-          });
-        }
-      })
-    );
 
     return NextResponse.json(updatedShift);
   } catch {

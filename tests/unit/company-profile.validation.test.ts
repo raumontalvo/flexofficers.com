@@ -7,11 +7,8 @@ describe("parseCompanyPayload", () => {
       companyName: "   ",
       contactName: "   ",
       phone: "   ",
-      city: "   ",
-      state: "   ",
-      licenseType: "   ",
-      licenseNumber: "   ",
-      licenseState: "   ",
+      email: "   ",
+      address: "   ",
     });
 
     expect("errors" in result).toBe(true);
@@ -22,11 +19,8 @@ describe("parseCompanyPayload", () => {
           expect.objectContaining({ field: "companyName", message: "companyName is required" }),
           expect.objectContaining({ field: "contactName", message: "contactName is required" }),
           expect.objectContaining({ field: "phone", message: "phone is required" }),
-          expect.objectContaining({ field: "city", message: "city is required" }),
-          expect.objectContaining({ field: "state", message: "state is required" }),
-          expect.objectContaining({ field: "licenseType", message: "licenseType is required" }),
-          expect.objectContaining({ field: "licenseNumber", message: "licenseNumber is required" }),
-          expect.objectContaining({ field: "licenseState", message: "licenseState is required" }),
+          expect.objectContaining({ field: "email", message: "email is required" }),
+          expect.objectContaining({ field: "address", message: "address is required" }),
         ])
       );
     }

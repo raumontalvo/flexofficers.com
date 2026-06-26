@@ -1,13 +1,14 @@
 "use client";
 
 import { SignOutButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui";
 
 export default function DashboardSignOutButton() {
   return (
     <SignOutButton redirectUrl="/">
-      <button className="rounded-xl border border-white/20 px-5 py-3 font-semibold hover:bg-white/10">
+      <Button variant="secondary" size="md" className="shrink-0">
         Sign Out
-      </button>
+      </Button>
     </SignOutButton>
   );
 }

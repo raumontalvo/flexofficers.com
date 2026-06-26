@@ -78,7 +78,8 @@ export async function POST(req: Request) {
         hourlyRate: parsed.data.hourlyRate,
         startTime: parsed.data.startTime,
         endTime: parsed.data.endTime,
-        requiredLicense: parsed.data.requiredLicense,
+        specialRequirements: parsed.data.specialRequirements,
+        reportingInstructions: parsed.data.reportingInstructions,
         positionsNeeded: parsed.data.positionsNeeded,
       },
     });

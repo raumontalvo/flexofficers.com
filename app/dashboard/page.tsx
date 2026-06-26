@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { FlexOfficersLogoLink } from "@/components/brand";
 import { prisma } from "@/lib/prisma";
+import CompanyDashboard from "./CompanyDashboard";
 import DashboardSignOutButton from "./SignOutButton";
+import OfficerDashboard from "./OfficerDashboard";
 
 export default async function DashboardPage() {
   const clerkUser = await currentUser();
@@ -13,17 +16,8 @@ export default async function DashboardPage() {
           clerkId: clerkUser.id,
         },
         include: {
-          officer: {
-            include: {
-              licenses: true,
-            },
-          },
+          officer: true,
           company: true,
-          notifications: {
-            where: {
-              read: false,
-            },
-          },
         },
       })
     : null;
@@ -34,50 +28,65 @@ export default async function DashboardPage() {
     redirect("/admin");
   }
 
-  const unreadCount = user?.notifications.length ?? 0;
-
   const officerMissingItems =
     role === "OFFICER"
-      ? [
-          !user?.officer?.city || !user?.officer?.state
-            ? "Add your city and state"
+      ? ([
+          !user?.officer?.city ? "Add your city" : null,
+          !user?.officer?.phone ? "Add your phone number" : null,
+          !user?.email ? "Add your email" : null,
+          !user?.officer?.armedStatus ? "Select armed or unarmed" : null,
+          user?.officer?.experienceYears === null ||
+          user?.officer?.experienceYears === undefined
+            ? "Add your years of experience"
             : null,
-          !user?.officer?.bio ? "Add your experience summary" : null,
-          !user?.officer?.licenses.length ? "Add at least one license" : null,
-        ].filter(Boolean)
+          !user?.officer?.licenseExpirationDate
+            ? "Add your license expiration date"
+            : null,
+        ].filter((item): item is string => Boolean(item)))
       : [];
 
   const companyMissingItems =
     role === "COMPANY"
-      ? [
+      ? ([
           !user?.company?.companyName ? "Add your company name" : null,
-          !user?.company?.city || !user?.company?.state
-            ? "Add your company city and state"
-            : null,
-          !user?.company?.licenseType ? "Add your company license type" : null,
-          !user?.company?.licenseNumber
-            ? "Add your company license number"
-            : null,
-          !user?.company?.licenseState
-            ? "Add your company license issuing state"
-            : null,
-        ].filter(Boolean)
+          !user?.company?.contactName ? "Add your contact person" : null,
+          !user?.company?.phone ? "Add your company phone number" : null,
+          !user?.company?.email && !user?.email ? "Add your company email" : null,
+          !user?.company?.address ? "Add your company address" : null,
+        ].filter((item): item is string => Boolean(item)))
       : [];
 
-  const missingItems =
-    role === "OFFICER" ? officerMissingItems : companyMissingItems;
+  if (role === "COMPANY" && user?.company) {
+    return (
+      <CompanyDashboard
+        firstName={clerkUser?.firstName}
+        company={user.company}
+        missingItems={companyMissingItems}
+      />
+    );
+  }
 
-  const profileLink =
-    role === "OFFICER" ? "/officer/profile" : "/company/profile";
+  if (role === "OFFICER") {
+    return (
+      <OfficerDashboard
+        firstName={clerkUser?.firstName}
+        officerId={user?.officer?.id}
+        missingItems={officerMissingItems}
+      />
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
+    <main className="min-h-screen bg-fo-bg px-6 py-12 text-fo-text">
       <section className="mx-auto max-w-6xl">
+        <div className="mb-8">
+          <FlexOfficersLogoLink href="/" height={40} />
+        </div>
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
           <div>
             <h1 className="text-4xl font-bold">Dashboard</h1>
 
-            <p className="mt-4 text-slate-300">
+            <p className="mt-4 text-fo-text-muted">
               Welcome{clerkUser?.firstName ? `, ${clerkUser.firstName}` : ""}.
               Manage your FlexOfficers marketplace activity.
             </p>
@@ -102,131 +111,6 @@ export default async function DashboardPage() {
               Go to Onboarding
             </Link>
           </div>
-        )}
-
-        {role && missingItems.length > 0 && (
-          <div className="mt-10 rounded-3xl border border-yellow-500/30 bg-yellow-500/10 p-6">
-            <h2 className="text-2xl font-bold">Complete your profile</h2>
-
-            <p className="mt-3 text-yellow-100">
-              Finish these items so your account is ready:
-            </p>
-
-            <ul className="mt-4 list-disc space-y-2 pl-6 text-yellow-100">
-              {missingItems.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-
-            <Link
-              href={profileLink}
-              className="mt-5 inline-block rounded-xl bg-yellow-500 px-6 py-3 font-semibold text-slate-950 hover:bg-yellow-400"
-            >
-              Complete Profile
-            </Link>
-          </div>
-        )}
-
-        {role === "OFFICER" && (
-          <>
-            <h2 className="mt-12 text-2xl font-bold">Officer Tools</h2>
-
-            <div className="mt-6 grid gap-6 md:grid-cols-3">
-              <Link
-                href="/officer/profile"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Officer Profile</h3>
-                <p className="mt-3 text-slate-300">
-                  Manage licenses, experience, and availability.
-                </p>
-              </Link>
-
-              <Link
-                href="/shifts"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Available Shifts</h3>
-                <p className="mt-3 text-slate-300">
-                  Browse and apply to open shifts.
-                </p>
-              </Link>
-
-              <Link
-                href="/officer/applications"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">My Applications</h3>
-                <p className="mt-3 text-slate-300">
-                  Track application status and decisions.
-                </p>
-              </Link>
-
-              <Link
-                href="/notifications"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Notifications</h3>
-                <p className="mt-3 text-slate-300">Unread: {unreadCount}</p>
-              </Link>
-            </div>
-          </>
-        )}
-
-        {role === "COMPANY" && (
-          <>
-            <h2 className="mt-12 text-2xl font-bold">Company Tools</h2>
-
-            <div className="mt-6 grid gap-6 md:grid-cols-3">
-              <Link
-                href="/company/profile"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Company Profile</h3>
-                <p className="mt-3 text-slate-300">
-                  Manage company information.
-                </p>
-              </Link>
-
-              <Link
-                href="/shifts/create"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Post a Shift</h3>
-                <p className="mt-3 text-slate-300">
-                  Create new security opportunities.
-                </p>
-              </Link>
-
-              <Link
-                href="/company/shifts"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Manage Shifts</h3>
-                <p className="mt-3 text-slate-300">
-                  View, cancel, and delete shifts your company posted.
-                </p>
-              </Link>
-
-              <Link
-                href="/company/applications"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Applicants</h3>
-                <p className="mt-3 text-slate-300">
-                  Review and manage applicants.
-                </p>
-              </Link>
-
-              <Link
-                href="/notifications"
-                className="rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10"
-              >
-                <h3 className="text-xl font-semibold">Notifications</h3>
-                <p className="mt-3 text-slate-300">Unread: {unreadCount}</p>
-              </Link>
-            </div>
-          </>
         )}
       </section>
     </main>

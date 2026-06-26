@@ -1,34 +1,32 @@
+import {
+  AVAILABILITY_OPTIONS,
+  CERTIFICATION_OPTIONS,
+  EXPERIENCE_CATEGORIES,
+} from "@/lib/profile-options";
+import { ArmedStatus } from "@/app/generated/prisma/enums";
+
 export type OfficerProfilePayload = {
   firstName?: unknown;
   lastName?: unknown;
   phone?: unknown;
+  email?: unknown;
   city?: unknown;
-  state?: unknown;
-  bio?: unknown;
+  profilePhotoUrl?: unknown;
+  armedStatus?: unknown;
   experienceYears?: unknown;
-  licenses?: unknown;
-};
-
-type RawLicenseInput = {
-  id?: unknown;
-  licenseType?: unknown;
-  licenseNumber?: unknown;
-  issuingState?: unknown;
-  expirationDate?: unknown;
-};
-
-export type ParsedLicense = {
-  id?: string;
-  licenseType: string;
-  licenseNumber: string;
-  issuingState: string;
-  expirationDate: Date;
+  licenseExpirationDate?: unknown;
+  availability?: unknown;
+  certifications?: unknown;
+  experienceCategories?: unknown;
+  introduction?: unknown;
 };
 
 export type FieldError = {
   field: string;
   message: string;
 };
+
+const INTRODUCTION_MAX_LENGTH = 300;
 
 function parseRequiredString(
   value: unknown,
@@ -47,33 +45,146 @@ function parseRequiredString(
   return value.trim();
 }
 
+function parseOptionalUrl(
+  value: unknown,
+  field: string,
+  errors: FieldError[]
+) {
+  if (typeof value === "undefined" || value === null || value === "") {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    errors.push({
+      field,
+      message: `${field} must be a string`,
+    });
+
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    new URL(trimmed);
+  } catch {
+    errors.push({
+      field,
+      message: `${field} must be a valid URL`,
+    });
+
+    return undefined;
+  }
+
+  return trimmed;
+}
+
+function parseStringArrayFromOptions(
+  value: unknown,
+  field: string,
+  allowed: readonly string[],
+  errors: FieldError[]
+) {
+  if (typeof value === "undefined" || value === null) {
+    return [] as string[];
+  }
+
+  if (!Array.isArray(value)) {
+    errors.push({
+      field,
+      message: `${field} must be an array`,
+    });
+
+    return [] as string[];
+  }
+
+  const allowedSet = new Set(allowed);
+  const parsed: string[] = [];
+
+  value.forEach((entry, index) => {
+    if (typeof entry !== "string") {
+      errors.push({
+        field: `${field}[${index}]`,
+        message: "must be a string",
+      });
+
+      return;
+    }
+
+    const trimmed = entry.trim();
+
+    if (!trimmed) {
+      return;
+    }
+
+    if (!allowedSet.has(trimmed)) {
+      errors.push({
+        field: `${field}[${index}]`,
+        message: "invalid option",
+      });
+
+      return;
+    }
+
+    if (!parsed.includes(trimmed)) {
+      parsed.push(trimmed);
+    }
+  });
+
+  return parsed;
+}
+
 export function parseOfficerPayload(payload: OfficerProfilePayload) {
   const errors: FieldError[] = [];
 
   const firstName = parseRequiredString(payload.firstName, "firstName", errors);
   const lastName = parseRequiredString(payload.lastName, "lastName", errors);
   const phone = parseRequiredString(payload.phone, "phone", errors);
+  const email = parseRequiredString(payload.email, "email", errors);
   const city = parseRequiredString(payload.city, "city", errors);
-  const state = parseRequiredString(payload.state, "state", errors);
+  const profilePhotoUrl = parseOptionalUrl(
+    payload.profilePhotoUrl,
+    "profilePhotoUrl",
+    errors
+  );
 
-  let bio: string | undefined;
-  if (typeof payload.bio === "undefined" || payload.bio === null || payload.bio === "") {
-    bio = undefined;
-  } else if (typeof payload.bio !== "string") {
+  let armedStatus: ArmedStatus | undefined;
+  if (typeof payload.armedStatus !== "string" || payload.armedStatus.trim() === "") {
     errors.push({
-      field: "bio",
-      message: "bio must be a string",
+      field: "armedStatus",
+      message: "armedStatus is required",
     });
   } else {
-    bio = payload.bio.trim();
+    const normalized = payload.armedStatus.trim().toUpperCase();
+
+    if (
+      normalized !== ArmedStatus.ARMED &&
+      normalized !== ArmedStatus.UNARMED
+    ) {
+      errors.push({
+        field: "armedStatus",
+        message: "armedStatus must be ARMED or UNARMED",
+      });
+    } else {
+      armedStatus = normalized as ArmedStatus;
+    }
   }
 
   let experienceYears: number | undefined;
   if (
-    typeof payload.experienceYears !== "undefined" &&
-    payload.experienceYears !== null &&
-    payload.experienceYears !== ""
+    typeof payload.experienceYears === "undefined" ||
+    payload.experienceYears === null ||
+    payload.experienceYears === ""
   ) {
+    errors.push({
+      field: "experienceYears",
+      message: "experienceYears is required",
+    });
+  } else {
     const parsedExperience = Number(payload.experienceYears);
 
     if (!Number.isFinite(parsedExperience) || parsedExperience < 0) {
@@ -86,100 +197,71 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
     }
   }
 
-  const parsedLicenses: ParsedLicense[] = [];
+  let licenseExpirationDate: Date | undefined;
+  const licenseExpirationDateRaw =
+    typeof payload.licenseExpirationDate === "string"
+      ? payload.licenseExpirationDate.trim()
+      : "";
 
-  if (typeof payload.licenses !== "undefined" && payload.licenses !== null) {
-    if (!Array.isArray(payload.licenses)) {
+  if (!licenseExpirationDateRaw) {
+    errors.push({
+      field: "licenseExpirationDate",
+      message: "licenseExpirationDate is required",
+    });
+  } else {
+    const parsedDate = new Date(licenseExpirationDateRaw);
+
+    if (Number.isNaN(parsedDate.getTime())) {
       errors.push({
-        field: "licenses",
-        message: "licenses must be an array",
+        field: "licenseExpirationDate",
+        message: "licenseExpirationDate must be a valid date",
       });
     } else {
-      payload.licenses.forEach((license, index) => {
-        const entry = (license ?? {}) as RawLicenseInput;
+      licenseExpirationDate = parsedDate;
+    }
+  }
 
-        let id: string | undefined;
-        if (typeof entry.id !== "undefined" && entry.id !== null && entry.id !== "") {
-          if (typeof entry.id !== "string") {
-            errors.push({
-              field: `licenses[${index}].id`,
-              message: "id must be a string",
-            });
-          } else {
-            id = entry.id.trim() || undefined;
-          }
-        }
+  const availability = parseStringArrayFromOptions(
+    payload.availability,
+    "availability",
+    AVAILABILITY_OPTIONS,
+    errors
+  );
+  const certifications = parseStringArrayFromOptions(
+    payload.certifications,
+    "certifications",
+    CERTIFICATION_OPTIONS,
+    errors
+  );
+  const experienceCategories = parseStringArrayFromOptions(
+    payload.experienceCategories,
+    "experienceCategories",
+    EXPERIENCE_CATEGORIES,
+    errors
+  );
 
-        const licenseType =
-          typeof entry.licenseType === "string" ? entry.licenseType.trim() : "";
-        const licenseNumber =
-          typeof entry.licenseNumber === "string" ? entry.licenseNumber.trim() : "";
-        const issuingState =
-          typeof entry.issuingState === "string" ? entry.issuingState.trim() : "";
-        const expirationDateRaw =
-          typeof entry.expirationDate === "string" ? entry.expirationDate.trim() : "";
+  let introduction: string | undefined;
+  if (
+    typeof payload.introduction === "undefined" ||
+    payload.introduction === null ||
+    payload.introduction === ""
+  ) {
+    introduction = undefined;
+  } else if (typeof payload.introduction !== "string") {
+    errors.push({
+      field: "introduction",
+      message: "introduction must be a string",
+    });
+  } else {
+    const trimmed = payload.introduction.trim();
 
-        const isEmptyEntry =
-          !licenseType &&
-          !licenseNumber &&
-          !issuingState &&
-          !expirationDateRaw;
-
-        if (isEmptyEntry) {
-          return;
-        }
-
-        if (!licenseType) {
-          errors.push({
-            field: `licenses[${index}].licenseType`,
-            message: "licenseType is required",
-          });
-        }
-
-        if (!licenseNumber) {
-          errors.push({
-            field: `licenses[${index}].licenseNumber`,
-            message: "licenseNumber is required",
-          });
-        }
-
-        if (!issuingState) {
-          errors.push({
-            field: `licenses[${index}].issuingState`,
-            message: "issuingState is required",
-          });
-        }
-
-        if (!expirationDateRaw) {
-          errors.push({
-            field: `licenses[${index}].expirationDate`,
-            message: "expirationDate is required",
-          });
-
-          return;
-        }
-
-        const expirationDate = new Date(expirationDateRaw);
-
-        if (Number.isNaN(expirationDate.getTime())) {
-          errors.push({
-            field: `licenses[${index}].expirationDate`,
-            message: "expirationDate must be a valid date",
-          });
-
-          return;
-        }
-
-        if (licenseType && licenseNumber && issuingState) {
-          parsedLicenses.push({
-            id,
-            licenseType,
-            licenseNumber,
-            issuingState,
-            expirationDate,
-          });
-        }
+    if (trimmed.length > INTRODUCTION_MAX_LENGTH) {
+      errors.push({
+        field: "introduction",
+        message: `introduction must be ${INTRODUCTION_MAX_LENGTH} characters or fewer`,
       });
+    } else {
+      introduction = trimmed || undefined;
     }
   }
 
@@ -192,11 +274,16 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
       firstName,
       lastName,
       phone,
+      email,
       city,
-      state,
-      bio,
-      experienceYears,
-      licenses: parsedLicenses,
+      profilePhotoUrl,
+      armedStatus: armedStatus!,
+      experienceYears: experienceYears!,
+      licenseExpirationDate: licenseExpirationDate!,
+      availability,
+      certifications,
+      experienceCategories,
+      introduction,
     },
   };
 }

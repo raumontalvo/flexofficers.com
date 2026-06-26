@@ -4,7 +4,6 @@ const isPrivatePage = createRouteMatcher([
   "/dashboard(.*)",
   "/company(.*)",
   "/officer(.*)",
-  "/notifications(.*)",
   "/admin(.*)",
   "/shifts/create(.*)",
 ]);

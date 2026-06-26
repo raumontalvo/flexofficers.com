@@ -6,7 +6,7 @@ describe("parseShiftPayload", () => {
     const result = parseShiftPayload({
       title: "Night Patrol",
       location: "HQ",
-      requiredLicense: "D License",
+      specialRequirements: "Armed officer required",
       hourlyRate: 25,
       positionsNeeded: 1,
       startTime: "2026-07-01T10:00:00.000Z",

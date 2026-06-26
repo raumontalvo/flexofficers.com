@@ -1,4 +1,5 @@
 import { UserRole } from "@/app/generated/prisma/enums";
+import { PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import OfficerProfileForm from "./OfficerProfileForm";
@@ -16,77 +17,46 @@ function formatDateForInput(value: Date | null) {
 export default async function OfficerProfilePage() {
   const clerkUser = await requirePageRole(UserRole.OFFICER);
 
-  const officer = await prisma.officer.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
-      user: {
-        clerkId: clerkUser.id,
-      },
+      clerkId: clerkUser.id,
     },
     include: {
-      licenses: {
-        orderBy: {
-          createdAt: "asc",
-        },
-      },
+      officer: true,
     },
   });
 
-  const savedLicenses =
-    officer?.licenses.map((license) => ({
-      id: license.id,
-      licenseType: license.licenseType,
-      licenseNumber: license.licenseNumber,
-      issuingState: license.issuingState,
-      expirationDate: formatDateForInput(license.expirationDate),
-      documentKey: license.documentKey ?? undefined,
-      documentFileName: license.documentFileName ?? undefined,
-      documentMimeType: license.documentMimeType ?? undefined,
-      documentSizeBytes: license.documentSizeBytes ?? undefined,
-      documentUploadedAt: license.documentUploadedAt?.toISOString() ?? undefined,
-      verificationStatus: license.verificationStatus,
-    })) ?? [];
+  const officer = user?.officer;
 
   const initialForm = {
     firstName: officer?.firstName ?? clerkUser?.firstName ?? "",
     lastName: officer?.lastName ?? clerkUser?.lastName ?? "",
     phone: officer?.phone ?? "",
+    email: user?.email ?? clerkUser.emailAddresses[0]?.emailAddress ?? "",
     city: officer?.city ?? "",
-    state: officer?.state ?? "",
-    bio: officer?.bio ?? "",
-    licenses:
-      savedLicenses.length > 0
-        ? savedLicenses
-        : [
-            {
-              id: undefined,
-              licenseType: "",
-              licenseNumber: "",
-              issuingState: "",
-              expirationDate: "",
-              documentKey: undefined,
-              documentFileName: undefined,
-              documentMimeType: undefined,
-              documentSizeBytes: undefined,
-              documentUploadedAt: undefined,
-              verificationStatus: undefined,
-            },
-          ],
+    profilePhotoUrl: officer?.profilePhotoUrl ?? "",
+    armedStatus: (officer?.armedStatus ?? "") as "" | "ARMED" | "UNARMED",
+    experienceYears:
+      officer?.experienceYears !== null && officer?.experienceYears !== undefined
+        ? String(officer.experienceYears)
+        : "",
+    licenseExpirationDate: formatDateForInput(officer?.licenseExpirationDate ?? null),
+    availability: officer?.availability ?? [],
+    certifications: officer?.certifications ?? [],
+    experienceCategories: officer?.experienceCategories ?? [],
+    introduction: officer?.introduction ?? "",
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <section className="mx-auto max-w-4xl">
-        <h1 className="text-4xl font-bold">Officer Profile</h1>
+    <PageShell nav="officer" maxWidth="lg">
+      <SectionHeading
+        title="Officer Profile"
+        subtitle="Keep your profile ready so companies can review you."
+      />
 
-        <p className="mt-4 text-slate-300">
-          Add your license, experience, location, and availability so companies
-          can review your profile.
-        </p>
-
-        <div className="mt-10 rounded-3xl border border-white/10 bg-white/5 p-8">
-          <OfficerProfileForm initialForm={initialForm} />
-        </div>
-      </section>
-    </main>
+      <div className="mt-8">
+        <OfficerProfileForm initialForm={initialForm} />
+      </div>
+    </PageShell>
   );
 }

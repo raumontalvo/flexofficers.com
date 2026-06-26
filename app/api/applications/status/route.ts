@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendNotificationEmail } from "@/lib/email";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { validateApplicationDecisionTransition } from "./decision-rules";
 import {
@@ -242,64 +241,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const application = decisionResult.application;
-
-    if (status === "ACCEPTED") {
-      const title = "Application accepted";
-      const message = `Your application for ${application.shift.title} was accepted.`;
-
-      await prisma.notification.create({
-        data: {
-          userId: application.officer.user.id,
-          title,
-          message,
-        },
-      });
-
-      try {
-        await sendNotificationEmail({
-          to: application.officer.user.email,
-          subject: title,
-          message,
-        });
-      } catch (error) {
-        console.error("Failed to send acceptance email", {
-          applicationId: application.id,
-          officerUserId: application.officer.user.id,
-          error,
-        });
-      }
-
-    }
-
-    if (status === "REJECTED") {
-      const title = "Application rejected";
-      const message = `Your application for ${application.shift.title} was rejected.`;
-
-      await prisma.notification.create({
-        data: {
-          userId: application.officer.user.id,
-          title,
-          message,
-        },
-      });
-
-      try {
-        await sendNotificationEmail({
-          to: application.officer.user.email,
-          subject: title,
-          message,
-        });
-      } catch (error) {
-        console.error("Failed to send rejection email", {
-          applicationId: application.id,
-          officerUserId: application.officer.user.id,
-          error,
-        });
-      }
-    }
-
-    return NextResponse.json(application);
+    return NextResponse.json(decisionResult.application);
   } catch {
     return NextResponse.json(
       { error: "Failed to update application status" },

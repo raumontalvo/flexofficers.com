@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import {
+  Button,
+  Card,
+  CardDescription,
+  CardTitle,
+  SectionHeading,
+} from "@/components/ui";
 
 type Role = "OFFICER" | "COMPANY";
 
@@ -14,6 +21,21 @@ const PENDING_ROLE_KEY = "flexofficers.pendingRole";
 
 function isValidRole(value: string | null): value is Role {
   return value === "OFFICER" || value === "COMPANY";
+}
+
+function RoleFeatureList({ items }: { items: string[] }) {
+  return (
+    <ul className="mt-5 space-y-3 text-left">
+      {items.map((item) => (
+        <li key={item} className="flex items-start gap-3 text-sm text-fo-text-muted">
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fo-primary/15 text-xs font-bold text-fo-primary-hover">
+            ✓
+          </span>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 export default function OnboardingRoleChoice({
@@ -84,54 +106,77 @@ export default function OnboardingRoleChoice({
   }, [isLoaded, isSignedIn, initialRole]);
 
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-12 text-white">
-      <section className="mx-auto max-w-3xl text-center">
-        <h1 className="text-5xl font-bold">Choose Your Role</h1>
+    <>
+      <SectionHeading
+        title="Welcome to FlexOfficers"
+        subtitle="Choose how you want to use the platform."
+        align="center"
+      />
 
-        <p className="mt-4 text-slate-300">
-          Tell us how you will use FlexOfficers.
+      {error ? (
+        <Card className="mt-6 border-red-500/20 bg-fo-rejected-bg">
+          <p className="text-sm text-fo-rejected">{error}</p>
+        </Card>
+      ) : null}
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+        <Card variant="elevated" className="flex h-full flex-col">
+          <CardTitle className="text-xl sm:text-2xl">Security Officer</CardTitle>
+          <CardDescription className="mt-2">
+            Browse shifts and apply for work on your schedule.
+          </CardDescription>
+
+          <RoleFeatureList
+            items={[
+              "Find open shifts",
+              "Apply for free",
+              "Get company contact info after acceptance",
+            ]}
+          />
+
+          <Button
+            type="button"
+            fullWidth
+            className="mt-8 w-full"
+            disabled={savingRole !== null}
+            onClick={() => chooseRole("OFFICER")}
+          >
+            {savingRole === "OFFICER" ? "Saving..." : "Continue as Officer"}
+          </Button>
+        </Card>
+
+        <Card variant="elevated" className="flex h-full flex-col">
+          <CardTitle className="text-xl sm:text-2xl">Security Company</CardTitle>
+          <CardDescription className="mt-2">
+            Post shifts and connect with qualified officers.
+          </CardDescription>
+
+          <RoleFeatureList
+            items={[
+              "Post open shifts",
+              "Review officer profiles",
+              "Fill shifts faster",
+            ]}
+          />
+
+          <Button
+            type="button"
+            fullWidth
+            className="mt-8 w-full"
+            disabled={savingRole !== null}
+            onClick={() => chooseRole("COMPANY")}
+          >
+            {savingRole === "COMPANY" ? "Saving..." : "Continue as Company"}
+          </Button>
+        </Card>
+      </div>
+
+      <Card variant="muted" className="mt-6">
+        <p className="text-sm leading-relaxed text-fo-text-muted">
+          Companies are responsible for verifying licenses, credentials, and
+          hiring requirements.
         </p>
-
-        {error && (
-          <div className="mt-6 rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
-            {error}
-          </div>
-        )}
-
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-            <h2 className="text-3xl font-bold">Security Officer</h2>
-
-            <p className="mt-4 text-slate-300">
-              Browse shifts, apply for opportunities, and build your profile.
-            </p>
-
-            <button
-              onClick={() => chooseRole("OFFICER")}
-              disabled={savingRole !== null}
-              className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {savingRole === "OFFICER" ? "Saving..." : "Continue as Officer"}
-            </button>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8">
-            <h2 className="text-3xl font-bold">Security Company</h2>
-
-            <p className="mt-4 text-slate-300">
-              Post shifts, review applicants, and manage staffing needs.
-            </p>
-
-            <button
-              onClick={() => chooseRole("COMPANY")}
-              disabled={savingRole !== null}
-              className="mt-8 w-full rounded-xl bg-blue-500 px-6 py-3 font-semibold hover:bg-blue-400 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {savingRole === "COMPANY" ? "Saving..." : "Continue as Company"}
-            </button>
-          </div>
-        </div>
-      </section>
-    </main>
+      </Card>
+    </>
   );
 }

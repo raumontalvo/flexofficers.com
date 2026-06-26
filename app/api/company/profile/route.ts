@@ -26,12 +26,6 @@ export async function POST(req: Request) {
     return rateLimitResponse;
   }
 
-  const email = clerkUser.emailAddresses[0]?.emailAddress;
-
-  if (!email) {
-    return NextResponse.json({ error: "Email not found" }, { status: 400 });
-  }
-
   let payload: CompanyProfilePayload;
 
   try {
@@ -93,13 +87,13 @@ export async function POST(req: Request) {
           id: existingUser.id,
         },
         data: {
-          email,
+          email: parsed.data.email,
         },
       })
     : await prisma.user.create({
         data: {
           clerkId: clerkUser.id,
-          email,
+          email: parsed.data.email,
           role: UserRole.COMPANY,
         },
       });
@@ -112,26 +106,20 @@ export async function POST(req: Request) {
       companyName: parsed.data.companyName,
       contactName: parsed.data.contactName,
       phone: parsed.data.phone,
+      email: parsed.data.email,
+      address: parsed.data.address,
       website: parsed.data.website,
-      city: parsed.data.city,
-      state: parsed.data.state,
-      description: parsed.data.description,
-      licenseType: parsed.data.licenseType,
-      licenseNumber: parsed.data.licenseNumber,
-      licenseState: parsed.data.licenseState,
+      logoUrl: parsed.data.logoUrl,
     },
     create: {
       userId: user.id,
       companyName: parsed.data.companyName,
       contactName: parsed.data.contactName,
       phone: parsed.data.phone,
+      email: parsed.data.email,
+      address: parsed.data.address,
       website: parsed.data.website,
-      city: parsed.data.city,
-      state: parsed.data.state,
-      description: parsed.data.description,
-      licenseType: parsed.data.licenseType,
-      licenseNumber: parsed.data.licenseNumber,
-      licenseState: parsed.data.licenseState,
+      logoUrl: parsed.data.logoUrl,
     },
   });
 

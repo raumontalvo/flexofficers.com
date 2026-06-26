@@ -1,7 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendNotificationEmail } from "@/lib/email";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   ApplicationStatus,
@@ -136,31 +135,6 @@ export async function POST(req: Request) {
         officerId: officer.id,
       },
     });
-
-    const title = "New application received";
-    const message = `${officer.firstName} ${officer.lastName} applied to ${shift.title}.`;
-
-    await prisma.notification.create({
-      data: {
-        userId: shift.company.user.id,
-        title,
-        message,
-      },
-    });
-
-    try {
-      await sendNotificationEmail({
-        to: shift.company.user.email,
-        subject: title,
-        message,
-      });
-    } catch (error) {
-      console.error("Failed to send new application email", {
-        shiftId: shift.id,
-        companyUserId: shift.company.user.id,
-        error,
-      });
-    }
 
     return NextResponse.json(application);
   } catch {

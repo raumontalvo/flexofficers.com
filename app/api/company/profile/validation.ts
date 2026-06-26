@@ -2,13 +2,10 @@ export type CompanyProfilePayload = {
   companyName?: unknown;
   contactName?: unknown;
   phone?: unknown;
+  email?: unknown;
+  address?: unknown;
   website?: unknown;
-  city?: unknown;
-  state?: unknown;
-  description?: unknown;
-  licenseType?: unknown;
-  licenseNumber?: unknown;
-  licenseState?: unknown;
+  logoUrl?: unknown;
 };
 
 export type FieldError = {
@@ -54,20 +51,54 @@ function parseOptionalString(
   return value.trim();
 }
 
+function parseOptionalUrl(
+  value: unknown,
+  field: string,
+  errors: FieldError[]
+) {
+  if (typeof value === "undefined" || value === null || value === "") {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    errors.push({
+      field,
+      message: `${field} must be a string`,
+    });
+
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    new URL(trimmed);
+  } catch {
+    errors.push({
+      field,
+      message: `${field} must be a valid URL`,
+    });
+
+    return undefined;
+  }
+
+  return trimmed;
+}
+
 export function parseCompanyPayload(payload: CompanyProfilePayload) {
   const errors: FieldError[] = [];
 
   const companyName = parseRequiredString(payload.companyName, "companyName", errors);
   const contactName = parseRequiredString(payload.contactName, "contactName", errors);
   const phone = parseRequiredString(payload.phone, "phone", errors);
-  const city = parseRequiredString(payload.city, "city", errors);
-  const state = parseRequiredString(payload.state, "state", errors);
-  const licenseType = parseRequiredString(payload.licenseType, "licenseType", errors);
-  const licenseNumber = parseRequiredString(payload.licenseNumber, "licenseNumber", errors);
-  const licenseState = parseRequiredString(payload.licenseState, "licenseState", errors);
-
+  const email = parseRequiredString(payload.email, "email", errors);
+  const address = parseRequiredString(payload.address, "address", errors);
   const website = parseOptionalString(payload.website, "website", errors);
-  const description = parseOptionalString(payload.description, "description", errors);
+  const logoUrl = parseOptionalUrl(payload.logoUrl, "logoUrl", errors);
 
   if (errors.length > 0) {
     return { errors };
@@ -78,13 +109,10 @@ export function parseCompanyPayload(payload: CompanyProfilePayload) {
       companyName,
       contactName,
       phone,
+      email,
+      address,
       website,
-      city,
-      state,
-      description,
-      licenseType,
-      licenseNumber,
-      licenseState,
+      logoUrl,
     },
   };
 }

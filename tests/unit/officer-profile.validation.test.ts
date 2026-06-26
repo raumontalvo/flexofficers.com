@@ -2,14 +2,16 @@ import { describe, expect, it } from "vitest";
 import { parseOfficerPayload } from "@/app/api/officer/profile/validation";
 
 describe("parseOfficerPayload", () => {
-  it("requires phone", () => {
+  it("requires phone and email", () => {
     const result = parseOfficerPayload({
       firstName: "Alex",
       lastName: "Stone",
       phone: "",
+      email: "",
       city: "Miami",
-      state: "FL",
-      licenses: [],
+      armedStatus: "ARMED",
+      experienceYears: 3,
+      licenseExpirationDate: "2027-01-01",
     });
 
     expect("errors" in result).toBe(true);
@@ -18,26 +20,23 @@ describe("parseOfficerPayload", () => {
       expect(result.errors).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ field: "phone", message: "phone is required" }),
+          expect.objectContaining({ field: "email", message: "email is required" }),
         ])
       );
     }
   });
 
-  it("requires expirationDate for non-empty license entries", () => {
+  it("rejects introductions longer than 300 characters", () => {
     const result = parseOfficerPayload({
       firstName: "Alex",
       lastName: "Stone",
       phone: "555-0100",
+      email: "alex@example.com",
       city: "Miami",
-      state: "FL",
-      licenses: [
-        {
-          licenseType: "D License",
-          licenseNumber: "ABC123",
-          issuingState: "FL",
-          expirationDate: "",
-        },
-      ],
+      armedStatus: "UNARMED",
+      experienceYears: 2,
+      licenseExpirationDate: "2027-01-01",
+      introduction: "a".repeat(301),
     });
 
     expect("errors" in result).toBe(true);
@@ -46,8 +45,8 @@ describe("parseOfficerPayload", () => {
       expect(result.errors).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            field: "licenses[0].expirationDate",
-            message: "expirationDate is required",
+            field: "introduction",
+            message: "introduction must be 300 characters or fewer",
           }),
         ])
       );

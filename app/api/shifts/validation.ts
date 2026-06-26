@@ -5,7 +5,8 @@ export type ShiftPayload = {
   startTime?: unknown;
   endTime?: unknown;
   hourlyRate?: unknown;
-  requiredLicense?: unknown;
+  specialRequirements?: unknown;
+  reportingInstructions?: unknown;
   positionsNeeded?: unknown;
 };
 
@@ -23,12 +24,12 @@ export function parseShiftPayload(payload: ShiftPayload) {
     errors.push("location is required");
   }
 
-  const requiredLicense =
-    typeof payload.requiredLicense === "string"
-      ? payload.requiredLicense.trim()
+  const specialRequirements =
+    typeof payload.specialRequirements === "string"
+      ? payload.specialRequirements.trim()
       : "";
-  if (!requiredLicense) {
-    errors.push("requiredLicense is required");
+  if (!specialRequirements) {
+    errors.push("specialRequirements is required");
   }
 
   if (
@@ -39,6 +40,19 @@ export function parseShiftPayload(payload: ShiftPayload) {
   }
   const description =
     typeof payload.description === "string" ? payload.description : undefined;
+
+  let reportingInstructions: string | undefined;
+  if (
+    typeof payload.reportingInstructions === "undefined" ||
+    payload.reportingInstructions === null ||
+    payload.reportingInstructions === ""
+  ) {
+    reportingInstructions = undefined;
+  } else if (typeof payload.reportingInstructions !== "string") {
+    errors.push("reportingInstructions must be a string");
+  } else {
+    reportingInstructions = payload.reportingInstructions.trim() || undefined;
+  }
 
   const hourlyRate = Number(payload.hourlyRate);
   if (!Number.isFinite(hourlyRate) || hourlyRate <= 0) {
@@ -85,7 +99,8 @@ export function parseShiftPayload(payload: ShiftPayload) {
       hourlyRate,
       startTime,
       endTime,
-      requiredLicense,
+      specialRequirements,
+      reportingInstructions,
       positionsNeeded: positionsNeededRaw,
     },
   };

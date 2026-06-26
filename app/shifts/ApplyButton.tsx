@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui";
 
 export default function ApplyButton({ shiftId }: { shiftId: string }) {
   const [hasApplied, setHasApplied] = useState(false);
@@ -30,12 +31,17 @@ export default function ApplyButton({ shiftId }: { shiftId: string }) {
   }
 
   return (
-    <button
+    <Button
       onClick={applyToShift}
       disabled={isLoading || hasApplied}
-      className="rounded-xl border border-white/20 px-6 py-3 font-semibold hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+      fullWidth
+      className="w-full"
     >
-      {hasApplied ? "Applied" : isLoading ? "Applying..." : "Apply"}
-    </button>
+      {hasApplied
+        ? "Applied"
+        : isLoading
+          ? "Applying..."
+          : "Apply to Shift"}
+    </Button>
   );
 }
