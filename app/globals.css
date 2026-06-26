@@ -23,6 +23,29 @@
   --fo-radius-card: 1.25rem;
   --fo-radius-button: 0.875rem;
   --fo-nav-height: 4.5rem;
+  --landing-header-h: 5rem;
+}
+
+@media (min-width: 390px) {
+  :root {
+    --landing-header-h: 5.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --landing-header-h: 6rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --landing-header-h: 5.25rem;
+  }
+}
+
+html {
+  scroll-padding-top: var(--landing-header-h);
 }
 
 @theme inline {
@@ -97,32 +120,22 @@ html {
     radial-gradient(ellipse 50% 40% at 20% 60%, rgba(59, 130, 246, 0.08), transparent 70%);
 }
 
-/* Landing header — mobile menu anchor offset */
+/* Landing header — premium sticky bar on mobile/tablet */
 .landing-header {
-  --landing-header-h: 4.25rem;
+  -webkit-backdrop-filter: blur(16px);
 }
 
-@media (min-width: 390px) {
+@media (max-width: 1023px) {
   .landing-header {
-    --landing-header-h: 4.5rem;
-  }
-}
-
-@media (min-width: 768px) {
-  .landing-header {
-    --landing-header-h: 4.75rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .landing-header {
-    --landing-header-h: 5.25rem;
+    background-color: rgba(2, 6, 23, 0.9);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px -12px rgba(0, 0, 0, 0.5);
   }
 }
 
 /* Landing navbar logo — clipped wordmark on mobile/tablet, full desktop treatment */
 .landing-nav-logo-clip {
-  --landing-nav-logo-h: 42px;
+  --landing-nav-logo-h: 56px;
   --landing-nav-logo-w: calc(var(--landing-nav-logo-h) * 1.5 / 0.72);
   display: inline-flex;
   flex-shrink: 0;
@@ -130,7 +143,7 @@ html {
   line-height: 0;
   height: var(--landing-nav-logo-h);
   width: var(--landing-nav-logo-w);
-  max-width: min(46vw, var(--landing-nav-logo-w));
+  max-width: min(38vw, var(--landing-nav-logo-w));
 }
 
 .landing-nav-logo-image {
@@ -143,14 +156,15 @@ html {
 
 @media (min-width: 390px) and (max-width: 1023px) {
   .landing-nav-logo-clip {
-    --landing-nav-logo-h: 48px;
+    --landing-nav-logo-h: 64px;
+    max-width: min(40vw, var(--landing-nav-logo-w));
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .landing-nav-logo-clip {
-    --landing-nav-logo-h: 54px;
-    max-width: min(40vw, var(--landing-nav-logo-w));
+    --landing-nav-logo-h: 72px;
+    max-width: min(42vw, var(--landing-nav-logo-w));
   }
 }
 

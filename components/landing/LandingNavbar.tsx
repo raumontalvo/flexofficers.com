@@ -64,9 +64,9 @@ export function LandingNavbar() {
   }, [open, closeMenu]);
 
   return (
-    <header className="landing-header sticky top-0 z-40 border-b border-white/[0.04] bg-fo-bg/80 backdrop-blur-xl">
-      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:px-8 lg:py-5">
-        <div className="flex min-w-0 items-center justify-self-start">
+    <header className="landing-header sticky top-0 z-50 border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
+      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-3.5 sm:gap-3 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:px-8 lg:py-5">
+        <div className="flex min-w-0 max-w-[42%] items-center justify-self-start sm:max-w-none">
           <FlexOfficersLogoLink
             href="/"
             height={320}
