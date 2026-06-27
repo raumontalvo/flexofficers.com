@@ -31,7 +31,7 @@ export default async function CompanyProfilePage() {
   };
 
   return (
-    <PageShell nav="company" maxWidth="lg">
+    <PageShell nav="company" maxWidth="6xl" sidebar>
       <SectionHeading
         title="Company Profile"
         subtitle="Keep your company contact information ready for accepted officers."

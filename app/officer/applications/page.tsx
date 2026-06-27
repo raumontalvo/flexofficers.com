@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { buttonClassName, Card, PageShell, SectionHeading } from "@/components/ui";
+import { PageShell } from "@/components/ui";
+import type { OfficerApplicationData } from "@/lib/officer-application-data";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
-import { ApplicationCard } from "./ApplicationCard";
+import { ApplicationsBrowseList } from "./ApplicationsBrowseList";
 
 export const dynamic = "force-dynamic";
 
@@ -34,62 +34,33 @@ export default async function OfficerApplicationsPage() {
     },
   });
 
-  return (
-    <PageShell nav="officer" maxWidth="2xl" sidebar>
-      <SectionHeading
-        title="My Shifts"
-        subtitle="Shifts you've applied to."
-        action={
-          applications.some((application) => application.status === "ACCEPTED") ? (
-            <Link
-              href="/officer/accepted-shifts"
-              className={buttonClassName({ variant: "secondary", size: "md" })}
-            >
-              Accepted Shifts
-            </Link>
-          ) : undefined
-        }
-      />
+  const applicationData: OfficerApplicationData[] = applications.map(
+    (application) => ({
+      id: application.id,
+      status: application.status,
+      appliedAt: application.appliedAt.toISOString(),
+      shift: {
+        id: application.shift.id,
+        title: application.shift.title,
+        hourlyRate: application.shift.hourlyRate.toString(),
+        companyName: application.shift.company.companyName,
+        location: application.shift.location,
+        city: application.shift.city,
+        state: application.shift.state,
+        startTime: application.shift.startTime.toISOString(),
+        endTime: application.shift.endTime.toISOString(),
+        shiftTimeType: application.shift.shiftTimeType,
+        requirements: application.shift.requirements,
+        otherRequirements: application.shift.otherRequirements,
+        specialRequirements: application.shift.specialRequirements,
+        status: application.shift.status,
+      },
+    })
+  );
 
-      <div className="mt-8 space-y-4">
-        {applications.length === 0 ? (
-          <Card variant="muted" className="text-center">
-            <p className="text-lg font-medium text-fo-text">
-              You have not applied to any shifts yet.
-            </p>
-            <p className="mt-2 text-sm text-fo-text-muted">
-              Browse open shifts and apply to start building your schedule.
-            </p>
-            <Link
-              href="/shifts"
-              className={buttonClassName({
-                fullWidth: true,
-                className: "mt-6 w-full sm:w-auto",
-              })}
-            >
-              Browse Shifts
-            </Link>
-          </Card>
-        ) : (
-          applications.map((application) => (
-            <ApplicationCard
-              key={application.id}
-              applicationId={application.id}
-              applicationStatus={application.status}
-              shiftId={application.shift.id}
-              title={application.shift.title}
-              hourlyRate={application.shift.hourlyRate}
-              companyName={application.shift.company.companyName}
-              location={application.shift.location}
-              startTime={application.shift.startTime}
-              endTime={application.shift.endTime}
-              positionsNeeded={application.shift.positionsNeeded}
-              specialRequirements={application.shift.specialRequirements}
-              shiftStatus={application.shift.status}
-            />
-          ))
-        )}
-      </div>
+  return (
+    <PageShell nav="officer" maxWidth="6xl" sidebar>
+      <ApplicationsBrowseList applications={applicationData} />
     </PageShell>
   );
 }

@@ -81,6 +81,36 @@ export type OfficerSearchCardRecord = Prisma.OfficerGetPayload<{
   select: typeof officerSearchCardSelect;
 }>;
 
+export const companyAcceptedOfficerSelect = {
+  id: true,
+  firstName: true,
+  lastName: true,
+  profilePhotoUrl: true,
+  city: true,
+  state: true,
+  phone: true,
+  armedStatuses: true,
+  experienceYears: true,
+  certifications: true,
+  experienceCategories: true,
+  introduction: true,
+  licenses: {
+    select: officerLicenseSelect,
+    orderBy: {
+      createdAt: "asc" as const,
+    },
+  },
+  user: {
+    select: {
+      email: true,
+    },
+  },
+} satisfies Prisma.OfficerSelect;
+
+export type CompanyAcceptedOfficerRecord = Prisma.OfficerGetPayload<{
+  select: typeof companyAcceptedOfficerSelect;
+}>;
+
 export const officerApplicantSelect = {
   firstName: true,
   lastName: true,

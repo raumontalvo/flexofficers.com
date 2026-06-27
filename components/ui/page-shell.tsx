@@ -6,6 +6,7 @@ import {
   FlexOfficersLogoLink,
 } from "@/components/brand";
 import { OfficerSidebar } from "@/components/dashboard/officer-sidebar";
+import { CompanySidebar } from "@/components/dashboard/company-sidebar";
 import { cn } from "@/lib/cn";
 import {
   MobileBottomNav,
@@ -42,12 +43,14 @@ export function PageShell({
 }: PageShellProps) {
   const showNav = nav !== "none";
   const showBrand = brand ?? (nav !== "none" && !sidebar);
-  const showSidebar = sidebar && nav === "officer";
+  const showSidebar = sidebar && (nav === "officer" || nav === "company");
 
   if (showSidebar) {
+    const Sidebar = nav === "officer" ? OfficerSidebar : CompanySidebar;
+
     return (
       <div className={cn("fo-dashboard-shell min-h-screen overflow-x-hidden text-fo-text", className)}>
-        <OfficerSidebar />
+        <Sidebar />
 
         <div className="relative flex min-h-screen min-w-0 flex-col md:pl-[250px]">
           <div className="fo-dashboard-glow pointer-events-none fixed inset-y-0 right-0 left-0 md:left-[250px]" aria-hidden="true" />

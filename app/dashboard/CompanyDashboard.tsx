@@ -104,11 +104,11 @@ export default async function CompanyDashboard({
     ]);
 
   return (
-    <PageShell nav="company" maxWidth="2xl">
+    <PageShell nav="company" maxWidth="6xl" sidebar>
       <div className="flex items-start justify-between gap-4">
         <SectionHeading
           title={`Welcome${firstName ? `, ${firstName}` : ""}`}
-          subtitle="Your company control center for shifts, applicants, and hiring."
+          subtitle="Your workforce control center for shifts, applicants, and confirmed officers."
           className="flex-1"
         />
         <DashboardSignOutButton />
@@ -216,8 +216,8 @@ export default async function CompanyDashboard({
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <QuickActionCard
               href="/company/shifts"
-              title="Manage Shifts"
-              description="View, edit, cancel, and delete shifts your company posted."
+              title="Open Shifts"
+              description="Post, edit, and manage shifts your company has open."
             />
             <QuickActionCard
               href="/company/applications"
@@ -225,20 +225,25 @@ export default async function CompanyDashboard({
               description="Review pending applications and accept officers."
             />
             <QuickActionCard
-              href="/company/officers"
-              title="Search Officers"
-              description="Filter officer profiles by city, experience, and availability."
+              href="/company/accepted-officers"
+              title="Accepted Officers"
+              description="Manage confirmed officers and staffing progress by shift."
+            />
+            <QuickActionCard
+              href="/company/completed-shifts"
+              title="Completed Shifts"
+              description="Review past assignments and cancelled shift history."
+            />
+            <QuickActionCard
+              href="/company/profile"
+              title="Company Profile"
+              description="Update company contact info and profile details."
             />
             <QuickActionCard
               href="/company/billing"
               title="Billing"
               description="View subscription status and billing details."
               highlight={!subscriptionActive}
-            />
-            <QuickActionCard
-              href="/company/profile"
-              title="Company Profile"
-              description="Update company contact info and profile details."
             />
           </div>
         </div>

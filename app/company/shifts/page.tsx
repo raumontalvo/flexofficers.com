@@ -49,9 +49,9 @@ export default async function CompanyShiftsPage() {
   });
 
   return (
-    <PageShell nav="company" maxWidth="2xl">
+    <PageShell nav="company" maxWidth="6xl" sidebar>
       <SectionHeading
-        title="Manage Shifts"
+        title="Open Shifts"
         subtitle="Track open, filled, and cancelled shifts."
         action={
           subscriptionActive ? (

@@ -1,4 +1,4 @@
-import { UserRole } from "@/app/generated/prisma/enums";
+import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
 import { Card, PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { officerApplicantSelect } from "@/lib/officer-fields";
@@ -12,6 +12,7 @@ export default async function CompanyApplicationsPage() {
 
   const applications = await prisma.application.findMany({
     where: {
+      status: ApplicationStatus.PENDING,
       shift: {
         company: {
           user: {
@@ -32,10 +33,10 @@ export default async function CompanyApplicationsPage() {
   });
 
   return (
-    <PageShell nav="company" maxWidth="2xl">
+    <PageShell nav="company" maxWidth="6xl" sidebar>
       <SectionHeading
         title="Applicants"
-        subtitle="Review officers who applied to your shifts."
+        subtitle="Review officers who applied to your shifts. Accepted officers move to Accepted Officers."
       />
 
       <div className="mt-8 space-y-4">

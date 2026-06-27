@@ -1,14 +1,9 @@
-import Link from "next/link";
 import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
-import {
-  buttonClassName,
-  Card,
-  PageShell,
-  SectionHeading,
-} from "@/components/ui";
+import { PageShell } from "@/components/ui";
+import type { OfficerAcceptedShiftData } from "@/lib/officer-accepted-shift-data";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
-import { AcceptedShiftCard } from "./AcceptedShiftCard";
+import { AcceptedShiftsBrowseList } from "./AcceptedShiftsBrowseList";
 
 export const dynamic = "force-dynamic";
 
@@ -48,80 +43,40 @@ export default async function OfficerAcceptedShiftsPage() {
     },
   });
 
+  const acceptedShiftData: OfficerAcceptedShiftData[] = applications.map(
+    (application) => ({
+      id: application.id,
+      shift: {
+        id: application.shift.id,
+        title: application.shift.title,
+        hourlyRate: application.shift.hourlyRate.toString(),
+        location: application.shift.location,
+        city: application.shift.city,
+        state: application.shift.state,
+        startTime: application.shift.startTime.toISOString(),
+        endTime: application.shift.endTime.toISOString(),
+        shiftTimeType: application.shift.shiftTimeType,
+        requirements: application.shift.requirements,
+        otherRequirements: application.shift.otherRequirements,
+        specialRequirements: application.shift.specialRequirements,
+        status: application.shift.status,
+        reportingInstructions: application.shift.reportingInstructions,
+      },
+      company: {
+        companyName: application.shift.company.companyName,
+        contactName: application.shift.company.contactName,
+        phone: application.shift.company.phone,
+        email: displayEmail(
+          application.shift.company.email,
+          application.shift.company.user.email
+        ),
+      },
+    })
+  );
+
   return (
-    <PageShell nav="officer" maxWidth="2xl" sidebar>
-      <SectionHeading
-        title="Accepted Shifts"
-        subtitle="Company contact details unlock after acceptance."
-        action={
-          <Link
-            href="/officer/applications"
-            className={buttonClassName({ variant: "secondary", size: "md" })}
-          >
-            My Shifts
-          </Link>
-        }
-      />
-
-      {applications.length > 0 ? (
-        <Card variant="muted" className="mt-6">
-          <p className="text-sm leading-relaxed text-fo-text-muted">
-            These companies have accepted your application. Contact them
-            directly to confirm shift details, arrival instructions, and any
-            site-specific requirements.
-          </p>
-        </Card>
-      ) : null}
-
-      <div className="mt-8 space-y-4">
-        {applications.length === 0 ? (
-          <Card variant="muted" className="text-center">
-            <p className="text-lg font-medium text-fo-text">
-              You do not have any accepted shifts yet.
-            </p>
-            <p className="mt-2 text-sm text-fo-text-muted">
-              Apply to open shifts and check back here once a company accepts
-              you.
-            </p>
-            <Link
-              href="/shifts"
-              className={buttonClassName({
-                fullWidth: true,
-                className: "mt-6 w-full sm:w-auto",
-              })}
-            >
-              Browse Available Shifts
-            </Link>
-          </Card>
-        ) : (
-          applications.map((application) => {
-            const { shift } = application;
-            const { company } = shift;
-
-            return (
-              <AcceptedShiftCard
-                key={application.id}
-                shiftId={shift.id}
-                title={shift.title}
-                hourlyRate={shift.hourlyRate}
-                companyName={company.companyName}
-                contactName={company.contactName}
-                phone={company.phone}
-                email={displayEmail(company.email, company.user.email)}
-                address={company.address}
-                website={company.website}
-                location={shift.location}
-                startTime={shift.startTime}
-                endTime={shift.endTime}
-                positionsNeeded={shift.positionsNeeded}
-                specialRequirements={shift.specialRequirements}
-                reportingInstructions={shift.reportingInstructions}
-                shiftStatus={shift.status}
-              />
-            );
-          })
-        )}
-      </div>
+    <PageShell nav="officer" maxWidth="6xl" sidebar>
+      <AcceptedShiftsBrowseList applications={acceptedShiftData} />
     </PageShell>
   );
 }

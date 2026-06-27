@@ -100,7 +100,7 @@ export const officerSidebarItems: NavItem[] = [
   },
 ];
 
-export const companyNavItems: NavItem[] = [
+export const companySidebarItems: NavItem[] = [
   {
     href: "/dashboard",
     label: "Dashboard",
@@ -109,7 +109,7 @@ export const companyNavItems: NavItem[] = [
   },
   {
     href: "/company/shifts",
-    label: "Shifts",
+    label: "Open Shifts",
     icon: ShiftsIcon,
     match: (pathname) => pathname.startsWith("/company/shifts"),
   },
@@ -120,15 +120,54 @@ export const companyNavItems: NavItem[] = [
     match: (pathname) => pathname.startsWith("/company/applications"),
   },
   {
-    href: "/company/officers",
-    label: "Search",
-    icon: SearchIcon,
-    match: (pathname) => pathname.startsWith("/company/officers"),
+    href: "/company/accepted-officers",
+    label: "Accepted Officers",
+    icon: AcceptedIcon,
+    match: (pathname) => pathname.startsWith("/company/accepted-officers"),
   },
   {
-    href: "/company/billing",
-    label: "Billing",
-    icon: BillingIcon,
-    match: (pathname) => pathname.startsWith("/company/billing"),
+    href: "/company/completed-shifts",
+    label: "Completed Shifts",
+    icon: UpcomingIcon,
+    match: (pathname) => pathname.startsWith("/company/completed-shifts"),
+  },
+  {
+    href: "/company/profile",
+    label: "Company Profile",
+    icon: ProfileIcon,
+    match: (pathname) => pathname.startsWith("/company/profile"),
+  },
+];
+
+export const companyNavItems: NavItem[] = [
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    icon: DashboardIcon,
+    match: (pathname) => pathname === "/dashboard",
+  },
+  {
+    href: "/company/shifts",
+    label: "Open Shifts",
+    icon: ShiftsIcon,
+    match: (pathname) => pathname.startsWith("/company/shifts"),
+  },
+  {
+    href: "/company/applications",
+    label: "Applicants",
+    icon: ApplicantsIcon,
+    match: (pathname) => pathname.startsWith("/company/applications"),
+  },
+  {
+    href: "/company/accepted-officers",
+    label: "Accepted",
+    icon: AcceptedIcon,
+    match: (pathname) => pathname.startsWith("/company/accepted-officers"),
+  },
+  {
+    href: "/company/profile",
+    label: "Profile",
+    icon: ProfileIcon,
+    match: (pathname) => pathname.startsWith("/company/profile"),
   },
 ];

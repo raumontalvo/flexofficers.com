@@ -1,11 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 export default function WithdrawApplicationButton({
   applicationId,
+  compact = false,
 }: {
   applicationId: string;
+  compact?: boolean;
 }) {
   async function withdrawApplication() {
     const confirmed = window.confirm(
@@ -33,6 +36,20 @@ export default function WithdrawApplicationButton({
     }
 
     alert(data?.error || "Failed to withdraw application");
+  }
+
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={withdrawApplication}
+        className={cn(
+          "inline-flex min-h-8 items-center justify-center rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs font-semibold text-fo-pending transition hover:bg-fo-pending-bg"
+        )}
+      >
+        Withdraw
+      </button>
+    );
   }
 
   return (

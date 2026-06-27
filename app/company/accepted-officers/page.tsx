@@ -1,0 +1,45 @@
+import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
+import { PageShell } from "@/components/ui";
+import { buildShiftWorkforceGroups } from "@/lib/company-workforce-data";
+import { companyAcceptedOfficerSelect } from "@/lib/officer-fields";
+import { requirePageRole } from "@/lib/page-rbac";
+import { prisma } from "@/lib/prisma";
+import { CompanyWorkforceBrowseList } from "./CompanyWorkforceBrowseList";
+
+export const dynamic = "force-dynamic";
+
+export default async function CompanyAcceptedOfficersPage() {
+  const clerkUser = await requirePageRole(UserRole.COMPANY);
+
+  const applications = await prisma.application.findMany({
+    where: {
+      status: ApplicationStatus.ACCEPTED,
+      shift: {
+        company: {
+          user: {
+            clerkId: clerkUser.id,
+          },
+        },
+      },
+    },
+    include: {
+      shift: true,
+      officer: {
+        select: companyAcceptedOfficerSelect,
+      },
+    },
+    orderBy: {
+      shift: {
+        startTime: "asc",
+      },
+    },
+  });
+
+  const groups = buildShiftWorkforceGroups(applications);
+
+  return (
+    <PageShell nav="company" maxWidth="6xl" sidebar>
+      <CompanyWorkforceBrowseList groups={groups} mode="accepted" />
+    </PageShell>
+  );
+}

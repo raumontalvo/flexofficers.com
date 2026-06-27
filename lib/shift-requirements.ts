@@ -1,5 +1,10 @@
 import type { ShiftCardData } from "@/lib/shift-card-data";
 
+export type ShiftRequirementSource = Pick<
+  ShiftCardData,
+  "requirements" | "otherRequirements" | "specialRequirements"
+>;
+
 export function parseShiftRequirementChips(value: string, max = 5): string[] {
   if (!value.trim()) {
     return [];
@@ -13,7 +18,10 @@ export function parseShiftRequirementChips(value: string, max = 5): string[] {
   return [...new Set(chips)].slice(0, max);
 }
 
-export function getShiftRequirementChips(shift: ShiftCardData, max = 5): string[] {
+export function getShiftRequirementChips(
+  shift: ShiftRequirementSource,
+  max = 5
+): string[] {
   const chips = [...(shift.requirements ?? [])];
 
   if (shift.otherRequirements?.trim()) {
