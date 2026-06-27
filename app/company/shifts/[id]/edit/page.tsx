@@ -4,6 +4,12 @@ import { notFound } from "next/navigation";
 import { PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
+import {
+  fromShiftArmedRequirement,
+  fromShiftTimeType,
+  fromShiftWorkType,
+} from "@/lib/shift-form-options";
+import { parseShiftRequirementChips } from "@/lib/shift-requirements";
 import EditShiftForm from "./EditShiftForm";
 
 export const dynamic = "force-dynamic";
@@ -41,14 +47,39 @@ export default async function EditCompanyShiftPage({
     notFound();
   }
 
+  const knownRequirements = new Set([
+    "D License",
+    "G License",
+    "K9",
+    "Firearms",
+    "CPR",
+    "AED",
+  ]);
+  const parsedRequirements = parseShiftRequirementChips(shift.specialRequirements, 20);
+  const requirements =
+    shift.requirements.length > 0
+      ? shift.requirements
+      : parsedRequirements.filter((entry) => knownRequirements.has(entry));
+  const otherRequirements =
+    shift.otherRequirements ??
+    (shift.requirements.length === 0
+      ? parsedRequirements.filter((entry) => !knownRequirements.has(entry)).join(", ")
+      : "");
+
   const initialForm = {
     title: shift.title,
     description: shift.description ?? "",
+    city: shift.city ?? "",
+    state: shift.state ?? "",
     location: shift.location,
     startTime: toDateTimeLocalValue(shift.startTime),
     endTime: toDateTimeLocalValue(shift.endTime),
     hourlyRate: shift.hourlyRate.toString(),
-    specialRequirements: shift.specialRequirements,
+    workType: fromShiftWorkType(shift.workType),
+    shiftTimeType: fromShiftTimeType(shift.shiftTimeType),
+    armedRequirement: fromShiftArmedRequirement(shift.armedRequirement),
+    requirements,
+    otherRequirements,
     reportingInstructions: shift.reportingInstructions ?? "",
     positionsNeeded: String(shift.positionsNeeded),
   };

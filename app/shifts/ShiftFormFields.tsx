@@ -5,15 +5,28 @@ import {
   CardTitle,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { US_STATES } from "@/lib/license-options";
+import {
+  SHIFT_ARMED_OPTIONS,
+  SHIFT_REQUIREMENT_OPTIONS,
+  SHIFT_TIME_TYPE_OPTIONS,
+  SHIFT_WORK_TYPE_OPTIONS,
+} from "@/lib/shift-form-options";
 
 export type ShiftFormValues = {
   title: string;
   description: string;
+  city: string;
+  state: string;
   location: string;
   startTime: string;
   endTime: string;
   hourlyRate: string;
-  specialRequirements: string;
+  workType: string;
+  shiftTimeType: string;
+  armedRequirement: string;
+  requirements: string[];
+  otherRequirements: string;
   reportingInstructions: string;
   positionsNeeded: string;
 };
@@ -35,6 +48,32 @@ function FieldLabel({
   );
 }
 
+function ChipToggle({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={checked}
+      onClick={() => onChange(!checked)}
+      className={cn(
+        "rounded-full border px-3 py-1.5 text-sm font-medium transition",
+        checked
+          ? "border-fo-primary-bright bg-fo-primary/15 text-fo-primary-hover"
+          : "border-fo-border bg-fo-bg-elevated text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text"
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
 type ShiftFormFieldsProps = {
   form: ShiftFormValues;
   onChange: (next: ShiftFormValues) => void;
@@ -46,6 +85,14 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
     value: ShiftFormValues[K]
   ) {
     onChange({ ...form, [key]: value });
+  }
+
+  function toggleRequirement(requirement: string) {
+    const next = form.requirements.includes(requirement)
+      ? form.requirements.filter((entry) => entry !== requirement)
+      : [...form.requirements, requirement];
+
+    updateField("requirements", next);
   }
 
   return (
@@ -83,22 +130,74 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
 
       <Card className="space-y-5">
         <CardHeader>
-          <CardTitle>Pay & staffing</CardTitle>
+          <CardTitle>Location</CardTitle>
           <CardDescription>
-            Set the hourly rate and how many officers you need.
+            City and state help officers find shifts near them.
           </CardDescription>
         </CardHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <FieldLabel htmlFor="hourlyRate">Hourly rate</FieldLabel>
+            <FieldLabel htmlFor="city">City</FieldLabel>
+            <input
+              id="city"
+              value={form.city}
+              onChange={(e) => updateField("city", e.target.value)}
+              className={fieldClassName}
+              placeholder="Enter city"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FieldLabel htmlFor="state">State</FieldLabel>
+            <select
+              id="state"
+              value={form.state}
+              onChange={(e) => updateField("state", e.target.value)}
+              className={fieldClassName}
+            >
+              <option value="">Select state</option>
+              {US_STATES.map((state) => (
+                <option key={state.code} value={state.code}>
+                  {state.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <FieldLabel htmlFor="location">Address / site</FieldLabel>
+          <input
+            id="location"
+            value={form.location}
+            onChange={(e) => updateField("location", e.target.value)}
+            className={fieldClassName}
+            placeholder="Street address or site name"
+          />
+        </div>
+      </Card>
+
+      <Card className="space-y-5">
+        <CardHeader>
+          <CardTitle>Pay & staffing</CardTitle>
+          <CardDescription>
+            Set hourly pay and how many officers you need.
+          </CardDescription>
+        </CardHeader>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <FieldLabel htmlFor="hourlyRate">Pay (hourly rate)</FieldLabel>
             <input
               id="hourlyRate"
               type="number"
+              min="0"
+              step="0.01"
               value={form.hourlyRate}
               onChange={(e) => updateField("hourlyRate", e.target.value)}
               className={fieldClassName}
-              placeholder="25.00"
+              placeholder="Min $/hr"
             />
           </div>
 
@@ -119,10 +218,8 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
 
       <Card className="space-y-5">
         <CardHeader>
-          <CardTitle>Schedule & location</CardTitle>
-          <CardDescription>
-            When the shift runs and where officers should report.
-          </CardDescription>
+          <CardTitle>Schedule</CardTitle>
+          <CardDescription>When the shift runs.</CardDescription>
         </CardHeader>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -149,15 +246,66 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
           </div>
         </div>
 
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <FieldLabel htmlFor="workType">Work type</FieldLabel>
+            <select
+              id="workType"
+              value={form.workType}
+              onChange={(e) => updateField("workType", e.target.value)}
+              className={fieldClassName}
+            >
+              <option value="">Select work type</option>
+              {SHIFT_WORK_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <FieldLabel htmlFor="shiftTimeType">Shift time type</FieldLabel>
+            <select
+              id="shiftTimeType"
+              value={form.shiftTimeType}
+              onChange={(e) => updateField("shiftTimeType", e.target.value)}
+              className={fieldClassName}
+            >
+              <option value="">Select shift time</option>
+              {SHIFT_TIME_TYPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="space-y-5">
+        <CardHeader>
+          <CardTitle>Armed status</CardTitle>
+          <CardDescription>
+            What armed status is required for this shift?
+          </CardDescription>
+        </CardHeader>
+
         <div className="space-y-2">
-          <FieldLabel htmlFor="location">Location</FieldLabel>
-          <input
-            id="location"
-            value={form.location}
-            onChange={(e) => updateField("location", e.target.value)}
+          <FieldLabel htmlFor="armedRequirement">Armed requirement</FieldLabel>
+          <select
+            id="armedRequirement"
+            value={form.armedRequirement}
+            onChange={(e) => updateField("armedRequirement", e.target.value)}
             className={fieldClassName}
-            placeholder="Address or site name"
-          />
+          >
+            <option value="">Select armed status</option>
+            {SHIFT_ARMED_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
       </Card>
 
@@ -165,18 +313,29 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
         <CardHeader>
           <CardTitle>Requirements</CardTitle>
           <CardDescription>
-            List certifications, armed status, or other must-haves.
+            Select certifications and add any other requirements.
           </CardDescription>
         </CardHeader>
 
+        <div className="flex flex-wrap gap-2">
+          {SHIFT_REQUIREMENT_OPTIONS.map((requirement) => (
+            <ChipToggle
+              key={requirement}
+              label={requirement}
+              checked={form.requirements.includes(requirement)}
+              onChange={() => toggleRequirement(requirement)}
+            />
+          ))}
+        </div>
+
         <div className="space-y-2">
-          <FieldLabel htmlFor="specialRequirements">Special requirements</FieldLabel>
+          <FieldLabel htmlFor="otherRequirements">Other requirements</FieldLabel>
           <textarea
-            id="specialRequirements"
-            value={form.specialRequirements}
-            onChange={(e) => updateField("specialRequirements", e.target.value)}
+            id="otherRequirements"
+            value={form.otherRequirements}
+            onChange={(e) => updateField("otherRequirements", e.target.value)}
             className={cn(fieldClassName, "min-h-24 resize-y py-3")}
-            placeholder="e.g. Armed, CPR certified, valid guard card"
+            placeholder="e.g. Age 21+, valid guard card, site-specific training"
           />
         </div>
       </Card>
@@ -207,3 +366,21 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
     </div>
   );
 }
+
+export const emptyShiftForm: ShiftFormValues = {
+  title: "",
+  description: "",
+  city: "",
+  state: "",
+  location: "",
+  startTime: "",
+  endTime: "",
+  hourlyRate: "",
+  workType: "",
+  shiftTimeType: "",
+  armedRequirement: "",
+  requirements: [],
+  otherRequirements: "",
+  reportingInstructions: "",
+  positionsNeeded: "1",
+};

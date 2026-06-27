@@ -20,6 +20,24 @@ enum ShiftStatus {
   CANCELLED
 }
 
+enum ShiftWorkType {
+  GIG
+  FULL_TIME
+  PART_TIME
+}
+
+enum ShiftTimeType {
+  DAY_SHIFT
+  NIGHT_SHIFT
+  OVERNIGHT
+}
+
+enum ShiftArmedRequirement {
+  ARMED
+  UNARMED
+  EITHER
+}
+
 enum ApplicationStatus {
   PENDING
   ACCEPTED
@@ -137,7 +155,7 @@ model Company {
 }
 
 model Shift {
-  id                    String      @id @default(uuid())
+  id                    String                 @id @default(uuid())
   companyId             String
   title                 String
   description           String?
@@ -147,12 +165,17 @@ model Shift {
   hourlyRate            Decimal
   startTime             DateTime
   endTime               DateTime
+  workType              ShiftWorkType?
+  shiftTimeType         ShiftTimeType?
+  armedRequirement      ShiftArmedRequirement?
+  requirements          String[]               @default([])
+  otherRequirements     String?
   specialRequirements   String
   reportingInstructions String?
-  positionsNeeded       Int         @default(1)
-  status                ShiftStatus @default(OPEN)
-  createdAt             DateTime    @default(now())
-  updatedAt             DateTime    @updatedAt
+  positionsNeeded       Int                    @default(1)
+  status                ShiftStatus            @default(OPEN)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 
   company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   applications Application[]

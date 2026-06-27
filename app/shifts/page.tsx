@@ -1,7 +1,8 @@
 import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
-import { Card, PageShell, SectionHeading } from "@/components/ui";
+import { PageShell, SectionHeading } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
-import { ShiftCard } from "./ShiftCard";
+import type { ShiftCardData } from "@/lib/shift-card-data";
+import { ShiftsBrowseList } from "./ShiftsBrowseList";
 
 export const dynamic = "force-dynamic";
 
@@ -27,39 +28,37 @@ export default async function ShiftsPage() {
     },
   });
 
+  const browseShifts: ShiftCardData[] = shifts.map((shift) => ({
+    id: shift.id,
+    title: shift.title,
+    hourlyRate: shift.hourlyRate.toString(),
+    companyName: shift.company.companyName,
+    location: shift.location,
+    city: shift.city,
+    state: shift.state,
+    startTime: shift.startTime.toISOString(),
+    endTime: shift.endTime.toISOString(),
+    createdAt: shift.createdAt.toISOString(),
+    positionsNeeded: shift.positionsNeeded,
+    filledCount: shift.applications.length,
+    workType: shift.workType,
+    shiftTimeType: shift.shiftTimeType,
+    armedRequirement: shift.armedRequirement,
+    requirements: shift.requirements,
+    otherRequirements: shift.otherRequirements,
+    specialRequirements: shift.specialRequirements,
+    status: shift.status,
+  }));
+
   return (
-    <PageShell nav="officer" maxWidth="2xl" sidebar>
+    <PageShell nav="officer" maxWidth="6xl" sidebar>
       <SectionHeading
-        title="Available Shifts"
-        subtitle="Find open security shifts near you."
+        title="Open Shifts"
+        subtitle="Browse open shifts posted by companies."
       />
 
-      <div className="mt-8 space-y-4">
-        {shifts.length === 0 ? (
-          <Card variant="muted" className="text-center">
-            <p className="text-lg font-medium text-fo-text">No shifts posted yet.</p>
-            <p className="mt-2 text-sm text-fo-text-muted">
-              Check back soon for new security opportunities.
-            </p>
-          </Card>
-        ) : (
-          shifts.map((shift) => (
-            <ShiftCard
-              key={shift.id}
-              id={shift.id}
-              title={shift.title}
-              hourlyRate={shift.hourlyRate}
-              companyName={shift.company.companyName}
-              location={shift.location}
-              startTime={shift.startTime}
-              endTime={shift.endTime}
-              positionsNeeded={shift.positionsNeeded}
-              filledCount={shift.applications.length}
-              specialRequirements={shift.specialRequirements}
-              status={shift.status}
-            />
-          ))
-        )}
+      <div className="mt-3">
+        <ShiftsBrowseList shifts={browseShifts} />
       </div>
     </PageShell>
   );

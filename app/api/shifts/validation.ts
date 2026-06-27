@@ -1,11 +1,25 @@
+import {
+  buildShiftSpecialRequirements,
+  normalizeShiftRequirements,
+  toShiftArmedRequirement,
+  toShiftTimeType,
+  toShiftWorkType,
+} from "@/lib/shift-form-options";
+
 export type ShiftPayload = {
   title?: unknown;
   description?: unknown;
   location?: unknown;
+  city?: unknown;
+  state?: unknown;
   startTime?: unknown;
   endTime?: unknown;
   hourlyRate?: unknown;
-  specialRequirements?: unknown;
+  workType?: unknown;
+  shiftTimeType?: unknown;
+  armedRequirement?: unknown;
+  requirements?: unknown;
+  otherRequirements?: unknown;
   reportingInstructions?: unknown;
   positionsNeeded?: unknown;
 };
@@ -24,12 +38,60 @@ export function parseShiftPayload(payload: ShiftPayload) {
     errors.push("location is required");
   }
 
-  const specialRequirements =
-    typeof payload.specialRequirements === "string"
-      ? payload.specialRequirements.trim()
+  const city = typeof payload.city === "string" ? payload.city.trim() : "";
+  if (!city) {
+    errors.push("city is required");
+  }
+
+  const state = typeof payload.state === "string" ? payload.state.trim() : "";
+  if (!state) {
+    errors.push("state is required");
+  } else if (!/^[A-Z]{2}$/.test(state.toUpperCase())) {
+    errors.push("state must be a 2-letter code");
+  }
+
+  const workTypeRaw =
+    typeof payload.workType === "string" ? payload.workType.trim() : "";
+  const workType = toShiftWorkType(workTypeRaw);
+  if (!workType) {
+    errors.push("workType is required");
+  }
+
+  const shiftTimeTypeRaw =
+    typeof payload.shiftTimeType === "string"
+      ? payload.shiftTimeType.trim()
       : "";
-  if (!specialRequirements) {
-    errors.push("specialRequirements is required");
+  const shiftTimeType = toShiftTimeType(shiftTimeTypeRaw);
+  if (!shiftTimeType) {
+    errors.push("shiftTimeType is required");
+  }
+
+  const armedRequirementRaw =
+    typeof payload.armedRequirement === "string"
+      ? payload.armedRequirement.trim()
+      : "";
+  const armedRequirement = toShiftArmedRequirement(armedRequirementRaw);
+  if (!armedRequirement) {
+    errors.push("armedRequirement is required");
+  }
+
+  const requirements = normalizeShiftRequirements(payload.requirements);
+
+  let otherRequirements: string | undefined;
+  if (
+    typeof payload.otherRequirements === "undefined" ||
+    payload.otherRequirements === null ||
+    payload.otherRequirements === ""
+  ) {
+    otherRequirements = undefined;
+  } else if (typeof payload.otherRequirements !== "string") {
+    errors.push("otherRequirements must be a string");
+  } else {
+    otherRequirements = payload.otherRequirements.trim() || undefined;
+  }
+
+  if (requirements.length === 0 && !otherRequirements) {
+    errors.push("at least one requirement is required");
   }
 
   if (
@@ -96,10 +158,20 @@ export function parseShiftPayload(payload: ShiftPayload) {
       title,
       description,
       location,
+      city,
+      state: state.toUpperCase(),
       hourlyRate,
       startTime,
       endTime,
-      specialRequirements,
+      workType: workType!,
+      shiftTimeType: shiftTimeType!,
+      armedRequirement: armedRequirement!,
+      requirements,
+      otherRequirements,
+      specialRequirements: buildShiftSpecialRequirements({
+        requirements,
+        otherRequirements,
+      }),
       reportingInstructions,
       positionsNeeded: positionsNeededRaw,
     },

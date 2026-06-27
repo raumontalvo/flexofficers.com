@@ -2,22 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui";
-import { ShiftFormFields } from "../ShiftFormFields";
-
-const emptyForm = {
-  title: "",
-  description: "",
-  location: "",
-  startTime: "",
-  endTime: "",
-  hourlyRate: "",
-  specialRequirements: "",
-  reportingInstructions: "",
-  positionsNeeded: "",
-};
+import { ShiftFormFields, emptyShiftForm } from "../ShiftFormFields";
 
 export default function CreateShiftForm() {
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(emptyShiftForm);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
