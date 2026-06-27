@@ -26,6 +26,14 @@ function getInitials(name?: string | null) {
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "?";
 }
 
+function shouldUseNativeImage(src: string) {
+  if (src.startsWith("/") || src.startsWith("data:")) {
+    return false;
+  }
+
+  return /^https?:\/\//i.test(src);
+}
+
 export function ProfileAvatar({
   name,
   src,
@@ -44,13 +52,22 @@ export function ProfileAvatar({
       aria-label={name ? `${name} avatar` : "Profile avatar"}
     >
       {src ? (
-        <Image
-          src={src}
-          alt={name ? `${name} profile photo` : "Profile photo"}
-          fill
-          className="object-cover"
-          sizes="80px"
-        />
+        shouldUseNativeImage(src) ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={src}
+            alt={name ? `${name} profile photo` : "Profile photo"}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <Image
+            src={src}
+            alt={name ? `${name} profile photo` : "Profile photo"}
+            fill
+            className="object-cover"
+            sizes="80px"
+          />
+        )
       ) : (
         <span>{initials}</span>
       )}
