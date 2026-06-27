@@ -1,11 +1,13 @@
 import type { ArmedStatus } from "@/app/generated/prisma/enums";
+import type { OfficerLicenseSnapshot } from "@/lib/officer-licenses";
+import { hasAtLeastOneLicense } from "@/lib/officer-licenses";
 
 type OfficerProfileSnapshot = {
   phone?: string | null;
   armedStatuses?: ArmedStatus[];
   experienceCategories?: string[];
   experienceYears?: number | null;
-  licenseExpirationDate?: Date | null;
+  licenses?: readonly OfficerLicenseSnapshot[] | null;
 } | null;
 
 export type ProfileCompletionField = {
@@ -41,9 +43,9 @@ export function getOfficerProfileCompletionFields(
         officer?.experienceYears !== undefined,
     },
     {
-      id: "licenseExpirationDate",
-      label: "Add your license expiration date",
-      complete: Boolean(officer?.licenseExpirationDate),
+      id: "licenses",
+      label: "Add at least one license",
+      complete: hasAtLeastOneLicense(officer?.licenses),
     },
   ];
 }

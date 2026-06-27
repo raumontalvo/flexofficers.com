@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import {
+  FlexOfficersBadge,
   FlexOfficersBadgeLink,
   FlexOfficersLogoLink,
 } from "@/components/brand";
@@ -17,7 +19,7 @@ type PageShellProps = {
   sidebar?: boolean;
   className?: string;
   contentClassName?: string;
-  maxWidth?: "md" | "lg" | "xl" | "2xl" | "6xl";
+  maxWidth?: "md" | "lg" | "xl" | "2xl" | "6xl" | "full";
 };
 
 const maxWidthClasses = {
@@ -26,6 +28,7 @@ const maxWidthClasses = {
   xl: "max-w-5xl",
   "2xl": "max-w-6xl",
   "6xl": "max-w-6xl",
+  full: "max-w-none",
 };
 
 export function PageShell({
@@ -43,18 +46,26 @@ export function PageShell({
 
   if (showSidebar) {
     return (
-      <div className={cn("min-h-screen bg-fo-bg text-fo-text", className)}>
+      <div className={cn("fo-dashboard-shell min-h-screen overflow-x-hidden text-fo-text", className)}>
         <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
           <OfficerSidebar />
 
-          <div className="flex min-w-0 flex-1 flex-col">
-            <header className="border-b border-white/[0.04] px-4 py-4 md:hidden">
-              <FlexOfficersBadgeLink href="/dashboard" height={40} transparent />
+          <div className="relative flex min-w-0 flex-1 flex-col">
+            <div className="fo-dashboard-glow" aria-hidden="true" />
+
+            <header className="relative border-b border-white/[0.06] px-4 py-4 md:hidden">
+              <Link href="/dashboard" className="inline-flex items-center gap-3">
+                <FlexOfficersBadge height={56} transparent priority />
+                <span className="text-lg font-bold tracking-tight">
+                  <span className="text-fo-primary-bright">Flex</span>
+                  <span className="text-slate-100">Officers</span>
+                </span>
+              </Link>
             </header>
 
             <main
               className={cn(
-                "flex-1 px-4 py-6 sm:px-6 sm:py-8",
+                "relative flex-1 px-4 py-4 sm:px-5 sm:py-5 lg:px-7",
                 showNav &&
                   "pb-[calc(var(--fo-nav-height)+env(safe-area-inset-bottom))] md:pb-8",
                 contentClassName

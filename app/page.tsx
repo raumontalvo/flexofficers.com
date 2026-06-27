@@ -241,7 +241,7 @@ export default function Home() {
             <StepCard
               step="Step 3"
               title="Connect"
-              description="Companies post shifts. Officers apply. Companies verify credentials through their own hiring process."
+              description="Companies review officer profiles and verify credentials through their own hiring process."
             />
           </div>
         </div>

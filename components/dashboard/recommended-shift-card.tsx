@@ -6,6 +6,7 @@ import {
   ShiftStatusBadge,
 } from "@/components/ui";
 import { formatHourlyRate, formatShiftDateTime } from "@/lib/format-shift";
+import { ShiftsIcon } from "@/components/nav/icons";
 
 type RecommendedShiftCardProps = {
   id: string;
@@ -29,44 +30,74 @@ export function RecommendedShiftCard({
   status,
 }: RecommendedShiftCardProps) {
   return (
-    <Card variant="elevated" className="fo-glass-card space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <Card
+      variant="elevated"
+      padding="none"
+      className="fo-glass-card fo-glass-card-hover flex h-full flex-col gap-2.5 p-3.5"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <h3 className="text-sm font-bold text-fo-text">{title}</h3>
+          <p className="text-xs font-medium text-fo-primary-hover">{companyName}</p>
+        </div>
         <ShiftStatusBadge status={status} />
-        <p className="text-2xl font-bold text-fo-primary-bright">
-          {formatHourlyRate(hourlyRate)}
-          <span className="ml-1 text-sm font-semibold text-fo-text-muted">/hr</span>
-        </p>
       </div>
 
-      <div className="space-y-2">
-        <h3 className="text-lg font-bold text-fo-text">{title}</h3>
-        <p className="text-sm font-medium text-fo-text-muted">{companyName}</p>
-        <p className="text-sm text-fo-text">{location}</p>
-        <div className="space-y-1 text-sm text-fo-text-muted">
+      <div className="space-y-1.5 text-xs">
+        <p className="text-fo-text-muted">{location}</p>
+        <p className="text-xl font-bold text-fo-primary-bright">
+          {formatHourlyRate(hourlyRate)}
+          <span className="ml-1 text-xs font-semibold text-fo-text-muted">/hr</span>
+        </p>
+        <div className="space-y-0.5 text-fo-text-subtle">
           <p>Starts {formatShiftDateTime(startTime)}</p>
           <p>Ends {formatShiftDateTime(endTime)}</p>
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <Link
+        href={`/shifts/${id}`}
+        className={buttonClassName({
+          fullWidth: true,
+          className: "mt-auto !min-h-9 w-full !py-2 !text-xs",
+        })}
+      >
+        View &amp; Apply
+      </Link>
+    </Card>
+  );
+}
+
+export function EmptyShiftsCard() {
+  return (
+    <Card
+      variant="elevated"
+      padding="none"
+      className="fo-glass-card fo-glass-card-hover relative overflow-hidden px-4 py-8 text-center"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(59,130,246,0.1),transparent_70%)]"
+        aria-hidden="true"
+      />
+      <div className="relative">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-300">
+          <ShiftsIcon className="h-6 w-6" />
+        </div>
+        <p className="text-sm font-semibold text-fo-text">
+          No open shifts available right now.
+        </p>
+        <p className="mx-auto mt-1 max-w-md text-xs leading-relaxed text-fo-text-muted">
+          Check back soon as companies post new security assignments.
+        </p>
         <Link
-          href={`/shifts/${id}`}
+          href="/shifts"
           className={buttonClassName({
-            variant: "secondary",
-            fullWidth: true,
-            className: "w-full",
+            variant: "primary",
+            size: "md",
+            className: "!min-h-9 mt-4 !px-4 !py-2 !text-xs",
           })}
         >
-          View Shift
-        </Link>
-        <Link
-          href={`/shifts/${id}`}
-          className={buttonClassName({
-            fullWidth: true,
-            className: "w-full",
-          })}
-        >
-          Apply
+          Browse All Shifts
         </Link>
       </div>
     </Card>

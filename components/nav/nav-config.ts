@@ -5,7 +5,6 @@ import {
   BillingIcon,
   BrowseIcon,
   DashboardIcon,
-  MessagesIcon,
   NotificationsIcon,
   ProfileIcon,
   SearchIcon,
@@ -80,12 +79,6 @@ export const officerSidebarItems: NavItem[] = [
     label: "Upcoming Shifts",
     icon: UpcomingIcon,
     match: (pathname) => pathname.startsWith("/officer/upcoming-shifts"),
-  },
-  {
-    href: "/officer/messages",
-    label: "Messages",
-    icon: MessagesIcon,
-    match: (pathname) => pathname.startsWith("/officer/messages"),
   },
   {
     href: "/officer/notifications",

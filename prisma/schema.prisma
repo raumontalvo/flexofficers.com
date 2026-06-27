@@ -70,12 +70,12 @@ model Officer {
   profilePhotoUrl       String?
   armedStatuses         ArmedStatus[] @default([])
   experienceYears       Int?
-  licenseExpirationDate DateTime?
   availability          String[]     @default([])
   certifications        String[]     @default([])
   experienceCategories  String[]     @default([])
   introduction          String?
   bio                   String?
+  licenseCertificationAccepted Boolean @default(false)
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
@@ -89,7 +89,7 @@ model License {
   officerId           String
   licenseType         String
   licenseNumber       String
-  expirationDate      DateTime?
+  expirationDate      DateTime
   issuingState        String
   verified            Boolean                   @default(false)
   verificationStatus  LicenseVerificationStatus @default(PENDING)

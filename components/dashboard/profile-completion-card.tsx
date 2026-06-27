@@ -5,11 +5,7 @@ import {
   Card,
   CardDescription,
   CardTitle,
-  StatusBadge,
 } from "@/components/ui";
-import {
-  formatArmedStatusLabel,
-} from "@/lib/profile-options";
 import {
   getOfficerProfileCompletionFields,
   getProfileCompletionPercent,
@@ -22,11 +18,23 @@ type ProfileCompletionCardProps = {
     armedStatuses?: ArmedStatus[];
     experienceCategories?: string[];
     experienceYears?: number | null;
-    licenseExpirationDate?: Date | null;
+    licenses?: Array<{
+      id: string;
+      licenseType: string;
+      licenseNumber: string;
+      issuingState: string;
+      expirationDate: Date;
+    }>;
   } | null;
+  className?: string;
+  compact?: boolean;
 };
 
-export function ProfileCompletionCard({ officer }: ProfileCompletionCardProps) {
+export function ProfileCompletionCard({
+  officer,
+  className,
+  compact = false,
+}: ProfileCompletionCardProps) {
   const fields = getOfficerProfileCompletionFields(officer);
   const incompleteFields = fields.filter((field) => !field.complete);
   const completionPercent = getProfileCompletionPercent(officer);
@@ -35,112 +43,67 @@ export function ProfileCompletionCard({ officer }: ProfileCompletionCardProps) {
   return (
     <Card
       variant="elevated"
+      padding="none"
       className={cn(
-        "fo-glass-card space-y-5",
-        isComplete ? "border-green-500/20" : "border-yellow-500/20"
+        "fo-glass-card fo-glass-card-hover flex h-full flex-col justify-between gap-3 p-3.5",
+        isComplete ? "border-emerald-500/25" : "border-sky-500/25",
+        className
       )}
     >
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <CardTitle className="text-xl">
-            {isComplete ? "Profile complete" : "Complete your profile"}
-          </CardTitle>
-          <CardDescription className="mt-2 max-w-2xl">
-            {isComplete
-              ? "Companies can review your qualifications, experience, and credentials."
-              : "Finish these items so companies can review you for open shifts."}
-          </CardDescription>
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-sm font-semibold">Profile Completion</CardTitle>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-fo-primary-bright/30 bg-fo-primary/10">
+            <span className="text-xs font-bold text-fo-primary-bright">
+              {completionPercent}%
+            </span>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-fo-border bg-fo-bg/60 px-4 py-3 text-center">
-          <p className="text-2xl font-bold text-fo-primary-bright">
-            {completionPercent}%
-          </p>
-          <p className="text-xs uppercase tracking-wide text-fo-text-subtle">
-            Complete
+        <CardDescription className="text-[11px] leading-snug">
+          {isComplete
+            ? "Ready for companies to review."
+            : "Complete your profile for more matches."}
+        </CardDescription>
+
+        <div className="space-y-1">
+          <div
+            className="h-1.5 overflow-hidden rounded-full bg-slate-800/80"
+            role="progressbar"
+            aria-valuenow={completionPercent}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Profile completion"
+          >
+            <div
+              className={cn(
+                "h-full rounded-full transition-all duration-500",
+                isComplete
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                  : "bg-gradient-to-r from-fo-primary via-fo-primary-bright to-sky-400"
+              )}
+              style={{ width: `${completionPercent}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-fo-text-subtle">
+            {isComplete
+              ? "All fields complete"
+              : `${incompleteFields.length} field${incompleteFields.length === 1 ? "" : "s"} left`}
           </p>
         </div>
       </div>
 
-      {!isComplete ? (
-        <ul className="space-y-2 text-sm text-fo-text">
-          {incompleteFields.map((field) => (
-            <li key={field.id} className="flex items-start gap-2">
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-fo-pending" />
-              <span>{field.label}</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {(officer?.armedStatuses?.length ?? 0) > 0 ||
-      (officer?.experienceCategories?.length ?? 0) > 0 ? (
-        <div className="space-y-4 rounded-2xl border border-fo-border bg-fo-bg/50 p-4">
-          {(officer?.armedStatuses?.length ?? 0) > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                Armed / Unarmed
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {officer?.armedStatuses?.map((status) => (
-                  <StatusBadge key={status} variant="info">
-                    {formatArmedStatusLabel(status)}
-                  </StatusBadge>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {(officer?.experienceCategories?.length ?? 0) > 0 ? (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                Experience
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {officer?.experienceCategories?.map((category) => (
-                  <StatusBadge key={category} variant="neutral">
-                    {category}
-                  </StatusBadge>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {officer?.experienceYears !== null &&
-          officer?.experienceYears !== undefined ? (
-            <p className="text-sm text-fo-text-muted">
-              {officer.experienceYears} years of experience
-              {officer.licenseExpirationDate
-                ? ` · License expires ${officer.licenseExpirationDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
-                : ""}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {!isComplete ? (
-        <Link
-          href="/officer/profile"
-          className={buttonClassName({
-            variant: "primary",
-            size: "md",
-            className: "w-full sm:w-auto",
-          })}
-        >
-          Complete Profile
-        </Link>
-      ) : (
-        <Link
-          href="/officer/profile"
-          className={buttonClassName({
-            variant: "secondary",
-            size: "md",
-            className: "w-full sm:w-auto",
-          })}
-        >
-          Edit Profile
-        </Link>
-      )}
+      <Link
+        href="/officer/profile"
+        className={buttonClassName({
+          variant: isComplete ? "secondary" : "primary",
+          size: "md",
+          fullWidth: true,
+          className: cn("!min-h-9 !py-2 !text-xs", compact && "w-full"),
+        })}
+      >
+        {isComplete ? "Edit Profile" : "Complete Profile"}
+      </Link>
     </Card>
   );
 }

@@ -1,15 +1,22 @@
 import type { ArmedStatus } from "@/app/generated/prisma/enums";
-import {
-  buttonClassName,
-  Card,
-  PageShell,
-  StatCard,
-} from "@/components/ui";
+import { PageShell, StatCard } from "@/components/ui";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { DashboardSidebarWidgets } from "@/components/dashboard/dashboard-sidebar-widgets";
 import { ProfileCompletionCard } from "@/components/dashboard/profile-completion-card";
-import { RecommendedShiftCard } from "@/components/dashboard/recommended-shift-card";
+import { QuickActionsRow } from "@/components/dashboard/quick-actions-row";
+import { RecommendedNextStepsCard } from "@/components/dashboard/recommended-next-steps-card";
+import {
+  EmptyShiftsCard,
+  RecommendedShiftCard,
+} from "@/components/dashboard/recommended-shift-card";
+import {
+  AcceptedIcon,
+  BrowseIcon,
+  ShiftsIcon,
+  UpcomingIcon,
+} from "@/components/nav/icons";
 import { rankRecommendedShifts } from "@/lib/recommended-shifts";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 import {
   ApplicationStatus,
   ShiftStatus,
@@ -17,18 +24,28 @@ import {
 
 type OfficerDashboardProps = {
   firstName?: string | null;
+  fullName?: string | null;
+  imageUrl?: string | null;
   officer: {
     id: string;
     phone?: string | null;
     armedStatuses: ArmedStatus[];
     experienceCategories: string[];
     experienceYears?: number | null;
-    licenseExpirationDate?: Date | null;
+    licenses?: Array<{
+      id: string;
+      licenseType: string;
+      licenseNumber: string;
+      issuingState: string;
+      expirationDate: Date;
+    }>;
   } | null;
 };
 
 export default async function OfficerDashboard({
   firstName,
+  fullName,
+  imageUrl,
   officer,
 }: OfficerDashboardProps) {
   const officerId = officer?.id ?? null;
@@ -107,96 +124,91 @@ export default async function OfficerDashboard({
   );
 
   return (
-    <PageShell nav="officer" maxWidth="2xl" sidebar>
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-[0.18em] text-fo-primary-hover">
-            Officer Dashboard
-          </p>
-          <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
-            Welcome back{firstName ? `, ${firstName}` : ""}
-          </h1>
-          <p className="max-w-2xl text-base text-fo-text-muted">
-            Browse real company shifts, track applications, and keep your profile
-            ready for hiring managers.
-          </p>
-        </div>
+    <PageShell nav="officer" maxWidth="full" sidebar>
+      <div className="space-y-4">
+        <DashboardHeader
+          firstName={firstName}
+          fullName={fullName}
+          imageUrl={imageUrl}
+        />
 
-        <ProfileCompletionCard officer={officer} />
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            className="fo-glass-card"
-            label="Applications"
-            value={applicationsCount}
-            hint="Shifts you've applied to"
-          />
-          <StatCard
-            className="fo-glass-card"
-            label="Accepted Shifts"
-            value={acceptedCount}
-            hint="Assignments you've won"
-          />
-          <StatCard
-            className="fo-glass-card"
-            label="Upcoming Shifts"
-            value={upcomingCount}
-            hint="Accepted shifts starting soon"
-          />
-          <StatCard
-            className="fo-glass-card"
-            label="Available Shifts"
-            value={availableShiftsCount}
-            hint="Open shifts posted by companies"
-          />
-        </div>
-
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 className="text-xl font-bold text-fo-text sm:text-2xl">
-                Recommended Shifts
-              </h2>
-              <p className="mt-1 text-sm text-fo-text-muted">
-                Real open shifts from companies on FlexOfficers, ranked by fit,
-                rate, and start date.
-              </p>
-            </div>
-            <Link
-              href="/shifts"
-              className={buttonClassName({ variant: "secondary", size: "md" })}
-            >
-              Browse All Shifts
-            </Link>
+        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <StatCard
+              label="Applications"
+              value={applicationsCount}
+              hint="Shifts you've applied to"
+              tone="purple"
+              icon={<ShiftsIcon className="h-4 w-4" />}
+            />
+            <StatCard
+              label="Accepted Shifts"
+              value={acceptedCount}
+              hint="Assignments you've won"
+              tone="green"
+              icon={<AcceptedIcon className="h-4 w-4" />}
+            />
+            <StatCard
+              label="Upcoming Shifts"
+              value={upcomingCount}
+              hint="Accepted shifts starting soon"
+              tone="blue"
+              icon={<UpcomingIcon className="h-4 w-4" />}
+            />
+            <StatCard
+              label="Available Shifts"
+              value={availableShiftsCount}
+              hint="Open shifts posted by companies"
+              tone="amber"
+              icon={<BrowseIcon className="h-4 w-4" />}
+            />
           </div>
 
-          {recommendedShifts.length === 0 ? (
-            <Card variant="muted" className="fo-glass-card text-center">
-              <p className="text-lg font-medium text-fo-text">
-                No open shifts available right now.
-              </p>
-              <p className="mt-2 text-sm text-fo-text-muted">
-                Check back soon as companies post new security assignments.
-              </p>
-            </Card>
-          ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
-              {recommendedShifts.map((shift) => (
-                <RecommendedShiftCard
-                  key={shift.id}
-                  id={shift.id}
-                  title={shift.title}
-                  companyName={shift.company.companyName}
-                  location={shift.location}
-                  hourlyRate={shift.hourlyRate}
-                  startTime={shift.startTime}
-                  endTime={shift.endTime}
-                  status={shift.status}
-                />
-              ))}
-            </div>
-          )}
-        </section>
+          <ProfileCompletionCard officer={officer} compact />
+        </div>
+
+        <RecommendedNextStepsCard officer={officer} />
+
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px] xl:gap-5">
+          <div className="min-w-0 space-y-4">
+            <section className="space-y-3">
+              <div>
+                <h2 className="text-base font-bold text-fo-text sm:text-lg">
+                  Recommended Shifts
+                </h2>
+                <p className="mt-0.5 text-xs text-fo-text-muted sm:text-sm">
+                  Open shifts ranked by fit, rate, and start date.
+                </p>
+              </div>
+
+              {recommendedShifts.length === 0 ? (
+                <EmptyShiftsCard />
+              ) : (
+                <div className="grid gap-3 lg:grid-cols-2">
+                  {recommendedShifts.map((shift) => (
+                    <RecommendedShiftCard
+                      key={shift.id}
+                      id={shift.id}
+                      title={shift.title}
+                      companyName={shift.company.companyName}
+                      location={shift.location}
+                      hourlyRate={shift.hourlyRate}
+                      startTime={shift.startTime}
+                      endTime={shift.endTime}
+                      status={shift.status}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <QuickActionsRow />
+          </div>
+
+          <aside className="min-w-0 xl:sticky xl:top-4 xl:self-start">
+            <DashboardSidebarWidgets upcomingCount={upcomingCount} />
+          </aside>
+        </div>
       </div>
     </PageShell>
   );

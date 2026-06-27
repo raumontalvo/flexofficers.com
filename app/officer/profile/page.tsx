@@ -1,7 +1,7 @@
 import { UserRole } from "@/app/generated/prisma/enums";
-import { PageShell, SectionHeading } from "@/components/ui";
+import { PageShell } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
-import { officerProfileSelect } from "@/lib/officer-fields";
+import { officerProfilePageUserSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
 import type { ArmedStatusOption } from "@/lib/profile-options";
 import OfficerProfileForm from "./OfficerProfileForm";
@@ -16,6 +16,10 @@ function formatDateForInput(value: Date | null) {
   return value.toISOString().slice(0, 10);
 }
 
+function createClientId(seed: string) {
+  return `license-${seed}`;
+}
+
 export default async function OfficerProfilePage() {
   const clerkUser = await requirePageRole(UserRole.OFFICER);
 
@@ -23,14 +27,30 @@ export default async function OfficerProfilePage() {
     where: {
       clerkId: clerkUser.id,
     },
-    include: {
-      officer: {
-        select: officerProfileSelect,
-      },
-    },
+    select: officerProfilePageUserSelect,
   });
 
   const officer = user?.officer;
+
+  const initialLicenses =
+    officer?.licenses && officer.licenses.length > 0
+      ? officer.licenses.map((license) => ({
+          clientId: createClientId(license.id),
+          id: license.id,
+          licenseNumber: license.licenseNumber,
+          licenseType: license.licenseType,
+          issuingState: license.issuingState,
+          expirationDate: formatDateForInput(license.expirationDate),
+        }))
+      : [
+          {
+            clientId: createClientId("new"),
+            licenseNumber: "",
+            licenseType: "",
+            issuingState: "",
+            expirationDate: "",
+          },
+        ];
 
   const initialForm = {
     firstName: officer?.firstName ?? clerkUser?.firstName ?? "",
@@ -44,21 +64,26 @@ export default async function OfficerProfilePage() {
       officer?.experienceYears !== null && officer?.experienceYears !== undefined
         ? String(officer.experienceYears)
         : "",
-    licenseExpirationDate: formatDateForInput(officer?.licenseExpirationDate ?? null),
+    licenses: initialLicenses,
     availability: officer?.availability ?? [],
     certifications: officer?.certifications ?? [],
     experienceCategories: officer?.experienceCategories ?? [],
     introduction: officer?.introduction ?? "",
+    licenseCertificationAccepted: officer?.licenseCertificationAccepted ?? false,
   };
 
   return (
     <PageShell nav="officer" maxWidth="lg" sidebar>
-      <SectionHeading
-        title="Officer Profile"
-        subtitle="Keep your profile ready so companies can review you."
-      />
+      <div className="space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight text-fo-text sm:text-3xl">
+          Officer Profile
+        </h1>
+        <p className="text-sm text-fo-text-muted sm:text-base">
+          Complete your profile step by step so companies can review you.
+        </p>
+      </div>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <OfficerProfileForm initialForm={initialForm} />
       </div>
     </PageShell>

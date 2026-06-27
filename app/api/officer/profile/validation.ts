@@ -4,7 +4,19 @@ import {
   AVAILABILITY_OPTIONS,
   CERTIFICATION_OPTIONS,
 } from "@/lib/profile-options";
+import {
+  LICENSE_TYPE_OPTIONS,
+  US_STATE_OPTIONS,
+} from "@/lib/license-options";
 import { ArmedStatus } from "@/app/generated/prisma/enums";
+
+export type OfficerLicensePayload = {
+  id?: unknown;
+  licenseNumber?: unknown;
+  licenseType?: unknown;
+  issuingState?: unknown;
+  expirationDate?: unknown;
+};
 
 export type OfficerProfilePayload = {
   firstName?: unknown;
@@ -16,16 +28,25 @@ export type OfficerProfilePayload = {
   armedStatus?: unknown;
   armedStatuses?: unknown;
   experienceYears?: unknown;
-  licenseExpirationDate?: unknown;
+  licenses?: unknown;
   availability?: unknown;
   certifications?: unknown;
   experienceCategories?: unknown;
   introduction?: unknown;
+  licenseCertificationAccepted?: unknown;
 };
 
 export type FieldError = {
   field: string;
   message: string;
+};
+
+export type ParsedOfficerLicense = {
+  id?: string;
+  licenseNumber: string;
+  licenseType: string;
+  issuingState: string;
+  expirationDate: Date;
 };
 
 const INTRODUCTION_MAX_LENGTH = 300;
@@ -203,6 +224,147 @@ function parseArmedStatuses(
   return parsed;
 }
 
+function parseLicenses(
+  value: unknown,
+  errors: FieldError[]
+): ParsedOfficerLicense[] {
+  if (!Array.isArray(value)) {
+    errors.push({
+      field: "licenses",
+      message: "licenses must be an array",
+    });
+
+    return [];
+  }
+
+  if (value.length === 0) {
+    errors.push({
+      field: "licenses",
+      message: "at least one license is required",
+    });
+
+    return [];
+  }
+
+  const licenseTypeSet = new Set<string>(LICENSE_TYPE_OPTIONS);
+  const stateSet = new Set<string>(US_STATE_OPTIONS);
+  const parsed: ParsedOfficerLicense[] = [];
+
+  value.forEach((entry, index) => {
+    const prefix = `licenses[${index}]`;
+
+    if (!entry || typeof entry !== "object") {
+      errors.push({
+        field: prefix,
+        message: "must be an object",
+      });
+
+      return;
+    }
+
+    const license = entry as OfficerLicensePayload;
+
+    const licenseNumber = parseRequiredString(
+      license.licenseNumber,
+      `${prefix}.licenseNumber`,
+      errors
+    );
+    const licenseType = parseRequiredString(
+      license.licenseType,
+      `${prefix}.licenseType`,
+      errors
+    );
+    const issuingState = parseRequiredString(
+      license.issuingState,
+      `${prefix}.issuingState`,
+      errors
+    );
+
+    if (licenseType && !licenseTypeSet.has(licenseType)) {
+      errors.push({
+        field: `${prefix}.licenseType`,
+        message: "invalid license type",
+      });
+    }
+
+    if (issuingState && !stateSet.has(issuingState)) {
+      errors.push({
+        field: `${prefix}.issuingState`,
+        message: "invalid issuing state",
+      });
+    }
+
+    const expirationDateRaw =
+      typeof license.expirationDate === "string"
+        ? license.expirationDate.trim()
+        : "";
+
+    if (!expirationDateRaw) {
+      errors.push({
+        field: `${prefix}.expirationDate`,
+        message: "expirationDate is required",
+      });
+    }
+
+    let expirationDate: Date | undefined;
+    if (expirationDateRaw) {
+      const parsedDate = new Date(expirationDateRaw);
+
+      if (Number.isNaN(parsedDate.getTime())) {
+        errors.push({
+          field: `${prefix}.expirationDate`,
+          message: "expirationDate must be a valid date",
+        });
+      } else {
+        expirationDate = parsedDate;
+      }
+    }
+
+    let id: string | undefined;
+    if (
+      typeof license.id === "string" &&
+      license.id.trim() !== "" &&
+      license.id !== "new"
+    ) {
+      id = license.id.trim();
+    }
+
+    if (
+      licenseNumber &&
+      licenseType &&
+      issuingState &&
+      expirationDate
+    ) {
+      parsed.push({
+        id,
+        licenseNumber,
+        licenseType,
+        issuingState,
+        expirationDate,
+      });
+    }
+  });
+
+  return parsed;
+}
+
+function parseLicenseCertificationAccepted(
+  value: unknown,
+  errors: FieldError[]
+): boolean {
+  if (value !== true) {
+    errors.push({
+      field: "licenseCertificationAccepted",
+      message:
+        "You must certify that your license information is accurate before saving.",
+    });
+
+    return false;
+  }
+
+  return true;
+}
+
 export function parseOfficerPayload(payload: OfficerProfilePayload) {
   const errors: FieldError[] = [];
 
@@ -218,6 +380,11 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
   );
 
   const armedStatuses = parseArmedStatuses(payload, errors);
+  const licenses = parseLicenses(payload.licenses, errors);
+  const licenseCertificationAccepted = parseLicenseCertificationAccepted(
+    payload.licenseCertificationAccepted,
+    errors
+  );
 
   let experienceYears: number | undefined;
   if (
@@ -239,30 +406,6 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
       });
     } else {
       experienceYears = parsedExperience;
-    }
-  }
-
-  let licenseExpirationDate: Date | undefined;
-  const licenseExpirationDateRaw =
-    typeof payload.licenseExpirationDate === "string"
-      ? payload.licenseExpirationDate.trim()
-      : "";
-
-  if (!licenseExpirationDateRaw) {
-    errors.push({
-      field: "licenseExpirationDate",
-      message: "licenseExpirationDate is required",
-    });
-  } else {
-    const parsedDate = new Date(licenseExpirationDateRaw);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      errors.push({
-        field: "licenseExpirationDate",
-        message: "licenseExpirationDate must be a valid date",
-      });
-    } else {
-      licenseExpirationDate = parsedDate;
     }
   }
 
@@ -324,11 +467,12 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
       profilePhotoUrl,
       armedStatuses,
       experienceYears: experienceYears!,
-      licenseExpirationDate: licenseExpirationDate!,
+      licenses,
       availability,
       certifications,
       experienceCategories,
       introduction,
+      licenseCertificationAccepted,
     },
   };
 }

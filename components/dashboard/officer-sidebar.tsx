@@ -15,45 +15,70 @@ function isActive(pathname: string, href: string, match?: (pathname: string) => 
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function OfficerSidebar() {
+type OfficerSidebarProps = {
+  badgeCounts?: Partial<Record<"notifications", number>>;
+};
+
+export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-72 shrink-0 border-r border-white/[0.06] bg-fo-bg-elevated/40 backdrop-blur-xl md:flex md:flex-col">
-      <div className="border-b border-white/[0.06] px-6 py-6">
-        <Link href="/dashboard" className="inline-flex items-center">
-          <FlexOfficersBadge height={48} transparent priority />
+    <aside className="sticky top-0 hidden h-screen w-[260px] shrink-0 flex-col border-r border-slate-800/90 bg-[#040a14]/98 backdrop-blur-xl md:flex">
+      <div className="border-b border-white/[0.06] px-3 py-3">
+        <Link href="/dashboard" className="flex items-center gap-2.5">
+          <FlexOfficersBadge
+            height={72}
+            transparent
+            priority
+            className="!h-[72px] !max-h-[72px] !w-auto shrink-0"
+          />
+          <span className="text-[1.125rem] font-bold leading-none tracking-tight">
+            <span className="text-fo-primary-bright">Flex</span>
+            <span className="text-slate-100">Officers</span>
+          </span>
         </Link>
       </div>
 
-      <nav aria-label="Officer dashboard" className="flex-1 space-y-1 px-4 py-5">
+      <nav
+        aria-label="Officer dashboard"
+        className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3"
+      >
         {officerSidebarItems.map((item) => {
           const active = isActive(pathname, item.href, item.match);
           const Icon = item.icon;
+          const badgeKey =
+            item.href === "/officer/notifications" ? "notifications" : null;
+          const badgeCount = badgeKey ? badgeCounts?.[badgeKey] : undefined;
+          const showBadge = typeof badgeCount === "number" && badgeCount > 0;
 
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-h-11 items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium transition",
+                "flex min-h-9 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors",
                 active
-                  ? "bg-fo-primary/15 text-fo-primary-hover shadow-[inset_0_0_0_1px_rgba(59,130,246,0.25)]"
-                  : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                  ? "fo-nav-pill-active text-white"
+                  : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
               )}
             >
-              <Icon className="h-5 w-5 shrink-0" />
-              <span>{item.label}</span>
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {showBadge ? (
+                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                  {badgeCount > 99 ? "99+" : badgeCount}
+                </span>
+              ) : null}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-white/[0.06] px-4 py-5">
+      <div className="mt-auto border-t border-white/[0.06] px-2.5 py-3">
         <SignOutButton redirectUrl="/">
           <button
             type="button"
-            className="flex min-h-11 w-full items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-medium text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
+            className="flex min-h-9 w-full items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium text-slate-400 transition hover:bg-white/[0.04] hover:text-slate-200"
           >
             Sign Out
           </button>

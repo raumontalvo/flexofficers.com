@@ -51,6 +51,8 @@ export default async function DashboardPage() {
     return (
       <OfficerDashboard
         firstName={clerkUser?.firstName}
+        fullName={clerkUser?.fullName}
+        imageUrl={clerkUser?.imageUrl}
         officer={user?.officer ?? null}
       />
     );

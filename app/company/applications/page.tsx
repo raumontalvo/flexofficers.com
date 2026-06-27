@@ -68,6 +68,7 @@ export default async function CompanyApplicationsPage() {
               certifications={application.officer.certifications}
               experienceCategories={application.officer.experienceCategories}
               introduction={application.officer.introduction}
+              licenses={application.officer.licenses}
             />
           ))
         )}

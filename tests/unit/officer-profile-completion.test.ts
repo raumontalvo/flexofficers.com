@@ -4,6 +4,14 @@ import {
   getProfileCompletionPercent,
 } from "@/lib/officer-profile-completion";
 
+const completeLicense = {
+  id: "license-1",
+  licenseType: "Unarmed Security",
+  licenseNumber: "D1234567",
+  issuingState: "FL",
+  expirationDate: new Date("2027-01-01"),
+};
+
 describe("officer profile completion", () => {
   it("tracks the required officer profile fields", () => {
     const labels = getIncompleteProfileLabels({
@@ -11,14 +19,14 @@ describe("officer profile completion", () => {
       armedStatuses: [],
       experienceCategories: [],
       experienceYears: null,
-      licenseExpirationDate: null,
+      licenses: [],
     });
 
     expect(labels).toEqual([
       "Select armed and/or unarmed",
       "Add experience categories",
       "Add your years of experience",
-      "Add your license expiration date",
+      "Add at least one license",
     ]);
   });
 
@@ -29,7 +37,7 @@ describe("officer profile completion", () => {
         armedStatuses: ["ARMED"],
         experienceCategories: ["Retail security"],
         experienceYears: 4,
-        licenseExpirationDate: new Date("2027-01-01"),
+        licenses: [completeLicense],
       })
     ).toBe(100);
   });

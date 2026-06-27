@@ -6,6 +6,9 @@ import {
   ShiftStatusBadge,
   StatusBadge,
 } from "@/components/ui";
+import { OfficerLicensesList } from "@/components/licenses/officer-licenses-list";
+import type { OfficerLicenseSnapshot } from "@/lib/officer-licenses";
+import { LICENSE_DISPLAY_DISCLAIMER } from "@/lib/officer-licenses";
 import { formatArmedStatuses } from "@/lib/profile-options";
 import { formatHourlyRate, formatShiftDateTime } from "@/lib/format-shift";
 import ApplicationStatusButtons from "./ApplicationStatusButtons";
@@ -28,6 +31,7 @@ type ApplicantCardProps = {
   certifications: string[];
   experienceCategories: string[];
   introduction?: string | null;
+  licenses: OfficerLicenseSnapshot[];
 };
 
 function TagList({ label, values }: { label: string; values: string[] }) {
@@ -88,6 +92,7 @@ export function ApplicantCard({
   certifications,
   experienceCategories,
   introduction,
+  licenses,
 }: ApplicantCardProps) {
   const officerName = `${officerFirstName} ${officerLastName}`.trim();
   const isPending = applicationStatus === "PENDING";
@@ -146,6 +151,16 @@ export function ApplicantCard({
 
       <TagList label="Certifications" values={certifications} />
       <TagList label="Experience categories" values={experienceCategories} />
+
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
+          Licenses
+        </p>
+        <OfficerLicensesList licenses={licenses} />
+        <p className="text-xs leading-relaxed text-fo-text-muted">
+          {LICENSE_DISPLAY_DISCLAIMER}
+        </p>
+      </div>
 
       {introduction ? (
         <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
