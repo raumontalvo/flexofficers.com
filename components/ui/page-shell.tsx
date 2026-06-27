@@ -47,37 +47,35 @@ export function PageShell({
   if (showSidebar) {
     return (
       <div className={cn("fo-dashboard-shell min-h-screen overflow-x-hidden text-fo-text", className)}>
-        <div className="mx-auto flex min-h-screen w-full max-w-[1600px]">
-          <OfficerSidebar />
+        <OfficerSidebar />
 
-          <div className="relative flex min-w-0 flex-1 flex-col">
-            <div className="fo-dashboard-glow" aria-hidden="true" />
+        <div className="relative flex min-h-screen min-w-0 flex-col md:pl-[250px]">
+          <div className="fo-dashboard-glow pointer-events-none fixed inset-y-0 right-0 left-0 md:left-[250px]" aria-hidden="true" />
 
-            <header className="relative border-b border-white/[0.06] px-4 py-4 md:hidden">
-              <Link href="/dashboard" className="inline-flex items-center gap-3">
-                <FlexOfficersBadge height={56} transparent priority />
-                <span className="text-lg font-bold tracking-tight">
-                  <span className="text-fo-primary-bright">Flex</span>
-                  <span className="text-slate-100">Officers</span>
-                </span>
-              </Link>
-            </header>
+          <header className="relative border-b border-white/[0.06] px-4 py-4 md:hidden">
+            <Link href="/dashboard" className="inline-flex items-center gap-3">
+              <FlexOfficersBadge height={56} transparent priority />
+              <span className="text-lg font-bold tracking-tight">
+                <span className="text-fo-primary-bright">Flex</span>
+                <span className="text-slate-100">Officers</span>
+              </span>
+            </Link>
+          </header>
 
-            <main
-              className={cn(
-                "relative flex-1 px-4 py-4 sm:px-5 sm:py-5 lg:px-7",
-                showNav &&
-                  "pb-[calc(var(--fo-nav-height)+env(safe-area-inset-bottom))] md:pb-8",
-                contentClassName
-              )}
-            >
-              <div className={cn("mx-auto w-full", maxWidthClasses[maxWidth])}>
-                {children}
-              </div>
-            </main>
+          <main
+            className={cn(
+              "relative flex-1 px-4 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-6",
+              showNav &&
+                "pb-[calc(var(--fo-nav-height)+env(safe-area-inset-bottom))] md:pb-8",
+              contentClassName
+            )}
+          >
+            <div className={cn("mx-auto w-full", maxWidthClasses[maxWidth])}>
+              {children}
+            </div>
+          </main>
 
-            {showNav ? <MobileBottomNav role={nav} /> : null}
-          </div>
+          {showNav ? <MobileBottomNav role={nav} /> : null}
         </div>
       </div>
     );

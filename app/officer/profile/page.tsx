@@ -73,19 +73,8 @@ export default async function OfficerProfilePage() {
   };
 
   return (
-    <PageShell nav="officer" maxWidth="lg" sidebar>
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-fo-text sm:text-3xl">
-          Officer Profile
-        </h1>
-        <p className="text-sm text-fo-text-muted sm:text-base">
-          Complete your profile step by step so companies can review you.
-        </p>
-      </div>
-
-      <div className="mt-6">
-        <OfficerProfileForm initialForm={initialForm} />
-      </div>
+    <PageShell nav="officer" maxWidth="xl" sidebar>
+      <OfficerProfileForm initialForm={initialForm} />
     </PageShell>
   );
 }

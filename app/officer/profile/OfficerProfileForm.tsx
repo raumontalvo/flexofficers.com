@@ -16,9 +16,7 @@ import {
 } from "@/lib/license-options";
 import {
   LICENSE_CERTIFICATION_COMPANY_HELPER,
-  LICENSE_CERTIFICATION_ERROR,
   LICENSE_CERTIFICATION_LABEL,
-  LICENSE_TYPE_REQUIRED_ERROR,
   OFFICER_LICENSE_HELPER_TEXT,
 } from "@/lib/officer-licenses";
 import { getProfileCompletionFromForm } from "@/lib/officer-profile-form";
@@ -31,9 +29,20 @@ import {
   type ArmedStatusOption,
 } from "@/lib/profile-options";
 import {
-  PROFILE_WIZARD_STEPS,
-  type ProfileWizardStepId,
-} from "./profile-wizard-steps";
+  formatLicenseExpiration,
+  getLicenseDisplayMeta,
+  LicenseTypeBadge,
+} from "./license-display";
+import { ProfileSuccessScreen } from "./ProfileSuccessScreen";
+import { ProfileWizardFooter } from "./ProfileWizardFooter";
+import { ProfileWizardHeader } from "./ProfileWizardHeader";
+import { ProfileWizardTips } from "./ProfileWizardTips";
+import {
+  getWizardSectionProgress,
+  validateWizardStep,
+} from "./profile-wizard-progress";
+import { PROFILE_WIZARD_STEPS } from "./profile-wizard-steps";
+import { StepRequiredBadge } from "./profile-wizard-ui";
 
 type LicenseFormEntry = {
   clientId: string;
@@ -66,7 +75,10 @@ type OfficerProfileFormProps = {
 };
 
 const fieldClassName =
-  "min-h-12 w-full rounded-fo-button border border-fo-border bg-fo-bg-elevated px-4 py-3 text-base text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30";
+  "min-h-10 w-full rounded-fo-button border border-fo-border bg-fo-bg-elevated px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30";
+
+const compactFieldClassName =
+  "min-h-8 w-full rounded-lg border border-fo-border/80 bg-fo-bg-elevated px-2 py-1.5 text-xs text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30 sm:text-sm";
 
 function createEmptyLicense(): LicenseFormEntry {
   return {
@@ -85,6 +97,10 @@ function toggleValue(values: string[], value: string) {
   return values.includes(value)
     ? values.filter((entry) => entry !== value)
     : [...values, value];
+}
+
+function getStateName(code: string) {
+  return US_STATES.find((state) => state.code === code)?.name ?? code;
 }
 
 function FieldLabel({
@@ -115,11 +131,11 @@ function TagToggleGroup({
   onChange: (next: string[]) => void;
 }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <div>
         <p className="text-sm font-semibold text-fo-text">{label}</p>
         {description ? (
-          <p className="mt-1 text-sm text-fo-text-muted">{description}</p>
+          <p className="mt-0.5 text-sm text-fo-text-muted">{description}</p>
         ) : null}
       </div>
 
@@ -134,7 +150,7 @@ function TagToggleGroup({
               aria-pressed={isSelected}
               onClick={() => onChange(toggleValue(selected, option))}
               className={cn(
-                "min-h-11 rounded-full border px-4 py-2.5 text-sm font-medium transition active:scale-[0.98]",
+                "min-h-9 rounded-full border px-3 py-1.5 text-sm font-medium transition active:scale-[0.98]",
                 isSelected
                   ? "border-fo-primary-bright bg-fo-primary/15 text-fo-primary-hover"
                   : "border-fo-border bg-fo-bg-elevated text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text"
@@ -164,11 +180,17 @@ function ProfilePhotoPreview({
   }, [photoUrl]);
 
   if (!showImage) {
-    return <ProfileAvatar name={name} size="xl" />;
+    return (
+      <ProfileAvatar
+        name={name}
+        size="xl"
+        className="!h-24 !w-24 !text-2xl sm:!h-28 sm:!w-28"
+      />
+    );
   }
 
   return (
-    <div className="relative h-20 w-20 overflow-hidden rounded-full border border-fo-border-strong bg-fo-bg-elevated">
+    <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-fo-primary-bright/30 bg-fo-bg-elevated shadow-[0_0_24px_rgba(59,130,246,0.15)] sm:h-28 sm:w-28">
       <img
         src={photoUrl}
         alt={name ? `${name} profile photo` : "Profile photo preview"}
@@ -179,60 +201,6 @@ function ProfilePhotoPreview({
   );
 }
 
-function validateStep(
-  step: ProfileWizardStepId,
-  form: OfficerProfileFormState
-): string | null {
-  switch (step) {
-    case "basic":
-      if (!form.firstName.trim()) return "First name is required.";
-      if (!form.lastName.trim()) return "Last name is required.";
-      if (!form.phone.trim()) return "Phone number is required.";
-      if (!form.email.trim()) return "Email is required.";
-      if (!form.city.trim()) return "City is required.";
-      return null;
-    case "experience":
-      if (form.armedStatuses.length === 0) {
-        return "Select at least one armed status option.";
-      }
-      if (!form.experienceYears.trim()) {
-        return "Years of experience is required.";
-      }
-      if (Number(form.experienceYears) < 0) {
-        return "Years of experience must be zero or greater.";
-      }
-      if (form.experienceCategories.length === 0) {
-        return "Select at least one experience category.";
-      }
-      return null;
-    case "licenses": {
-      if (form.licenses.some((license) => !license.licenseType.trim())) {
-        return LICENSE_TYPE_REQUIRED_ERROR;
-      }
-      for (const license of form.licenses) {
-        if (!license.licenseNumber.trim()) {
-          return "Every license must include a license number.";
-        }
-        if (!license.issuingState.trim()) {
-          return "Every license must include an issuing state.";
-        }
-        if (!license.expirationDate.trim()) {
-          return "Every license must include an expiration date.";
-        }
-      }
-      if (!form.licenseCertificationAccepted) {
-        return LICENSE_CERTIFICATION_ERROR;
-      }
-      return null;
-    }
-    case "certifications":
-    case "availability":
-      return null;
-    default:
-      return null;
-  }
-}
-
 export default function OfficerProfileForm({
   initialForm,
 }: OfficerProfileFormProps) {
@@ -240,6 +208,7 @@ export default function OfficerProfileForm({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const currentStep = PROFILE_WIZARD_STEPS[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
@@ -248,6 +217,11 @@ export default function OfficerProfileForm({
 
   const completionPercent = useMemo(
     () => getProfileCompletionFromForm(form),
+    [form]
+  );
+
+  const sectionProgress = useMemo(
+    () => getWizardSectionProgress(form),
     [form]
   );
 
@@ -319,7 +293,7 @@ export default function OfficerProfileForm({
       });
 
       if (response.ok) {
-        alert("Officer profile saved!");
+        setShowSuccess(true);
         return true;
       }
 
@@ -342,7 +316,7 @@ export default function OfficerProfileForm({
   }
 
   async function handleContinue() {
-    const error = validateStep(currentStep.id, form);
+    const error = validateWizardStep(currentStep.id, form);
     if (error) {
       setStepError(error);
       return;
@@ -358,17 +332,192 @@ export default function OfficerProfileForm({
     goToStep(currentStepIndex + 1);
   }
 
+  function renderLicensesStep() {
+    return (
+      <div className="space-y-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <p className="max-w-2xl text-sm leading-relaxed text-fo-text-muted">
+            {OFFICER_LICENSE_HELPER_TEXT}
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={addLicense}
+            className="w-full shrink-0 sm:w-auto"
+          >
+            Add Another License
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          {form.licenses.map((license) => {
+            const meta = getLicenseDisplayMeta(license.licenseType);
+            const stateName = license.issuingState
+              ? getStateName(license.issuingState)
+              : "—";
+
+            return (
+              <div
+                key={license.clientId}
+                className="rounded-xl border border-fo-border bg-fo-bg-elevated/40 p-3"
+              >
+                <div className="grid gap-3 sm:grid-cols-[minmax(130px,1fr)_minmax(100px,0.9fr)_minmax(110px,1fr)_minmax(110px,0.9fr)_auto] sm:items-center">
+                  <div className="space-y-1.5">
+                    {license.licenseType ? (
+                      <LicenseTypeBadge licenseType={license.licenseType} />
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-600 px-2.5 py-1.5 text-xs text-slate-500">
+                        {meta.icon} Select type
+                      </span>
+                    )}
+                    <select
+                      aria-label="License type"
+                      value={license.licenseType}
+                      onChange={(e) =>
+                        updateLicense(license.clientId, {
+                          licenseType: e.target.value,
+                        })
+                      }
+                      className={compactFieldClassName}
+                    >
+                      <option value="">License type</option>
+                      {LICENSE_TYPE_OPTIONS.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                      {license.licenseType &&
+                      !LICENSE_TYPE_OPTIONS.includes(
+                        license.licenseType as (typeof LICENSE_TYPE_OPTIONS)[number]
+                      ) ? (
+                        <option value={license.licenseType}>
+                          {license.licenseType}
+                        </option>
+                      ) : null}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
+                      State
+                    </p>
+                    <p className="hidden min-h-5 text-sm font-medium text-fo-text sm:block">
+                      {stateName}
+                    </p>
+                    <select
+                      aria-label="Issuing state"
+                      value={license.issuingState}
+                      onChange={(e) =>
+                        updateLicense(license.clientId, {
+                          issuingState: e.target.value,
+                        })
+                      }
+                      className={compactFieldClassName}
+                    >
+                      <option value="">State</option>
+                      {US_STATES.map((state) => (
+                        <option key={state.code} value={state.code}>
+                          {state.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
+                      Number
+                    </p>
+                    <input
+                      aria-label="License number"
+                      value={license.licenseNumber}
+                      onChange={(e) =>
+                        updateLicense(license.clientId, {
+                          licenseNumber: e.target.value,
+                        })
+                      }
+                      className={compactFieldClassName}
+                      placeholder="License number"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
+                      Expiration
+                    </p>
+                    {license.expirationDate ? (
+                      <p className="hidden text-sm font-medium text-fo-text sm:block">
+                        {formatLicenseExpiration(license.expirationDate)}
+                      </p>
+                    ) : null}
+                    <input
+                      aria-label="Expiration date"
+                      type="date"
+                      value={license.expirationDate}
+                      onChange={(e) =>
+                        updateLicense(license.clientId, {
+                          expirationDate: e.target.value,
+                        })
+                      }
+                      className={compactFieldClassName}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-end sm:justify-center">
+                    {form.licenses.length > 1 ? (
+                      <button
+                        type="button"
+                        onClick={() => removeLicense(license.clientId)}
+                        className="text-xs font-medium text-fo-rejected transition hover:text-red-400"
+                      >
+                        Remove
+                      </button>
+                    ) : (
+                      <span className="text-xs text-fo-text-subtle">—</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-2 rounded-xl border border-fo-border bg-fo-bg-elevated/40 p-3.5">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={form.licenseCertificationAccepted}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  licenseCertificationAccepted: e.target.checked,
+                })
+              }
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border-fo-border bg-fo-bg-elevated text-fo-primary-bright focus:ring-fo-primary-bright/30"
+            />
+            <span className="text-sm leading-relaxed text-fo-text">
+              {LICENSE_CERTIFICATION_LABEL}
+            </span>
+          </label>
+          <p className="text-xs leading-relaxed text-fo-text-muted">
+            {LICENSE_CERTIFICATION_COMPANY_HELPER}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   function renderStepContent() {
     switch (currentStep.id) {
       case "basic":
         return (
-          <div className="space-y-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="space-y-4">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
               <ProfilePhotoPreview
                 name={displayName}
                 photoUrl={form.profilePhotoUrl}
               />
-              <div className="min-w-0 flex-1 space-y-2">
+              <div className="min-w-0 flex-1 space-y-1.5 sm:pt-1">
                 <FieldLabel htmlFor="profilePhotoUrl">Profile photo URL</FieldLabel>
                 <input
                   id="profilePhotoUrl"
@@ -382,8 +531,8 @@ export default function OfficerProfileForm({
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
                 <FieldLabel htmlFor="firstName">First name</FieldLabel>
                 <input
                   id="firstName"
@@ -395,7 +544,7 @@ export default function OfficerProfileForm({
                   placeholder="First name"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <FieldLabel htmlFor="lastName">Last name</FieldLabel>
                 <input
                   id="lastName"
@@ -405,10 +554,7 @@ export default function OfficerProfileForm({
                   placeholder="Last name"
                 />
               </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <FieldLabel htmlFor="phone">Phone</FieldLabel>
                 <input
                   id="phone"
@@ -418,7 +564,7 @@ export default function OfficerProfileForm({
                   placeholder="Phone number"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <input
                   id="email"
@@ -429,24 +575,23 @@ export default function OfficerProfileForm({
                   placeholder="Email"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <FieldLabel htmlFor="city">City</FieldLabel>
-              <input
-                id="city"
-                value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-                className={fieldClassName}
-                placeholder="City"
-              />
+              <div className="space-y-1.5 sm:col-span-2">
+                <FieldLabel htmlFor="city">City</FieldLabel>
+                <input
+                  id="city"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                  className={fieldClassName}
+                  placeholder="City"
+                />
+              </div>
             </div>
           </div>
         );
 
       case "experience":
         return (
-          <div className="space-y-5">
+          <div className="space-y-4">
             <TagToggleGroup
               label="Armed status"
               description="Select all that apply. Choose both if you can work armed and unarmed assignments."
@@ -462,7 +607,7 @@ export default function OfficerProfileForm({
               }
             />
 
-            <div className="space-y-2">
+            <div className="max-w-xs space-y-1.5">
               <FieldLabel htmlFor="experienceYears">Years of experience</FieldLabel>
               <input
                 id="experienceYears"
@@ -487,7 +632,7 @@ export default function OfficerProfileForm({
               }
             />
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <FieldLabel htmlFor="introduction">Short introduction</FieldLabel>
               <textarea
                 id="introduction"
@@ -496,12 +641,12 @@ export default function OfficerProfileForm({
                 onChange={(e) =>
                   setForm({ ...form, introduction: e.target.value })
                 }
-                className={cn(fieldClassName, "min-h-32 resize-y py-3")}
+                className={cn(fieldClassName, "min-h-24 resize-y py-2.5")}
                 placeholder="Tell companies about your experience, reliability, and the shifts you prefer."
               />
               <p
                 className={cn(
-                  "text-right text-sm",
+                  "text-right text-xs",
                   form.introduction.length >= 280
                     ? "text-fo-pending"
                     : "text-fo-text-subtle"
@@ -514,153 +659,7 @@ export default function OfficerProfileForm({
         );
 
       case "licenses":
-        return (
-          <div className="space-y-5">
-            <p className="text-sm leading-relaxed text-fo-text-muted">
-              {OFFICER_LICENSE_HELPER_TEXT}
-            </p>
-
-            <div className="space-y-4">
-              {form.licenses.map((license, index) => (
-                <div
-                  key={license.clientId}
-                  className="space-y-4 rounded-2xl border border-fo-border bg-fo-bg-elevated/60 p-4"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-fo-text">
-                      License {index + 1}
-                    </p>
-                    {form.licenses.length > 1 ? (
-                      <button
-                        type="button"
-                        onClick={() => removeLicense(license.clientId)}
-                        className="text-sm font-medium text-fo-rejected transition hover:text-red-400"
-                      >
-                        Remove
-                      </button>
-                    ) : null}
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2 sm:col-span-2">
-                      <FieldLabel htmlFor={`licenseType-${license.clientId}`}>
-                        License type
-                      </FieldLabel>
-                      <select
-                        id={`licenseType-${license.clientId}`}
-                        value={license.licenseType}
-                        onChange={(e) =>
-                          updateLicense(license.clientId, {
-                            licenseType: e.target.value,
-                          })
-                        }
-                        className={fieldClassName}
-                      >
-                        <option value="">Select license type</option>
-                        {LICENSE_TYPE_OPTIONS.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                        {license.licenseType &&
-                        !LICENSE_TYPE_OPTIONS.includes(
-                          license.licenseType as (typeof LICENSE_TYPE_OPTIONS)[number]
-                        ) ? (
-                          <option value={license.licenseType}>
-                            {license.licenseType}
-                          </option>
-                        ) : null}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <FieldLabel htmlFor={`licenseNumber-${license.clientId}`}>
-                        License number
-                      </FieldLabel>
-                      <input
-                        id={`licenseNumber-${license.clientId}`}
-                        value={license.licenseNumber}
-                        onChange={(e) =>
-                          updateLicense(license.clientId, {
-                            licenseNumber: e.target.value,
-                          })
-                        }
-                        className={fieldClassName}
-                        placeholder="License number"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <FieldLabel htmlFor={`issuingState-${license.clientId}`}>
-                        Issuing state
-                      </FieldLabel>
-                      <select
-                        id={`issuingState-${license.clientId}`}
-                        value={license.issuingState}
-                        onChange={(e) =>
-                          updateLicense(license.clientId, {
-                            issuingState: e.target.value,
-                          })
-                        }
-                        className={fieldClassName}
-                      >
-                        <option value="">Select state</option>
-                        {US_STATES.map((state) => (
-                          <option key={state.code} value={state.code}>
-                            {state.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2 sm:col-span-2">
-                      <FieldLabel htmlFor={`expirationDate-${license.clientId}`}>
-                        Expiration date
-                      </FieldLabel>
-                      <input
-                        id={`expirationDate-${license.clientId}`}
-                        type="date"
-                        value={license.expirationDate}
-                        onChange={(e) =>
-                          updateLicense(license.clientId, {
-                            expirationDate: e.target.value,
-                          })
-                        }
-                        className={fieldClassName}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <Button type="button" variant="secondary" onClick={addLicense}>
-              Add Another License
-            </Button>
-
-            <div className="space-y-3 rounded-2xl border border-fo-border bg-fo-bg-elevated/60 p-4">
-              <label className="flex cursor-pointer items-start gap-3">
-                <input
-                  type="checkbox"
-                  checked={form.licenseCertificationAccepted}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      licenseCertificationAccepted: e.target.checked,
-                    })
-                  }
-                  className="mt-1 h-4 w-4 shrink-0 rounded border-fo-border bg-fo-bg-elevated text-fo-primary-bright focus:ring-fo-primary-bright/30"
-                />
-                <span className="text-sm leading-relaxed text-fo-text">
-                  {LICENSE_CERTIFICATION_LABEL}
-                </span>
-              </label>
-              <p className="text-xs leading-relaxed text-fo-text-muted">
-                {LICENSE_CERTIFICATION_COMPANY_HELPER}
-              </p>
-            </div>
-          </div>
-        );
+        return renderLicensesStep();
 
       case "certifications":
         return (
@@ -675,13 +674,37 @@ export default function OfficerProfileForm({
 
       case "availability":
         return (
-          <TagToggleGroup
-            label="When can you work?"
-            description="Tap the times and schedules that fit you."
-            options={AVAILABILITY_OPTIONS}
-            selected={form.availability}
-            onChange={(availability) => setForm({ ...form, availability })}
-          />
+          <div className="space-y-4">
+            <TagToggleGroup
+              label="When can you work?"
+              description="Tap the times and schedules that fit you."
+              options={AVAILABILITY_OPTIONS}
+              selected={form.availability}
+              onChange={(availability) => setForm({ ...form, availability })}
+            />
+
+            <div className="rounded-xl border border-fo-border bg-fo-bg-elevated/40 p-3.5">
+              <p className="text-sm font-semibold text-fo-text">
+                Availability summary
+              </p>
+              {form.availability.length > 0 ? (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {form.availability.map((item) => (
+                    <span
+                      key={item}
+                      className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-1.5 text-sm text-fo-text-muted">
+                  No availability selected yet. Choose the schedules that fit you.
+                </p>
+              )}
+            </div>
+          </div>
         );
 
       default:
@@ -689,135 +712,78 @@ export default function OfficerProfileForm({
     }
   }
 
+  if (showSuccess) {
+    return (
+      <div className="pb-4">
+        <ProfileSuccessScreen />
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-5">
-      <div className="fo-glass-card fo-glass-card-hover space-y-4 rounded-fo-card border border-white/10 p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-medium text-fo-text-muted">
-              Profile completion
-            </p>
-            <p className="text-2xl font-bold text-fo-primary-bright">
-              {completionPercent}%
-            </p>
-          </div>
-          <p className="text-xs text-fo-text-subtle sm:text-sm">
-            Step {currentStepIndex + 1} of {PROFILE_WIZARD_STEPS.length}
-          </p>
-        </div>
+    <div className="pb-3">
+      <ProfileWizardHeader
+        currentStepIndex={currentStepIndex}
+        completionPercent={completionPercent}
+        completedSections={sectionProgress.completedCount}
+        totalSections={sectionProgress.totalCount}
+        nextStepLabel={sectionProgress.nextStepLabel}
+        allSectionsComplete={sectionProgress.allComplete}
+        form={form}
+        onStepSelect={goToStep}
+      />
 
-        <div
-          className="h-2 overflow-hidden rounded-full bg-slate-800/80"
-          role="progressbar"
-          aria-valuenow={completionPercent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label="Profile completion"
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px] lg:items-start">
+        <Card
+          variant="elevated"
+          className="fo-glass-card min-w-0 space-y-4 border border-white/10 p-3.5 sm:p-4 lg:p-5"
         >
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-fo-primary via-fo-primary-bright to-sky-400 transition-all duration-500"
-            style={{ width: `${completionPercent}%` }}
-          />
-        </div>
+          <CardHeader className="space-y-1.5 p-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <CardTitle className="text-lg">{currentStep.label}</CardTitle>
+              <StepRequiredBadge required={currentStep.required} />
+            </div>
+            <CardDescription className="text-sm">
+              {currentStep.id === "basic" &&
+                "Add a photo URL and contact details companies may review."}
+              {currentStep.id === "experience" &&
+                "Help companies understand your background and credentials."}
+              {currentStep.id === "licenses" &&
+                "At least one license is required to complete your profile."}
+              {currentStep.id === "certifications" &&
+                "Select any certifications you currently hold."}
+              {currentStep.id === "availability" &&
+                "Choose the schedules that fit you best."}
+            </CardDescription>
+          </CardHeader>
 
-        <nav
-          aria-label="Profile steps"
-          className="-mx-1 overflow-x-auto px-1 pb-1"
-        >
-          <ol className="flex min-w-max gap-2">
-            {PROFILE_WIZARD_STEPS.map((step, index) => {
-              const isActive = index === currentStepIndex;
-              const isComplete = index < currentStepIndex;
+          {renderStepContent()}
 
-              return (
-                <li key={step.id}>
-                  <button
-                    type="button"
-                    onClick={() => goToStep(index)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition sm:px-4 sm:text-sm",
-                      isActive
-                        ? "fo-nav-pill-active border-fo-primary-bright/30 text-white"
-                        : isComplete
-                          ? "border-fo-primary/30 bg-fo-primary/10 text-fo-primary-hover"
-                          : "border-fo-border bg-fo-bg-elevated/60 text-fo-text-muted hover:text-fo-text"
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold sm:h-6 sm:w-6 sm:text-xs",
-                        isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-fo-bg text-fo-text-muted"
-                      )}
-                    >
-                      {index + 1}
-                    </span>
-                    <span className="whitespace-nowrap">{step.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
+          {stepError ? (
+            <p className="text-sm text-fo-rejected" role="alert">
+              {stepError}
+            </p>
+          ) : null}
+        </Card>
+
+        <ProfileWizardTips
+          stepId={currentStep.id}
+          className="hidden lg:block"
+        />
       </div>
 
-      <Card
-        variant="elevated"
-        className="fo-glass-card fo-glass-card-hover space-y-5"
-      >
-        <CardHeader>
-          <CardTitle>{currentStep.label}</CardTitle>
-          <CardDescription>
-            {currentStep.id === "basic" &&
-              "Add a photo URL and contact details companies may review."}
-            {currentStep.id === "experience" &&
-              "Help companies understand your background and credentials."}
-            {currentStep.id === "licenses" &&
-              "At least one license is required to complete your profile."}
-            {currentStep.id === "certifications" &&
-              "Select any certifications you currently hold."}
-            {currentStep.id === "availability" &&
-              "Choose the schedules that fit you best."}
-          </CardDescription>
-        </CardHeader>
+      <ProfileWizardTips
+        stepId={currentStep.id}
+        className="mt-4 lg:hidden"
+      />
 
-        {renderStepContent()}
-
-        {stepError ? (
-          <p className="text-sm text-fo-rejected" role="alert">
-            {stepError}
-          </p>
-        ) : null}
-
-        <div className="flex flex-col-reverse gap-3 border-t border-white/[0.06] pt-5 sm:flex-row sm:justify-between">
-          {!isFirstStep ? (
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleBack}
-              disabled={isSaving}
-            >
-              Back
-            </Button>
-          ) : (
-            <span className="hidden sm:block" aria-hidden />
-          )}
-
-          <Button
-            type="button"
-            onClick={handleContinue}
-            disabled={isSaving}
-            className="w-full sm:w-auto"
-          >
-            {isSaving
-              ? "Saving..."
-              : isLastStep
-                ? "Save Profile"
-                : "Save & Continue"}
-          </Button>
-        </div>
-      </Card>
+      <ProfileWizardFooter
+        isFirstStep={isFirstStep}
+        isLastStep={isLastStep}
+        isSaving={isSaving}
+        onBack={handleBack}
+        onContinue={handleContinue}
+      />
     </div>
   );
 }
