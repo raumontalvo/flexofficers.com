@@ -1,6 +1,6 @@
 "use client";
 
-import { useClerk, useUser } from "@clerk/nextjs";
+import { SignOutButton, useClerk, useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { Button, Card, CardDescription, CardHeader, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -63,6 +63,24 @@ function PrivacyBullet({ children }: { children: string }) {
       <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-fo-primary-bright/80" />
       <span>{children}</span>
     </li>
+  );
+}
+
+function SignOutRow() {
+  return (
+    <div className="flex flex-col gap-3 border-t border-white/[0.06] pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="min-w-0 space-y-1">
+        <p className="text-sm font-semibold text-fo-text">Sign Out</p>
+        <p className="text-sm text-fo-text-muted">
+          Sign out of FlexOfficers on this device.
+        </p>
+      </div>
+      <SignOutButton redirectUrl="/">
+        <button type="button" className={actionButtonClassName}>
+          Sign Out
+        </button>
+      </SignOutButton>
+    </div>
   );
 }
 
@@ -138,6 +156,7 @@ export function AccountSettingsContent({
               actionLabel="Change Password"
               onAction={() => openClerkProfile("/password")}
             />
+            <SignOutRow />
           </div>
 
           <p className="mt-4 text-xs leading-relaxed text-fo-text-subtle">
