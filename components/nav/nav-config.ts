@@ -46,6 +46,12 @@ export const officerNavItems: NavItem[] = [
     icon: ProfileIcon,
     match: (pathname) => pathname.startsWith("/officer/profile"),
   },
+  {
+    href: "/officer/settings",
+    label: "Settings",
+    icon: SettingsIcon,
+    match: (pathname) => pathname.startsWith("/officer/settings"),
+  },
 ];
 
 export const officerSidebarItems: NavItem[] = [
@@ -137,6 +143,12 @@ export const companySidebarItems: NavItem[] = [
     icon: ProfileIcon,
     match: (pathname) => pathname.startsWith("/company/profile"),
   },
+  {
+    href: "/company/settings",
+    label: "Settings",
+    icon: SettingsIcon,
+    match: (pathname) => pathname.startsWith("/company/settings"),
+  },
 ];
 
 export const companyNavItems: NavItem[] = [
@@ -169,5 +181,11 @@ export const companyNavItems: NavItem[] = [
     label: "Profile",
     icon: ProfileIcon,
     match: (pathname) => pathname.startsWith("/company/profile"),
+  },
+  {
+    href: "/company/settings",
+    label: "Settings",
+    icon: SettingsIcon,
+    match: (pathname) => pathname.startsWith("/company/settings"),
   },
 ];

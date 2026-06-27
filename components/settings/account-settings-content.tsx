@@ -4,15 +4,21 @@ import { useClerk, useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { Button, Card, CardDescription, CardHeader, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { DeleteAccountDialog } from "./DeleteAccountDialog";
+import { DeleteAccountDialog } from "./delete-account-dialog";
 
 const SUPPORT_PHONE = "239-900-5653";
 const SUPPORT_PHONE_HREF = "tel:+12399005653";
 
-const privacyItems = [
+export const OFFICER_PRIVACY_ITEMS = [
   "Companies can view your profile after you apply to a shift.",
   "Your phone number and email are shared only after you are accepted for a shift.",
   "License information is self-reported by officers.",
+];
+
+export const COMPANY_PRIVACY_ITEMS = [
+  "Officer profiles are visible when they apply to your shifts.",
+  "Your company contact information may be shared with accepted officers.",
+  "You are responsible for verifying officer licenses and credentials.",
 ];
 
 const actionButtonClassName =
@@ -60,7 +66,15 @@ function PrivacyBullet({ children }: { children: string }) {
   );
 }
 
-export function OfficerSettingsContent() {
+type AccountSettingsContentProps = {
+  privacyItems: string[];
+  deleteDescription: string;
+};
+
+export function AccountSettingsContent({
+  privacyItems,
+  deleteDescription,
+}: AccountSettingsContentProps) {
   const { isLoaded, user } = useUser();
   const { openUserProfile } = useClerk();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -195,9 +209,7 @@ export function OfficerSettingsContent() {
             <div className="space-y-1">
               <p className="text-sm font-semibold text-red-100">Delete Account</p>
               <p className="text-sm leading-relaxed text-red-200/70">
-                This action will permanently delete your account and all
-                associated data, including your profile and applications. This
-                action cannot be undone.
+                {deleteDescription}
               </p>
             </div>
 

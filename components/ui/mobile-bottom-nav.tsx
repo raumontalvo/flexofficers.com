@@ -43,7 +43,8 @@ export function MobileBottomNav({
         className={cn(
           "mx-auto grid max-w-lg gap-1 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2",
           navItems.length === 4 && "grid-cols-4",
-          navItems.length === 5 && "grid-cols-5"
+          navItems.length === 5 && "grid-cols-5",
+          navItems.length === 6 && "grid-cols-6"
         )}
       >
         {navItems.map((item) => {

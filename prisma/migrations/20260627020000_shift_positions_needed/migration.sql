@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Shift"
+ADD COLUMN IF NOT EXISTS "positionsNeeded" INTEGER NOT NULL DEFAULT 1;
