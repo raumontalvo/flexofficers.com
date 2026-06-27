@@ -7,7 +7,7 @@ describe("officer profile form completion", () => {
       getProfileCompletionFromForm({
         phone: "555-0100",
         armedStatuses: ["ARMED"],
-        experienceCategories: ["Retail security"],
+        experienceCategories: ["Retail Security"],
         experienceYears: "4",
         licenses: [
           {
@@ -26,7 +26,7 @@ describe("officer profile form completion", () => {
       getProfileCompletionFromForm({
         phone: "555-0100",
         armedStatuses: ["ARMED"],
-        experienceCategories: ["Retail security"],
+        experienceCategories: ["Retail Security"],
         experienceYears: "4",
         licenses: [
           {

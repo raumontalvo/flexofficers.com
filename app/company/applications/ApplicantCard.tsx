@@ -9,7 +9,7 @@ import {
 import { OfficerLicensesList } from "@/components/licenses/officer-licenses-list";
 import type { OfficerLicenseSnapshot } from "@/lib/officer-licenses";
 import { LICENSE_DISPLAY_DISCLAIMER } from "@/lib/officer-licenses";
-import { formatArmedStatuses } from "@/lib/profile-options";
+import { formatArmedStatuses, normalizeExperienceCategories } from "@/lib/profile-options";
 import { formatHourlyRate, formatShiftDateTime } from "@/lib/format-shift";
 import ApplicationStatusButtons from "./ApplicationStatusButtons";
 
@@ -150,7 +150,10 @@ export function ApplicantCard({
       </div>
 
       <TagList label="Certifications" values={certifications} />
-      <TagList label="Experience categories" values={experienceCategories} />
+      <TagList
+        label="Experience categories"
+        values={normalizeExperienceCategories(experienceCategories)}
+      />
 
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">

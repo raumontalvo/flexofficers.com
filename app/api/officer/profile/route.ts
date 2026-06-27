@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { normalizeExperienceCategories } from "@/lib/profile-options";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   parseOfficerPayload,
@@ -152,6 +153,10 @@ export async function POST(req: Request) {
   }
 
   try {
+    const experienceCategories = normalizeExperienceCategories(
+      parsed.data.experienceCategories
+    );
+
     const result = await prisma.$transaction(async (tx) => {
       const user = existingUser
         ? await tx.user.update({
@@ -184,7 +189,7 @@ export async function POST(req: Request) {
           experienceYears: parsed.data.experienceYears,
           availability: parsed.data.availability,
           certifications: parsed.data.certifications,
-          experienceCategories: parsed.data.experienceCategories,
+          experienceCategories,
           introduction: parsed.data.introduction,
           licenseCertificationAccepted: parsed.data.licenseCertificationAccepted,
         },
@@ -199,7 +204,7 @@ export async function POST(req: Request) {
           experienceYears: parsed.data.experienceYears,
           availability: parsed.data.availability,
           certifications: parsed.data.certifications,
-          experienceCategories: parsed.data.experienceCategories,
+          experienceCategories,
           introduction: parsed.data.introduction,
           licenseCertificationAccepted: parsed.data.licenseCertificationAccepted,
         },

@@ -3,6 +3,8 @@ import {
   AVAILABILITY_OPTIONS,
   CERTIFICATION_OPTIONS,
   EXPERIENCE_CATEGORIES,
+  getExperienceCategoryFilterValues,
+  type ExperienceCategory,
 } from "@/lib/profile-options";
 
 export type OfficerSearchFilters = {
@@ -11,7 +13,7 @@ export type OfficerSearchFilters = {
   minExperienceYears?: number;
   certification?: string;
   availability?: string;
-  experienceCategory?: string;
+  experienceCategory?: ExperienceCategory;
 };
 
 type SearchParamValue = string | string[] | undefined;
@@ -79,7 +81,7 @@ export function parseOfficerSearchFilters(
     experienceCategory &&
     isAllowedOption(experienceCategory, EXPERIENCE_CATEGORIES)
   ) {
-    filters.experienceCategory = experienceCategory;
+    filters.experienceCategory = experienceCategory as ExperienceCategory;
   }
 
   return filters;
@@ -130,9 +132,14 @@ export function buildOfficerSearchWhere(
   }
 
   if (filters.experienceCategory) {
-    where.experienceCategories = {
-      has: filters.experienceCategory,
-    };
+    const filterValues = getExperienceCategoryFilterValues(
+      filters.experienceCategory
+    );
+
+    where.experienceCategories =
+      filterValues.length === 1
+        ? { has: filterValues[0] }
+        : { hasSome: filterValues };
   }
 
   return where;

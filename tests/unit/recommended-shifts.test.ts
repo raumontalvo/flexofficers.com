@@ -32,7 +32,7 @@ describe("rankRecommendedShifts", () => {
       ],
       {
         armedStatuses: ["ARMED"],
-        experienceCategories: ["Retail security"],
+        experienceCategories: ["Retail Security"],
       },
       { now: new Date("2026-06-26T12:00:00.000Z") }
     );

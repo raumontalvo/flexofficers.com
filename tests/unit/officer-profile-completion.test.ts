@@ -35,7 +35,7 @@ describe("officer profile completion", () => {
       getProfileCompletionPercent({
         phone: "555-0100",
         armedStatuses: ["ARMED"],
-        experienceCategories: ["Retail security"],
+        experienceCategories: ["Retail Security"],
         experienceYears: 4,
         licenses: [completeLicense],
       })

@@ -1,4 +1,25 @@
 export const EXPERIENCE_CATEGORIES = [
+  "Retail Security",
+  "Event Security",
+  "Construction Site Security",
+  "Residential Security",
+  "Corporate Office Security",
+  "Warehouse Security",
+  "Hospital Security",
+  "School Security",
+  "Night Patrol",
+  "Access Control",
+  "CCTV / Monitoring",
+  "Crowd Control",
+  "Executive Protection",
+  "K9 Security",
+  "Military",
+  "Law Enforcement",
+  "Corrections / Prison Guard",
+] as const;
+
+/** Legacy values kept for validation of existing profiles not yet migrated. */
+export const LEGACY_EXPERIENCE_CATEGORIES = [
   "Retail security",
   "Event security",
   "Construction site security",
@@ -13,10 +34,6 @@ export const EXPERIENCE_CATEGORIES = [
   "Crowd control",
   "Executive protection",
   "K9 security",
-] as const;
-
-/** Legacy values kept for validation of migrated/existing profiles. */
-export const LEGACY_EXPERIENCE_CATEGORIES = [
   "Apartment Communities",
   "Gated Communities",
   "Construction Sites",
@@ -25,15 +42,49 @@ export const LEGACY_EXPERIENCE_CATEGORIES = [
   "Hospital",
   "School",
   "Hotel",
-  "Event Security",
   "Bar / Nightclub",
   "Corporate Office",
   "Warehouse",
   "Fire Watch",
   "Patrol",
-  "Executive Protection",
   "Loss Prevention",
 ] as const;
+
+export const EXPERIENCE_CATEGORY_MIGRATION_MAP: Record<
+  string,
+  ExperienceCategory
+> = {
+  "Retail security": "Retail Security",
+  "Event security": "Event Security",
+  "Construction site security": "Construction Site Security",
+  "Residential security": "Residential Security",
+  "Corporate office security": "Corporate Office Security",
+  "Warehouse security": "Warehouse Security",
+  "Hospital security": "Hospital Security",
+  "School security": "School Security",
+  "Night patrol": "Night Patrol",
+  "Access control": "Access Control",
+  "CCTV / monitoring": "CCTV / Monitoring",
+  "Crowd control": "Crowd Control",
+  "Executive protection": "Executive Protection",
+  "K9 security": "K9 Security",
+  "Apartment Communities": "Residential Security",
+  "Gated Communities": "Residential Security",
+  "Construction Sites": "Construction Site Security",
+  Retail: "Retail Security",
+  "Shopping Mall": "Retail Security",
+  Hospital: "Hospital Security",
+  School: "School Security",
+  "Event Security": "Event Security",
+  "Bar / Nightclub": "Crowd Control",
+  "Corporate Office": "Corporate Office Security",
+  Warehouse: "Warehouse Security",
+  "Fire Watch": "Construction Site Security",
+  Patrol: "Night Patrol",
+  "Executive Protection": "Executive Protection",
+  "Loss Prevention": "Retail Security",
+  Hotel: "Corporate Office Security",
+};
 
 export const ALL_EXPERIENCE_CATEGORIES = [
   ...EXPERIENCE_CATEGORIES,
@@ -68,6 +119,40 @@ export type ExperienceCategory = (typeof EXPERIENCE_CATEGORIES)[number];
 export type ArmedStatusOption = (typeof ARMED_STATUS_OPTIONS)[number];
 export type CertificationOption = (typeof CERTIFICATION_OPTIONS)[number];
 export type AvailabilityOption = (typeof AVAILABILITY_OPTIONS)[number];
+
+const experienceCategorySet = new Set<string>(EXPERIENCE_CATEGORIES);
+
+export function normalizeExperienceCategory(value: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  if (experienceCategorySet.has(trimmed)) {
+    return trimmed;
+  }
+
+  return EXPERIENCE_CATEGORY_MIGRATION_MAP[trimmed] ?? trimmed;
+}
+
+export function normalizeExperienceCategories(values: readonly string[]): string[] {
+  const normalized = values
+    .map(normalizeExperienceCategory)
+    .filter((value) => value.length > 0);
+
+  return [...new Set(normalized)];
+}
+
+export function getExperienceCategoryFilterValues(
+  category: ExperienceCategory
+): string[] {
+  const aliases = Object.entries(EXPERIENCE_CATEGORY_MIGRATION_MAP)
+    .filter(([, canonical]) => canonical === category)
+    .map(([legacy]) => legacy);
+
+  return [category, ...aliases];
+}
 
 export function formatArmedStatusLabel(status: ArmedStatusOption) {
   return status === "ARMED" ? "Armed" : "Unarmed";

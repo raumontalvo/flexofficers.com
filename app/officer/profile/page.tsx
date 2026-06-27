@@ -4,6 +4,7 @@ import { requirePageRole } from "@/lib/page-rbac";
 import { officerProfilePageUserSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
 import type { ArmedStatusOption } from "@/lib/profile-options";
+import { normalizeExperienceCategories } from "@/lib/profile-options";
 import OfficerProfileForm from "./OfficerProfileForm";
 
 export const dynamic = "force-dynamic";
@@ -67,7 +68,9 @@ export default async function OfficerProfilePage() {
     licenses: initialLicenses,
     availability: officer?.availability ?? [],
     certifications: officer?.certifications ?? [],
-    experienceCategories: officer?.experienceCategories ?? [],
+    experienceCategories: normalizeExperienceCategories(
+      officer?.experienceCategories ?? []
+    ),
     introduction: officer?.introduction ?? "",
     licenseCertificationAccepted: officer?.licenseCertificationAccepted ?? false,
   };

@@ -4,7 +4,10 @@ import {
   ProfileAvatar,
   StatusBadge,
 } from "@/components/ui";
-import { formatArmedStatuses } from "@/lib/profile-options";
+import {
+  formatArmedStatuses,
+  normalizeExperienceCategories,
+} from "@/lib/profile-options";
 
 type OfficerSearchCardProps = {
   firstName: string;
@@ -102,7 +105,10 @@ export function OfficerSearchCard({
 
       <TagList label="Certifications" values={certifications} />
       <TagList label="Availability" values={availability} />
-      <TagList label="Experience categories" values={experienceCategories} />
+      <TagList
+        label="Experience categories"
+        values={normalizeExperienceCategories(experienceCategories)}
+      />
 
       {introduction ? (
         <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">

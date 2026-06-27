@@ -12,7 +12,7 @@ const partialForm = {
   city: "Miami",
   armedStatuses: ["ARMED"],
   experienceYears: "4",
-  experienceCategories: ["Retail security"],
+  experienceCategories: ["Retail Security"],
   licenses: [
     {
       licenseType: "",

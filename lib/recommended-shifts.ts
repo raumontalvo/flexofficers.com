@@ -1,4 +1,5 @@
 import type { ArmedStatus, ShiftStatus } from "@/app/generated/prisma/enums";
+import { normalizeExperienceCategories } from "@/lib/profile-options";
 
 export type RecommendedShiftInput = {
   id: string;
@@ -128,7 +129,7 @@ export function rankRecommendedShifts(
       matchScore += scoreArmedStatusMatch(shiftText, officer.armedStatuses);
       matchScore += scoreExperienceMatch(
         shiftText,
-        officer.experienceCategories
+        normalizeExperienceCategories(officer.experienceCategories)
       );
     }
 

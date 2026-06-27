@@ -13,7 +13,7 @@ describe("parseOfficerSearchFilters", () => {
       minExperienceYears: "3",
       certification: "CPR / First Aid",
       availability: "Night Shift",
-      experienceCategory: "Hospital security",
+      experienceCategory: "Hospital Security",
     });
 
     expect(filters).toEqual({
@@ -22,7 +22,7 @@ describe("parseOfficerSearchFilters", () => {
       minExperienceYears: 3,
       certification: "CPR / First Aid",
       availability: "Night Shift",
-      experienceCategory: "Hospital security",
+      experienceCategory: "Hospital Security",
     });
   });
 
@@ -46,7 +46,7 @@ describe("buildOfficerSearchWhere", () => {
       minExperienceYears: 2,
       certification: "Taser",
       availability: "Weekends",
-      experienceCategory: "Retail security",
+      experienceCategory: "Retail Security",
     });
 
     expect(where).toEqual({
@@ -70,7 +70,7 @@ describe("buildOfficerSearchWhere", () => {
         has: "Weekends",
       },
       experienceCategories: {
-        has: "Retail security",
+        hasSome: expect.arrayContaining(["Retail Security", "Retail security"]),
       },
     });
   });
