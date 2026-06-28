@@ -32,6 +32,7 @@ export type CompanyBillingPageData = {
   invoices: SerializedStripeInvoice[];
   stripeConnected: boolean;
   stripeBillingReady: boolean;
+  hasValidStripeCustomer: boolean;
   features: readonly string[];
 };
 
@@ -89,6 +90,7 @@ export function serializeCompanyBillingPageData(input: {
   company: CompanyBillingSource;
   stripeConnected: boolean;
   stripeBillingReady: boolean;
+  hasValidStripeCustomer: boolean;
   paymentMethod?: SerializedStripePaymentMethod | null;
   invoices?: SerializedStripeInvoice[];
   now?: Date;
@@ -117,6 +119,7 @@ export function serializeCompanyBillingPageData(input: {
     invoices: input.invoices ?? [],
     stripeConnected: input.stripeConnected,
     stripeBillingReady: input.stripeBillingReady,
+    hasValidStripeCustomer: input.hasValidStripeCustomer,
     features: COMPANY_ANNUAL_PLAN_FEATURES,
   };
 }

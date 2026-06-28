@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedCompanyForBilling } from "@/lib/company-billing-auth";
-import { ensureStripeCustomer } from "@/lib/company-billing-customer";
+import {
+  ensureStripeCustomerForCheckout,
+  requireValidStripeCustomer,
+} from "@/lib/company-billing-customer";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   getAppUrl,
@@ -50,39 +53,6 @@ async function requireBillingAuth(request: Request, bucket: string) {
   return auth;
 }
 
-async function requireStripeCustomer(
-  auth: Exclude<Awaited<ReturnType<typeof requireBillingAuth>>, NextResponse>
-) {
-  const stripe = getStripeClient();
-
-  if (!stripe) {
-    return {
-      error: NextResponse.json(
-        { error: "Stripe billing is not configured." },
-        { status: 503 }
-      ),
-    };
-  }
-
-  const customerId = await ensureStripeCustomer({
-    companyId: auth.company.id,
-    companyName: auth.company.companyName,
-    stripeCustomerId: auth.company.stripeCustomerId,
-    email: auth.user.email,
-  });
-
-  if (!customerId) {
-    return {
-      error: NextResponse.json(
-        { error: "Unable to create Stripe customer." },
-        { status: 500 }
-      ),
-    };
-  }
-
-  return { stripe, customerId };
-}
-
 export async function createStripeCheckoutSession(request: Request) {
   try {
     const authOrResponse = await requireBillingAuth(request, "stripe-checkout");
@@ -91,22 +61,30 @@ export async function createStripeCheckoutSession(request: Request) {
       return authOrResponse;
     }
 
-    const customerResult = await requireStripeCustomer(authOrResponse);
-
-    if ("error" in customerResult) {
-      return customerResult.error;
-    }
-
+    const stripe = getStripeClient();
     const priceId = getStripePriceId();
 
-    if (!priceId) {
+    if (!stripe || !priceId) {
       return NextResponse.json(
         { error: "Stripe billing is not configured." },
         { status: 503 }
       );
     }
 
-    const { stripe, customerId } = customerResult;
+    const customerId = await ensureStripeCustomerForCheckout({
+      companyId: authOrResponse.company.id,
+      companyName: authOrResponse.company.companyName,
+      stripeCustomerId: authOrResponse.company.stripeCustomerId,
+      email: authOrResponse.user.email,
+    });
+
+    if (!customerId) {
+      return NextResponse.json(
+        { error: "Unable to create Stripe customer." },
+        { status: 500 }
+      );
+    }
+
     const appUrl = getAppUrl();
     const metadata = {
       clerkUserId: authOrResponse.clerkUserId,
@@ -151,13 +129,30 @@ export async function createStripePortalSession(request: Request) {
       return authOrResponse;
     }
 
-    const customerResult = await requireStripeCustomer(authOrResponse);
+    const stripe = getStripeClient();
 
-    if ("error" in customerResult) {
-      return customerResult.error;
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe billing is not configured." },
+        { status: 503 }
+      );
     }
 
-    const { stripe, customerId } = customerResult;
+    const customerId = await requireValidStripeCustomer({
+      companyId: authOrResponse.company.id,
+      stripeCustomerId: authOrResponse.company.stripeCustomerId,
+    });
+
+    if (!customerId) {
+      return NextResponse.json(
+        {
+          error:
+            "No Stripe billing account is connected yet. Start a subscription first.",
+        },
+        { status: 400 }
+      );
+    }
+
     const returnUrl = `${getRequestOrigin(request)}/company/billing`;
 
     const session = await stripe.billingPortal.sessions.create({
@@ -189,13 +184,30 @@ export async function createStripePaymentMethodSession(request: Request) {
       return authOrResponse;
     }
 
-    const customerResult = await requireStripeCustomer(authOrResponse);
+    const stripe = getStripeClient();
 
-    if ("error" in customerResult) {
-      return customerResult.error;
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe billing is not configured." },
+        { status: 503 }
+      );
     }
 
-    const { stripe, customerId } = customerResult;
+    const customerId = await requireValidStripeCustomer({
+      companyId: authOrResponse.company.id,
+      stripeCustomerId: authOrResponse.company.stripeCustomerId,
+    });
+
+    if (!customerId) {
+      return NextResponse.json(
+        {
+          error:
+            "No Stripe billing account is connected yet. Start a subscription first.",
+        },
+        { status: 400 }
+      );
+    }
+
     const returnUrl = `${getRequestOrigin(request)}/company/billing`;
 
     const session = await stripe.billingPortal.sessions.create({

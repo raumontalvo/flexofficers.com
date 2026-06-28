@@ -10,6 +10,7 @@ import {
   SectionHeading,
 } from "@/components/ui";
 import { serializeCompanyBillingPageData } from "@/lib/company-billing-page-data";
+import { resolveCompanyStripeCustomer } from "@/lib/company-billing-customer";
 import { fetchCompanyStripeBillingDetails } from "@/lib/company-billing-stripe";
 import { companyDashboardSelect } from "@/lib/officer-fields";
 import { requirePageRole } from "@/lib/page-rbac";
@@ -69,14 +70,21 @@ export default async function CompanyBillingPage() {
         priceId: process.env.STRIPE_PRICE_ID,
       });
 
-    const stripeDetails = company.stripeCustomerId
-      ? await fetchCompanyStripeBillingDetails(company.stripeCustomerId)
-      : null;
+    const stripeCustomer = await resolveCompanyStripeCustomer({
+      companyId: company.id,
+      stripeCustomerId: company.stripeCustomerId,
+    });
+
+    const stripeDetails =
+      stripeCustomer.isValid && stripeCustomer.customerId
+        ? await fetchCompanyStripeBillingDetails(stripeCustomer.customerId)
+        : null;
 
     const billing = serializeCompanyBillingPageData({
       company,
       stripeConnected,
       stripeBillingReady,
+      hasValidStripeCustomer: stripeCustomer.isValid,
       paymentMethod: stripeDetails?.paymentMethod ?? null,
       invoices: stripeDetails?.invoices ?? [],
     });

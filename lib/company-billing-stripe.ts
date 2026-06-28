@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import { COMPANY_ANNUAL_PLAN } from "@/lib/company-billing-plan";
+import { isStripeMissingCustomerError } from "@/lib/stripe-customer-errors";
 import { getStripeClient } from "@/lib/stripe";
 
 export type SerializedStripePaymentMethod = {
@@ -138,7 +139,14 @@ export async function fetchCompanyStripeBillingDetails(stripeCustomerId: string)
       paymentMethod,
       invoices,
     };
-  } catch {
+  } catch (error) {
+    if (isStripeMissingCustomerError(error)) {
+      return {
+        paymentMethod: null,
+        invoices: [] as SerializedStripeInvoice[],
+      };
+    }
+
     return {
       paymentMethod: null,
       invoices: [] as SerializedStripeInvoice[],

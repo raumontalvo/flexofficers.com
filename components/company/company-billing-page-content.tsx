@@ -91,10 +91,32 @@ function StripeUnavailableNote() {
   );
 }
 
+function StripeConnectPrompt() {
+  return (
+    <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-4">
+      <p className="text-sm text-fo-text">
+        No Stripe billing account is connected yet. Start a subscription to set
+        up billing in this environment.
+      </p>
+      <div className="mt-4">
+        <StripeBillingAction
+          action="checkout"
+          label="Start Subscription Now"
+          fullWidth
+        />
+      </div>
+    </div>
+  );
+}
+
 export function CompanyBillingPageContent({
   billing,
 }: CompanyBillingPageContentProps) {
   const showRenewal = Boolean(billing.nextRenewal);
+  const canManageStripeBilling =
+    billing.stripeBillingReady && billing.hasValidStripeCustomer;
+  const showStartSubscriptionPrompt =
+    billing.stripeBillingReady && !billing.hasValidStripeCustomer && !billing.isOnTrial;
 
   return (
     <div className="space-y-6">
@@ -179,7 +201,7 @@ export function CompanyBillingPageContent({
             ) : null}
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {billing.stripeBillingReady ? (
+              {canManageStripeBilling ? (
                 <>
                   <StripeBillingAction
                     action="portal"
@@ -211,6 +233,12 @@ export function CompanyBillingPageContent({
                 </>
               )}
             </div>
+
+            {showStartSubscriptionPrompt ? (
+              <div className="mt-4">
+                <StripeConnectPrompt />
+              </div>
+            ) : null}
 
             {!billing.stripeBillingReady ? (
               <div className="mt-4">
@@ -318,7 +346,7 @@ export function CompanyBillingPageContent({
                     <StatusBadge variant="success">Default</StatusBadge>
                   </div>
                 </div>
-                {billing.stripeBillingReady ? (
+                {canManageStripeBilling ? (
                   <StripeBillingLink label="Update Payment Method" />
                 ) : (
                   <StripeBillingLink label="Update Payment Method" disabled />
@@ -327,11 +355,13 @@ export function CompanyBillingPageContent({
             ) : (
               <div className="space-y-4">
                 <p className="text-sm text-fo-text-muted">
-                  {billing.stripeConnected
+                  {billing.hasValidStripeCustomer
                     ? "No payment method on file."
-                    : "Payment method details will appear here once Stripe is connected."}
+                    : billing.stripeConnected
+                      ? "Start a subscription to add a payment method."
+                      : "Payment method details will appear here once Stripe is connected."}
                 </p>
-                {billing.stripeBillingReady ? (
+                {canManageStripeBilling ? (
                   <StripeBillingLink label="Update Payment Method" />
                 ) : (
                   <StripeBillingLink label="Update Payment Method" disabled />

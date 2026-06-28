@@ -29,6 +29,7 @@ describe("company billing page data", () => {
       company,
       stripeConnected: false,
       stripeBillingReady: false,
+      hasValidStripeCustomer: false,
       now,
     });
 
@@ -55,10 +56,12 @@ describe("company billing page data", () => {
       company,
       stripeConnected: true,
       stripeBillingReady: true,
+      hasValidStripeCustomer: true,
       now,
     });
 
     expect(billing.status).toBe("active");
+    expect(billing.hasValidStripeCustomer).toBe(true);
     expect(billing.statusLabel).toBe("Active");
     expect(billing.isOnTrial).toBe(false);
     expect(billing.autoRenewalEnabled).toBe(true);
@@ -81,6 +84,7 @@ describe("company billing page data", () => {
       company,
       stripeConnected: false,
       stripeBillingReady: false,
+      hasValidStripeCustomer: false,
       now,
     });
 
@@ -104,6 +108,7 @@ describe("company billing page data", () => {
       company,
       stripeConnected: true,
       stripeBillingReady: true,
+      hasValidStripeCustomer: true,
       paymentMethod: {
         brand: "Visa",
         last4: "4242",
