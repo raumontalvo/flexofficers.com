@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   ApplicantsIcon,
-  ReportsIcon,
   SearchIcon,
   ShiftsIcon,
 } from "@/components/nav/icons";
@@ -29,13 +28,6 @@ const actions = [
     description: "Search and review officer profiles.",
     icon: SearchIcon,
     iconClassName: "bg-emerald-500/20 text-emerald-300",
-  },
-  {
-    href: "/company/reports",
-    title: "View Reports",
-    description: "Track operations and staffing activity.",
-    icon: ReportsIcon,
-    iconClassName: "bg-amber-500/20 text-amber-300",
   },
 ] as const;
 

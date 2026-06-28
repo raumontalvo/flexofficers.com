@@ -8,7 +8,6 @@ import {
   InvitesIcon,
   NotificationsIcon,
   ProfileIcon,
-  ReportsIcon,
   SearchIcon,
   SettingsIcon,
   ShiftsIcon,
@@ -165,15 +164,9 @@ export const companySidebarItems: NavItem[] = [
   },
   {
     href: "/company/billing",
-    label: "Billing & Plans",
+    label: "Billing & Plan",
     icon: BillingIcon,
     match: (pathname) => pathname.startsWith("/company/billing"),
-  },
-  {
-    href: "/company/reports",
-    label: "Reports",
-    icon: ReportsIcon,
-    match: (pathname) => pathname.startsWith("/company/reports"),
   },
   {
     href: "/company/settings",
@@ -218,6 +211,8 @@ export const companyNavItems: NavItem[] = [
     href: "/company/settings",
     label: "Settings",
     icon: SettingsIcon,
-    match: (pathname) => pathname.startsWith("/company/settings"),
+    match: (pathname) =>
+      pathname.startsWith("/company/settings") ||
+      pathname.startsWith("/company/billing"),
   },
 ];

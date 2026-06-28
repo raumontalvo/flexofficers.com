@@ -3,6 +3,7 @@ import {
   AccountSettingsContent,
   COMPANY_PRIVACY_ITEMS,
 } from "@/components/settings/account-settings-content";
+import { CompanyMobileSettingsLinks } from "@/components/settings/company-mobile-settings-links";
 import { PageShell, SectionHeading } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 
@@ -19,6 +20,7 @@ export default async function CompanySettingsPage() {
       />
 
       <div className="mt-8">
+        <CompanyMobileSettingsLinks />
         <AccountSettingsContent
           privacyItems={COMPANY_PRIVACY_ITEMS}
           deleteDescription="This action will permanently delete your account and all associated data, including your company profile, shifts, and applicant records. This action cannot be undone."
