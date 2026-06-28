@@ -97,44 +97,51 @@ export async function fetchCompanyStripeBillingDetails(stripeCustomerId: string)
     return null;
   }
 
-  const customer = await stripe.customers.retrieve(stripeCustomerId, {
-    expand: ["invoice_settings.default_payment_method"],
-  });
+  try {
+    const customer = await stripe.customers.retrieve(stripeCustomerId, {
+      expand: ["invoice_settings.default_payment_method"],
+    });
 
-  if (customer.deleted) {
+    if (customer.deleted) {
+      return {
+        paymentMethod: null,
+        invoices: [] as SerializedStripeInvoice[],
+      };
+    }
+
+    const defaultPaymentMethod =
+      customer.invoice_settings?.default_payment_method;
+
+    const paymentMethod =
+      defaultPaymentMethod && typeof defaultPaymentMethod !== "string"
+        ? serializePaymentMethod(defaultPaymentMethod)
+        : null;
+
+    const invoiceList = await stripe.invoices.list({
+      customer: stripeCustomerId,
+      limit: 12,
+    });
+
+    const invoices = invoiceList.data.map((invoice) => ({
+      id: invoice.id,
+      date: formatInvoiceDate(invoice.created),
+      description: COMPANY_ANNUAL_PLAN.invoiceDescription,
+      status: formatInvoiceStatus(invoice.status),
+      amount: formatInvoiceAmount(
+        invoice.amount_paid || invoice.amount_due,
+        invoice.currency
+      ),
+      downloadUrl: invoice.invoice_pdf ?? null,
+    }));
+
+    return {
+      paymentMethod,
+      invoices,
+    };
+  } catch {
     return {
       paymentMethod: null,
       invoices: [] as SerializedStripeInvoice[],
     };
   }
-
-  const defaultPaymentMethod =
-    customer.invoice_settings?.default_payment_method;
-
-  const paymentMethod =
-    defaultPaymentMethod && typeof defaultPaymentMethod !== "string"
-      ? serializePaymentMethod(defaultPaymentMethod)
-      : null;
-
-  const invoiceList = await stripe.invoices.list({
-    customer: stripeCustomerId,
-    limit: 12,
-  });
-
-  const invoices = invoiceList.data.map((invoice) => ({
-    id: invoice.id,
-    date: formatInvoiceDate(invoice.created),
-    description: COMPANY_ANNUAL_PLAN.invoiceDescription,
-    status: formatInvoiceStatus(invoice.status),
-    amount: formatInvoiceAmount(
-      invoice.amount_paid || invoice.amount_due,
-      invoice.currency
-    ),
-    downloadUrl: invoice.invoice_pdf ?? null,
-  }));
-
-  return {
-    paymentMethod,
-    invoices,
-  };
 }
