@@ -40,7 +40,8 @@ export default async function CompanyDashboard({
     : company.companyName?.trim() || firstName?.trim() || "there";
   const now = new Date();
 
-  const [shifts, applications, invitedCount] = await Promise.all([
+  const [shifts, applications, invitedCount, unreadNotificationCount] =
+    await Promise.all([
     prisma.shift.findMany({
       where: {
         companyId: company.id,
@@ -101,6 +102,12 @@ export default async function CompanyDashboard({
         },
       },
     }),
+    prisma.notification.count({
+      where: {
+        userId: company.userId,
+        read: false,
+      },
+    }),
   ]);
 
   const shiftStats = getCompanyShiftStats(shifts, now);
@@ -126,6 +133,7 @@ export default async function CompanyDashboard({
         <CompanyDashboardHeader
           displayName={displayName}
           canPostShifts={canPostShifts}
+          unreadNotificationCount={unreadNotificationCount}
         />
 
         <CompanySummaryCards

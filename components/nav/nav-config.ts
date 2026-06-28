@@ -146,6 +146,12 @@ export const companySidebarItems: NavItem[] = [
     match: (pathname) => pathname.startsWith("/company/applications"),
   },
   {
+    href: "/company/notifications",
+    label: "Notifications",
+    icon: NotificationsIcon,
+    match: (pathname) => pathname.startsWith("/company/notifications"),
+  },
+  {
     href: "/company/officers",
     label: "Search Officers",
     icon: SearchIcon,

@@ -97,7 +97,7 @@ export default async function CompanyShiftsPage() {
               href="/shifts/create"
               className={buttonClassName({ size: "md" })}
             >
-              + Post a Shift
+              Post a Shift
             </Link>
           ) : (
             <Link

@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import {
-  FlexOfficersBadge,
   FlexOfficersBadgeLink,
   FlexOfficersLogoLink,
 } from "@/components/brand";
 import { OfficerSidebar } from "@/components/dashboard/officer-sidebar";
 import { CompanySidebar } from "@/components/dashboard/company-sidebar";
+import { MobileDashboardHeader } from "@/components/dashboard/mobile-dashboard-header";
 import { cn } from "@/lib/cn";
 import {
   MobileBottomNav,
@@ -55,15 +54,7 @@ export function PageShell({
         <div className="relative flex min-h-screen min-w-0 flex-col md:pl-[250px]">
           <div className="fo-dashboard-glow pointer-events-none fixed inset-y-0 right-0 left-0 md:left-[250px]" aria-hidden="true" />
 
-          <header className="relative border-b border-white/[0.06] px-4 py-4 md:hidden">
-            <Link href="/dashboard" className="inline-flex items-center gap-3">
-              <FlexOfficersBadge height={56} transparent priority />
-              <span className="text-lg font-bold tracking-tight">
-                <span className="text-fo-primary-bright">Flex</span>
-                <span className="text-slate-100">Officers</span>
-              </span>
-            </Link>
-          </header>
+          <MobileDashboardHeader role={nav} />
 
           <main
             className={cn(

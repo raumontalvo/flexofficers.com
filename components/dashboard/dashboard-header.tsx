@@ -69,7 +69,7 @@ export function DashboardHeader({
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href="/officer/notifications"
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#070f1c]/60 text-fo-text-muted transition hover:border-fo-primary-bright/35 hover:text-fo-primary-hover"
+            className="hidden h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#070f1c]/60 text-fo-text-muted transition hover:border-fo-primary-bright/35 hover:text-fo-primary-hover md:flex"
             aria-label="Notifications"
           >
             <NotificationsIcon className="h-4 w-4" />
