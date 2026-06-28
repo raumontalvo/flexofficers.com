@@ -173,6 +173,9 @@ export const companyDashboardSelect = {
   verified: true,
   subscriptionStatus: true,
   subscriptionCurrentPeriodEnd: true,
+  trialStartedAt: true,
+  trialEndsAt: true,
+  accessStatus: true,
   stripeCustomerId: true,
   stripeSubscriptionId: true,
   createdAt: true,
@@ -203,16 +206,22 @@ export const dashboardUserSelect = {
   },
 } satisfies Prisma.UserSelect;
 
-export const adminOfficerLicenseSelect = {
+export const adminOfficerSelect = {
   id: true,
   firstName: true,
   lastName: true,
+  phone: true,
   city: true,
   state: true,
+  profilePhotoUrl: true,
+  armedStatuses: true,
+  licenseCertificationAccepted: true,
+  createdAt: true,
   updatedAt: true,
   user: {
     select: {
       email: true,
+      createdAt: true,
     },
   },
   licenses: {
@@ -221,8 +230,83 @@ export const adminOfficerLicenseSelect = {
       createdAt: "asc" as const,
     },
   },
+  applications: {
+    select: {
+      status: true,
+      appliedAt: true,
+      shift: {
+        select: {
+          company: {
+            select: {
+              companyName: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      appliedAt: "desc" as const,
+    },
+  },
+  _count: {
+    select: {
+      applications: true,
+    },
+  },
 } satisfies Prisma.OfficerSelect;
 
-export type AdminOfficerLicenseRecord = Prisma.OfficerGetPayload<{
-  select: typeof adminOfficerLicenseSelect;
+export type AdminOfficerRecord = Prisma.OfficerGetPayload<{
+  select: typeof adminOfficerSelect;
 }>;
+
+/** @deprecated Use adminOfficerSelect */
+export const adminOfficerLicenseSelect = adminOfficerSelect;
+
+/** @deprecated Use AdminOfficerRecord */
+export type AdminOfficerLicenseRecord = AdminOfficerRecord;
+
+export const adminCompanySelect = {
+  id: true,
+  companyName: true,
+  contactName: true,
+  phone: true,
+  email: true,
+  website: true,
+  address: true,
+  logoUrl: true,
+  city: true,
+  state: true,
+  verified: true,
+  accessStatus: true,
+  trialStartedAt: true,
+  trialEndsAt: true,
+  trialExtendedAt: true,
+  trialExtendedByAdminId: true,
+  trialExtensionReason: true,
+  subscriptionStatus: true,
+  subscriptionCurrentPeriodEnd: true,
+  stripeCustomerId: true,
+  stripeSubscriptionId: true,
+  createdAt: true,
+  updatedAt: true,
+  user: {
+    select: {
+      email: true,
+    },
+  },
+  _count: {
+    select: {
+      shifts: true,
+    },
+  },
+} satisfies Prisma.CompanySelect;
+
+export type AdminCompanyRecord = Prisma.CompanyGetPayload<{
+  select: typeof adminCompanySelect;
+}>;
+
+/** @deprecated Use adminCompanySelect */
+export const adminCompanyTrialSelect = adminCompanySelect;
+
+/** @deprecated Use AdminCompanyRecord */
+export type AdminCompanyTrialRecord = AdminCompanyRecord;

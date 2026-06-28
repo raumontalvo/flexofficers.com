@@ -57,6 +57,12 @@ enum CompanySubscriptionStatus {
   CANCELED
 }
 
+enum CompanyAccessStatus {
+  TRIAL
+  ACTIVE
+  EXPIRED
+}
+
 enum LicenseVerificationStatus {
   PENDING
   VERIFIED
@@ -147,6 +153,12 @@ model Company {
   subscriptionCurrentPeriodEnd DateTime?
   stripeCustomerId           String?                   @unique
   stripeSubscriptionId       String?                   @unique
+  trialStartedAt             DateTime?
+  trialEndsAt                DateTime?
+  accessStatus               CompanyAccessStatus       @default(TRIAL)
+  trialExtendedAt            DateTime?
+  trialExtendedByAdminId     String?
+  trialExtensionReason       String?
   createdAt                  DateTime                  @default(now())
   updatedAt                  DateTime                  @updatedAt
 

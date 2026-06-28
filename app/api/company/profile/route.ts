@@ -7,6 +7,7 @@ import {
   type CompanyProfilePayload,
 } from "./validation";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { getDefaultTrialFields } from "@/lib/company-trial";
 
 export async function POST(req: Request) {
   const clerkUser = await currentUser();
@@ -98,6 +99,8 @@ export async function POST(req: Request) {
         },
       });
 
+  const trialDefaults = getDefaultTrialFields();
+
   const company = await prisma.company.upsert({
     where: {
       userId: user.id,
@@ -120,6 +123,9 @@ export async function POST(req: Request) {
       address: parsed.data.address,
       website: parsed.data.website,
       logoUrl: parsed.data.logoUrl,
+      trialStartedAt: trialDefaults.trialStartedAt,
+      trialEndsAt: trialDefaults.trialEndsAt,
+      accessStatus: trialDefaults.accessStatus,
     },
   });
 

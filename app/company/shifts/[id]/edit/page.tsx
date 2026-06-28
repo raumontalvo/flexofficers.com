@@ -1,28 +1,17 @@
-import { UserRole } from "@/app/generated/prisma/enums";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PageShell, SectionHeading } from "@/components/ui";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { buttonClassName, PageShell } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import {
   fromShiftArmedRequirement,
-  fromShiftTimeType,
   fromShiftWorkType,
 } from "@/lib/shift-form-options";
-import { parseShiftRequirementChips } from "@/lib/shift-requirements";
+import { shiftToPostShiftFormValues } from "@/lib/shift-create-form";
 import EditShiftForm from "./EditShiftForm";
 
 export const dynamic = "force-dynamic";
-
-function toDateTimeLocalValue(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
 
 export default async function EditCompanyShiftPage({
   params,
@@ -47,61 +36,79 @@ export default async function EditCompanyShiftPage({
     notFound();
   }
 
-  const knownRequirements = new Set([
-    "D License",
-    "G License",
-    "K9",
-    "Firearms",
-    "CPR",
-    "AED",
-  ]);
-  const parsedRequirements = parseShiftRequirementChips(shift.specialRequirements, 20);
-  const requirements =
-    shift.requirements.length > 0
-      ? shift.requirements
-      : parsedRequirements.filter((entry) => knownRequirements.has(entry));
-  const otherRequirements =
-    shift.otherRequirements ??
-    (shift.requirements.length === 0
-      ? parsedRequirements.filter((entry) => !knownRequirements.has(entry)).join(", ")
-      : "");
-
-  const initialForm = {
+  const initialForm = shiftToPostShiftFormValues({
     title: shift.title,
-    description: shift.description ?? "",
-    city: shift.city ?? "",
-    state: shift.state ?? "",
+    description: shift.description,
     location: shift.location,
-    startTime: toDateTimeLocalValue(shift.startTime),
-    endTime: toDateTimeLocalValue(shift.endTime),
-    hourlyRate: shift.hourlyRate.toString(),
+    city: shift.city,
+    state: shift.state,
+    startTime: shift.startTime,
+    endTime: shift.endTime,
+    hourlyRate: shift.hourlyRate,
     workType: fromShiftWorkType(shift.workType),
-    shiftTimeType: fromShiftTimeType(shift.shiftTimeType),
+    requirements: shift.requirements,
+    otherRequirements: shift.otherRequirements,
     armedRequirement: fromShiftArmedRequirement(shift.armedRequirement),
-    requirements,
-    otherRequirements,
-    reportingInstructions: shift.reportingInstructions ?? "",
-    positionsNeeded: String(shift.positionsNeeded),
-  };
+    positionsNeeded: shift.positionsNeeded,
+  });
 
   return (
-    <PageShell nav="company" maxWidth="lg">
-      <Link
-        href="/company/shifts"
-        className="inline-flex min-h-11 items-center text-sm font-medium text-fo-primary-hover hover:text-fo-primary-bright"
-      >
-        ← Back to Manage Shifts
-      </Link>
+    <PageShell nav="company" maxWidth="full" sidebar>
+      <div className="space-y-5">
+        <nav
+          aria-label="Breadcrumb"
+          className="text-sm text-fo-text-muted"
+        >
+          <ol className="flex flex-wrap items-center gap-1.5">
+            <li>
+              <Link
+                href="/dashboard"
+                className="transition hover:text-fo-primary-hover"
+              >
+                Dashboard
+              </Link>
+            </li>
+            <li aria-hidden="true">&gt;</li>
+            <li>
+              <Link
+                href="/company/shifts"
+                className="transition hover:text-fo-primary-hover"
+              >
+                My Shifts
+              </Link>
+            </li>
+            <li aria-hidden="true">&gt;</li>
+            <li className="font-medium text-fo-text">Edit Shift</li>
+          </ol>
+        </nav>
 
-      <div className="mt-4">
-        <SectionHeading
-          title="Edit Shift"
-          subtitle="Update this shift posting for your company."
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-fo-text sm:text-3xl">
+              Edit Shift
+            </h1>
+            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-fo-text-muted">
+              Update the details below and save your changes.
+            </p>
+          </div>
+
+          <Link
+            href="/company/shifts"
+            className={buttonClassName({
+              variant: "secondary",
+              size: "md",
+              className: "shrink-0 self-start",
+            })}
+          >
+            Back to My Shifts
+          </Link>
+        </div>
+
+        <EditShiftForm
+          shiftId={shift.id}
+          initialForm={initialForm}
+          reportingInstructions={shift.reportingInstructions}
         />
-      </div>
-
-      <div className="mt-8">
-        <EditShiftForm shiftId={shift.id} initialForm={initialForm} />
       </div>
     </PageShell>
   );

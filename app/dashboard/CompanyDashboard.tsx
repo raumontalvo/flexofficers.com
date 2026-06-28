@@ -1,251 +1,166 @@
-import Link from "next/link";
 import type { Prisma } from "@/app/generated/prisma/client";
 import { companyDashboardSelect } from "@/lib/officer-fields";
+import { PageShell } from "@/components/ui";
+import { CompanyApplicationsDonut } from "@/components/dashboard/company-applications-donut";
+import { CompanyDashboardHeader } from "@/components/dashboard/company-dashboard-header";
+import { CompanyProfileCompletionBanner } from "@/components/dashboard/company-profile-completion-banner";
+import type { CompanyProfileCompletion } from "@/lib/company-profile-completion";
+import { CompanyQuickActions } from "@/components/dashboard/company-quick-actions";
+import { CompanyRecentApplications } from "@/components/dashboard/company-recent-applications";
+import { CompanyShiftsTable } from "@/components/dashboard/company-shifts-table";
+import { CompanySummaryCards } from "@/components/dashboard/company-summary-cards";
+import { CompanyUpcomingShifts } from "@/components/dashboard/company-upcoming-shifts";
+import { ApplicationStatus } from "@/app/generated/prisma/enums";
+import { canCompanyPostNewShifts } from "@/lib/company-access";
 import {
-  ApplicationStatus,
-  ShiftStatus,
-} from "@/app/generated/prisma/enums";
-import {
-  buttonClassName,
-  Card,
-  CardDescription,
-  CardTitle,
-  PageShell,
-  SectionHeading,
-  StatCard,
-  StatusBadge,
-} from "@/components/ui";
-import {
-  formatCompanySubscriptionStatus,
-  isCompanySubscriptionActive,
-} from "@/lib/company-subscription";
+  getCompanyApplicationStats,
+  getCompanyShiftStats,
+  getFilledShiftsThisMonth,
+  getUpcomingConfirmedShifts,
+  serializeCompanyDashboardShift,
+} from "@/lib/company-dashboard-data";
+import { formatArmedStatuses } from "@/lib/profile-options";
 import { prisma } from "@/lib/prisma";
-import DashboardSignOutButton from "./SignOutButton";
 
 type CompanyDashboardProps = {
   firstName?: string | null;
   company: Prisma.CompanyGetPayload<{ select: typeof companyDashboardSelect }>;
-  missingItems: string[];
+  profileCompletion: CompanyProfileCompletion;
 };
-
-function QuickActionCard({
-  href,
-  title,
-  description,
-  highlight = false,
-}: {
-  href: string;
-  title: string;
-  description: string;
-  highlight?: boolean;
-}) {
-  return (
-    <Link href={href} className="block h-full">
-      <Card
-        variant={highlight ? "elevated" : "default"}
-        className="h-full transition hover:border-fo-border-strong hover:bg-fo-surface-hover"
-      >
-        <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
-        <CardDescription className="mt-2 text-sm leading-relaxed">
-          {description}
-        </CardDescription>
-      </Card>
-    </Link>
-  );
-}
 
 export default async function CompanyDashboard({
   firstName,
   company,
-  missingItems,
+  profileCompletion,
 }: CompanyDashboardProps) {
-  const subscriptionActive = isCompanySubscriptionActive(company);
-  const subscriptionLabel = formatCompanySubscriptionStatus(
-    company.subscriptionStatus
-  );
-  const periodEnd = company.subscriptionCurrentPeriodEnd
-    ? company.subscriptionCurrentPeriodEnd.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null;
+  const canPostShifts = canCompanyPostNewShifts(company);
+  const displayName = profileCompletion.isComplete
+    ? company.companyName.trim()
+    : company.companyName?.trim() || firstName?.trim() || "there";
+  const now = new Date();
 
-  const [openShiftsCount, pendingApplicantsCount, acceptedApplicantsCount, filledShiftsCount] =
-    await Promise.all([
-      prisma.shift.count({
-        where: {
-          companyId: company.id,
-          status: ShiftStatus.OPEN,
-        },
-      }),
-      prisma.application.count({
-        where: {
-          status: ApplicationStatus.PENDING,
-          shift: {
-            companyId: company.id,
+  const [shifts, applications] = await Promise.all([
+    prisma.shift.findMany({
+      where: {
+        companyId: company.id,
+      },
+      select: {
+        id: true,
+        title: true,
+        location: true,
+        city: true,
+        state: true,
+        startTime: true,
+        endTime: true,
+        status: true,
+        positionsNeeded: true,
+        applications: {
+          select: {
+            status: true,
           },
         },
-      }),
-      prisma.application.count({
-        where: {
-          status: ApplicationStatus.ACCEPTED,
-          shift: {
-            companyId: company.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    prisma.application.findMany({
+      where: {
+        shift: {
+          companyId: company.id,
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        appliedAt: true,
+        shift: {
+          select: {
+            title: true,
           },
         },
-      }),
-      prisma.shift.count({
-        where: {
-          companyId: company.id,
-          status: ShiftStatus.FILLED,
+        officer: {
+          select: {
+            firstName: true,
+            lastName: true,
+            armedStatuses: true,
+          },
         },
-      }),
-    ]);
+      },
+      orderBy: {
+        appliedAt: "desc",
+      },
+      take: 20,
+    }),
+  ]);
+
+  const shiftStats = getCompanyShiftStats(shifts, now);
+  const applicationStats = getCompanyApplicationStats(applications);
+  const filledThisMonth = getFilledShiftsThisMonth(shifts, now);
+  const upcomingShifts = getUpcomingConfirmedShifts(shifts, now);
+  const serializedShifts = shifts.map(serializeCompanyDashboardShift);
 
   return (
-    <PageShell nav="company" maxWidth="6xl" sidebar>
-      <div className="flex items-start justify-between gap-4">
-        <SectionHeading
-          title={`Welcome${firstName ? `, ${firstName}` : ""}`}
-          subtitle="Your workforce control center for shifts, applicants, and confirmed officers."
-          className="flex-1"
-        />
-        <DashboardSignOutButton />
-      </div>
-
-      <div className="mt-8 space-y-4">
-        {missingItems.length > 0 ? (
-          <Card className="border-yellow-500/20 bg-fo-pending-bg">
-            <CardTitle className="text-lg text-fo-pending">
-              Complete your company profile
-            </CardTitle>
-            <CardDescription className="mt-2 text-fo-text">
-              Finish these items so your account is ready:
-            </CardDescription>
-            <ul className="mt-4 space-y-2 text-sm text-fo-text">
-              {missingItems.map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-fo-pending" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/company/profile"
-              className={buttonClassName({
-                variant: "secondary",
-                size: "md",
-                className: "mt-5 border-yellow-500/30 text-fo-pending hover:bg-yellow-500/10",
-              })}
-            >
-              Complete Profile
-            </Link>
-          </Card>
+    <PageShell nav="company" maxWidth="full" sidebar>
+      <div className="space-y-5">
+        {!profileCompletion.isComplete ? (
+          <CompanyProfileCompletionBanner
+            completionPercent={profileCompletion.completionPercent}
+            missingItems={profileCompletion.missingItems}
+          />
         ) : null}
 
-        <Card variant="elevated" className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle className="text-lg">Subscription</CardTitle>
-              <CardDescription className="mt-1">
-                {subscriptionActive
-                  ? "Your subscription is active. You can post new shifts."
-                  : "Activate a subscription to post new shifts."}
-              </CardDescription>
-            </div>
-            <StatusBadge variant={subscriptionActive ? "success" : "info"}>
-              {subscriptionLabel}
-            </StatusBadge>
-          </div>
+        <CompanyDashboardHeader
+          displayName={displayName}
+          canPostShifts={canPostShifts}
+        />
 
-          {periodEnd ? (
-            <p className="text-sm text-fo-text-muted">
-              Current period ends {periodEnd}
-            </p>
-          ) : null}
+        <CompanySummaryCards
+          shiftStats={shiftStats}
+          applicationStats={applicationStats}
+          filledThisMonth={filledThisMonth}
+          upcomingConfirmedCount={upcomingShifts.length}
+        />
 
-          {!subscriptionActive ? (
-            <p className="text-sm leading-relaxed text-fo-text-muted">
-              Existing shifts, applicants, and officer search stay available
-              without a subscription.
-            </p>
-          ) : null}
-        </Card>
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard
-            label="Open Shifts"
-            value={openShiftsCount}
-            hint="Currently accepting applicants"
-          />
-          <StatCard
-            label="Pending Applicants"
-            value={pendingApplicantsCount}
-            hint="Waiting for your review"
-          />
-          <StatCard
-            label="Accepted / Filled"
-            value={acceptedApplicantsCount}
-            hint={
-              filledShiftsCount > 0
-                ? `${filledShiftsCount} shift${filledShiftsCount === 1 ? "" : "s"} filled`
-                : "Accepted applicants across your shifts"
-            }
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <CompanyShiftsTable shifts={serializedShifts} />
+          <CompanyUpcomingShifts
+            shifts={upcomingShifts.map((shift) => ({
+              id: shift.id,
+              title: shift.title,
+              startTime: shift.startTime.toISOString(),
+              city: shift.city,
+              state: shift.state,
+              location: shift.location,
+              openPositions: Math.max(
+                shift.positionsNeeded -
+                  shift.applications.filter(
+                    (application) =>
+                      application.status === ApplicationStatus.ACCEPTED
+                  ).length,
+                0
+              ),
+            }))}
           />
         </div>
 
-        {subscriptionActive ? (
-          <Link
-            href="/shifts/create"
-            className={buttonClassName({ fullWidth: true, className: "w-full" })}
-          >
-            Post a Shift
-          </Link>
-        ) : (
-          <Link
-            href="/company/billing"
-            className={buttonClassName({ fullWidth: true, className: "w-full" })}
-          >
-            Subscribe to Post Shifts
-          </Link>
-        )}
-
-        <div>
-          <h2 className="text-lg font-semibold text-fo-text">Quick actions</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <QuickActionCard
-              href="/company/shifts"
-              title="Open Shifts"
-              description="Post, edit, and manage shifts your company has open."
-            />
-            <QuickActionCard
-              href="/company/applications"
-              title="Applicants"
-              description="Review pending applications and accept officers."
-            />
-            <QuickActionCard
-              href="/company/accepted-officers"
-              title="Accepted Officers"
-              description="Manage confirmed officers and staffing progress by shift."
-            />
-            <QuickActionCard
-              href="/company/completed-shifts"
-              title="Completed Shifts"
-              description="Review past assignments and cancelled shift history."
-            />
-            <QuickActionCard
-              href="/company/profile"
-              title="Company Profile"
-              description="Update company contact info and profile details."
-            />
-            <QuickActionCard
-              href="/company/billing"
-              title="Billing"
-              description="View subscription status and billing details."
-              highlight={!subscriptionActive}
-            />
-          </div>
+        <div className="grid gap-5 lg:grid-cols-3">
+          <CompanyApplicationsDonut
+            newCount={applicationStats.new}
+            reviewedCount={applicationStats.reviewed}
+            withdrawnCount={applicationStats.withdrawn}
+          />
+          <CompanyQuickActions canPostShifts={canPostShifts} />
+          <CompanyRecentApplications
+            applications={applications.slice(0, 5).map((application) => ({
+              id: application.id,
+              officerName:
+                `${application.officer.firstName} ${application.officer.lastName}`.trim(),
+              officerType: formatArmedStatuses(application.officer.armedStatuses),
+              status: application.status,
+              shiftTitle: application.shift.title,
+            }))}
+          />
         </div>
       </div>
     </PageShell>

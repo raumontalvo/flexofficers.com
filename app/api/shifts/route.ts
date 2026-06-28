@@ -1,7 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { isCompanySubscriptionActive } from "@/lib/company-subscription";
+import { canCompanyPostNewShifts, getCompanyPostingBlockMessage } from "@/lib/company-access";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { parseShiftPayload, type ShiftPayload } from "./validation";
 
@@ -52,11 +52,12 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!isCompanySubscriptionActive(company)) {
+    if (!canCompanyPostNewShifts(company)) {
       return NextResponse.json(
         {
           error:
-            "An active annual subscription is required to post new shifts.",
+            getCompanyPostingBlockMessage(company) ??
+            "An active subscription or trial is required to post new shifts.",
         },
         { status: 403 }
       );

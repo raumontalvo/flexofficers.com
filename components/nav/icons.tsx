@@ -128,3 +128,29 @@ export function SettingsIcon(props: IconProps) {
     </IconBase>
   );
 }
+
+export function CompaniesIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <rect x="4" y="3" width="16" height="18" rx="2" />
+      <path d="M9 8h2M13 8h2M9 12h2M13 12h2M9 16h6" />
+    </IconBase>
+  );
+}
+
+export function ReportsIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M5 19V9M10 19V5M15 19v-7M20 19V3" />
+    </IconBase>
+  );
+}
+
+export function AuditIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M8 6h13M8 12h13M8 18h13" />
+      <path d="M3 6h.01M3 12h.01M3 18h.01" />
+    </IconBase>
+  );
+}

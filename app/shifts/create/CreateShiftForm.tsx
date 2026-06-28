@@ -1,37 +1,73 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui";
-import { ShiftFormFields, emptyShiftForm } from "../ShiftFormFields";
+import {
+  buildShiftApiPayload,
+  emptyPostShiftForm,
+  type PostShiftFormValues,
+} from "@/lib/shift-create-form";
+import { PostShiftForm } from "@/components/shifts/post-shift-form";
+import { PostShiftSummaryPanel } from "@/components/shifts/post-shift-summary-panel";
 
 export default function CreateShiftForm() {
-  const [form, setForm] = useState(emptyShiftForm);
+  const router = useRouter();
+  const [form, setForm] = useState<PostShiftFormValues>(emptyPostShiftForm);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit() {
+    setErrorMessage(null);
 
-    const response = await fetch("/api/shifts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+    const built = buildShiftApiPayload(form);
 
-    if (response.ok) {
-      alert("Shift created!");
-    } else {
-      alert("Failed to create shift");
+    if (!("payload" in built)) {
+      setErrorMessage(built.error);
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/shifts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(built.payload),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json().catch(() => null)) as {
+          error?: string;
+          details?: string[];
+        } | null;
+        const details = data?.details?.join(", ");
+        throw new Error(
+          details || data?.error || "Failed to create shift. Check required fields."
+        );
+      }
+
+      router.push("/company/shifts");
+      router.refresh();
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to create shift."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <ShiftFormFields form={form} onChange={setForm} />
-
-      <Button type="submit" fullWidth className="w-full">
-        Create Shift
-      </Button>
-    </form>
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <PostShiftForm form={form} onChange={setForm} />
+      <PostShiftSummaryPanel
+        form={form}
+        isSubmitting={isSubmitting}
+        errorMessage={errorMessage}
+        onSubmit={handleSubmit}
+      />
+    </div>
   );
 }

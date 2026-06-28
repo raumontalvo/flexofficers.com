@@ -25,3 +25,27 @@ export async function requirePageRole(role: UserRole) {
 
   return clerkUser;
 }
+
+export async function requireApiAdmin() {
+  const clerkUser = await currentUser();
+
+  if (!clerkUser) {
+    return null;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: {
+      clerkId: clerkUser.id,
+    },
+    select: {
+      id: true,
+      role: true,
+    },
+  });
+
+  if (user?.role !== UserRole.ADMIN) {
+    return null;
+  }
+
+  return user;
+}

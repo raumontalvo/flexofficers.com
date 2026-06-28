@@ -1,15 +1,19 @@
 import Link from "next/link";
-import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
+import { UserRole } from "@/app/generated/prisma/enums";
 import {
   buttonClassName,
   Card,
   PageShell,
   SectionHeading,
 } from "@/components/ui";
-import { isCompanySubscriptionActive } from "@/lib/company-subscription";
+import { MyShiftsTable } from "@/components/company/my-shifts-table";
+import {
+  canCompanyPostNewShifts,
+  getCompanyPostingBlockMessage,
+} from "@/lib/company-access";
+import { serializeCompanyShiftRow } from "@/lib/company-shifts-page";
 import { prisma } from "@/lib/prisma";
 import { requirePageRole } from "@/lib/page-rbac";
-import { CompanyShiftCard } from "./CompanyShiftCard";
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +28,10 @@ export default async function CompanyShiftsPage() {
     },
   });
 
-  const subscriptionActive = company
-    ? isCompanySubscriptionActive(company)
-    : false;
+  const canPostShifts = company ? canCompanyPostNewShifts(company) : false;
+  const postingBlockMessage = company
+    ? getCompanyPostingBlockMessage(company)
+    : null;
 
   const shifts = await prisma.shift.findMany({
     where: {
@@ -36,10 +41,20 @@ export default async function CompanyShiftsPage() {
         },
       },
     },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      location: true,
+      city: true,
+      state: true,
+      startTime: true,
+      endTime: true,
+      hourlyRate: true,
+      status: true,
+      positionsNeeded: true,
       applications: {
-        where: {
-          status: ApplicationStatus.ACCEPTED,
+        select: {
+          status: true,
         },
       },
     },
@@ -48,18 +63,20 @@ export default async function CompanyShiftsPage() {
     },
   });
 
+  const serializedShifts = shifts.map(serializeCompanyShiftRow);
+
   return (
     <PageShell nav="company" maxWidth="6xl" sidebar>
       <SectionHeading
-        title="Open Shifts"
-        subtitle="Track open, filled, and cancelled shifts."
+        title="My Shifts"
+        subtitle="Track, manage, and update your posted shifts."
         action={
-          subscriptionActive ? (
+          canPostShifts ? (
             <Link
               href="/shifts/create"
               className={buttonClassName({ size: "md" })}
             >
-              Post a Shift
+              + Post a Shift
             </Link>
           ) : (
             <Link
@@ -72,74 +89,29 @@ export default async function CompanyShiftsPage() {
         }
       />
 
-      <div className="mt-8 space-y-4">
-        {!subscriptionActive ? (
-          <Card variant="muted">
-            <p className="text-sm leading-relaxed text-fo-text-muted">
-              Your subscription is inactive. You can still manage existing
-              shifts, but posting new shifts requires an active subscription.
-            </p>
-            <Link
-              href="/company/billing"
-              className={buttonClassName({
-                variant: "secondary",
-                size: "md",
-                className: "mt-4",
-              })}
-            >
-              View Billing
-            </Link>
-          </Card>
-        ) : null}
+      {!canPostShifts ? (
+        <Card variant="muted" className="mt-6">
+          <p className="text-sm leading-relaxed text-fo-text-muted">
+            {postingBlockMessage ??
+              "Your trial or subscription is inactive. You can still manage existing shifts, but posting new shifts requires active access."}
+          </p>
+          <Link
+            href="/company/billing"
+            className={buttonClassName({
+              variant: "secondary",
+              size: "md",
+              className: "mt-4",
+            })}
+          >
+            View Billing
+          </Link>
+        </Card>
+      ) : null}
 
-        {shifts.length === 0 ? (
-          <Card variant="muted" className="text-center">
-            <p className="text-lg font-medium text-fo-text">
-              You have not posted any shifts yet.
-            </p>
-            <p className="mt-2 text-sm text-fo-text-muted">
-              Post your first shift to start receiving officer applications.
-            </p>
-            {subscriptionActive ? (
-              <Link
-                href="/shifts/create"
-                className={buttonClassName({
-                  fullWidth: true,
-                  className: "mt-6 w-full sm:w-auto",
-                })}
-              >
-                Post a Shift
-              </Link>
-            ) : (
-              <Link
-                href="/company/billing"
-                className={buttonClassName({
-                  fullWidth: true,
-                  className: "mt-6 w-full sm:w-auto",
-                })}
-              >
-                View Billing
-              </Link>
-            )}
-          </Card>
-        ) : (
-          shifts.map((shift) => (
-            <CompanyShiftCard
-              key={shift.id}
-              shiftId={shift.id}
-              title={shift.title}
-              hourlyRate={shift.hourlyRate}
-              location={shift.location}
-              startTime={shift.startTime}
-              endTime={shift.endTime}
-              positionsNeeded={shift.positionsNeeded}
-              filledCount={shift.applications.length}
-              specialRequirements={shift.specialRequirements}
-              status={shift.status}
-            />
-          ))
-        )}
-      </div>
+      <MyShiftsTable
+        shifts={serializedShifts}
+        canPostShifts={canPostShifts}
+      />
     </PageShell>
   );
 }

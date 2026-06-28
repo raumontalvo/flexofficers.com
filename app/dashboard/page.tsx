@@ -1,31 +1,12 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { dashboardUserSelect } from "@/lib/officer-fields";
+import { getCompanyProfileCompletion } from "@/lib/company-profile-completion";
 import { prisma } from "@/lib/prisma";
 import CompanyDashboard from "./CompanyDashboard";
 import { DashboardSetupState } from "./DashboardSetupState";
 import OfficerDashboard from "./OfficerDashboard";
-
-function getCompanyMissingItems(
-  company: {
-    companyName: string | null;
-    contactName: string | null;
-    phone: string | null;
-    email: string | null;
-    address: string | null;
-  } | null | undefined,
-  userEmail: string
-) {
-  return [
-    !company?.companyName ? "Add your company name" : null,
-    !company?.contactName ? "Add your contact person" : null,
-    !company?.phone ? "Add your company phone number" : null,
-    !company?.email && !userEmail ? "Add your company email" : null,
-    !company?.address ? "Add your company address" : null,
-  ].filter((item): item is string => Boolean(item));
-}
 
 export default async function DashboardPage() {
   const clerkUser = await currentUser();
@@ -64,11 +45,16 @@ export default async function DashboardPage() {
       );
     }
 
+    const profileCompletion = getCompanyProfileCompletion(
+      user.company,
+      user.email
+    );
+
     return (
       <CompanyDashboard
         firstName={clerkUser.firstName}
         company={user.company}
-        missingItems={getCompanyMissingItems(user.company, user.email)}
+        profileCompletion={profileCompletion}
       />
     );
   }
