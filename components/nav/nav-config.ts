@@ -5,6 +5,7 @@ import {
   BillingIcon,
   BrowseIcon,
   DashboardIcon,
+  InvitesIcon,
   NotificationsIcon,
   ProfileIcon,
   ReportsIcon,
@@ -34,6 +35,12 @@ export const officerNavItems: NavItem[] = [
     icon: BrowseIcon,
     match: (pathname) =>
       pathname === "/shifts" || pathname.startsWith("/shifts/"),
+  },
+  {
+    href: "/officer/invites",
+    label: "Invites",
+    icon: InvitesIcon,
+    match: (pathname) => pathname.startsWith("/officer/invites"),
   },
   {
     href: "/officer/applications",
@@ -68,6 +75,12 @@ export const officerSidebarItems: NavItem[] = [
     icon: BrowseIcon,
     match: (pathname) =>
       pathname === "/shifts" || pathname.startsWith("/shifts/"),
+  },
+  {
+    href: "/officer/invites",
+    label: "Company Invites",
+    icon: InvitesIcon,
+    match: (pathname) => pathname.startsWith("/officer/invites"),
   },
   {
     href: "/officer/applications",
@@ -134,7 +147,7 @@ export const companySidebarItems: NavItem[] = [
   },
   {
     href: "/company/officers",
-    label: "Officers",
+    label: "Search Officers",
     icon: SearchIcon,
     match: (pathname) => pathname.startsWith("/company/officers"),
   },
@@ -146,7 +159,7 @@ export const companySidebarItems: NavItem[] = [
   },
   {
     href: "/company/billing",
-    label: "Billing",
+    label: "Billing & Plans",
     icon: BillingIcon,
     match: (pathname) => pathname.startsWith("/company/billing"),
   },

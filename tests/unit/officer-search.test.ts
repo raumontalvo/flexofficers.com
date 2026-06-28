@@ -3,6 +3,7 @@ import { ArmedStatus } from "@/app/generated/prisma/enums";
 import {
   buildOfficerSearchWhere,
   parseOfficerSearchFilters,
+  resolveOfficerStateQuery,
 } from "@/lib/officer-search";
 
 describe("parseOfficerSearchFilters", () => {
@@ -20,9 +21,31 @@ describe("parseOfficerSearchFilters", () => {
       city: "Miami",
       armedStatuses: [ArmedStatus.ARMED],
       minExperienceYears: 3,
-      certification: "CPR / First Aid",
-      availability: "Night Shift",
+      certifications: ["CPR / First Aid"],
+      availabilities: ["Night Shift"],
       experienceCategory: "Hospital Security",
+    });
+  });
+
+  it("parses name, state, and multi-select filters", () => {
+    const filters = parseOfficerSearchFilters({
+      name: "Raul",
+      city: "Fort Myers",
+      state: "Florida",
+      background: ["Military", "K9"],
+      licenseType: "Armed Security",
+      certification: ["CPR / First Aid", "Taser"],
+      availability: ["Weekdays", "Days"],
+    });
+
+    expect(filters).toEqual({
+      name: "Raul",
+      city: "Fort Myers",
+      state: "Florida",
+      backgrounds: ["Military", "K9"],
+      licenseTypes: ["Armed Security"],
+      certifications: ["CPR / First Aid", "Taser"],
+      availabilities: ["Weekdays", "Days"],
     });
   });
 
@@ -32,9 +55,17 @@ describe("parseOfficerSearchFilters", () => {
       availability: "Invalid Availability",
       experienceCategory: "Invalid Category",
       armedStatuses: "maybe",
+      background: "Invalid Background",
     });
 
     expect(filters).toEqual({});
+  });
+});
+
+describe("resolveOfficerStateQuery", () => {
+  it("resolves state names and codes", () => {
+    expect(resolveOfficerStateQuery("Florida")).toBe("FL");
+    expect(resolveOfficerStateQuery("fl")).toBe("FL");
   });
 });
 
@@ -71,6 +102,33 @@ describe("buildOfficerSearchWhere", () => {
       },
       experienceCategories: {
         hasSome: expect.arrayContaining(["Retail Security", "Retail security"]),
+      },
+    });
+  });
+
+  it("builds where clauses for name and state filters", () => {
+    const where = buildOfficerSearchWhere({
+      name: "Raul",
+      state: "Florida",
+      backgrounds: ["Military"],
+      licenseTypes: ["Armed Security"],
+    });
+
+    expect(where).toMatchObject({
+      OR: [
+        { firstName: { contains: "Raul", mode: "insensitive" } },
+        { lastName: { contains: "Raul", mode: "insensitive" } },
+      ],
+      state: {
+        equals: "FL",
+        mode: "insensitive",
+      },
+      licenses: {
+        some: {
+          licenseType: {
+            in: ["Armed Security"],
+          },
+        },
       },
     });
   });

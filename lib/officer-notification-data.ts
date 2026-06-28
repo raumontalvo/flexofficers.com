@@ -117,6 +117,9 @@ function includesAny(text: string, phrases: string[]) {
 function inferNotificationMeta(title: string, message: string): InferredMeta {
   const text = `${title} ${message}`.toLowerCase();
 
+  if (includesAny(text, ["invited you", "company invite", "new company invite"])) {
+    return { category: "applications", kind: "application_status_updated" };
+  }
   if (includesAny(text, ["application accepted", "accepted your application"])) {
     return { category: "applications", kind: "application_accepted" };
   }
@@ -204,8 +207,16 @@ const KIND_ICON_VARIANTS: Record<NotificationKind, NotificationIconVariant> = {
 
 function inferPrimaryAction(
   kind: NotificationKind,
-  category: NotificationCategory
+  category: NotificationCategory,
+  title: string,
+  message: string
 ): OfficerNotificationData["primaryAction"] {
+  const text = `${title} ${message}`.toLowerCase();
+
+  if (includesAny(text, ["invited you", "new company invite", "company invite"])) {
+    return { label: "View Details", href: "/officer/invites" };
+  }
+
   if (kind === "new_shift_match") {
     return { label: "View Shift", href: "/shifts" };
   }
@@ -251,7 +262,7 @@ export function mapOfficerNotification(notification: {
     tone: KIND_TONES[kind],
     iconVariant: KIND_ICON_VARIANTS[kind],
     typeLabel: KIND_LABELS[kind],
-    primaryAction: inferPrimaryAction(kind, category),
+    primaryAction: inferPrimaryAction(kind, category, notification.title, notification.message),
   };
 }
 

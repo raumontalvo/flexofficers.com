@@ -37,6 +37,15 @@ export function ShiftsIcon(props: IconProps) {
   );
 }
 
+export function InvitesIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 7.5h16M4 12h10M4 16.5h7" />
+      <path d="M17.5 11.5 20 14l-4 4" />
+    </IconBase>
+  );
+}
+
 export function AcceptedIcon(props: IconProps) {
   return (
     <IconBase {...props}>

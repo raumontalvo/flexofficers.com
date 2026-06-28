@@ -6,16 +6,32 @@ import {
   ShiftStatus,
   UserRole,
 } from "@/app/generated/prisma/enums";
+import { ShiftDetailActions } from "@/components/shifts/shift-detail-actions";
 import {
-  buttonClassName,
   Card,
   PageShell,
   ShiftStatusBadge,
   StatusBadge,
 } from "@/components/ui";
-import { formatHourlyRate, formatShiftDateTime } from "@/lib/format-shift";
+import {
+  formatDisplayPhone,
+  companyHasPublicProfile,
+  formatTitleCase,
+  sanitizeDisplayValue,
+} from "@/lib/company-profile-page-data";
+import {
+  formatEstimatedShiftPay,
+  formatHourlyRate,
+  formatShiftCityState,
+  formatShiftDateTime,
+} from "@/lib/format-shift";
 import { prisma } from "@/lib/prisma";
-import ApplyButton from "../ApplyButton";
+import {
+  fromShiftArmedRequirement,
+  fromShiftTimeType,
+  fromShiftWorkType,
+} from "@/lib/shift-form-options";
+import { getShiftRequirementChips } from "@/lib/shift-requirements";
 
 export const dynamic = "force-dynamic";
 
@@ -39,13 +55,37 @@ export default async function ShiftDetailPage({
             status: ApplicationStatus.ACCEPTED,
           },
         },
-        company: true,
+        company: {
+          include: {
+            user: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
       },
     }),
     clerkUser
       ? prisma.user.findUnique({
           where: { clerkId: clerkUser.id },
-          select: { role: true },
+          select: {
+            role: true,
+            officer: {
+              select: {
+                id: true,
+                applications: {
+                  where: {
+                    shiftId: id,
+                  },
+                  select: {
+                    status: true,
+                  },
+                  take: 1,
+                },
+              },
+            },
+          },
         })
       : Promise.resolve(null),
   ]);
@@ -56,8 +96,41 @@ export default async function ShiftDetailPage({
 
   const filledCount = shift.applications.length;
   const openPositions = Math.max(shift.positionsNeeded - filledCount, 0);
+  const officerApplication = user?.officer?.applications[0] ?? null;
+  const applicationStatus = officerApplication?.status ?? null;
+  const isAcceptedOfficer = applicationStatus === ApplicationStatus.ACCEPTED;
+  const hasBlockingApplication =
+    applicationStatus === ApplicationStatus.PENDING ||
+    applicationStatus === ApplicationStatus.ACCEPTED;
+  const shiftAcceptingApplications = shift.status === ShiftStatus.OPEN;
   const canApply =
-    user?.role === UserRole.OFFICER && shift.status === ShiftStatus.OPEN;
+    user?.role === UserRole.OFFICER &&
+    shiftAcceptingApplications &&
+    !hasBlockingApplication;
+  const requirementChips = getShiftRequirementChips(shift, 20);
+  const locationLabel = formatShiftCityState(shift);
+  const estimatedPay = formatEstimatedShiftPay(
+    shift.hourlyRate,
+    shift.startTime,
+    shift.endTime
+  );
+  const workTypeLabel = fromShiftWorkType(shift.workType);
+  const shiftTimeLabel = fromShiftTimeType(shift.shiftTimeType);
+  const armedLabel = fromShiftArmedRequirement(shift.armedRequirement);
+  const displayCompanyName =
+    formatTitleCase(shift.company.companyName) ?? shift.company.companyName;
+  const hasPublicProfile = companyHasPublicProfile({
+    companyName: shift.company.companyName,
+    description: shift.company.description,
+    city: shift.company.city,
+    state: shift.company.state,
+    website: shift.company.website,
+  });
+  const companyContactEmail =
+    sanitizeDisplayValue(shift.company.email) ||
+    sanitizeDisplayValue(shift.company.user.email);
+  const companyContactPhone = formatDisplayPhone(shift.company.phone);
+  const companyContactName = sanitizeDisplayValue(shift.company.contactName);
 
   return (
     <PageShell nav="officer" maxWidth="lg" sidebar>
@@ -92,6 +165,10 @@ export default async function ShiftDetailPage({
                 /hr
               </span>
             </p>
+
+            <p className="text-sm font-medium text-fo-text-muted">
+              Estimated pay: {estimatedPay}
+            </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
@@ -102,6 +179,9 @@ export default async function ShiftDetailPage({
               <p className="mt-2 text-base font-medium text-fo-text">
                 {shift.location}
               </p>
+              {locationLabel ? (
+                <p className="mt-1 text-sm text-fo-text-muted">{locationLabel}</p>
+              ) : null}
             </div>
 
             <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
@@ -130,17 +210,67 @@ export default async function ShiftDetailPage({
                 {formatShiftDateTime(shift.endTime)}
               </p>
             </div>
+
+            {workTypeLabel ? (
+              <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
+                  Work type
+                </p>
+                <p className="mt-2 text-base font-medium text-fo-text">
+                  {workTypeLabel}
+                </p>
+              </div>
+            ) : null}
+
+            {shiftTimeLabel ? (
+              <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
+                  Shift time
+                </p>
+                <p className="mt-2 text-base font-medium text-fo-text">
+                  {shiftTimeLabel}
+                </p>
+              </div>
+            ) : null}
+
+            {armedLabel ? (
+              <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
+                  Armed requirement
+                </p>
+                <p className="mt-2 text-base font-medium text-fo-text">
+                  {armedLabel}
+                </p>
+              </div>
+            ) : null}
           </div>
         </Card>
 
         <Card className="space-y-3">
           <h2 className="text-lg font-semibold text-fo-text">Description</h2>
           <p className="whitespace-pre-wrap text-base leading-relaxed text-fo-text-muted">
-            {shift.description || "No description provided."}
+            {shift.description?.trim() || "No description provided."}
           </p>
         </Card>
 
-        {shift.specialRequirements ? (
+        {requirementChips.length > 0 ? (
+          <Card variant="muted" className="space-y-3">
+            <h2 className="text-lg font-semibold text-fo-text">Requirements</h2>
+            <ul className="flex flex-wrap gap-2">
+              {requirementChips.map((chip) => (
+                <li
+                  key={chip}
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-fo-text"
+                >
+                  {chip}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        ) : null}
+
+        {shift.specialRequirements?.trim() &&
+        requirementChips.length === 0 ? (
           <Card variant="muted" className="space-y-3">
             <h2 className="text-lg font-semibold text-fo-text">
               Special requirements
@@ -151,31 +281,74 @@ export default async function ShiftDetailPage({
           </Card>
         ) : null}
 
+        {isAcceptedOfficer && shift.reportingInstructions?.trim() ? (
+          <Card className="space-y-3">
+            <h2 className="text-lg font-semibold text-fo-text">
+              Reporting instructions
+            </h2>
+            <p className="whitespace-pre-wrap text-base leading-relaxed text-fo-text-muted">
+              {shift.reportingInstructions}
+            </p>
+          </Card>
+        ) : null}
+
         <Card className="space-y-3">
           <h2 className="text-lg font-semibold text-fo-text">Company</h2>
-          <p className="text-base font-medium text-fo-text">
-            {shift.company.companyName}
-          </p>
-          <p className="text-sm leading-relaxed text-fo-text-muted">
-            Company contact details are shared after your application is
-            accepted.
-          </p>
+          {hasPublicProfile ? (
+            <Link
+              href={`/companies/${shift.companyId}`}
+              className="text-base font-medium text-fo-primary-bright hover:text-fo-primary-hover"
+            >
+              {displayCompanyName}
+            </Link>
+          ) : (
+            <p className="text-base font-medium text-fo-text">{displayCompanyName}</p>
+          )}
+          {isAcceptedOfficer ? (
+            <dl className="space-y-2 text-sm text-fo-text-muted">
+              {companyContactName ? (
+                <div>
+                  <dt className="font-semibold text-fo-text">Contact</dt>
+                  <dd>{companyContactName}</dd>
+                </div>
+              ) : null}
+              {companyContactPhone ? (
+                <div>
+                  <dt className="font-semibold text-fo-text">Phone</dt>
+                  <dd>{companyContactPhone}</dd>
+                </div>
+              ) : null}
+              {companyContactEmail ? (
+                <div>
+                  <dt className="font-semibold text-fo-text">Email</dt>
+                  <dd>
+                    <a
+                      href={`mailto:${companyContactEmail}`}
+                      className="text-fo-primary-bright hover:text-fo-primary-hover"
+                    >
+                      {companyContactEmail}
+                    </a>
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          ) : (
+            <p className="text-sm leading-relaxed text-fo-text-muted">
+              Company contact details are shared after your application is
+              accepted.
+            </p>
+          )}
         </Card>
 
-        {canApply ? (
-          <ApplyButton shiftId={shift.id} />
-        ) : shift.status !== ShiftStatus.OPEN ? (
-          <div className="rounded-fo-card border border-fo-border bg-fo-neutral-bg px-5 py-4 text-center text-sm text-fo-text-muted">
-            This shift is no longer accepting applications.
-          </div>
-        ) : !clerkUser ? (
-          <Link
-            href="/sign-in"
-            className={buttonClassName({ fullWidth: true, className: "w-full" })}
-          >
-            Sign in to apply
-          </Link>
-        ) : null}
+        <ShiftDetailActions
+          shiftId={shift.id}
+          companyId={shift.companyId}
+          hasPublicProfile={hasPublicProfile}
+          canApply={canApply}
+          applicationStatus={applicationStatus}
+          isSignedIn={Boolean(clerkUser)}
+          shiftAcceptingApplications={shiftAcceptingApplications}
+        />
       </div>
     </PageShell>
   );

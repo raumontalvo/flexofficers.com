@@ -62,6 +62,7 @@ export const officerSearchCardSelect = {
   lastName: true,
   profilePhotoUrl: true,
   city: true,
+  state: true,
   armedStatuses: true,
   experienceYears: true,
   certifications: true,
@@ -69,6 +70,7 @@ export const officerSearchCardSelect = {
   experienceCategories: true,
   introduction: true,
   phone: true,
+  createdAt: true,
   licenses: {
     select: officerLicenseSelect,
     orderBy: {

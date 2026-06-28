@@ -12,6 +12,7 @@ import {
   getCompanyPostingBlockMessage,
 } from "@/lib/company-access";
 import { serializeCompanyShiftRow } from "@/lib/company-shifts-page";
+import { getShiftWorkforceMap } from "@/lib/shift-workforce";
 import { prisma } from "@/lib/prisma";
 import { requirePageRole } from "@/lib/page-rbac";
 
@@ -55,6 +56,25 @@ export default async function CompanyShiftsPage() {
       applications: {
         select: {
           status: true,
+          officer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+      },
+      shiftInvites: {
+        select: {
+          status: true,
+          officer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       },
     },
@@ -64,6 +84,7 @@ export default async function CompanyShiftsPage() {
   });
 
   const serializedShifts = shifts.map(serializeCompanyShiftRow);
+  const workforceByShiftId = getShiftWorkforceMap(shifts);
 
   return (
     <PageShell nav="company" maxWidth="6xl" sidebar>
@@ -110,6 +131,7 @@ export default async function CompanyShiftsPage() {
 
       <MyShiftsTable
         shifts={serializedShifts}
+        workforceByShiftId={workforceByShiftId}
         canPostShifts={canPostShifts}
       />
     </PageShell>

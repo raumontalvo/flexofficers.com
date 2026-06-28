@@ -1,14 +1,15 @@
 import { UserRole } from "@/app/generated/prisma/enums";
-import { Card, PageShell, SectionHeading } from "@/components/ui";
+import { CompanyOfficersPageContent } from "@/components/company/company-officers-page-content";
+import { PageShell, SectionHeading } from "@/components/ui";
+import { serializeOfficerSearchResult } from "@/lib/company-officers-page";
+import { officerSearchCardSelect } from "@/lib/officer-fields";
 import {
   buildOfficerSearchWhere,
   parseOfficerSearchFilters,
 } from "@/lib/officer-search";
-import { officerSearchCardSelect } from "@/lib/officer-fields";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
-import { OfficerSearchCard } from "./OfficerSearchCard";
-import { OfficerSearchFiltersForm } from "./OfficerSearchFiltersForm";
+import { INVITEABLE_SHIFT_STATUSES } from "@/lib/shift-fill-status";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export default async function CompanyOfficersPage({
   const params = await searchParams;
   const filters = parseOfficerSearchFilters(params);
 
-  const [officers, companyApplications] = await Promise.all([
+  const [officers, openShifts, invites] = await Promise.all([
     prisma.officer.findMany({
       where: buildOfficerSearchWhere(filters),
       select: {
@@ -36,7 +37,29 @@ export default async function CompanyOfficersPage({
       },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
     }),
-    prisma.application.findMany({
+    prisma.shift.findMany({
+      where: {
+        status: {
+          in: INVITEABLE_SHIFT_STATUSES,
+        },
+        company: {
+          user: {
+            clerkId: clerkUser.id,
+          },
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        city: true,
+        state: true,
+        startTime: true,
+      },
+      orderBy: {
+        startTime: "asc",
+      },
+    }),
+    prisma.shiftInvite.findMany({
       where: {
         shift: {
           company: {
@@ -47,65 +70,38 @@ export default async function CompanyOfficersPage({
         },
       },
       select: {
+        id: true,
         officerId: true,
+        shiftId: true,
+        status: true,
       },
     }),
   ]);
 
-  const contactVisibleOfficerIds = new Set(
-    companyApplications.map((application) => application.officerId)
-  );
-
+  const serializedOfficers = officers.map(serializeOfficerSearchResult);
   const hasActiveFilters = Object.keys(filters).length > 0;
+  const serializedOpenShifts = openShifts.map((shift) => ({
+    id: shift.id,
+    title: shift.title,
+    city: shift.city,
+    state: shift.state,
+    startTime: shift.startTime.toISOString(),
+  }));
 
   return (
-    <PageShell nav="company" maxWidth="2xl">
+    <PageShell nav="company" maxWidth="full" sidebar>
       <SectionHeading
-        title="Search Officers"
-        subtitle="Find officers by city, experience, and availability."
+        title="Officers"
+        subtitle="Find qualified officers near your shifts and invite them to apply."
       />
 
-      <div className="mt-8 space-y-4">
-        <OfficerSearchFiltersForm filters={filters} />
-
-        {officers.length === 0 ? (
-          <Card variant="muted" className="text-center">
-            <p className="text-lg font-medium text-fo-text">
-              No officers matched your search.
-            </p>
-            <p className="mt-2 text-sm text-fo-text-muted">
-              {hasActiveFilters
-                ? "Try adjusting your filters or clear them to browse all officer profiles."
-                : "Officer profiles will appear here as officers join the marketplace."}
-            </p>
-          </Card>
-        ) : (
-          <>
-            <p className="text-sm text-fo-text-muted">
-              {officers.length} officer{officers.length === 1 ? "" : "s"} found
-            </p>
-
-            {officers.map((officer) => (
-              <OfficerSearchCard
-                key={officer.id}
-                firstName={officer.firstName}
-                lastName={officer.lastName}
-                profilePhotoUrl={officer.profilePhotoUrl}
-                city={officer.city}
-                armedStatuses={officer.armedStatuses}
-                experienceYears={officer.experienceYears}
-                certifications={officer.certifications}
-                availability={officer.availability}
-                experienceCategories={officer.experienceCategories}
-                introduction={officer.introduction}
-                showContact={contactVisibleOfficerIds.has(officer.id)}
-                phone={officer.phone}
-                email={officer.user.email}
-              />
-            ))}
-          </>
-        )}
-      </div>
+      <CompanyOfficersPageContent
+        officers={serializedOfficers}
+        filters={filters}
+        hasActiveFilters={hasActiveFilters}
+        openShifts={serializedOpenShifts}
+        invites={invites}
+      />
     </PageShell>
   );
 }

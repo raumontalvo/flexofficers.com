@@ -3,6 +3,7 @@ import {
   type CompanyShiftRecord,
   getShiftApplicantCount,
   getShiftFilledCount,
+  isActiveCompanyShiftStatus,
 } from "@/lib/company-dashboard-data";
 import { formatShiftCityState } from "@/lib/format-shift";
 
@@ -97,7 +98,8 @@ export function serializeCompanyShiftRow(
 export function getCompanyShiftsTabCounts(shifts: SerializedCompanyShiftRow[]) {
   return {
     all: shifts.length,
-    open: shifts.filter((shift) => shift.status === ShiftStatus.OPEN).length,
+    open: shifts.filter((shift) => isActiveCompanyShiftStatus(shift.status))
+      .length,
     filled: shifts.filter((shift) => shift.status === ShiftStatus.FILLED).length,
     cancelled: shifts.filter(
       (shift) => shift.status === ShiftStatus.CANCELLED
@@ -111,7 +113,7 @@ export function filterCompanyShiftsByTab(
 ) {
   switch (tab) {
     case "open":
-      return shifts.filter((shift) => shift.status === ShiftStatus.OPEN);
+      return shifts.filter((shift) => isActiveCompanyShiftStatus(shift.status));
     case "filled":
       return shifts.filter((shift) => shift.status === ShiftStatus.FILLED);
     case "cancelled":

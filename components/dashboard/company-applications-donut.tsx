@@ -7,20 +7,20 @@ type DonutSegment = {
 };
 
 type CompanyApplicationsDonutProps = {
-  newCount: number;
-  reviewedCount: number;
-  withdrawnCount: number;
+  pendingCount: number;
+  invitedCount: number;
+  acceptedCount: number;
 };
 
 function buildSegments({
-  newCount,
-  reviewedCount,
-  withdrawnCount,
+  pendingCount,
+  invitedCount,
+  acceptedCount,
 }: CompanyApplicationsDonutProps): DonutSegment[] {
   return [
-    { label: "New", value: newCount, color: "#3b82f6" },
-    { label: "Reviewed", value: reviewedCount, color: "#10b981" },
-    { label: "Withdrawn", value: withdrawnCount, color: "#f59e0b" },
+    { label: "Pending", value: pendingCount, color: "#3b82f6" },
+    { label: "Invited", value: invitedCount, color: "#f59e0b" },
+    { label: "Accepted", value: acceptedCount, color: "#10b981" },
   ];
 }
 
@@ -81,8 +81,8 @@ export function CompanyApplicationsDonut(props: CompanyApplicationsDonutProps) {
         <div className="mt-6 flex flex-col items-center justify-center py-6 text-center">
           <DonutChart segments={segments} />
           <p className="mt-4 text-sm text-fo-text-muted">
-            Application activity will appear here once officers apply to your
-            shifts.
+            Application and invite activity will appear here once officers apply
+            or accept your invites.
           </p>
         </div>
       ) : (

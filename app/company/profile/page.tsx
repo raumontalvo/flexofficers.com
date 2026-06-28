@@ -1,8 +1,9 @@
-import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { PageShell, SectionHeading } from "@/components/ui";
+import { CompanyProfilePageContent } from "@/components/company/company-profile-page-content";
+import { PageShell } from "@/components/ui";
+import { serializeCompanyProfile } from "@/lib/company-profile-page-data";
 import { requirePageRole } from "@/lib/page-rbac";
-import CompanyProfileForm from "./CompanyProfileForm";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -20,26 +21,33 @@ export default async function CompanyProfilePage() {
 
   const company = user?.company;
 
-  const initialForm = {
-    logoUrl: company?.logoUrl ?? "",
-    companyName: company?.companyName ?? "",
-    contactName: company?.contactName ?? "",
-    phone: company?.phone ?? "",
-    email: company?.email ?? user?.email ?? clerkUser.emailAddresses[0]?.emailAddress ?? "",
-    address: company?.address ?? "",
-    website: company?.website ?? "",
-  };
+  if (!company) {
+    return (
+      <PageShell nav="company" maxWidth="full" sidebar>
+        <p className="text-sm text-fo-text-muted">Company profile not found.</p>
+      </PageShell>
+    );
+  }
+
+  const shifts = await prisma.shift.findMany({
+    where: {
+      companyId: company.id,
+    },
+    select: {
+      requirements: true,
+    },
+  });
+
+  const profile = serializeCompanyProfile({
+    company,
+    userEmail: user.email,
+    shifts,
+    showContactDetails: true,
+  });
 
   return (
-    <PageShell nav="company" maxWidth="6xl" sidebar>
-      <SectionHeading
-        title="Company Profile"
-        subtitle="Keep your company contact information ready for accepted officers."
-      />
-
-      <div className="mt-8">
-        <CompanyProfileForm initialForm={initialForm} />
-      </div>
+    <PageShell nav="company" maxWidth="full" sidebar>
+      <CompanyProfilePageContent profile={profile} />
     </PageShell>
   );
 }

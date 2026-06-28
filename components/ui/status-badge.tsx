@@ -68,8 +68,11 @@ export function ApplicationStatusBadge({
 
 const shiftStatusMap = {
   OPEN: "success",
+  INVITED: "pending",
+  PARTIALLY_FILLED: "info",
   FILLED: "neutral",
   CANCELLED: "rejected",
+  COMPLETED: "neutral",
 } as const satisfies Record<string, StatusBadgeVariant>;
 
 export function shiftStatusVariant(status: string): StatusBadgeVariant {
@@ -85,7 +88,7 @@ export function ShiftStatusBadge({
 }) {
   return (
     <StatusBadge variant={shiftStatusVariant(status)} className={className}>
-      {status}
+      {status.replaceAll("_", " ")}
     </StatusBadge>
   );
 }

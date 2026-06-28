@@ -59,6 +59,9 @@ function OverviewCard({
 function ShiftStatusBadge({ status }: { status: ShiftStatus }) {
   const styles = {
     [ShiftStatus.OPEN]: "border-green-500/25 bg-green-500/10 text-green-200",
+    [ShiftStatus.INVITED]: "border-amber-500/25 bg-amber-500/10 text-amber-200",
+    [ShiftStatus.PARTIALLY_FILLED]:
+      "border-blue-500/25 bg-blue-500/10 text-blue-100",
     [ShiftStatus.FILLED]: "border-blue-500/25 bg-blue-500/10 text-blue-100",
     [ShiftStatus.CANCELLED]: "border-red-500/20 bg-white/[0.04] text-fo-text-muted",
     [ShiftStatus.COMPLETED]: "border-blue-500/20 bg-white/[0.04] text-fo-text-muted",
@@ -71,7 +74,7 @@ function ShiftStatusBadge({ status }: { status: ShiftStatus }) {
         styles[status] ?? styles[ShiftStatus.COMPLETED]
       )}
     >
-      {status}
+      {status.replaceAll("_", " ")}
     </span>
   );
 }

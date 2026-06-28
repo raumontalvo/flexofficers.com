@@ -1,13 +1,14 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { getDefaultTrialFields } from "@/lib/company-trial";
+import { embedCompanyProfileMeta } from "@/lib/company-profile-meta";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   parseCompanyPayload,
   type CompanyProfilePayload,
 } from "./validation";
-import { UserRole } from "@/app/generated/prisma/enums";
-import { getDefaultTrialFields } from "@/lib/company-trial";
 
 export async function POST(req: Request) {
   const clerkUser = await currentUser();
@@ -100,6 +101,17 @@ export async function POST(req: Request) {
       });
 
   const trialDefaults = getDefaultTrialFields();
+  const storedDescription = embedCompanyProfileMeta(parsed.data.description, {
+    services: parsed.data.services,
+    officerBenefits: parsed.data.officerBenefits,
+    workEnvironment: parsed.data.workEnvironment,
+    businessHours: parsed.data.businessHours,
+    licenseIssueDate: parsed.data.licenseIssueDate,
+    licenseExpirationDate: parsed.data.licenseExpirationDate,
+    industry: parsed.data.industry ?? null,
+    companySize: parsed.data.companySize ?? null,
+    established: parsed.data.established ?? null,
+  });
 
   const company = await prisma.company.upsert({
     where: {
@@ -113,6 +125,12 @@ export async function POST(req: Request) {
       address: parsed.data.address,
       website: parsed.data.website,
       logoUrl: parsed.data.logoUrl,
+      city: parsed.data.city,
+      state: parsed.data.state,
+      description: storedDescription,
+      licenseType: parsed.data.licenseType,
+      licenseNumber: parsed.data.licenseNumber,
+      licenseState: parsed.data.licenseState,
     },
     create: {
       userId: user.id,
@@ -123,6 +141,12 @@ export async function POST(req: Request) {
       address: parsed.data.address,
       website: parsed.data.website,
       logoUrl: parsed.data.logoUrl,
+      city: parsed.data.city,
+      state: parsed.data.state,
+      description: storedDescription,
+      licenseType: parsed.data.licenseType,
+      licenseNumber: parsed.data.licenseNumber,
+      licenseState: parsed.data.licenseState,
       trialStartedAt: trialDefaults.trialStartedAt,
       trialEndsAt: trialDefaults.trialEndsAt,
       accessStatus: trialDefaults.accessStatus,

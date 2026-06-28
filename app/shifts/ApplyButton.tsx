@@ -2,9 +2,20 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
-export default function ApplyButton({ shiftId }: { shiftId: string }) {
-  const [hasApplied, setHasApplied] = useState(false);
+type ApplyButtonProps = {
+  shiftId: string;
+  initialHasApplied?: boolean;
+  className?: string;
+};
+
+export default function ApplyButton({
+  shiftId,
+  initialHasApplied = false,
+  className,
+}: ApplyButtonProps) {
+  const [hasApplied, setHasApplied] = useState(initialHasApplied);
   const [isLoading, setIsLoading] = useState(false);
 
   async function applyToShift() {
@@ -35,7 +46,7 @@ export default function ApplyButton({ shiftId }: { shiftId: string }) {
       onClick={applyToShift}
       disabled={isLoading || hasApplied}
       fullWidth
-      className="w-full"
+      className={cn("w-full", className)}
     >
       {hasApplied
         ? "Applied"

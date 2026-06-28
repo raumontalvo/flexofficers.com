@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
 import { ShiftRowActions } from "@/components/company/shift-row-actions";
+import { ShiftWorkforcePanel } from "@/components/company/shift-workforce-panel";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
 import {
   COMPANY_SHIFTS_PAGE_SIZE,
   filterCompanyShiftsByTab,
@@ -29,6 +31,7 @@ const TABS: { id: CompanyShiftsPageTab; label: string }[] = [
 
 type MyShiftsTableProps = {
   shifts: SerializedCompanyShiftRow[];
+  workforceByShiftId: Record<string, SerializedShiftWorkforce>;
   canPostShifts: boolean;
 };
 
@@ -70,6 +73,10 @@ function MyShiftStatusBadge({ status }: { status: ShiftStatus }) {
   const styles = {
     [ShiftStatus.OPEN]:
       "border-green-500/25 bg-green-500/10 text-green-200",
+    [ShiftStatus.INVITED]:
+      "border-amber-500/25 bg-amber-500/10 text-amber-200",
+    [ShiftStatus.PARTIALLY_FILLED]:
+      "border-blue-500/25 bg-blue-500/10 text-blue-100",
     [ShiftStatus.FILLED]:
       "border-blue-500/25 bg-blue-500/10 text-blue-100",
     [ShiftStatus.CANCELLED]:
@@ -85,7 +92,7 @@ function MyShiftStatusBadge({ status }: { status: ShiftStatus }) {
         styles[status] ?? styles[ShiftStatus.COMPLETED]
       )}
     >
-      {status}
+      {status.replaceAll("_", " ")}
     </span>
   );
 }
@@ -138,10 +145,15 @@ function EmptyShiftsState({ canPostShifts }: { canPostShifts: boolean }) {
   );
 }
 
-export function MyShiftsTable({ shifts, canPostShifts }: MyShiftsTableProps) {
+export function MyShiftsTable({
+  shifts,
+  workforceByShiftId,
+  canPostShifts,
+}: MyShiftsTableProps) {
   const [activeTab, setActiveTab] = useState<CompanyShiftsPageTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [expandedShiftId, setExpandedShiftId] = useState<string | null>(null);
 
   const tabCounts = useMemo(() => getCompanyShiftsTabCounts(shifts), [shifts]);
 
@@ -243,56 +255,77 @@ export function MyShiftsTable({ shifts, canPostShifts }: MyShiftsTableProps) {
                 const duration = formatShiftDurationLabel(startTime, endTime);
 
                 return (
-                  <tr
-                    key={shift.id}
-                    className="border-b border-white/[0.04] transition hover:bg-white/[0.03]"
-                  >
-                    <td className="px-4 py-4 align-middle">
-                      <MyShiftStatusBadge status={shift.status} />
-                    </td>
-                    <td className="px-4 py-4 align-middle">
-                      <p className="font-semibold text-fo-text">{shift.title}</p>
-                      <p className="mt-1 flex items-center gap-1.5 text-xs text-fo-text-muted">
-                        <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-                        <span className="truncate">
-                          {shift.locationSubtext
-                            ? `${shift.locationLabel} · ${shift.locationSubtext}`
-                            : shift.locationLabel}
+                  <Fragment key={shift.id}>
+                    <tr className="border-b border-white/[0.04] transition hover:bg-white/[0.03]">
+                      <td className="px-4 py-4 align-middle">
+                        <MyShiftStatusBadge status={shift.status} />
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        <p className="font-semibold text-fo-text">{shift.title}</p>
+                        <p className="mt-1 flex items-center gap-1.5 text-xs text-fo-text-muted">
+                          <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+                          <span className="truncate">
+                            {shift.locationSubtext
+                              ? `${shift.locationLabel} · ${shift.locationSubtext}`
+                              : shift.locationLabel}
+                          </span>
+                        </p>
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        <p className="text-fo-text">{formatShiftTableDate(startTime)}</p>
+                        <p className="mt-0.5 text-xs text-fo-text-muted">
+                          {formatShiftTime(startTime)} – {formatShiftTime(endTime)}
+                          {duration ? ` ${duration}` : ""}
+                        </p>
+                      </td>
+                      <td className="px-4 py-4 align-middle font-medium text-fo-text">
+                        {formatHourlyRate(shift.hourlyRate)}
+                        <span className="text-fo-text-muted">/hr</span>
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        <p className="font-medium text-fo-text">
+                          {shift.filledCount} / {shift.positionsNeeded}
+                        </p>
+                        <FillProgressBar
+                          filledCount={shift.filledCount}
+                          positionsNeeded={shift.positionsNeeded}
+                        />
+                      </td>
+                      <td className="px-4 py-4 align-middle">
+                        <span className="inline-flex items-center gap-1.5 text-fo-text-muted">
+                          <PeopleIcon className="h-4 w-4 shrink-0" />
+                          <span className="font-medium text-fo-text">
+                            {shift.applicantCount}
+                          </span>
                         </span>
-                      </p>
-                    </td>
-                    <td className="px-4 py-4 align-middle">
-                      <p className="text-fo-text">{formatShiftTableDate(startTime)}</p>
-                      <p className="mt-0.5 text-xs text-fo-text-muted">
-                        {formatShiftTime(startTime)} – {formatShiftTime(endTime)}
-                        {duration ? ` ${duration}` : ""}
-                      </p>
-                    </td>
-                    <td className="px-4 py-4 align-middle font-medium text-fo-text">
-                      {formatHourlyRate(shift.hourlyRate)}
-                      <span className="text-fo-text-muted">/hr</span>
-                    </td>
-                    <td className="px-4 py-4 align-middle">
-                      <p className="font-medium text-fo-text">
-                        {shift.filledCount} / {shift.positionsNeeded}
-                      </p>
-                      <FillProgressBar
-                        filledCount={shift.filledCount}
-                        positionsNeeded={shift.positionsNeeded}
-                      />
-                    </td>
-                    <td className="px-4 py-4 align-middle">
-                      <span className="inline-flex items-center gap-1.5 text-fo-text-muted">
-                        <PeopleIcon className="h-4 w-4 shrink-0" />
-                        <span className="font-medium text-fo-text">
-                          {shift.applicantCount}
-                        </span>
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 align-middle text-right">
-                      <ShiftRowActions shiftId={shift.id} status={shift.status} />
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-4 py-4 align-middle text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setExpandedShiftId((current) =>
+                                current === shift.id ? null : shift.id
+                              )
+                            }
+                            className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
+                          >
+                            {expandedShiftId === shift.id ? "Hide" : "Roster"}
+                          </button>
+                          <ShiftRowActions shiftId={shift.id} status={shift.status} />
+                        </div>
+                      </td>
+                    </tr>
+                    {expandedShiftId === shift.id && workforceByShiftId[shift.id] ? (
+                      <tr>
+                        <td colSpan={7} className="p-0">
+                          <ShiftWorkforcePanel
+                            workforce={workforceByShiftId[shift.id]}
+                          />
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
                 );
               })
             )}

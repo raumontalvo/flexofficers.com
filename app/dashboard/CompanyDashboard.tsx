@@ -14,6 +14,7 @@ import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { canCompanyPostNewShifts } from "@/lib/company-access";
 import {
   getCompanyApplicationStats,
+  getCompanyApplicationsSummary,
   getCompanyShiftStats,
   getFilledShiftsThisMonth,
   getUpcomingConfirmedShifts,
@@ -39,7 +40,7 @@ export default async function CompanyDashboard({
     : company.companyName?.trim() || firstName?.trim() || "there";
   const now = new Date();
 
-  const [shifts, applications] = await Promise.all([
+  const [shifts, applications, invitedCount] = await Promise.all([
     prisma.shift.findMany({
       where: {
         companyId: company.id,
@@ -92,10 +93,22 @@ export default async function CompanyDashboard({
       },
       take: 20,
     }),
+    prisma.shiftInvite.count({
+      where: {
+        status: "PENDING",
+        shift: {
+          companyId: company.id,
+        },
+      },
+    }),
   ]);
 
   const shiftStats = getCompanyShiftStats(shifts, now);
   const applicationStats = getCompanyApplicationStats(applications);
+  const applicationsSummary = getCompanyApplicationsSummary({
+    applications,
+    invitedCount,
+  });
   const filledThisMonth = getFilledShiftsThisMonth(shifts, now);
   const upcomingShifts = getUpcomingConfirmedShifts(shifts, now);
   const serializedShifts = shifts.map(serializeCompanyDashboardShift);
@@ -118,6 +131,7 @@ export default async function CompanyDashboard({
         <CompanySummaryCards
           shiftStats={shiftStats}
           applicationStats={applicationStats}
+          applicationsSummary={applicationsSummary}
           filledThisMonth={filledThisMonth}
           upcomingConfirmedCount={upcomingShifts.length}
         />
@@ -146,9 +160,9 @@ export default async function CompanyDashboard({
 
         <div className="grid gap-5 lg:grid-cols-3">
           <CompanyApplicationsDonut
-            newCount={applicationStats.new}
-            reviewedCount={applicationStats.reviewed}
-            withdrawnCount={applicationStats.withdrawn}
+            pendingCount={applicationsSummary.pending}
+            invitedCount={applicationsSummary.invited}
+            acceptedCount={applicationsSummary.accepted}
           />
           <CompanyQuickActions canPostShifts={canPostShifts} />
           <CompanyRecentApplications

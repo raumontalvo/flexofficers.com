@@ -68,7 +68,7 @@ export function filterShiftsByTab(
 ) {
   switch (tab) {
     case "open":
-      return shifts.filter((shift) => shift.status === ShiftStatus.OPEN);
+      return shifts.filter((shift) => isActiveCompanyShiftStatus(shift.status));
     case "filled":
       return shifts.filter((shift) => shift.status === ShiftStatus.FILLED);
     case "past":
@@ -85,7 +85,8 @@ export function getCompanyShiftStats(
   shifts: CompanyShiftRecord[],
   now: Date = new Date()
 ) {
-  const open = shifts.filter((shift) => shift.status === ShiftStatus.OPEN).length;
+  const open = shifts.filter((shift) => isActiveCompanyShiftStatus(shift.status))
+    .length;
   const filled = shifts.filter(
     (shift) => shift.status === ShiftStatus.FILLED
   ).length;
@@ -113,19 +114,45 @@ export function getCompanyApplicationStats(
   const withdrawn = applications.filter(
     (application) => application.status === ApplicationStatus.WITHDRAWN
   ).length;
+  const accepted = applications.filter(
+    (application) => application.status === ApplicationStatus.ACCEPTED
+  ).length;
+  const rejected = applications.filter(
+    (application) => application.status === ApplicationStatus.REJECTED
+  ).length;
 
   return {
     total: applications.length,
     new: pending,
     reviewed,
     withdrawn,
-    accepted: applications.filter(
-      (application) => application.status === ApplicationStatus.ACCEPTED
-    ).length,
-    rejected: applications.filter(
-      (application) => application.status === ApplicationStatus.REJECTED
-    ).length,
+    accepted,
+    rejected,
+    pending,
   };
+}
+
+export function getCompanyApplicationsSummary(input: {
+  applications: Pick<CompanyApplicationRecord, "status">[];
+  invitedCount: number;
+}) {
+  const applicationStats = getCompanyApplicationStats(input.applications);
+
+  return {
+    total:
+      applicationStats.pending + input.invitedCount + applicationStats.accepted,
+    pending: applicationStats.pending,
+    invited: input.invitedCount,
+    accepted: applicationStats.accepted,
+  };
+}
+
+export function isActiveCompanyShiftStatus(status: ShiftStatus) {
+  return (
+    status === ShiftStatus.OPEN ||
+    status === ShiftStatus.INVITED ||
+    status === ShiftStatus.PARTIALLY_FILLED
+  );
 }
 
 export function getFilledShiftsThisMonth(
@@ -207,7 +234,7 @@ export function filterSerializedShiftsByTab(
 
     switch (tab) {
       case "open":
-        return shift.status === ShiftStatus.OPEN;
+        return isActiveCompanyShiftStatus(shift.status);
       case "filled":
         return shift.status === ShiftStatus.FILLED;
       case "past":

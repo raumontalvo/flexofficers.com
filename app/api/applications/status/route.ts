@@ -6,9 +6,9 @@ import { enforceRateLimit } from "@/lib/rate-limit";
 import { validateApplicationDecisionTransition } from "./decision-rules";
 import {
   ApplicationStatus,
-  ShiftStatus,
   UserRole,
 } from "@/app/generated/prisma/enums";
+import { syncShiftFillStatus } from "@/lib/shift-fill-status";
 
 export async function POST(req: Request) {
   try {
@@ -211,18 +211,11 @@ export async function POST(req: Request) {
         });
 
         if (acceptedCount >= updatedApplication.shift.positionsNeeded) {
-          await tx.shift.update({
-            where: {
-              id: updatedApplication.shiftId,
-            },
-            data: {
-              status: ShiftStatus.FILLED,
-            },
-          });
-
           shiftFilled = true;
         }
       }
+
+      await syncShiftFillStatus(tx, updatedApplication.shiftId);
 
       return {
         application: updatedApplication,

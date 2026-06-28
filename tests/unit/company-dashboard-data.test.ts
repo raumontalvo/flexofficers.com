@@ -88,6 +88,7 @@ describe("company dashboard data helpers", () => {
     ).toEqual({
       total: 4,
       new: 1,
+      pending: 1,
       reviewed: 2,
       withdrawn: 1,
       accepted: 1,

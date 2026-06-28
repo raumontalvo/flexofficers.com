@@ -12,13 +12,19 @@ type CompanySummaryCardsProps = {
     new: number;
     reviewed: number;
   };
+  applicationsSummary: {
+    total: number;
+    pending: number;
+    invited: number;
+    accepted: number;
+  };
   filledThisMonth: number;
   upcomingConfirmedCount: number;
 };
 
 export function CompanySummaryCards({
   shiftStats,
-  applicationStats,
+  applicationsSummary,
   filledThisMonth,
   upcomingConfirmedCount,
 }: CompanySummaryCardsProps) {
@@ -32,9 +38,9 @@ export function CompanySummaryCards({
       />
       <StatCard
         label="Applications"
-        value={applicationStats.total}
+        value={applicationsSummary.total}
         tone="purple"
-        hint={`New ${applicationStats.new} · Reviewed ${applicationStats.reviewed}`}
+        hint={`${applicationsSummary.pending} Pending · ${applicationsSummary.invited} Invited · ${applicationsSummary.accepted} Accepted`}
       />
       <StatCard
         label="Filled Shifts"

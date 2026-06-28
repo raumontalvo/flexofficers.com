@@ -15,6 +15,8 @@ enum UserRole {
 
 enum ShiftStatus {
   OPEN
+  INVITED
+  PARTIALLY_FILLED
   FILLED
   COMPLETED
   CANCELLED
@@ -43,6 +45,12 @@ enum ApplicationStatus {
   ACCEPTED
   REJECTED
   WITHDRAWN
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 enum ArmedStatus {
@@ -106,6 +114,7 @@ model Officer {
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   licenses     License[]
   applications Application[]
+  shiftInvites ShiftInvite[]
 }
 
 model License {
@@ -191,6 +200,7 @@ model Shift {
 
   company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   applications Application[]
+  shiftInvites ShiftInvite[]
 }
 
 model Application {
@@ -199,6 +209,21 @@ model Application {
   officerId String
   status    ApplicationStatus @default(PENDING)
   appliedAt DateTime          @default(now())
+
+  shift   Shift   @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  officer Officer @relation(fields: [officerId], references: [id], onDelete: Cascade)
+
+  @@unique([shiftId, officerId])
+}
+
+model ShiftInvite {
+  id          String       @id @default(uuid())
+  shiftId     String
+  officerId   String
+  status      InviteStatus @default(PENDING)
+  message     String?
+  invitedAt   DateTime     @default(now())
+  respondedAt DateTime?
 
   shift   Shift   @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   officer Officer @relation(fields: [officerId], references: [id], onDelete: Cascade)
