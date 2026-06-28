@@ -203,6 +203,12 @@ export const companyNavItems: NavItem[] = [
     match: (pathname) => pathname.startsWith("/company/officers"),
   },
   {
+    href: "/company/profile",
+    label: "Profile",
+    icon: ProfileIcon,
+    match: (pathname) => pathname.startsWith("/company/profile"),
+  },
+  {
     href: "/company/settings",
     label: "Settings",
     icon: SettingsIcon,
