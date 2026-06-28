@@ -1,5 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+const isPublicApi = createRouteMatcher(["/api/stripe/webhook"]);
+
 const isPrivatePage = createRouteMatcher([
   "/dashboard(.*)",
   "/company(.*)",
@@ -11,6 +13,10 @@ const isPrivatePage = createRouteMatcher([
 const isPrivateApi = createRouteMatcher(["/api(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
+  if (isPublicApi(req)) {
+    return;
+  }
+
   if (isPrivatePage(req) || isPrivateApi(req)) {
     await auth.protect();
   }

@@ -41,6 +41,18 @@ describe("isCompanySubscriptionActive", () => {
     ).toBe(false);
   });
 
+  it("returns true when status is TRIALING and period end is in the future", () => {
+    expect(
+      isCompanySubscriptionActive(
+        {
+          subscriptionStatus: CompanySubscriptionStatus.TRIALING,
+          subscriptionCurrentPeriodEnd: new Date("2027-06-25T12:00:00.000Z"),
+        },
+        now
+      )
+    ).toBe(true);
+  });
+
   it("returns false for non-active statuses", () => {
     expect(
       isCompanySubscriptionActive(

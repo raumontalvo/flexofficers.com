@@ -5,11 +5,16 @@ export type CompanySubscriptionFields = {
   subscriptionCurrentPeriodEnd: Date | null;
 };
 
+const ACTIVE_SUBSCRIPTION_STATUSES = new Set<CompanySubscriptionStatus>([
+  CompanySubscriptionStatus.ACTIVE,
+  CompanySubscriptionStatus.TRIALING,
+]);
+
 export function isCompanySubscriptionActive(
   company: CompanySubscriptionFields,
   now: Date = new Date()
 ) {
-  if (company.subscriptionStatus !== CompanySubscriptionStatus.ACTIVE) {
+  if (!ACTIVE_SUBSCRIPTION_STATUSES.has(company.subscriptionStatus)) {
     return false;
   }
 
@@ -26,6 +31,8 @@ export function formatCompanySubscriptionStatus(
   switch (status) {
     case CompanySubscriptionStatus.ACTIVE:
       return "Active";
+    case CompanySubscriptionStatus.TRIALING:
+      return "Trialing";
     case CompanySubscriptionStatus.PAST_DUE:
       return "Past due";
     case CompanySubscriptionStatus.CANCELED:

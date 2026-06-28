@@ -61,6 +61,7 @@ enum ArmedStatus {
 enum CompanySubscriptionStatus {
   INACTIVE
   ACTIVE
+  TRIALING
   PAST_DUE
   CANCELED
 }
@@ -160,6 +161,7 @@ model Company {
   verified                   Boolean                   @default(false)
   subscriptionStatus         CompanySubscriptionStatus @default(INACTIVE)
   subscriptionCurrentPeriodEnd DateTime?
+  subscriptionPriceId        String?
   stripeCustomerId           String?                   @unique
   stripeSubscriptionId       String?                   @unique
   trialStartedAt             DateTime?
