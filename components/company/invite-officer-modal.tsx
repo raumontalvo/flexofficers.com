@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
-  hasPendingInviteForShift,
+  getInviteableShiftIdsForOfficer,
+  getInviteStateForShift,
   type CompanyOfficerInviteRecord,
 } from "@/lib/company-invite-workflow";
 import type { CompanyOpenShiftOption } from "@/components/company/invite-officer-to-shift";
@@ -78,15 +79,22 @@ export function InviteOfficerModal({
   );
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen || !officerId) {
       return;
     }
 
-    setShiftId(openShifts[0]?.id ?? "");
+    const openShiftIds = openShifts.map((shift) => shift.id);
+    const inviteableShiftIds = getInviteableShiftIdsForOfficer(
+      officerId,
+      openShiftIds,
+      invites
+    );
+
+    setShiftId(inviteableShiftIds[0] ?? openShifts[0]?.id ?? "");
     setMessage("");
     setError(null);
     setSentInvite(null);
-  }, [isOpen, officerId, openShifts]);
+  }, [isOpen, officerId, openShifts, invites]);
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -110,12 +118,18 @@ export function InviteOfficerModal({
     return null;
   }
 
-  const selectedShiftPending =
-    shiftId &&
-    hasPendingInviteForShift(officerId, shiftId, invites);
+  const openShiftIds = openShifts.map((shift) => shift.id);
+  const selectedShiftState =
+    shiftId && officerId
+      ? getInviteStateForShift(officerId, shiftId, invites)
+      : null;
+  const canSendInvite = Boolean(shiftId) && selectedShiftState?.kind === "invite";
+  const remainingInviteableShiftIds = officerId
+    ? getInviteableShiftIdsForOfficer(officerId, openShiftIds, invites)
+    : [];
 
   async function handleSendInvite() {
-    if (!shiftId || selectedShiftPending) {
+    if (!shiftId || !canSendInvite) {
       return;
     }
 
@@ -168,16 +182,39 @@ export function InviteOfficerModal({
               <span className="mt-4 inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-200">
                 Invited
               </span>
-              <button
-                type="button"
-                onClick={onClose}
-                className={buttonClassName({
-                  size: "md",
-                  className: "mt-6 w-full",
-                })}
-              >
-                Done
-              </button>
+              <div className="mt-6 flex flex-col gap-2">
+                {remainingInviteableShiftIds.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSentInvite(null);
+                      setShiftId(remainingInviteableShiftIds[0] ?? "");
+                      setMessage("");
+                      setError(null);
+                    }}
+                    className={buttonClassName({
+                      size: "md",
+                      className: "w-full",
+                    })}
+                  >
+                    Invite to Another Shift
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className={buttonClassName({
+                    variant:
+                      remainingInviteableShiftIds.length > 0
+                        ? "secondary"
+                        : "primary",
+                    size: "md",
+                    className: "w-full",
+                  })}
+                >
+                  Done
+                </button>
+              </div>
             </div>
           ) : openShifts.length === 0 ? (
             <div>
@@ -239,11 +276,31 @@ export function InviteOfficerModal({
                     onChange={(event) => setShiftId(event.target.value)}
                     className="min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text"
                   >
-                    {openShifts.map((shift) => (
-                      <option key={shift.id} value={shift.id}>
-                        {formatShiftOptionLabel(shift)}
-                      </option>
-                    ))}
+                    {openShifts.map((shift) => {
+                      const shiftState = getInviteStateForShift(
+                        officerId,
+                        shift.id,
+                        invites
+                      );
+                      const shiftBlocked = shiftState.kind !== "invite";
+                      const statusSuffix =
+                        shiftState.kind === "pending"
+                          ? " · Invite sent"
+                          : shiftState.kind === "accepted"
+                            ? " · Accepted"
+                            : "";
+
+                      return (
+                        <option
+                          key={shift.id}
+                          value={shift.id}
+                          disabled={shiftBlocked}
+                        >
+                          {formatShiftOptionLabel(shift)}
+                          {statusSuffix}
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -264,9 +321,16 @@ export function InviteOfficerModal({
                   />
                 </div>
 
-                {selectedShiftPending ? (
+                {selectedShiftState?.kind === "pending" ? (
                   <p className="text-xs text-amber-200">
                     This officer already has a pending invite for the selected
+                    shift.
+                  </p>
+                ) : null}
+
+                {selectedShiftState?.kind === "accepted" ? (
+                  <p className="text-xs text-emerald-200">
+                    This officer already accepted an invite for the selected
                     shift.
                   </p>
                 ) : null}
@@ -290,7 +354,7 @@ export function InviteOfficerModal({
                 </button>
                 <button
                   type="button"
-                  disabled={loading || !shiftId || Boolean(selectedShiftPending)}
+                  disabled={loading || !canSendInvite}
                   onClick={handleSendInvite}
                   className={cn(
                     buttonClassName({

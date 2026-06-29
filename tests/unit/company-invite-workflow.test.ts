@@ -1,22 +1,88 @@
 import { describe, expect, it } from "vitest";
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
-import { getOfficerInviteButtonState } from "@/lib/company-invite-workflow";
+import {
+  getInviteableShiftIdsForOfficer,
+  getInviteStateForShift,
+  getOfficerInviteButtonState,
+} from "@/lib/company-invite-workflow";
 import { getCompanyApplicationsSummary } from "@/lib/company-dashboard-data";
 
 describe("company invite workflow", () => {
-  it("shows pending invite state on officer cards", () => {
+  it("tracks invite state per shift", () => {
+    const invites = [
+      {
+        id: "invite-1",
+        officerId: "officer-1",
+        shiftId: "shift-1",
+        status: "PENDING" as const,
+      },
+    ];
+
+    expect(getInviteStateForShift("officer-1", "shift-1", invites)).toEqual({
+      kind: "pending",
+      label: "Invitation Sent",
+    });
+    expect(getInviteStateForShift("officer-1", "shift-2", invites)).toEqual({
+      kind: "invite",
+    });
+  });
+
+  it("keeps invite available when another open shift can still be invited", () => {
+    const invites = [
+      {
+        id: "invite-1",
+        officerId: "officer-1",
+        shiftId: "shift-1",
+        status: "PENDING" as const,
+      },
+    ];
+
     expect(
-      getOfficerInviteButtonState("officer-1", [
-        {
-          id: "invite-1",
-          officerId: "officer-1",
-          shiftId: "shift-1",
-          status: "PENDING",
-        },
-      ])
+      getOfficerInviteButtonState("officer-1", invites, ["shift-1", "shift-2"])
+    ).toEqual({
+      kind: "invite",
+    });
+    expect(
+      getInviteableShiftIdsForOfficer("officer-1", ["shift-1", "shift-2"], invites)
+    ).toEqual(["shift-2"]);
+  });
+
+  it("blocks inviting only when every open shift already has an active invite", () => {
+    const invites = [
+      {
+        id: "invite-1",
+        officerId: "officer-1",
+        shiftId: "shift-1",
+        status: "PENDING" as const,
+      },
+      {
+        id: "invite-2",
+        officerId: "officer-1",
+        shiftId: "shift-2",
+        status: "PENDING" as const,
+      },
+    ];
+
+    expect(
+      getOfficerInviteButtonState("officer-1", invites, ["shift-1", "shift-2"])
     ).toEqual({
       kind: "pending",
       label: "Invitation Sent",
+    });
+  });
+
+  it("allows re-inviting after a declined invite", () => {
+    const invites = [
+      {
+        id: "invite-1",
+        officerId: "officer-1",
+        shiftId: "shift-1",
+        status: "DECLINED" as const,
+      },
+    ];
+
+    expect(getInviteStateForShift("officer-1", "shift-1", invites)).toEqual({
+      kind: "invite",
     });
   });
 

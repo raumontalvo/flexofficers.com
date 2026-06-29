@@ -12,17 +12,62 @@ export type OfficerInviteButtonState =
   | { kind: "pending"; label: "Invitation Sent" }
   | { kind: "accepted"; label: "Invite Accepted" };
 
-export function getOfficerInviteButtonState(
+export function getInviteStateForShift(
   officerId: string,
+  shiftId: string,
   invites: readonly CompanyOfficerInviteRecord[]
 ): OfficerInviteButtonState {
-  const officerInvites = invites.filter((invite) => invite.officerId === officerId);
+  const invite = invites.find(
+    (entry) => entry.officerId === officerId && entry.shiftId === shiftId
+  );
 
-  if (officerInvites.some((invite) => invite.status === "PENDING")) {
+  if (!invite || invite.status === "DECLINED") {
+    return { kind: "invite" };
+  }
+
+  if (invite.status === "PENDING") {
     return { kind: "pending", label: "Invitation Sent" };
   }
 
-  if (officerInvites.some((invite) => invite.status === "ACCEPTED")) {
+  return { kind: "accepted", label: "Invite Accepted" };
+}
+
+export function getInviteableShiftIdsForOfficer(
+  officerId: string,
+  openShiftIds: readonly string[],
+  invites: readonly CompanyOfficerInviteRecord[]
+) {
+  return openShiftIds.filter(
+    (shiftId) =>
+      getInviteStateForShift(officerId, shiftId, invites).kind === "invite"
+  );
+}
+
+export function getOfficerInviteButtonState(
+  officerId: string,
+  invites: readonly CompanyOfficerInviteRecord[],
+  openShiftIds: readonly string[] = []
+): OfficerInviteButtonState {
+  if (openShiftIds.length === 0) {
+    return { kind: "invite" };
+  }
+
+  if (
+    getInviteableShiftIdsForOfficer(officerId, openShiftIds, invites).length > 0
+  ) {
+    return { kind: "invite" };
+  }
+
+  const officerShiftInvites = invites.filter(
+    (invite) =>
+      invite.officerId === officerId && openShiftIds.includes(invite.shiftId)
+  );
+
+  if (officerShiftInvites.some((invite) => invite.status === "PENDING")) {
+    return { kind: "pending", label: "Invitation Sent" };
+  }
+
+  if (officerShiftInvites.some((invite) => invite.status === "ACCEPTED")) {
     return { kind: "accepted", label: "Invite Accepted" };
   }
 
@@ -34,11 +79,8 @@ export function hasPendingInviteForShift(
   shiftId: string,
   invites: readonly CompanyOfficerInviteRecord[]
 ) {
-  return invites.some(
-    (invite) =>
-      invite.officerId === officerId &&
-      invite.shiftId === shiftId &&
-      invite.status === "PENDING"
+  return (
+    getInviteStateForShift(officerId, shiftId, invites).kind === "pending"
   );
 }
 

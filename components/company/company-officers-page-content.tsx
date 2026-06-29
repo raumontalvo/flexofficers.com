@@ -387,7 +387,11 @@ export function CompanyOfficersPageContent({
                 officer={officer}
                 onViewProfile={() => setProfileOfficerId(officer.id)}
                 onInvite={() => setInviteOfficerId(officer.id)}
-                inviteState={getOfficerInviteButtonState(officer.id, invites)}
+                inviteState={getOfficerInviteButtonState(
+                  officer.id,
+                  invites,
+                  openShifts.map((shift) => shift.id)
+                )}
               />
             ))}
           </div>
