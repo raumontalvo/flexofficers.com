@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   getOfficerBackgroundCategories,
+  getOfficerLicenseChipDisplay,
+  getOfficerLicenseChipTone,
   getOfficerStatusBadge,
   mapAvailabilityFilterToStoredValue,
   mapStoredAvailabilityToDisplayLabel,
@@ -86,6 +88,39 @@ describe("company officers page helpers", () => {
         armedStatuses: ["UNARMED"],
       })
     ).toBe("Unarmed Security");
+  });
+
+  it("builds license chip display with overflow", () => {
+    expect(getOfficerLicenseChipDisplay([])).toEqual({
+      chips: [],
+      overflowCount: 0,
+    });
+
+    expect(
+      getOfficerLicenseChipDisplay(["Unarmed Security", "Armed Security"])
+    ).toEqual({
+      chips: ["Unarmed Security", "Armed Security"],
+      overflowCount: 0,
+    });
+
+    expect(
+      getOfficerLicenseChipDisplay([
+        "Unarmed Security",
+        "Armed Security",
+        "K9 Security",
+        "Executive Protection",
+        "Security Guard",
+      ])
+    ).toEqual({
+      chips: ["Unarmed Security", "Armed Security"],
+      overflowCount: 3,
+    });
+  });
+
+  it("assigns license chip tones", () => {
+    expect(getOfficerLicenseChipTone("Unarmed Security")).toBe("blue");
+    expect(getOfficerLicenseChipTone("Armed Security")).toBe("green");
+    expect(getOfficerLicenseChipTone("K9 Security")).toBe("neutral");
   });
 
   it("sorts officers by experience and alphabetically", () => {

@@ -1,6 +1,6 @@
 import type { Prisma } from "@/app/generated/prisma/client";
 import { ShiftStatus, ShiftVisibility } from "@/app/generated/prisma/enums";
-import { officerSearchCardSelect } from "@/lib/officer-fields";
+import { officerSearchCardSelect, officerUserSummarySelect } from "@/lib/officer-fields";
 import { serializeOfficerSearchResult } from "@/lib/company-officers-page";
 
 export const companyStaffMemberSelect = {
@@ -10,9 +10,7 @@ export const companyStaffMemberSelect = {
     select: {
       ...officerSearchCardSelect,
       user: {
-        select: {
-          email: true,
-        },
+        select: officerUserSummarySelect,
       },
     },
   },

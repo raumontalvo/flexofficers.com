@@ -5,6 +5,7 @@ import {
 } from "@/app/generated/prisma/enums";
 import {
   filterCompanyShiftsByTab,
+  formatShiftDateBadgeParts,
   formatShiftDurationLabel,
   getCompanyShiftsTabCounts,
   getFillProgressVariant,
@@ -130,5 +131,15 @@ describe("company shifts page helpers", () => {
     expect(getFillProgressVariant(0, 3)).toBe("empty");
     expect(getFillProgressVariant(1, 3)).toBe("partial");
     expect(getFillProgressVariant(3, 3)).toBe("full");
+  });
+
+  it("formats shift date badge parts", () => {
+    expect(
+      formatShiftDateBadgeParts(new Date("2026-06-30T08:00:00.000Z"))
+    ).toEqual({
+      weekday: "TUE",
+      month: "JUN",
+      day: "30",
+    });
   });
 });

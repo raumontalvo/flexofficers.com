@@ -2,7 +2,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { CompanyOfficersPageContent } from "@/components/company/company-officers-page-content";
 import { PageShell, SectionHeading } from "@/components/ui";
 import { serializeOfficerSearchResult } from "@/lib/company-officers-page";
-import { officerSearchCardSelect } from "@/lib/officer-fields";
+import { officerSearchCardSelect, officerUserSummarySelect } from "@/lib/officer-fields";
 import {
   buildOfficerSearchWhere,
   parseOfficerSearchFilters,
@@ -30,9 +30,7 @@ export default async function CompanyOfficersPage({
       select: {
         ...officerSearchCardSelect,
         user: {
-          select: {
-            email: true,
-          },
+          select: officerUserSummarySelect,
         },
       },
       orderBy: [{ lastName: "asc" }, { firstName: "asc" }],

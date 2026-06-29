@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { AddToStaffButton } from "@/components/company/add-to-staff-button";
 import { Button, ProfileAvatar } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { SerializedOfficerSearchResult } from "@/lib/company-officers-page";
@@ -13,6 +14,8 @@ import { LICENSE_DISPLAY_DISCLAIMER } from "@/lib/officer-licenses";
 type OfficerProfilePanelProps = {
   officer: SerializedOfficerSearchResult | null;
   onClose: () => void;
+  isOnStaff?: boolean;
+  onStaffChange?: (onStaff: boolean) => void;
 };
 
 function DetailField({
@@ -65,6 +68,8 @@ function TagList({
 export function OfficerProfilePanel({
   officer,
   onClose,
+  isOnStaff = false,
+  onStaffChange,
 }: OfficerProfilePanelProps) {
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -231,7 +236,17 @@ export function OfficerProfilePanel({
               </section>
             </div>
 
-            <div className="border-t border-white/[0.06] px-5 py-4">
+            <div className="space-y-2 border-t border-white/[0.06] px-5 py-4">
+              {onStaffChange && officer ? (
+                <AddToStaffButton
+                  officerId={officer.id}
+                  isOnStaff={isOnStaff}
+                  size="mobile"
+                  className="w-full !min-h-9 !text-xs lg:hidden"
+                  onAdded={() => onStaffChange(true)}
+                  onRemoved={() => onStaffChange(false)}
+                />
+              ) : null}
               <Button
                 type="button"
                 variant="secondary"

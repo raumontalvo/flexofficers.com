@@ -12,6 +12,10 @@ export type OfficerLicenseRecord = Prisma.LicenseGetPayload<{
   select: typeof officerLicenseSelect;
 }>;
 
+export const officerUserSummarySelect = {
+  email: true,
+} satisfies Prisma.UserSelect;
+
 /** Explicit Officer columns for Prisma select/include — matches current schema. */
 export const officerProfileSelect = {
   id: true,
@@ -120,9 +124,7 @@ export const companyAcceptedOfficerSelect = {
     },
   },
   user: {
-    select: {
-      email: true,
-    },
+    select: officerUserSummarySelect,
   },
 } satisfies Prisma.OfficerSelect;
 

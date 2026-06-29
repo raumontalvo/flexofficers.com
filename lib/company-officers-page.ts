@@ -155,6 +155,39 @@ export function getOfficerStatusBadge(input: {
   return "Officer";
 }
 
+export type OfficerLicenseChipTone = "blue" | "green" | "neutral";
+
+export function getOfficerLicenseChipTone(
+  licenseType: string
+): OfficerLicenseChipTone {
+  if (licenseType === "Unarmed Security") {
+    return "blue";
+  }
+
+  if (licenseType === "Armed Security") {
+    return "green";
+  }
+
+  return "neutral";
+}
+
+export function getOfficerLicenseChipDisplay(
+  licenseTypeLabels: readonly string[]
+) {
+  if (licenseTypeLabels.length === 0) {
+    return { chips: [] as string[], overflowCount: 0 };
+  }
+
+  if (licenseTypeLabels.length <= 2) {
+    return { chips: [...licenseTypeLabels], overflowCount: 0 };
+  }
+
+  return {
+    chips: licenseTypeLabels.slice(0, 2),
+    overflowCount: licenseTypeLabels.length - 2,
+  };
+}
+
 export function serializeOfficerSearchResult(
   officer: OfficerSearchCardRecord & {
     state?: string | null;

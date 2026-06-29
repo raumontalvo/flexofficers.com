@@ -1,4 +1,4 @@
-import { ArmedStatus, Prisma, UserRole } from "@/app/generated/prisma/client";
+import { ArmedStatus, Prisma } from "@/app/generated/prisma/client";
 import {
   mapAvailabilityFilterToStoredValue,
   mapBackgroundFilterToCategory,
@@ -288,11 +288,7 @@ export function buildOfficerQuickSearchWhere(
 export function buildOfficerSearchWhere(
   filters: OfficerSearchFilters
 ): Prisma.OfficerWhereInput {
-  const where: Prisma.OfficerWhereInput = {
-    user: {
-      role: UserRole.OFFICER,
-    },
-  };
+  const where: Prisma.OfficerWhereInput = {};
 
   if (filters.firstName || filters.lastName || filters.name) {
     Object.assign(

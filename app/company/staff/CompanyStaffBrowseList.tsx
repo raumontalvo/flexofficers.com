@@ -176,15 +176,6 @@ export function CompanyStaffBrowseList({
               invites,
               openShiftIds
             )}
-            staffAction={
-              <AddToStaffButton
-                officerId={member.officerId}
-                isOnStaff
-                size="mobile"
-                className="w-full"
-                onRemoved={() => handleRemoveFromStaff(member.officerId)}
-              />
-            }
             inviteLabel="Invite to Shift"
           />
         ))}
@@ -212,6 +203,16 @@ export function CompanyStaffBrowseList({
       <OfficerProfilePanel
         officer={profileOfficer}
         onClose={() => setProfileOfficerId(null)}
+        isOnStaff={Boolean(profileOfficer)}
+        onStaffChange={
+          profileOfficer
+            ? (onStaff) => {
+                if (!onStaff) {
+                  handleRemoveFromStaff(profileOfficer.id);
+                }
+              }
+            : undefined
+        }
       />
 
       <InviteOfficerModal

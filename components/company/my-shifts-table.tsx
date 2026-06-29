@@ -3,15 +3,10 @@
 import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
+import { MyShiftMobileCard } from "@/components/company/my-shift-mobile-card";
 import { ShiftRowActions } from "@/components/company/shift-row-actions";
 import { ShiftWorkforcePanel } from "@/components/company/shift-workforce-panel";
 import { buttonClassName } from "@/components/ui";
-import {
-  MobileListCard,
-  MobileListCardActions,
-  MobileListCardGroup,
-  MobileSecondaryButton,
-} from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
 import {
@@ -84,7 +79,7 @@ function MyShiftStatusBadge({ status }: { status: ShiftStatus }) {
     [ShiftStatus.PARTIALLY_FILLED]:
       "border-blue-500/25 bg-blue-500/10 text-blue-100",
     [ShiftStatus.FILLED]:
-      "border-blue-500/25 bg-blue-500/10 text-blue-100",
+      "border-green-500/25 bg-green-500/10 text-green-200",
     [ShiftStatus.CANCELLED]:
       "border-red-500/20 bg-white/[0.04] text-fo-text-muted",
     [ShiftStatus.COMPLETED]:
@@ -151,6 +146,44 @@ function EmptyShiftsState({ canPostShifts }: { canPostShifts: boolean }) {
   );
 }
 
+function MobilePagination({
+  pagination,
+  onPageChange,
+}: {
+  pagination: ReturnType<typeof paginateCompanyShifts<SerializedCompanyShiftRow>>;
+  onPageChange: (page: number) => void;
+}) {
+  if (pagination.totalPages <= 1) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center justify-between gap-3 pt-1">
+      <button
+        type="button"
+        onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
+        disabled={pagination.page <= 1}
+        className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Previous
+      </button>
+      <p className="text-xs text-fo-text-muted">
+        Page {pagination.page} of {pagination.totalPages}
+      </p>
+      <button
+        type="button"
+        onClick={() =>
+          onPageChange(Math.min(pagination.totalPages, pagination.page + 1))
+        }
+        disabled={pagination.page >= pagination.totalPages}
+        className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Next
+      </button>
+    </div>
+  );
+}
+
 export function MyShiftsTable({
   shifts,
   workforceByShiftId,
@@ -185,297 +218,285 @@ export function MyShiftsTable({
 
   if (shifts.length === 0) {
     return (
-      <section className="fo-glass-card mt-6 rounded-xl border border-white/10">
-        <EmptyShiftsState canPostShifts={canPostShifts} />
-      </section>
+      <>
+        <section className="fo-glass-card mt-6 rounded-xl border border-white/10 md:hidden">
+          <EmptyShiftsState canPostShifts={canPostShifts} />
+        </section>
+        <section className="fo-glass-card mt-6 hidden overflow-hidden rounded-xl border border-white/10 md:block">
+          <EmptyShiftsState canPostShifts={canPostShifts} />
+        </section>
+      </>
     );
   }
 
   return (
-    <section className="fo-glass-card mt-6 overflow-hidden rounded-xl border border-white/10">
-      <div className="flex flex-col gap-3 border-b border-white/[0.06] px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="overflow-x-auto">
-          <div className="flex min-w-max flex-nowrap gap-2">
-          {TABS.map((tab) => {
-            const count = tabCounts[tab.id];
+    <>
+      <section className="mt-4 space-y-4 pb-24 md:hidden">
+        <div className="fo-glass-card space-y-3 rounded-2xl border border-white/10 p-3.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)]">
+          <div className="overflow-x-auto">
+            <div className="flex min-w-max flex-nowrap gap-2">
+              {TABS.map((tab) => {
+                const count = tabCounts[tab.id];
 
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-semibold transition",
-                  activeTab === tab.id
-                    ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                    : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
-                )}
-              >
-                {tab.label}
-                {count > 0 ? (
-                  <span className="ml-1.5 text-[11px] opacity-80">({count})</span>
-                ) : null}
-              </button>
-            );
-          })}
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                      activeTab === tab.id
+                        ? "bg-fo-primary-bright/20 text-fo-primary-hover"
+                        : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                    )}
+                  >
+                    {tab.label}
+                    {count > 0 ? (
+                      <span className="ml-1.5 text-[11px] opacity-80">({count})</span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          <label className="relative block">
+            <span className="sr-only">Search shifts</span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search shifts..."
+              className="min-h-10 w-full rounded-xl border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
+            />
+          </label>
         </div>
 
-        <label className="relative block w-full lg:max-w-xs">
-          <span className="sr-only">Search shifts</span>
-          <input
-            type="search"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search shifts..."
-            className="min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
-          />
-        </label>
-      </div>
-
-      <MobileListCardGroup className="md:hidden border-0 bg-transparent rounded-none">
         {pagination.items.length === 0 ? (
-          <div className="px-4 py-12 text-center text-sm text-fo-text-muted">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-12 text-center text-sm text-fo-text-muted">
             No shifts match this filter.
           </div>
         ) : (
-          pagination.items.map((shift) => {
-            const startTime = new Date(shift.startTime);
-            const endTime = new Date(shift.endTime);
-            const duration = formatShiftDurationLabel(startTime, endTime);
-
-            return (
-              <MobileListCard key={shift.id}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-fo-text">{shift.title}</p>
-                    <p className="mt-1 flex items-center gap-1.5 text-xs text-fo-text-muted">
-                      <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-                      <span>
-                        {shift.locationSubtext
-                          ? `${shift.locationLabel} · ${shift.locationSubtext}`
-                          : shift.locationLabel}
-                      </span>
-                    </p>
-                  </div>
-                  <MyShiftStatusBadge status={shift.status} />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs text-fo-text-muted">Date</p>
-                    <p className="mt-0.5 font-medium text-fo-text">
-                      {formatShiftTableDate(startTime)}
-                    </p>
-                    <p className="mt-0.5 text-xs text-fo-text-muted">
-                      {formatShiftTime(startTime)} – {formatShiftTime(endTime)}
-                      {duration ? ` ${duration}` : ""}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-fo-text-muted">Pay</p>
-                    <p className="mt-0.5 font-medium text-fo-text">
-                      {formatHourlyRate(shift.hourlyRate)}
-                      <span className="text-fo-text-muted">/hr</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-fo-text-muted">Filled</p>
-                    <p className="mt-0.5 font-medium text-fo-text">
-                      {shift.filledCount} / {shift.positionsNeeded}
-                    </p>
-                    <FillProgressBar
-                      filledCount={shift.filledCount}
-                      positionsNeeded={shift.positionsNeeded}
-                    />
-                  </div>
-                  <div>
-                    <p className="text-xs text-fo-text-muted">Applicants</p>
-                    <p className="mt-0.5 inline-flex items-center gap-1.5 font-medium text-fo-text">
-                      <PeopleIcon className="h-4 w-4 shrink-0 text-fo-text-muted" />
-                      {shift.applicantCount}
-                    </p>
-                  </div>
-                </div>
-
-                <MobileListCardActions>
-                  <MobileSecondaryButton
-                    onClick={() =>
-                      setExpandedShiftId((current) =>
-                        current === shift.id ? null : shift.id
-                      )
-                    }
-                  >
-                    {expandedShiftId === shift.id ? "Hide Roster" : "View Roster"}
-                  </MobileSecondaryButton>
-                  <ShiftRowActions shiftId={shift.id} status={shift.status} stacked />
-                </MobileListCardActions>
-
-                {expandedShiftId === shift.id && workforceByShiftId[shift.id] ? (
-                  <ShiftWorkforcePanel workforce={workforceByShiftId[shift.id]} />
-                ) : null}
-              </MobileListCard>
-            );
-          })
+          <div className="space-y-2.5">
+            {pagination.items.map((shift) => (
+              <MyShiftMobileCard
+                key={shift.id}
+                shift={shift}
+                workforce={workforceByShiftId[shift.id]}
+                rosterExpanded={expandedShiftId === shift.id}
+                onToggleRoster={() =>
+                  setExpandedShiftId((current) =>
+                    current === shift.id ? null : shift.id
+                  )
+                }
+              />
+            ))}
+          </div>
         )}
-      </MobileListCardGroup>
 
-      <div className="hidden overflow-x-auto md:block">
-        <table className="min-w-[960px] w-full text-left text-sm">
-          <thead className="border-b border-white/[0.06] bg-white/[0.02] text-[11px] uppercase tracking-wide text-fo-text-muted">
-            <tr>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 font-semibold">Shift / Location</th>
-              <th className="px-4 py-3 font-semibold">Date &amp; Time</th>
-              <th className="px-4 py-3 font-semibold">Pay</th>
-              <th className="px-4 py-3 font-semibold">Filled</th>
-              <th className="px-4 py-3 font-semibold">Applicants</th>
-              <th className="px-4 py-3 font-semibold text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pagination.items.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-4 py-12 text-center text-sm text-fo-text-muted"
-                >
-                  No shifts match this filter.
-                </td>
-              </tr>
-            ) : (
-              pagination.items.map((shift) => {
-                const startTime = new Date(shift.startTime);
-                const endTime = new Date(shift.endTime);
-                const duration = formatShiftDurationLabel(startTime, endTime);
+        {filteredShifts.length > 0 ? (
+          <MobilePagination pagination={pagination} onPageChange={setPage} />
+        ) : null}
+      </section>
+
+      <section className="fo-glass-card mt-6 hidden overflow-hidden rounded-xl border border-white/10 md:block">
+        <div className="flex flex-col gap-3 border-b border-white/[0.06] px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="overflow-x-auto">
+            <div className="flex min-w-max flex-nowrap gap-2">
+              {TABS.map((tab) => {
+                const count = tabCounts[tab.id];
 
                 return (
-                  <Fragment key={shift.id}>
-                    <tr className="border-b border-white/[0.04] transition hover:bg-white/[0.03]">
-                      <td className="px-4 py-4 align-middle">
-                        <MyShiftStatusBadge status={shift.status} />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <p className="font-semibold text-fo-text">{shift.title}</p>
-                        <p className="mt-1 flex items-center gap-1.5 text-xs text-fo-text-muted">
-                          <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-                          <span className="truncate">
-                            {shift.locationSubtext
-                              ? `${shift.locationLabel} · ${shift.locationSubtext}`
-                              : shift.locationLabel}
-                          </span>
-                        </p>
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <p className="text-fo-text">{formatShiftTableDate(startTime)}</p>
-                        <p className="mt-0.5 text-xs text-fo-text-muted">
-                          {formatShiftTime(startTime)} – {formatShiftTime(endTime)}
-                          {duration ? ` ${duration}` : ""}
-                        </p>
-                      </td>
-                      <td className="px-4 py-4 align-middle font-medium text-fo-text">
-                        {formatHourlyRate(shift.hourlyRate)}
-                        <span className="text-fo-text-muted">/hr</span>
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <p className="font-medium text-fo-text">
-                          {shift.filledCount} / {shift.positionsNeeded}
-                        </p>
-                        <FillProgressBar
-                          filledCount={shift.filledCount}
-                          positionsNeeded={shift.positionsNeeded}
-                        />
-                      </td>
-                      <td className="px-4 py-4 align-middle">
-                        <span className="inline-flex items-center gap-1.5 text-fo-text-muted">
-                          <PeopleIcon className="h-4 w-4 shrink-0" />
-                          <span className="font-medium text-fo-text">
-                            {shift.applicantCount}
-                          </span>
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 align-middle text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExpandedShiftId((current) =>
-                                current === shift.id ? null : shift.id
-                              )
-                            }
-                            className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
-                          >
-                            {expandedShiftId === shift.id ? "Hide" : "Roster"}
-                          </button>
-                          <ShiftRowActions shiftId={shift.id} status={shift.status} />
-                        </div>
-                      </td>
-                    </tr>
-                    {expandedShiftId === shift.id && workforceByShiftId[shift.id] ? (
-                      <tr>
-                        <td colSpan={7} className="p-0">
-                          <ShiftWorkforcePanel
-                            workforce={workforceByShiftId[shift.id]}
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={cn(
+                      "rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                      activeTab === tab.id
+                        ? "bg-fo-primary-bright/20 text-fo-primary-hover"
+                        : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                    )}
+                  >
+                    {tab.label}
+                    {count > 0 ? (
+                      <span className="ml-1.5 text-[11px] opacity-80">({count})</span>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <label className="relative block w-full lg:max-w-xs">
+            <span className="sr-only">Search shifts</span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search shifts..."
+              className="min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
+            />
+          </label>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-[960px] w-full text-left text-sm">
+            <thead className="border-b border-white/[0.06] bg-white/[0.02] text-[11px] uppercase tracking-wide text-fo-text-muted">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Shift / Location</th>
+                <th className="px-4 py-3 font-semibold">Date &amp; Time</th>
+                <th className="px-4 py-3 font-semibold">Pay</th>
+                <th className="px-4 py-3 font-semibold">Filled</th>
+                <th className="px-4 py-3 font-semibold">Applicants</th>
+                <th className="px-4 py-3 font-semibold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagination.items.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-12 text-center text-sm text-fo-text-muted"
+                  >
+                    No shifts match this filter.
+                  </td>
+                </tr>
+              ) : (
+                pagination.items.map((shift) => {
+                  const startTime = new Date(shift.startTime);
+                  const endTime = new Date(shift.endTime);
+                  const duration = formatShiftDurationLabel(startTime, endTime);
+
+                  return (
+                    <Fragment key={shift.id}>
+                      <tr className="border-b border-white/[0.04] transition hover:bg-white/[0.03]">
+                        <td className="px-4 py-4 align-middle">
+                          <MyShiftStatusBadge status={shift.status} />
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <p className="font-semibold text-fo-text">{shift.title}</p>
+                          <p className="mt-1 flex items-center gap-1.5 text-xs text-fo-text-muted">
+                            <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+                            <span className="truncate">
+                              {shift.locationSubtext
+                                ? `${shift.locationLabel} · ${shift.locationSubtext}`
+                                : shift.locationLabel}
+                            </span>
+                          </p>
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <p className="text-fo-text">{formatShiftTableDate(startTime)}</p>
+                          <p className="mt-0.5 text-xs text-fo-text-muted">
+                            {formatShiftTime(startTime)} – {formatShiftTime(endTime)}
+                            {duration ? ` ${duration}` : ""}
+                          </p>
+                        </td>
+                        <td className="px-4 py-4 align-middle font-medium text-fo-text">
+                          {formatHourlyRate(shift.hourlyRate)}
+                          <span className="text-fo-text-muted">/hr</span>
+                        </td>
+                        <td className="px-4 py-4 align-middle">
+                          <p className="font-medium text-fo-text">
+                            {shift.filledCount} / {shift.positionsNeeded}
+                          </p>
+                          <FillProgressBar
+                            filledCount={shift.filledCount}
+                            positionsNeeded={shift.positionsNeeded}
                           />
                         </td>
+                        <td className="px-4 py-4 align-middle">
+                          <span className="inline-flex items-center gap-1.5 text-fo-text-muted">
+                            <PeopleIcon className="h-4 w-4 shrink-0" />
+                            <span className="font-medium text-fo-text">
+                              {shift.applicantCount}
+                            </span>
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 align-middle text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedShiftId((current) =>
+                                  current === shift.id ? null : shift.id
+                                )
+                              }
+                              className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
+                            >
+                              {expandedShiftId === shift.id ? "Hide" : "Roster"}
+                            </button>
+                            <ShiftRowActions shiftId={shift.id} status={shift.status} />
+                          </div>
+                        </td>
                       </tr>
-                    ) : null}
-                  </Fragment>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {filteredShifts.length > 0 ? (
-        <div className="flex flex-col gap-3 border-t border-white/[0.06] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-fo-text-muted">
-            Showing {pagination.startIndex} to {pagination.endIndex} of{" "}
-            {pagination.totalItems} shifts
-          </p>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-              disabled={pagination.page <= 1}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Previous
-            </button>
-
-            {Array.from({ length: pagination.totalPages }, (_, index) => index + 1).map(
-              (pageNumber) => (
-                <button
-                  key={pageNumber}
-                  type="button"
-                  onClick={() => setPage(pageNumber)}
-                  className={cn(
-                    "min-w-8 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition",
-                    pageNumber === pagination.page
-                      ? "border-fo-primary-bright/40 bg-fo-primary-bright/15 text-fo-primary-hover"
-                      : "border-white/10 text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
-                  )}
-                >
-                  {pageNumber}
-                </button>
-              )
-            )}
-
-            <button
-              type="button"
-              onClick={() =>
-                setPage((current) => Math.min(pagination.totalPages, current + 1))
-              }
-              disabled={pagination.page >= pagination.totalPages}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
+                      {expandedShiftId === shift.id && workforceByShiftId[shift.id] ? (
+                        <tr>
+                          <td colSpan={7} className="p-0">
+                            <ShiftWorkforcePanel
+                              workforce={workforceByShiftId[shift.id]}
+                            />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      ) : null}
-    </section>
+
+        {filteredShifts.length > 0 ? (
+          <div className="flex flex-col gap-3 border-t border-white/[0.06] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-fo-text-muted">
+              Showing {pagination.startIndex} to {pagination.endIndex} of{" "}
+              {pagination.totalItems} shifts
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={pagination.page <= 1}
+                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+
+              {Array.from({ length: pagination.totalPages }, (_, index) => index + 1).map(
+                (pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    onClick={() => setPage(pageNumber)}
+                    className={cn(
+                      "min-w-8 rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition",
+                      pageNumber === pagination.page
+                        ? "border-fo-primary-bright/40 bg-fo-primary-bright/15 text-fo-primary-hover"
+                        : "border-white/10 text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                    )}
+                  >
+                    {pageNumber}
+                  </button>
+                )
+              )}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setPage((current) => Math.min(pagination.totalPages, current + 1))
+                }
+                disabled={pagination.page >= pagination.totalPages}
+                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </section>
+    </>
   );
 }

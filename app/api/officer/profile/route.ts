@@ -5,6 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { normalizeExperienceCategories } from "@/lib/profile-options";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
+  resolveProfilePhotoUrl,
+} from "@/lib/profile-photo";
+import {
   parseOfficerPayload,
   type OfficerProfilePayload,
 } from "./validation";
@@ -156,6 +159,9 @@ export async function POST(req: Request) {
     const experienceCategories = normalizeExperienceCategories(
       parsed.data.experienceCategories
     );
+    const profilePhotoUrl =
+      resolveProfilePhotoUrl(parsed.data.profilePhotoUrl, clerkUser.imageUrl) ||
+      null;
 
     const result = await prisma.$transaction(async (tx) => {
       const user = existingUser
@@ -184,7 +190,7 @@ export async function POST(req: Request) {
           lastName: parsed.data.lastName,
           phone: parsed.data.phone,
           city: parsed.data.city,
-          profilePhotoUrl: parsed.data.profilePhotoUrl,
+          profilePhotoUrl,
           armedStatuses: parsed.data.armedStatuses,
           experienceYears: parsed.data.experienceYears,
           availability: parsed.data.availability,
@@ -199,7 +205,7 @@ export async function POST(req: Request) {
           lastName: parsed.data.lastName,
           phone: parsed.data.phone,
           city: parsed.data.city,
-          profilePhotoUrl: parsed.data.profilePhotoUrl,
+          profilePhotoUrl,
           armedStatuses: parsed.data.armedStatuses,
           experienceYears: parsed.data.experienceYears,
           availability: parsed.data.availability,

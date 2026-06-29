@@ -6,6 +6,7 @@ import {
   PageShell,
   SectionHeading,
 } from "@/components/ui";
+import { MobilePrimaryButton } from "@/components/ui/mobile";
 import { MyShiftsTable } from "@/components/company/my-shifts-table";
 import {
   canCompanyPostNewShifts,
@@ -88,52 +89,72 @@ export default async function CompanyShiftsPage() {
 
   return (
     <PageShell nav="company" maxWidth="6xl" sidebar>
-      <SectionHeading
-        title="My Shifts"
-        subtitle="Track, manage, and update your posted shifts."
-        action={
-          canPostShifts ? (
-            <Link
-              href="/shifts/create"
-              className={buttonClassName({ size: "md" })}
-            >
-              Post a Shift
-            </Link>
-          ) : (
+      <div className="space-y-4 md:space-y-0">
+        <div className="space-y-4 md:hidden">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-fo-text">
+              My Shifts
+            </h1>
+            <p className="mt-1.5 text-sm leading-relaxed text-fo-text-muted">
+              Track, manage, and update your posted shifts.
+            </p>
+          </div>
+
+          <MobilePrimaryButton
+            href={canPostShifts ? "/shifts/create" : "/company/billing"}
+          >
+            + Post a Shift
+          </MobilePrimaryButton>
+        </div>
+
+        <SectionHeading
+          className="hidden md:flex"
+          title="My Shifts"
+          subtitle="Track, manage, and update your posted shifts."
+          action={
+            canPostShifts ? (
+              <Link
+                href="/shifts/create"
+                className={buttonClassName({ size: "md" })}
+              >
+                Post a Shift
+              </Link>
+            ) : (
+              <Link
+                href="/company/billing"
+                className={buttonClassName({ size: "md" })}
+              >
+                Subscribe to Post Shifts
+              </Link>
+            )
+          }
+        />
+
+        {!canPostShifts ? (
+          <Card variant="muted" className="md:mt-6">
+            <p className="text-sm leading-relaxed text-fo-text-muted">
+              {postingBlockMessage ??
+                "Your trial or subscription is inactive. You can still manage existing shifts, but posting new shifts requires active access."}
+            </p>
             <Link
               href="/company/billing"
-              className={buttonClassName({ size: "md" })}
+              className={buttonClassName({
+                variant: "secondary",
+                size: "md",
+                className: "mt-4",
+              })}
             >
-              Subscribe to Post Shifts
+              View Billing
             </Link>
-          )
-        }
-      />
+          </Card>
+        ) : null}
 
-      {!canPostShifts ? (
-        <Card variant="muted" className="mt-6">
-          <p className="text-sm leading-relaxed text-fo-text-muted">
-            {postingBlockMessage ??
-              "Your trial or subscription is inactive. You can still manage existing shifts, but posting new shifts requires active access."}
-          </p>
-          <Link
-            href="/company/billing"
-            className={buttonClassName({
-              variant: "secondary",
-              size: "md",
-              className: "mt-4",
-            })}
-          >
-            View Billing
-          </Link>
-        </Card>
-      ) : null}
-
-      <MyShiftsTable
-        shifts={serializedShifts}
-        workforceByShiftId={workforceByShiftId}
-        canPostShifts={canPostShifts}
-      />
+        <MyShiftsTable
+          shifts={serializedShifts}
+          workforceByShiftId={workforceByShiftId}
+          canPostShifts={canPostShifts}
+        />
+      </div>
     </PageShell>
   );
 }

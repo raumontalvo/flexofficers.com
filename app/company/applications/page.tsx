@@ -2,7 +2,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { CompanyApplicantsPageContent } from "@/components/company/company-applicants-page-content";
 import { PageShell, SectionHeading } from "@/components/ui";
 import { serializeCompanyApplicant } from "@/lib/company-applications-page";
-import { officerApplicantSelect } from "@/lib/officer-fields";
+import { officerApplicantSelect, officerUserSummarySelect } from "@/lib/officer-fields";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 
@@ -47,9 +47,7 @@ export default async function CompanyApplicationsPage() {
           availability: true,
           state: true,
           user: {
-            select: {
-              email: true,
-            },
+            select: officerUserSummarySelect,
           },
         },
       },

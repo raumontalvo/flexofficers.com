@@ -72,6 +72,14 @@ export function formatShiftTableDate(date: Date) {
   });
 }
 
+export function formatShiftDateBadgeParts(date: Date) {
+  return {
+    weekday: date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase(),
+    month: date.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+    day: String(date.getDate()),
+  };
+}
+
 export function serializeCompanyShiftRow(
   shift: CompanyShiftRowRecord
 ): SerializedCompanyShiftRow {

@@ -96,9 +96,6 @@ describe("buildOfficerSearchWhere", () => {
     });
 
     expect(where).toEqual({
-      user: {
-        role: "OFFICER",
-      },
       city: {
         contains: "Austin",
         mode: "insensitive",

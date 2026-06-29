@@ -152,7 +152,7 @@ export function ApplicantsShiftSummaryPanel({
             className: "mt-4 w-full",
           })}
         >
-          View My Shifts
+          Back to My Shifts
         </Link>
       </section>
     </div>

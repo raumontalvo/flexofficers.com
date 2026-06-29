@@ -3,16 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
+import { ApplicantMobileCard } from "@/components/company/applicant-mobile-card";
 import { ApplicationReviewPanel } from "@/components/company/application-review-panel";
 import { ApplicantsShiftSummaryPanel } from "@/components/company/applicants-shift-summary-panel";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
-import {
-  MobileListCard,
-  MobileListCardActions,
-  MobileListCardGroup,
-  MobilePrimaryButton,
-  MobileSecondaryButton,
-} from "@/components/ui/mobile";
+import { MobileSecondaryButton } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import {
   filterCompanyApplicantsByShift,
@@ -34,11 +29,6 @@ const TABS: { id: CompanyApplicantsTab; label: string }[] = [
 
 const ROW_GRID =
   "grid grid-cols-[minmax(0,1.15fr)_minmax(0,1.15fr)_minmax(0,0.75fr)_72px_118px] items-center gap-x-3";
-
-type ApplicantRowActionsProps = {
-  application: SerializedCompanyApplicant;
-  onView: () => void;
-};
 
 async function updateApplicationStatus(
   applicationId: string,
@@ -151,8 +141,10 @@ function ApplicantStatusBadge({ status }: { status: ApplicationStatus }) {
 function ApplicantRowActions({
   application,
   onView,
-  stacked = false,
-}: ApplicantRowActionsProps & { stacked?: boolean }) {
+}: {
+  application: SerializedCompanyApplicant;
+  onView: () => void;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isPending = application.status === ApplicationStatus.PENDING;
@@ -171,29 +163,6 @@ function ApplicantRowActions({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
-
-  if (stacked) {
-    return (
-      <MobileListCardActions>
-        <MobileSecondaryButton onClick={onView}>View</MobileSecondaryButton>
-        {isPending ? (
-          <>
-            <MobilePrimaryButton
-              onClick={() => void updateApplicationStatus(application.id, "ACCEPTED")}
-            >
-              Accept
-            </MobilePrimaryButton>
-            <MobileSecondaryButton
-              onClick={() => void updateApplicationStatus(application.id, "REJECTED")}
-              variant="danger"
-            >
-              Reject
-            </MobileSecondaryButton>
-          </>
-        ) : null}
-      </MobileListCardActions>
-    );
-  }
 
   return (
     <div className="flex shrink-0 items-center justify-end gap-1">
@@ -285,6 +254,130 @@ function MetaLine({
   );
 }
 
+function ApplicantFilters({
+  activeTab,
+  onTabChange,
+  tabCounts,
+  searchQuery,
+  onSearchChange,
+  shiftFilter,
+  onShiftFilterChange,
+  shiftOptions,
+  compact = false,
+}: {
+  activeTab: CompanyApplicantsTab;
+  onTabChange: (tab: CompanyApplicantsTab) => void;
+  tabCounts: ReturnType<typeof getCompanyApplicantsTabCounts>;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  shiftFilter: string | null;
+  onShiftFilterChange: (shiftId: string | null) => void;
+  shiftOptions: ReturnType<typeof getUniqueApplicantShifts>;
+  compact?: boolean;
+}) {
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  return (
+    <div className={cn("space-y-2.5", compact && "space-y-2")}>
+      <div className="overflow-x-auto">
+        <div className="flex min-w-max flex-nowrap gap-1.5">
+          {TABS.map((tab) => {
+            const count = tabCounts[tab.id];
+
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onTabChange(tab.id)}
+                className={cn(
+                  "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition",
+                  compact && "px-2.5 py-1",
+                  activeTab === tab.id
+                    ? "bg-fo-primary-bright/20 text-fo-primary-hover"
+                    : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                )}
+              >
+                {tab.label}
+                {count > 0 ? (
+                  <span className="ml-1 text-[10px] opacity-80">({count})</span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex min-w-0 items-center gap-2">
+        <label className="relative min-w-0 flex-1">
+          <span className="sr-only">Search applicants</span>
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Search applicants..."
+            className={cn(
+              "w-full rounded-xl border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20",
+              compact ? "min-h-9" : "min-h-9 lg:min-h-10"
+            )}
+          />
+        </label>
+
+        <div className="relative shrink-0">
+          <button
+            type="button"
+            onClick={() => setFilterOpen((open) => !open)}
+            className={cn(
+              "rounded-xl border px-3 py-2 text-xs font-semibold transition",
+              compact ? "min-h-9" : "min-h-9 lg:min-h-10",
+              shiftFilter
+                ? "border-fo-primary-bright/40 bg-fo-primary-bright/10 text-fo-primary-hover"
+                : "border-white/10 text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+            )}
+          >
+            Filter
+          </button>
+
+          {filterOpen ? (
+            <div className="absolute right-0 z-30 mt-1 max-h-56 min-w-[220px] overflow-y-auto rounded-lg border border-white/10 bg-fo-bg-elevated p-2 shadow-xl">
+              <button
+                type="button"
+                onClick={() => {
+                  onShiftFilterChange(null);
+                  setFilterOpen(false);
+                }}
+                className={cn(
+                  "block w-full rounded-md px-3 py-2 text-left text-sm transition hover:bg-white/[0.04]",
+                  !shiftFilter ? "text-fo-text" : "text-fo-text-muted"
+                )}
+              >
+                All Shifts
+              </button>
+              {shiftOptions.map((shift) => (
+                <button
+                  key={shift.id}
+                  type="button"
+                  onClick={() => {
+                    onShiftFilterChange(shift.id);
+                    setFilterOpen(false);
+                  }}
+                  className={cn(
+                    "block w-full rounded-md px-3 py-2 text-left text-sm transition hover:bg-white/[0.04]",
+                    shiftFilter === shift.id
+                      ? "text-fo-primary-hover"
+                      : "text-fo-text-muted"
+                  )}
+                >
+                  {shift.title}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 type CompanyApplicantsPageContentProps = {
   applications: SerializedCompanyApplicant[];
 };
@@ -295,7 +388,6 @@ export function CompanyApplicantsPageContent({
   const [activeTab, setActiveTab] = useState<CompanyApplicantsTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [shiftFilter, setShiftFilter] = useState<string | null>(null);
-  const [filterOpen, setFilterOpen] = useState(false);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(
     applications[0]?.id ?? null
   );
@@ -350,295 +442,202 @@ export function CompanyApplicantsPageContent({
 
   if (applications.length === 0) {
     return (
-      <section className="fo-glass-card mt-6 rounded-xl border border-white/10 px-4 py-12 text-center">
+      <section className="fo-glass-card mt-4 rounded-xl border border-white/10 px-4 py-12 text-center lg:mt-6">
         <h2 className="text-lg font-semibold text-fo-text">No applicants yet.</h2>
         <p className="mt-2 text-sm text-fo-text-muted">
           Once officers apply to your shifts, they&apos;ll appear here for review.
         </p>
+        <MobileSecondaryButton
+          href="/company/shifts"
+          className="mx-auto mt-5 min-h-10 max-w-xs text-sm lg:hidden"
+        >
+          Back to My Shifts
+        </MobileSecondaryButton>
         <Link
           href="/company/shifts"
           className={buttonClassName({
             size: "md",
-            className: "mt-5 inline-flex",
+            className: "mt-5 hidden inline-flex lg:inline-flex",
           })}
         >
-          View My Shifts
+          Back to My Shifts
         </Link>
       </section>
     );
   }
 
   return (
-    <div className="mt-6 grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <section className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
-        <div className="border-b border-white/[0.06] px-3 py-3 sm:px-4">
-          <div className="overflow-x-auto">
-            <div className="flex min-w-max flex-nowrap gap-2">
-              {TABS.map((tab) => {
-                const count = tabCounts[tab.id];
-
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                      "shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition",
-                      activeTab === tab.id
-                        ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                        : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
-                    )}
-                  >
-                    {tab.label}
-                    {count > 0 ? (
-                      <span className="ml-1.5 text-[11px] opacity-80">({count})</span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-3 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-            <label className="relative min-w-0 flex-1">
-              <span className="sr-only">Search applicants</span>
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search applicants..."
-                className="min-h-9 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
-              />
-            </label>
-
-            <div className="relative w-full shrink-0 sm:w-auto">
-              <button
-                type="button"
-                onClick={() => setFilterOpen((open) => !open)}
-                className={cn(
-                  "min-h-12 w-full rounded-lg border px-3 py-2 text-xs font-semibold transition sm:min-h-9 sm:w-auto",
-                  shiftFilter
-                    ? "border-fo-primary-bright/40 bg-fo-primary-bright/10 text-fo-primary-hover"
-                    : "border-white/10 text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
-                )}
-              >
-                Filter
-              </button>
-
-              {filterOpen ? (
-                <div className="absolute right-0 z-30 mt-1 max-h-56 min-w-[220px] overflow-y-auto rounded-lg border border-white/10 bg-fo-bg-elevated p-2 shadow-xl">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShiftFilter(null);
-                      setFilterOpen(false);
-                    }}
-                    className={cn(
-                      "block w-full rounded-md px-3 py-2 text-left text-sm transition hover:bg-white/[0.04]",
-                      !shiftFilter ? "text-fo-text" : "text-fo-text-muted"
-                    )}
-                  >
-                    All Shifts
-                  </button>
-                  {shiftOptions.map((shift) => (
-                    <button
-                      key={shift.id}
-                      type="button"
-                      onClick={() => {
-                        setShiftFilter(shift.id);
-                        setFilterOpen(false);
-                      }}
-                      className={cn(
-                        "block w-full rounded-md px-3 py-2 text-left text-sm transition hover:bg-white/[0.04]",
-                        shiftFilter === shift.id
-                          ? "text-fo-primary-hover"
-                          : "text-fo-text-muted"
-                      )}
-                    >
-                      {shift.title}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-
-        <div
-          className={cn(
-            ROW_GRID,
-            "hidden border-b border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted sm:px-4 lg:grid"
-          )}
-        >
-          <div>Applicant</div>
-          <div>Shift</div>
-          <div>Applied</div>
-          <div>Status</div>
-          <div className="text-right">Actions</div>
+    <>
+      <div className="mt-4 space-y-3 pb-24 lg:hidden">
+        <div className="fo-glass-card rounded-2xl border border-white/10 p-3 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)]">
+          <ApplicantFilters
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            tabCounts={tabCounts}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            shiftFilter={shiftFilter}
+            onShiftFilterChange={setShiftFilter}
+            shiftOptions={shiftOptions}
+            compact
+          />
         </div>
 
         {filteredApplications.length === 0 ? (
-          <div className="px-4 py-10 text-center text-sm text-fo-text-muted">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-fo-text-muted">
             No applicants match this filter.
           </div>
         ) : (
-          <MobileListCardGroup className="lg:hidden">
-            {filteredApplications.map((application) => {
-              const schedule = formatApplicantShiftSchedule(
-                application.shiftStartTime,
-                application.shiftEndTime
-              );
-              const locationLine = application.shiftLocationSubtext
-                ? `${application.shiftLocationLabel} · ${application.shiftLocationSubtext}`
-                : application.shiftLocationLabel;
-              const isSelected = selectedApplication?.id === application.id;
+          <div className="space-y-2.5">
+            {filteredApplications.map((application) => (
+              <ApplicantMobileCard
+                key={application.id}
+                application={application}
+                onView={() => setReviewApplicationId(application.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
-              return (
-                <MobileListCard
-                  key={application.id}
-                  onClick={() => setSelectedApplicationId(application.id)}
-                  selected={isSelected}
-                >
-                    <div className="flex items-start gap-3">
-                      <OfficerAvatar
-                        name={application.officerName}
-                        photoUrl={application.profilePhotoUrl}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-fo-text">
-                          {application.officerName}
-                        </p>
-                        <ApplicantStatusBadge status={application.status} />
+      <div className="mt-6 hidden min-w-0 gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.02]">
+          <div className="border-b border-white/[0.06] px-4 py-4">
+            <ApplicantFilters
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              tabCounts={tabCounts}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              shiftFilter={shiftFilter}
+              onShiftFilterChange={setShiftFilter}
+              shiftOptions={shiftOptions}
+            />
+          </div>
+
+          <div
+            className={cn(
+              ROW_GRID,
+              "border-b border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted"
+            )}
+          >
+            <div>Applicant</div>
+            <div>Shift</div>
+            <div>Applied</div>
+            <div>Status</div>
+            <div className="text-right">Actions</div>
+          </div>
+
+          {filteredApplications.length === 0 ? (
+            <div className="px-4 py-10 text-center text-sm text-fo-text-muted">
+              No applicants match this filter.
+            </div>
+          ) : (
+            <div className="divide-y divide-white/[0.04]">
+              {filteredApplications.map((application) => {
+                const schedule = formatApplicantShiftSchedule(
+                  application.shiftStartTime,
+                  application.shiftEndTime
+                );
+                const locationLine = application.shiftLocationSubtext
+                  ? `${application.shiftLocationLabel} · ${application.shiftLocationSubtext}`
+                  : application.shiftLocationLabel;
+                const isSelected = selectedApplication?.id === application.id;
+
+                return (
+                  <div
+                    key={application.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedApplicationId(application.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setSelectedApplicationId(application.id);
+                      }
+                    }}
+                    className={cn(
+                      ROW_GRID,
+                      "min-h-[104px] cursor-pointer px-4 py-3 transition hover:bg-white/[0.03]",
+                      isSelected && "bg-blue-500/[0.06]"
+                    )}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-start gap-2.5">
+                        <OfficerAvatar
+                          name={application.officerName}
+                          photoUrl={application.profilePhotoUrl}
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-fo-text">
+                            {application.officerName}
+                          </p>
+                          {application.licenseNumbers.length > 0 ? (
+                            <MetaLine icon={LicenseIcon}>
+                              {application.licenseNumbers.join(", ")}
+                            </MetaLine>
+                          ) : null}
+                          {application.phone ? (
+                            <MetaLine icon={PhoneIcon}>{application.phone}</MetaLine>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-1 text-sm">
-                      <p className="font-medium text-fo-text">{application.shiftTitle}</p>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-fo-text">
+                        {application.shiftTitle}
+                      </p>
                       <MetaLine icon={LocationIcon}>{locationLine}</MetaLine>
                       <MetaLine icon={CalendarIcon}>
                         {`${schedule.dateLabel} · ${schedule.timeLabel}`}
                       </MetaLine>
-                      <p className="text-xs text-fo-text-muted">
-                        Applied {application.appliedDateLabel} ·{" "}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="flex items-center gap-1.5 text-xs text-fo-text">
+                        <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+                        <span className="truncate">{application.appliedDateLabel}</span>
+                      </p>
+                      <p className="mt-1 pl-5 text-[11px] text-fo-text-muted">
                         {application.appliedTimeLabel}
                       </p>
                     </div>
 
-                    <ApplicantRowActions
-                      application={application}
-                      onView={() => setReviewApplicationId(application.id)}
-                      stacked
-                    />
-                </MobileListCard>
-              );
-            })}
-          </MobileListCardGroup>
-        )}
+                    <div className="flex justify-center">
+                      <ApplicantStatusBadge status={application.status} />
+                    </div>
 
-        {filteredApplications.length > 0 ? (
-          <div className="hidden divide-y divide-white/[0.04] lg:block">
-            {filteredApplications.map((application) => {
-              const schedule = formatApplicantShiftSchedule(
-                application.shiftStartTime,
-                application.shiftEndTime
-              );
-              const locationLine = application.shiftLocationSubtext
-                ? `${application.shiftLocationLabel} · ${application.shiftLocationSubtext}`
-                : application.shiftLocationLabel;
-              const isSelected = selectedApplication?.id === application.id;
-
-              return (
-                <div
-                  key={application.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedApplicationId(application.id)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setSelectedApplicationId(application.id);
-                    }
-                  }}
-                  className={cn(
-                    ROW_GRID,
-                    "min-h-[104px] cursor-pointer px-3 py-3 transition hover:bg-white/[0.03] sm:px-4",
-                    isSelected && "bg-blue-500/[0.06]"
-                  )}
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-start gap-2.5">
-                      <OfficerAvatar
-                        name={application.officerName}
-                        photoUrl={application.profilePhotoUrl}
+                    <div
+                      className="flex justify-end"
+                      onClick={(event) => event.stopPropagation()}
+                      onKeyDown={(event) => event.stopPropagation()}
+                    >
+                      <ApplicantRowActions
+                        application={application}
+                        onView={() => setReviewApplicationId(application.id)}
                       />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-fo-text">
-                          {application.officerName}
-                        </p>
-                        {application.licenseNumbers.length > 0 ? (
-                          <MetaLine icon={LicenseIcon}>
-                            {application.licenseNumbers.join(", ")}
-                          </MetaLine>
-                        ) : null}
-                        {application.phone ? (
-                          <MetaLine icon={PhoneIcon}>{application.phone}</MetaLine>
-                        ) : null}
-                      </div>
                     </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-fo-text">
-                      {application.shiftTitle}
-                    </p>
-                    <MetaLine icon={LocationIcon}>{locationLine}</MetaLine>
-                    <MetaLine icon={CalendarIcon}>
-                      {`${schedule.dateLabel} · ${schedule.timeLabel}`}
-                    </MetaLine>
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="flex items-center gap-1.5 text-xs text-fo-text">
-                      <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-                      <span className="truncate">{application.appliedDateLabel}</span>
-                    </p>
-                    <p className="mt-1 pl-5 text-[11px] text-fo-text-muted">
-                      {application.appliedTimeLabel}
-                    </p>
-                  </div>
-
-                  <div className="flex justify-center">
-                    <ApplicantStatusBadge status={application.status} />
-                  </div>
-
-                  <div
-                    className="flex justify-end"
-                    onClick={(event) => event.stopPropagation()}
-                    onKeyDown={(event) => event.stopPropagation()}
-                  >
-                    <ApplicantRowActions
-                      application={application}
-                      onView={() => setReviewApplicationId(application.id)}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
-      </section>
-
-      <div className="min-w-0 shrink-0 lg:w-[320px]">
-        <ApplicantsShiftSummaryPanel
-          applications={applications}
-          selectedApplication={selectedApplication}
-        />
+        <div className="min-w-0 shrink-0 lg:w-[320px]">
+          <ApplicantsShiftSummaryPanel
+            applications={applications}
+            selectedApplication={selectedApplication}
+          />
+        </div>
       </div>
 
       <ApplicationReviewPanel
         application={reviewApplication}
+        allApplications={applications}
         onClose={() => setReviewApplicationId(null)}
       />
-    </div>
+    </>
   );
 }

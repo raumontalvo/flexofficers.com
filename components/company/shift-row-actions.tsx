@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
+import {
+  cancelCompanyShift,
+  deleteCompanyShift,
+} from "@/components/company/shift-actions-menu";
 import { MobilePrimaryButton, MobileSecondaryButton } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -79,54 +83,6 @@ function DeleteIcon({ className }: { className?: string }) {
 export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowActionsProps) {
   const isCancelled = status === ShiftStatus.CANCELLED;
 
-  async function cancelShift() {
-    const confirmed = window.confirm(
-      "Are you sure you want to cancel this shift? It will be removed from Available Shifts but kept in your company history."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    const response = await fetch("/api/shifts/cancel", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ shiftId }),
-    });
-
-    if (response.ok) {
-      window.location.reload();
-    } else {
-      alert("Failed to cancel shift");
-    }
-  }
-
-  async function deleteShift() {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this shift? This cannot be undone."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    const response = await fetch("/api/shifts/delete", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ shiftId }),
-    });
-
-    if (response.ok) {
-      window.location.reload();
-    } else {
-      alert("Failed to delete shift");
-    }
-  }
-
   if (stacked) {
     return (
       <div className="flex w-full flex-col gap-2">
@@ -138,10 +94,10 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
             Edit
           </MobileSecondaryButton>
         )}
-        <MobileSecondaryButton onClick={cancelShift} disabled={isCancelled}>
+        <MobileSecondaryButton onClick={() => void cancelCompanyShift(shiftId)} disabled={isCancelled}>
           Cancel
         </MobileSecondaryButton>
-        <MobilePrimaryButton onClick={deleteShift} variant="danger">
+        <MobilePrimaryButton onClick={() => void deleteCompanyShift(shiftId)} variant="danger">
           Delete
         </MobilePrimaryButton>
       </div>
@@ -191,7 +147,7 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
 
       <button
         type="button"
-        onClick={cancelShift}
+        onClick={() => void cancelCompanyShift(shiftId)}
         disabled={isCancelled}
         className={cn(
           iconButtonClassName,
@@ -205,7 +161,7 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
 
       <button
         type="button"
-        onClick={deleteShift}
+        onClick={() => void deleteCompanyShift(shiftId)}
         className={cn(
           iconButtonClassName,
           "border-red-500/30 text-red-200 hover:bg-red-500/10"

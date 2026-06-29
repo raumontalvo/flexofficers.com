@@ -475,7 +475,7 @@ export function CompanyOfficersPageContent({
             </div>
           </div>
 
-          <div className="space-y-3 lg:hidden">
+          <div className="space-y-2.5 pb-24 lg:hidden">
             {sortedOfficers.map((officer) => (
               <OfficerSearchMobileCard
                 key={officer.id}
@@ -487,16 +487,6 @@ export function CompanyOfficersPageContent({
                   invites,
                   openShiftIds
                 )}
-                staffAction={
-                  <AddToStaffButton
-                    officerId={officer.id}
-                    isOnStaff={staffOfficerIds.has(officer.id)}
-                    size="mobile"
-                    className="w-full"
-                    onAdded={() => handleStaffChange(officer.id, true)}
-                    onRemoved={() => handleStaffChange(officer.id, false)}
-                  />
-                }
               />
             ))}
           </div>
@@ -530,6 +520,12 @@ export function CompanyOfficersPageContent({
       <OfficerProfilePanel
         officer={profileOfficer}
         onClose={() => setProfileOfficerId(null)}
+        isOnStaff={profileOfficer ? staffOfficerIds.has(profileOfficer.id) : false}
+        onStaffChange={
+          profileOfficer
+            ? (onStaff) => handleStaffChange(profileOfficer.id, onStaff)
+            : undefined
+        }
       />
 
       <InviteOfficerModal
