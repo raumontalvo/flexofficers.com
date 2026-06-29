@@ -1,14 +1,20 @@
 import { cn } from "@/lib/cn";
-import { PROFILE_WIZARD_TIPS } from "./profile-wizard-tips";
+import { PROFILE_WIZARD_TIPS, PROFILE_APPLY_TIP } from "./profile-wizard-tips";
 import type { ProfileWizardStepId } from "./profile-wizard-steps";
 
 type ProfileWizardTipsProps = {
   stepId: ProfileWizardStepId;
   className?: string;
+  showApplyTip?: boolean;
 };
 
-export function ProfileWizardTips({ stepId, className }: ProfileWizardTipsProps) {
+export function ProfileWizardTips({
+  stepId,
+  className,
+  showApplyTip = false,
+}: ProfileWizardTipsProps) {
   const tips = PROFILE_WIZARD_TIPS[stepId];
+  const items = showApplyTip ? [PROFILE_APPLY_TIP, ...tips.items] : tips.items;
 
   return (
     <aside
@@ -19,7 +25,7 @@ export function ProfileWizardTips({ stepId, className }: ProfileWizardTipsProps)
     >
       <h3 className="text-sm font-semibold text-fo-text">{tips.title}</h3>
       <ul className="mt-3 space-y-2.5">
-        {tips.items.map((item) => (
+        {items.map((item) => (
           <li
             key={item}
             className="flex gap-2 text-sm leading-relaxed text-fo-text-muted"

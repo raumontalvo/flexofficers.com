@@ -769,12 +769,14 @@ export default function OfficerProfileForm({
         <ProfileWizardTips
           stepId={currentStep.id}
           className="hidden lg:block"
+          showApplyTip={completionPercent < 100}
         />
       </div>
 
       <ProfileWizardTips
         stepId={currentStep.id}
         className="mt-4 lg:hidden"
+        showApplyTip={completionPercent < 100}
       />
 
       <ProfileWizardFooter

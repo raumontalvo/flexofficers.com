@@ -5,6 +5,9 @@ export type ProfileWizardTip = {
   items: string[];
 };
 
+export const PROFILE_APPLY_TIP =
+  "Complete your profile so you can apply to shifts.";
+
 export const PROFILE_WIZARD_TIPS: Record<ProfileWizardStepId, ProfileWizardTip> =
   {
     basic: {
