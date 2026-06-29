@@ -124,7 +124,7 @@ export function ApplicationReviewPanel({
         error?: string;
       } | null;
 
-      alert(data?.error || "Failed to update application");
+      alert(data?.error || "Failed to update applicant");
     } finally {
       setIsSubmitting(false);
     }
@@ -136,7 +136,7 @@ export function ApplicationReviewPanel({
     <>
       <button
         type="button"
-        aria-label="Close application review panel"
+        aria-label="Close applicant review panel"
         className={cn(
           "fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] transition-opacity",
           application ? "opacity-100" : "pointer-events-none opacity-0"
@@ -157,7 +157,7 @@ export function ApplicationReviewPanel({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-bold text-fo-text">
-                    Application Review
+                    Applicant Review
                   </h2>
                   <p className="mt-1 text-sm text-fo-text-muted">
                     {application.officerProfile.name} · {application.appliedShift.title}

@@ -141,7 +141,7 @@ export const companySidebarItems: NavItem[] = [
   },
   {
     href: "/company/applications",
-    label: "Applications",
+    label: "Applicants",
     icon: ApplicantsIcon,
     match: (pathname) => pathname.startsWith("/company/applications"),
   },
@@ -198,7 +198,7 @@ export const companyNavItems: NavItem[] = [
   },
   {
     href: "/company/applications",
-    label: "Applications",
+    label: "Applicants",
     icon: ApplicantsIcon,
     match: (pathname) => pathname.startsWith("/company/applications"),
   },
@@ -207,6 +207,12 @@ export const companyNavItems: NavItem[] = [
     label: "Officers",
     icon: SearchIcon,
     match: (pathname) => pathname.startsWith("/company/officers"),
+  },
+  {
+    href: "/company/staff",
+    label: "Staff",
+    icon: StaffIcon,
+    match: (pathname) => pathname.startsWith("/company/staff"),
   },
   {
     href: "/company/profile",

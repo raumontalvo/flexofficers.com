@@ -18,8 +18,8 @@ const actions = [
   },
   {
     href: "/company/applications",
-    title: "View Applications",
-    description: "Review new officer applications.",
+    title: "View Applicants",
+    description: "Review new officer applicants.",
     icon: ApplicantsIcon,
     iconClassName: "bg-violet-500/20 text-violet-300",
   },

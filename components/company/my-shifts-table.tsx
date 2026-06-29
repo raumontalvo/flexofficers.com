@@ -136,7 +136,7 @@ function EmptyShiftsState({ canPostShifts }: { canPostShifts: boolean }) {
     <div className="px-4 py-16 text-center">
       <h3 className="text-lg font-semibold text-fo-text">No shifts posted yet.</h3>
       <p className="mt-2 text-sm text-fo-text-muted">
-        Post your first shift to start receiving officer applications.
+        Post your first shift to start receiving applicants.
       </p>
       <Link
         href={canPostShifts ? "/shifts/create" : "/company/billing"}

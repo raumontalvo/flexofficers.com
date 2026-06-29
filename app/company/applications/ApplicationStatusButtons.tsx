@@ -23,10 +23,10 @@ export default function ApplicationStatusButtons({
     });
 
     if (response.ok) {
-      alert(`Application ${nextStatus.toLowerCase()}!`);
+      alert(`Applicant ${nextStatus.toLowerCase()}!`);
       window.location.reload();
     } else {
-      alert("Failed to update application");
+      alert("Failed to update applicant");
     }
   }
 

@@ -44,12 +44,12 @@ export function CompanyRecentApplications({
       className="fo-glass-card h-full border border-white/10 p-4"
     >
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-base font-bold text-fo-text">Recent Applications</h2>
+        <h2 className="text-base font-bold text-fo-text">Recent Applicants</h2>
         <Link
           href="/company/applications"
           className="text-xs font-semibold text-fo-primary-hover hover:underline"
         >
-          View All Applications
+          View All Applicants
         </Link>
       </div>
 

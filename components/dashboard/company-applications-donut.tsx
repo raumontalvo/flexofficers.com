@@ -75,13 +75,13 @@ export function CompanyApplicationsDonut(props: CompanyApplicationsDonutProps) {
       padding="none"
       className="fo-glass-card h-full border border-white/10 p-4"
     >
-      <h2 className="text-base font-bold text-fo-text">Applications Overview</h2>
+      <h2 className="text-base font-bold text-fo-text">Applicants Overview</h2>
 
       {total === 0 ? (
         <div className="mt-6 flex flex-col items-center justify-center py-6 text-center">
           <DonutChart segments={segments} />
           <p className="mt-4 text-sm text-fo-text-muted">
-            Application and invite activity will appear here once officers apply
+            Applicant and invite activity will appear here once officers apply
             or accept your invites.
           </p>
         </div>

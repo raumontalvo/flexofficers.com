@@ -61,7 +61,7 @@ async function updateApplicationStatus(
     error?: string;
   } | null;
 
-  alert(data?.error || "Failed to update application");
+  alert(data?.error || "Failed to update applicant");
 }
 
 function LocationIcon({ className }: { className?: string }) {

@@ -37,7 +37,7 @@ export function CompanySummaryCards({
         hint={`Open ${shiftStats.open} · Filled ${shiftStats.filled} · Past ${shiftStats.past}`}
       />
       <StatCard
-        label="Applications"
+        label="Applicants"
         value={applicationsSummary.total}
         tone="purple"
         hint={`${applicationsSummary.pending} Pending · ${applicationsSummary.invited} Invited · ${applicationsSummary.accepted} Accepted`}
