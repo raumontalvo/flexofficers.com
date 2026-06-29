@@ -37,12 +37,25 @@ export function InvitesBrowseList({
   const [tab, setTab] = useState<InviteTab>("all");
   const [sort, setSort] = useState<InviteSortOption>("newest");
   const [viewMode, setViewMode] = useState<InviteViewMode>("list");
-  const tabCounts = useMemo(() => getInviteTabCounts(invites), [invites]);
+  const [removedInviteIds, setRemovedInviteIds] = useState<string[]>([]);
+
+  const activeInvites = useMemo(
+    () => invites.filter((invite) => !removedInviteIds.includes(invite.id)),
+    [invites, removedInviteIds]
+  );
+
+  const tabCounts = useMemo(() => getInviteTabCounts(activeInvites), [activeInvites]);
 
   const visibleInvites = useMemo(() => {
-    const filtered = filterInvitesByTab(invites, tab);
+    const filtered = filterInvitesByTab(activeInvites, tab);
     return sortOfficerInvites(filtered, sort);
-  }, [invites, tab, sort]);
+  }, [activeInvites, tab, sort]);
+
+  function handleInviteDeleted(inviteId: string) {
+    setRemovedInviteIds((current) =>
+      current.includes(inviteId) ? current : [...current, inviteId]
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -77,10 +90,10 @@ export function InvitesBrowseList({
           {visibleInvites.length === 0 ? (
             <section className="fo-glass-card rounded-xl border border-white/10 px-4 py-12 text-center">
               <h2 className="text-lg font-semibold text-fo-text">
-                {invites.length === 0 ? "No invites found." : "No invites in this tab."}
+                {activeInvites.length === 0 ? "No invites found." : "No invites in this tab."}
               </h2>
               <p className="mt-2 text-sm text-fo-text-muted">
-                {invites.length === 0
+                {activeInvites.length === 0
                   ? "When a company invites you to a shift, it will appear here."
                   : "Try another tab or adjust your filters."}
               </p>
@@ -163,6 +176,7 @@ export function InvitesBrowseList({
                     invite={invite}
                     viewMode={viewMode}
                     onRespond={() => undefined}
+                    onDeleted={handleInviteDeleted}
                   />
                 ))}
               </div>
@@ -170,7 +184,7 @@ export function InvitesBrowseList({
           )}
 
           <InvitesMobileFooter
-            invites={invites}
+            invites={activeInvites}
             inviteNotifications={inviteNotifications}
           />
         </div>

@@ -17,8 +17,11 @@ import {
 } from "@/lib/officer-upcoming-shift-data";
 import { UpcomingShiftCard } from "./UpcomingShiftCard";
 
-const fieldClassName =
+const desktopFieldClassName =
   "min-h-9 w-full rounded-lg border border-fo-border bg-fo-bg-elevated px-2.5 py-1.5 text-sm text-fo-text focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30";
+
+const mobileSortClassName =
+  "max-w-[5.5rem] cursor-pointer border-0 bg-transparent py-0.5 text-[11px] font-semibold text-fo-text focus:outline-none";
 
 const filterOptions: { value: UpcomingShiftFilter; label: string }[] = [
   { value: "", label: "All Upcoming" },
@@ -30,6 +33,9 @@ const sortOptions: { value: UpcomingShiftSort; label: string }[] = [
   { value: "soonest", label: "Soonest" },
   { value: "latest", label: "Latest" },
 ];
+
+const compactStatCardClassName =
+  "!gap-2 !p-3 [&>div>p:nth-child(2)]:text-lg [&>div>p:nth-child(2)]:sm:text-lg";
 
 type UpcomingShiftsBrowseListProps = {
   applications: OfficerAcceptedShiftData[];
@@ -58,16 +64,47 @@ export function UpcomingShiftsBrowseList({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
+      <div className="space-y-1 lg:space-y-2">
+        <h1 className="text-2xl font-bold tracking-tight text-fo-text lg:text-4xl">
           Upcoming Shifts
         </h1>
-        <p className="max-w-2xl text-base text-fo-text-muted sm:text-lg">
+        <p className="max-w-2xl text-sm text-fo-text-muted lg:text-lg">
           Accepted assignments with future start dates.
         </p>
       </div>
 
-      <MobileStatGrid>
+      <MobileStatGrid className="gap-2 lg:hidden">
+        <StatCard
+          label="Upcoming Shifts"
+          value={summary.count}
+          tone="blue"
+          className={compactStatCardClassName}
+        />
+        <StatCard
+          label="Expected Earnings"
+          value={formatExpectedEarnings(summary.expectedEarnings)}
+          tone="green"
+          className={compactStatCardClassName}
+        />
+        <StatCard
+          label="Scheduled Hours"
+          value={formatScheduledHours(summary.scheduledHours)}
+          tone="purple"
+          className={compactStatCardClassName}
+        />
+        <StatCard
+          label="Next Shift"
+          value={summary.nextShiftDate ?? "—"}
+          hint={summary.nextShiftStartsIn ?? undefined}
+          tone="amber"
+          className={cn(
+            compactStatCardClassName,
+            "[&>div>p:nth-child(2)]:text-base [&>div>p:nth-child(2)]:leading-tight"
+          )}
+        />
+      </MobileStatGrid>
+
+      <MobileStatGrid className="hidden lg:grid">
         <StatCard label="Upcoming Shifts" value={summary.count} tone="blue" />
         <StatCard
           label="Expected Earnings"
@@ -87,7 +124,47 @@ export function UpcomingShiftsBrowseList({
         />
       </MobileStatGrid>
 
-      <div className="fo-glass-card grid gap-3 rounded-lg border border-white/10 p-3 md:grid-cols-[minmax(0,1fr)_180px]">
+      <div className="fo-scrollbar-hide -mx-1 flex items-center gap-1.5 overflow-x-auto px-1 lg:hidden">
+        {filterOptions.map((option) => {
+          const active = shiftFilter === option.value;
+
+          return (
+            <button
+              key={option.value || "all"}
+              type="button"
+              onClick={() => setShiftFilter(option.value)}
+              className={cn(
+                "shrink-0 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition",
+                active
+                  ? "border-fo-primary-bright/50 bg-fo-primary/10 text-fo-primary-bright"
+                  : "border-white/10 bg-white/[0.03] text-fo-text-muted"
+              )}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+
+        <label className="flex shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5">
+          <span className="whitespace-nowrap text-[10px] font-medium text-fo-text-muted">
+            Sort:
+          </span>
+          <select
+            value={sort}
+            onChange={(event) => setSort(event.target.value as UpcomingShiftSort)}
+            className={mobileSortClassName}
+            aria-label="Sort upcoming shifts"
+          >
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="fo-glass-card hidden gap-3 rounded-lg border border-white/10 p-3 lg:grid lg:grid-cols-[minmax(0,1fr)_180px]">
         <div className="flex flex-wrap gap-2">
           {filterOptions.map((option) => {
             const active = shiftFilter === option.value;
@@ -120,7 +197,7 @@ export function UpcomingShiftsBrowseList({
             onChange={(event) =>
               setSort(event.target.value as UpcomingShiftSort)
             }
-            className={fieldClassName}
+            className={desktopFieldClassName}
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -157,7 +234,7 @@ export function UpcomingShiftsBrowseList({
       ) : null}
 
       {filteredApplications.length > 0 ? (
-        <div className="space-y-2">
+        <div className="space-y-3 lg:space-y-2">
           {filteredApplications.map((application) => (
             <UpcomingShiftCard key={application.id} application={application} />
           ))}

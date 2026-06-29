@@ -20,6 +20,7 @@ import {
   type OfficerInviteData,
 } from "@/lib/officer-invite-data";
 import { shiftDetailHref } from "@/lib/shift-detail-navigation";
+import { DeleteInviteButton } from "./DeleteInviteButton";
 
 const statusBadgeClasses = {
   PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-200",
@@ -30,6 +31,7 @@ const statusBadgeClasses = {
 type InviteActionsProps = {
   invite: OfficerInviteData;
   onRespond: () => void;
+  onDeleted?: (inviteId: string) => void;
   stacked?: boolean;
 };
 
@@ -89,7 +91,12 @@ function DollarIcon({ className }: { className?: string }) {
   );
 }
 
-export function InviteActions({ invite, onRespond, stacked = false }: InviteActionsProps) {
+export function InviteActions({
+  invite,
+  onRespond,
+  onDeleted,
+  stacked = false,
+}: InviteActionsProps) {
   const [loading, setLoading] = useState<"accept" | "decline" | null>(null);
   const pathname = usePathname();
   const shiftHref = shiftDetailHref(invite.shift.id, pathname);
@@ -137,13 +144,21 @@ export function InviteActions({ invite, onRespond, stacked = false }: InviteActi
     );
   }
 
-  if (stacked) {
+  if (stacked && invite.status === "DECLINED") {
     return (
       <MobileListCardActions>
         <MobileSettingsRow label="View Shift" href={shiftHref} />
-        <p className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-center text-xs font-medium text-red-200/90">
-          You declined this invite
-        </p>
+        <DeleteInviteButton
+          inviteId={invite.id}
+          onDeleted={onDeleted}
+          label="Delete"
+          className={buttonClassName({
+            variant: "secondary",
+            size: "md",
+            className:
+              "min-h-11 w-full border-red-500/35 px-3 text-xs text-red-300 hover:border-red-500/50 hover:bg-red-500/10",
+          })}
+        />
       </MobileListCardActions>
     );
   }
@@ -222,9 +237,17 @@ export function InviteActions({ invite, onRespond, stacked = false }: InviteActi
       >
         View Shift
       </ShiftDetailLink>
-      <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-center text-[11px] font-medium text-red-200/90">
-        You declined this invite
-      </div>
+      <DeleteInviteButton
+        inviteId={invite.id}
+        onDeleted={onDeleted}
+        label="Delete"
+        className={buttonClassName({
+          variant: "secondary",
+          size: "md",
+          className:
+            "min-h-9 w-full border-red-500/35 px-3 text-xs text-red-300 hover:border-red-500/50 hover:bg-red-500/10",
+        })}
+      />
     </div>
   );
 }
@@ -233,14 +256,17 @@ type InviteCardProps = {
   invite: OfficerInviteData;
   viewMode: "list" | "grid";
   onRespond: () => void;
+  onDeleted?: (inviteId: string) => void;
 };
 
 function InviteCardMobile({
   invite,
   onRespond,
+  onDeleted,
 }: {
   invite: OfficerInviteData;
   onRespond: () => void;
+  onDeleted?: (inviteId: string) => void;
 }) {
   const schedule = formatInviteSchedule(invite);
   const locationLabel = formatInviteLocation(invite);
@@ -306,13 +332,23 @@ function InviteCardMobile({
           </p>
         ) : null}
 
-        <InviteActions invite={invite} onRespond={onRespond} stacked />
+        <InviteActions
+          invite={invite}
+          onRespond={onRespond}
+          onDeleted={onDeleted}
+          stacked
+        />
       </div>
     </article>
   );
 }
 
-export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
+export function InviteCard({
+  invite,
+  viewMode,
+  onRespond,
+  onDeleted,
+}: InviteCardProps) {
   const schedule = formatInviteSchedule(invite);
   const locationLabel = formatInviteLocation(invite);
   const hourlyRateLabel = formatInviteHourlyRate(invite);
@@ -321,7 +357,11 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
   if (viewMode === "grid") {
     return (
       <div className="contents">
-        <InviteCardMobile invite={invite} onRespond={onRespond} />
+        <InviteCardMobile
+          invite={invite}
+          onRespond={onRespond}
+          onDeleted={onDeleted}
+        />
 
         <article className="fo-glass-card hidden h-full min-h-[220px] flex-col rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:flex">
         <div className="flex items-start gap-3">
@@ -372,7 +412,11 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
         <p className="mt-3 text-[11px] text-fo-text-subtle">{invitedLabel}</p>
 
         <div className="mt-4">
-          <InviteActions invite={invite} onRespond={onRespond} />
+          <InviteActions
+            invite={invite}
+            onRespond={onRespond}
+            onDeleted={onDeleted}
+          />
         </div>
       </article>
       </div>
@@ -381,7 +425,11 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
 
   return (
     <div className="contents">
-      <InviteCardMobile invite={invite} onRespond={onRespond} />
+      <InviteCardMobile
+        invite={invite}
+        onRespond={onRespond}
+        onDeleted={onDeleted}
+      />
 
       <article className="fo-glass-card hidden min-h-[132px] grid-cols-1 gap-4 rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_auto] lg:items-center">
       <div className="flex items-start gap-3">
@@ -430,7 +478,11 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
         </p>
       </div>
 
-      <InviteActions invite={invite} onRespond={onRespond} />
+      <InviteActions
+        invite={invite}
+        onRespond={onRespond}
+        onDeleted={onDeleted}
+      />
     </article>
     </div>
   );
