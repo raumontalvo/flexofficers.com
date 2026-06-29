@@ -1,5 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { ApplicationStatus } from "@/app/generated/prisma/enums";
+import { createNotificationsWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { parseShiftPayload, type ShiftPayload } from "../validation";
@@ -58,6 +60,20 @@ export async function POST(req: Request) {
           },
         },
       },
+      include: {
+        applications: {
+          where: {
+            status: ApplicationStatus.ACCEPTED,
+          },
+          include: {
+            officer: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!shift) {
@@ -90,6 +106,21 @@ export async function POST(req: Request) {
         positionsNeeded: parsed.data.positionsNeeded,
       },
     });
+
+    if (shift.applications.length > 0) {
+      const title = "Shift updated";
+      const message = `The shift "${updatedShift.title}" was updated by the company.`;
+
+      await createNotificationsWithEmail(
+        prisma,
+        shift.applications.map((application) => ({
+          userId: application.officer.user.id,
+          title,
+          message,
+          type: "shift_update" as const,
+        }))
+      );
+    }
 
     return NextResponse.json(updatedShift);
   } catch {

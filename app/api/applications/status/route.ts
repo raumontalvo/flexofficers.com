@@ -9,6 +9,7 @@ import {
   UserRole,
 } from "@/app/generated/prisma/enums";
 import { syncShiftFillStatus } from "@/lib/shift-fill-status";
+import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 
 export async function POST(req: Request) {
   try {
@@ -216,6 +217,30 @@ export async function POST(req: Request) {
       }
 
       await syncShiftFillStatus(tx, updatedApplication.shiftId);
+
+      if (status === ApplicationStatus.ACCEPTED) {
+        const title = "Application accepted";
+        const message = `Your application for ${updatedApplication.shift.title} was accepted.`;
+
+        await createNotificationWithEmail(tx, {
+          userId: updatedApplication.officer.user.id,
+          title,
+          message,
+          type: "application_accepted",
+        });
+      }
+
+      if (status === ApplicationStatus.REJECTED) {
+        const title = "Application rejected";
+        const message = `Your application for ${updatedApplication.shift.title} was rejected.`;
+
+        await createNotificationWithEmail(tx, {
+          userId: updatedApplication.officer.user.id,
+          title,
+          message,
+          type: "application_rejected",
+        });
+      }
 
       return {
         application: updatedApplication,

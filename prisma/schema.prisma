@@ -84,12 +84,13 @@ enum LicenseVerificationStatus {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  clerkId   String   @unique
-  email     String   @unique
-  role      UserRole
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                        String   @id @default(uuid())
+  clerkId                   String   @unique
+  email                     String   @unique
+  role                      UserRole
+  emailNotificationsEnabled Boolean  @default(true)
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 
   officer       Officer?
   company       Company?

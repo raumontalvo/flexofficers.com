@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
 import { buildCompanyInviteResponseNotification } from "@/lib/company-invite-workflow";
+import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 import {
   canAcceptInvite,
   inviteStatusForResponse,
@@ -216,12 +217,11 @@ export async function POST(req: Request) {
         response,
       });
 
-      await tx.notification.create({
-        data: {
-          userId: invite.shift.company.user.id,
-          title: companyNotification.title,
-          message: companyNotification.message,
-        },
+      await createNotificationWithEmail(tx, {
+        userId: invite.shift.company.user.id,
+        title: companyNotification.title,
+        message: companyNotification.message,
+        type: response === "accept" ? "invite_accepted" : "invite_declined",
       });
 
       return {

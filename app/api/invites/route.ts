@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { ApplicationStatus, ShiftVisibility, UserRole } from "@/app/generated/prisma/enums";
 import { buildOfficerInviteNotificationMessage } from "@/lib/company-invite-workflow";
+import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
@@ -187,16 +188,15 @@ export async function POST(req: Request) {
             },
           });
 
-      await tx.notification.create({
-        data: {
-          userId: officer.user.id,
-          title: "New Company Invite",
-          message: buildOfficerInviteNotificationMessage({
-            companyName: shift.company.companyName,
-            shiftTitle: shift.title,
-            message: nextInvite.message,
-          }),
-        },
+      await createNotificationWithEmail(tx, {
+        userId: officer.user.id,
+        title: "New Company Invite",
+        message: buildOfficerInviteNotificationMessage({
+          companyName: shift.company.companyName,
+          shiftTitle: shift.title,
+          message: nextInvite.message,
+        }),
+        type: "new_company_invite",
       });
 
       await syncShiftFillStatus(tx, shiftId);

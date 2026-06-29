@@ -12,6 +12,7 @@ import {
   isOfficerProfileComplete,
   OFFICER_PROFILE_APPLY_REQUIRED_MESSAGE,
 } from "@/lib/officer-profile-completion";
+import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 
 export async function POST(req: Request) {
   try {
@@ -150,6 +151,17 @@ export async function POST(req: Request) {
         shiftId: data.shiftId,
         officerId: officer.id,
       },
+    });
+
+    const officerName = `${clerkUser.firstName ?? "Officer"} ${clerkUser.lastName ?? "User"}`.trim();
+    const title = "New application received";
+    const message = `${officerName} applied to ${shift.title}.`;
+
+    await createNotificationWithEmail(prisma, {
+      userId: shift.company.user.id,
+      title,
+      message,
+      type: "new_application",
     });
 
     return NextResponse.json(application);
