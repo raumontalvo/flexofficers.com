@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { officerWithUserSelect } from "@/lib/officer-fields";
+import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { validateApplicationWithdrawal } from "./rules";
@@ -52,6 +53,15 @@ export async function POST(req: Request) {
         id: applicationId,
       },
       include: {
+        shift: {
+          include: {
+            company: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
         officer: {
           select: officerWithUserSelect,
         },
@@ -87,6 +97,27 @@ export async function POST(req: Request) {
       data: {
         status: ApplicationStatus.WITHDRAWN,
       },
+    });
+
+    const officerName =
+      `${existing.officer.firstName} ${existing.officer.lastName}`.trim();
+    const title = "Officer withdrew application";
+    const message = `${officerName} withdrew their application for ${existing.shift.title}.`;
+    const companyRecipientUserId = existing.shift.company.user.id;
+
+    console.log("[application-withdraw] Creating company notification", {
+      companyRecipientUserId,
+      officerUserId: existing.officer.user.id,
+      companyAccountEmail: existing.shift.company.user.email,
+      companyProfileEmail: existing.shift.company.email ?? null,
+    });
+
+    await createNotificationWithEmail(prisma, {
+      userId: companyRecipientUserId,
+      title,
+      message,
+      type: "application_withdrawn",
+      linkUrl: "/company/applications",
     });
 
     return NextResponse.json(updatedApplication);
