@@ -156,9 +156,17 @@ export async function POST(req: Request) {
     const officerName = `${clerkUser.firstName ?? "Officer"} ${clerkUser.lastName ?? "User"}`.trim();
     const title = "New application received";
     const message = `${officerName} applied to ${shift.title}.`;
+    const companyRecipientUserId = shift.company.user.id;
+
+    console.log("[application-create] Creating company notification", {
+      companyRecipientUserId,
+      officerUserId: user.id,
+      companyAccountEmail: shift.company.user.email,
+      companyProfileEmail: shift.company.email ?? null,
+    });
 
     await createNotificationWithEmail(prisma, {
-      userId: shift.company.user.id,
+      userId: companyRecipientUserId,
       title,
       message,
       type: "new_application",

@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@/app/generated/prisma/client";
 import {
+  getNotificationEmailConfigStatus,
   isNotificationEmailConfigured,
   sendNotificationEmail,
 } from "@/lib/notifications/send-notification-email";
@@ -72,13 +73,52 @@ export function getNotificationLinkUrl(
   return `${getAppBaseUrl()}${NOTIFICATION_LINK_PATHS[type]}`;
 }
 
+function logNotificationEmailDelivery(
+  level: "log" | "warn" | "error",
+  message: string,
+  details: Record<string, unknown>
+) {
+  const payload = {
+    ...getNotificationEmailConfigStatus(),
+    ...details,
+  };
+
+  if (level === "warn") {
+    console.warn(`[notification-email] ${message}`, payload);
+    return;
+  }
+
+  if (level === "error") {
+    console.error(`[notification-email] ${message}`, payload);
+    return;
+  }
+
+  console.log(`[notification-email] ${message}`, payload);
+}
+
 async function deliverNotificationEmail(
   db: NotificationDb,
   input: CreateNotificationWithEmailInput,
   sendEmail: SendNotificationEmailFn
 ) {
+  const deliveryContext = {
+    recipientUserId: input.userId,
+    notificationType: input.type,
+  };
+
   try {
+    logNotificationEmailDelivery(
+      "log",
+      "Starting notification email delivery",
+      deliveryContext
+    );
+
     if (!isNotificationEmailConfigured()) {
+      logNotificationEmailDelivery(
+        "warn",
+        "Skipped email delivery because Resend is not configured",
+        deliveryContext
+      );
       return;
     }
 
@@ -93,20 +133,65 @@ async function deliverNotificationEmail(
     });
 
     const recipientEmail = user?.email?.trim();
+    const emailNotificationsEnabled = user?.emailNotificationsEnabled !== false;
 
-    if (!recipientEmail || user?.emailNotificationsEnabled === false) {
+    logNotificationEmailDelivery("log", "Resolved notification recipient", {
+      ...deliveryContext,
+      recipientEmailExists: Boolean(recipientEmail),
+      emailNotificationsEnabled,
+    });
+
+    if (!recipientEmail) {
+      logNotificationEmailDelivery(
+        "warn",
+        "Skipped email delivery because user.email is missing (account email is used for notifications, not company profile email)",
+        deliveryContext
+      );
       return;
     }
 
-    await sendEmail({
+    if (!emailNotificationsEnabled) {
+      logNotificationEmailDelivery(
+        "warn",
+        "Skipped email delivery because emailNotificationsEnabled is false",
+        {
+          ...deliveryContext,
+          recipientEmailExists: true,
+          emailNotificationsEnabled: false,
+        }
+      );
+      return;
+    }
+
+    const result = await sendEmail({
       to: recipientEmail,
       subject: getNotificationEmailSubject(input.type),
       title: input.title,
       message: input.message,
       linkUrl: getNotificationLinkUrl(input.type, input.linkUrl),
     });
+
+    if (result?.error) {
+      logNotificationEmailDelivery("error", "Resend returned an error", {
+        ...deliveryContext,
+        recipientEmailExists: true,
+        emailNotificationsEnabled: true,
+        resendError: result.error,
+      });
+      return;
+    }
+
+    logNotificationEmailDelivery("log", "Resend email sent successfully", {
+      ...deliveryContext,
+      recipientEmailExists: true,
+      emailNotificationsEnabled: true,
+      resendEmailId: result?.data?.id ?? null,
+    });
   } catch (error) {
-    console.error("Failed to send notification email:", error);
+    logNotificationEmailDelivery("error", "Notification email delivery failed", {
+      ...deliveryContext,
+      error,
+    });
   }
 }
 
@@ -126,7 +211,7 @@ export async function createNotificationWithEmail(
   });
 
   const sendEmail = options?.sendEmail ?? sendNotificationEmail;
-  void deliverNotificationEmail(db, input, sendEmail);
+  await deliverNotificationEmail(db, input, sendEmail);
 
   return notification;
 }

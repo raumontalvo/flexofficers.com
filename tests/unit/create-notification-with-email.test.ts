@@ -6,10 +6,6 @@ import {
 } from "@/lib/notifications/create-notification-with-email";
 import { isNotificationEmailConfigured } from "@/lib/notifications/send-notification-email";
 
-async function flushAsyncWork() {
-  await new Promise((resolve) => setImmediate(resolve));
-}
-
 describe("createNotificationWithEmail", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -20,7 +16,10 @@ describe("createNotificationWithEmail", () => {
     vi.stubEnv("RESEND_API_KEY", "re_test_key");
     vi.stubEnv("EMAIL_FROM", "FlexOfficers <notifications@flexofficers.com>");
 
-    const sendEmail = vi.fn().mockResolvedValue(undefined);
+    const sendEmail = vi.fn().mockResolvedValue({
+      data: { id: "email-1" },
+      error: null,
+    });
     const notification = {
       id: "notification-1",
       userId: "user-1",
@@ -61,9 +60,6 @@ describe("createNotificationWithEmail", () => {
         message: notification.message,
       },
     });
-
-    await flushAsyncWork();
-
     expect(sendEmail).toHaveBeenCalledWith({
       to: "officer@example.com",
       subject: "Application accepted",
@@ -73,11 +69,77 @@ describe("createNotificationWithEmail", () => {
     });
   });
 
+  it("sends new application email to the company user account email", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("EMAIL_FROM", "FlexOfficers <notifications@flexofficers.com>");
+
+    const companyUserId = "company-user-1";
+    const sendEmail = vi.fn().mockResolvedValue({
+      data: { id: "email-company-1" },
+      error: null,
+    });
+
+    const db = {
+      notification: {
+        create: vi.fn().mockResolvedValue({
+          id: "notification-company-1",
+          userId: companyUserId,
+          title: "New application received",
+          message: "Alex Officer applied to Warehouse Security.",
+          read: false,
+          createdAt: new Date("2026-06-01T12:00:00.000Z"),
+        }),
+      },
+      user: {
+        findUnique: vi.fn().mockResolvedValue({
+          email: "owner@acme.test",
+          emailNotificationsEnabled: true,
+        }),
+      },
+    };
+
+    await createNotificationWithEmail(
+      db,
+      {
+        userId: companyUserId,
+        title: "New application received",
+        message: "Alex Officer applied to Warehouse Security.",
+        type: "new_application",
+      },
+      { sendEmail }
+    );
+
+    expect(db.notification.create).toHaveBeenCalledWith({
+      data: {
+        userId: companyUserId,
+        title: "New application received",
+        message: "Alex Officer applied to Warehouse Security.",
+      },
+    });
+    expect(db.user.findUnique).toHaveBeenCalledWith({
+      where: { id: companyUserId },
+      select: {
+        email: true,
+        emailNotificationsEnabled: true,
+      },
+    });
+    expect(sendEmail).toHaveBeenCalledWith({
+      to: "owner@acme.test",
+      subject: "New application",
+      title: "New application received",
+      message: "Alex Officer applied to Warehouse Security.",
+      linkUrl: getNotificationLinkUrl("new_application"),
+    });
+  });
+
   it("skips email when notifications are disabled or email is missing", async () => {
     vi.stubEnv("RESEND_API_KEY", "re_test_key");
     vi.stubEnv("EMAIL_FROM", "FlexOfficers <notifications@flexofficers.com>");
 
-    const sendEmail = vi.fn().mockResolvedValue(undefined);
+    const sendEmail = vi.fn().mockResolvedValue({
+      data: { id: "email-2" },
+      error: null,
+    });
     const db = {
       notification: {
         create: vi.fn().mockResolvedValue({
@@ -108,7 +170,6 @@ describe("createNotificationWithEmail", () => {
       { sendEmail }
     );
 
-    await flushAsyncWork();
     expect(sendEmail).not.toHaveBeenCalled();
 
     db.user.findUnique.mockResolvedValue({
@@ -127,12 +188,14 @@ describe("createNotificationWithEmail", () => {
       { sendEmail }
     );
 
-    await flushAsyncWork();
     expect(sendEmail).not.toHaveBeenCalled();
   });
 
   it("skips email when Resend env vars are missing", async () => {
-    const sendEmail = vi.fn().mockResolvedValue(undefined);
+    const sendEmail = vi.fn().mockResolvedValue({
+      data: { id: "email-4" },
+      error: null,
+    });
     const db = {
       notification: {
         create: vi.fn().mockResolvedValue({
@@ -165,7 +228,6 @@ describe("createNotificationWithEmail", () => {
       { sendEmail }
     );
 
-    await flushAsyncWork();
     expect(sendEmail).not.toHaveBeenCalled();
     expect(db.user.findUnique).not.toHaveBeenCalled();
   });
@@ -211,11 +273,66 @@ describe("createNotificationWithEmail", () => {
       )
     ).resolves.toMatchObject({ id: "notification-3" });
 
-    await flushAsyncWork();
+    expect(consoleError).toHaveBeenCalledWith(
+      "[notification-email] Notification email delivery failed",
+      expect.objectContaining({
+        recipientUserId: "user-3",
+        notificationType: "new_company_invite",
+      })
+    );
+  });
+
+  it("logs Resend API errors without failing notification creation", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("EMAIL_FROM", "FlexOfficers <notifications@flexofficers.com>");
+
+    const sendEmail = vi.fn().mockResolvedValue({
+      data: null,
+      error: { message: "Invalid from address" },
+    });
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    const db = {
+      notification: {
+        create: vi.fn().mockResolvedValue({
+          id: "notification-5",
+          userId: "company-user-2",
+          title: "New application received",
+          message: "Alex applied to Warehouse Security.",
+          read: false,
+          createdAt: new Date(),
+        }),
+      },
+      user: {
+        findUnique: vi.fn().mockResolvedValue({
+          email: "owner@acme.test",
+          emailNotificationsEnabled: true,
+        }),
+      },
+    };
+
+    await expect(
+      createNotificationWithEmail(
+        db,
+        {
+          userId: "company-user-2",
+          title: "New application received",
+          message: "Alex applied to Warehouse Security.",
+          type: "new_application",
+        },
+        { sendEmail }
+      )
+    ).resolves.toMatchObject({ id: "notification-5" });
 
     expect(consoleError).toHaveBeenCalledWith(
-      "Failed to send notification email:",
-      expect.any(Error)
+      "[notification-email] Resend returned an error",
+      expect.objectContaining({
+        recipientUserId: "company-user-2",
+        notificationType: "new_application",
+        resendError: { message: "Invalid from address" },
+      })
     );
   });
 });
@@ -223,6 +340,7 @@ describe("createNotificationWithEmail", () => {
 describe("notification email metadata", () => {
   it("maps notification types to subjects and links", () => {
     expect(getNotificationEmailSubject("invite_declined")).toBe("Invite declined");
+    expect(getNotificationEmailSubject("new_application")).toBe("New application");
     expect(getNotificationEmailSubject("new_company_invite")).toBe(
       "New company invite"
     );

@@ -19,6 +19,13 @@ export function isNotificationEmailConfigured() {
   );
 }
 
+export function getNotificationEmailConfigStatus() {
+  return {
+    resendApiKeyConfigured: Boolean(process.env.RESEND_API_KEY?.trim()),
+    emailFromConfigured: Boolean(process.env.EMAIL_FROM?.trim()),
+  };
+}
+
 export async function sendNotificationEmail({
   to,
   subject,
@@ -36,7 +43,12 @@ export async function sendNotificationEmail({
   const emailFrom = process.env.EMAIL_FROM?.trim();
 
   if (!resendApiKey || !emailFrom) {
-    return;
+    return {
+      data: null,
+      error: {
+        message: "Resend is not configured (missing RESEND_API_KEY or EMAIL_FROM).",
+      },
+    };
   }
 
   const resend = new Resend(resendApiKey);
@@ -47,7 +59,7 @@ export async function sendNotificationEmail({
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
     "https://flexofficers.com";
 
-  await resend.emails.send({
+  return resend.emails.send({
     from: emailFrom,
     to,
     subject,
