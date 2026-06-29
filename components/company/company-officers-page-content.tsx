@@ -12,7 +12,6 @@ import {
   type CompanyOfficerInviteRecord,
 } from "@/lib/company-invite-workflow";
 import { buttonClassName } from "@/components/ui";
-import { cn } from "@/lib/cn";
 import {
   OFFICER_AVAILABILITY_FILTER_OPTIONS,
   OFFICER_BACKGROUND_FILTER_OPTIONS,
@@ -20,7 +19,6 @@ import {
   OFFICER_LICENSE_FILTER_OPTIONS,
   sortOfficerSearchResults,
   type OfficerSortOption,
-  type OfficerViewMode,
   type SerializedOfficerSearchResult,
 } from "@/lib/company-officers-page";
 import type { OfficerSearchFilters } from "@/lib/officer-search";
@@ -164,7 +162,6 @@ export function CompanyOfficersPageContent({
   );
   const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
   const [sort, setSort] = useState<OfficerSortOption>("alphabetical");
-  const [viewMode, setViewMode] = useState<OfficerViewMode>("list");
   const [profileOfficerId, setProfileOfficerId] = useState<string | null>(null);
   const [inviteOfficerId, setInviteOfficerId] = useState<string | null>(null);
   const [invites, setInvites] = useState(initialInvites);
@@ -446,33 +443,6 @@ export function CompanyOfficersPageContent({
                   <option value="newest">Newest</option>
                 </select>
               </label>
-
-              <div className="hidden inline-flex rounded-lg border border-white/10 p-0.5 lg:inline-flex">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={cn(
-                    "rounded-md px-3 py-1.5 text-xs font-semibold transition",
-                    viewMode === "list"
-                      ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                      : "text-fo-text-muted hover:text-fo-text"
-                  )}
-                >
-                  List
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={cn(
-                    "rounded-md px-3 py-1.5 text-xs font-semibold transition",
-                    viewMode === "grid"
-                      ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                      : "text-fo-text-muted hover:text-fo-text"
-                  )}
-                >
-                  Grid
-                </button>
-              </div>
             </div>
           </div>
 
@@ -492,12 +462,7 @@ export function CompanyOfficersPageContent({
             ))}
           </div>
 
-          <div
-            className={cn(
-              "hidden lg:block",
-              viewMode === "grid" ? "grid gap-4 xl:grid-cols-2" : "space-y-4"
-            )}
-          >
+          <div className="hidden space-y-4 lg:block">
             {sortedOfficers.map((officer) => (
               <OfficerResultCard
                 key={officer.id}
