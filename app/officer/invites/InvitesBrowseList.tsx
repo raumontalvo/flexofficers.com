@@ -151,9 +151,10 @@ export function InvitesBrowseList({
 
               <div
                 className={cn(
+                  "flex flex-col gap-6",
                   viewMode === "grid"
-                    ? "grid gap-3 lg:grid-cols-2"
-                    : "space-y-3"
+                    ? "lg:grid lg:grid-cols-2 lg:gap-3"
+                    : "lg:block lg:gap-0 lg:space-y-3"
                 )}
               >
                 {visibleInvites.map((invite) => (
