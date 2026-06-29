@@ -4,27 +4,7 @@ import Link from "next/link";
 import { formatNotificationTimeAgo } from "@/lib/officer-notification-data";
 import type { OfficerNotificationData } from "@/lib/officer-notification-data";
 import { buttonClassName } from "@/components/ui";
-
-const STEPS = [
-  {
-    title: "Company invites you",
-    description:
-      "A company finds your profile and invites you to a shift.",
-  },
-  {
-    title: "You review the shift",
-    description: "Check the details and decide if it's a good fit.",
-  },
-  {
-    title: "Accept invite",
-    description:
-      "If you accept, the shift is automatically added to your Accepted Shifts.",
-  },
-  {
-    title: "Show up & get paid",
-    description: "Work the shift and get paid directly by the company.",
-  },
-];
+import { INVITE_HOW_IT_WORKS_STEPS } from "@/lib/officer-invite-data";
 
 type InvitesHowItWorksPanelProps = {
   inviteNotifications: OfficerNotificationData[];
@@ -34,11 +14,11 @@ export function InvitesHowItWorksPanel({
   inviteNotifications,
 }: InvitesHowItWorksPanelProps) {
   return (
-    <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+    <aside className="hidden space-y-4 lg:block lg:sticky lg:top-6 lg:self-start">
       <section className="fo-glass-card rounded-xl border border-white/10 p-4">
         <h2 className="text-base font-semibold text-fo-text">How Invites Work</h2>
         <ol className="mt-4 space-y-4">
-          {STEPS.map((step, index) => (
+          {INVITE_HOW_IT_WORKS_STEPS.map((step, index) => (
             <li key={step.title} className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-blue-500/30 bg-blue-500/10 text-xs font-bold text-blue-100">
                 {index + 1}

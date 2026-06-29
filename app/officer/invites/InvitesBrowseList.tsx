@@ -16,6 +16,7 @@ import {
 import type { OfficerNotificationData } from "@/lib/officer-notification-data";
 import { InviteCard } from "./InviteCard";
 import { InvitesHowItWorksPanel } from "./InvitesHowItWorksPanel";
+import { InvitesMobileFooter } from "./InvitesMobileFooter";
 
 const tabColorClasses: Record<InviteTab, string> = {
   all: "text-fo-text-muted hover:text-fo-text",
@@ -98,7 +99,7 @@ export function InvitesBrowseList({
             </section>
           ) : (
             <>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="hidden flex-col gap-3 sm:flex sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm font-medium text-fo-text">
                   {visibleInvites.length} invite
                   {visibleInvites.length === 1 ? "" : "s"}
@@ -151,7 +152,7 @@ export function InvitesBrowseList({
               <div
                 className={cn(
                   viewMode === "grid"
-                    ? "grid gap-3 sm:grid-cols-2"
+                    ? "grid gap-3 lg:grid-cols-2"
                     : "space-y-3"
                 )}
               >
@@ -167,9 +168,10 @@ export function InvitesBrowseList({
             </>
           )}
 
-          <section className="rounded-xl border border-blue-500/25 bg-blue-500/10 px-4 py-3 text-sm text-blue-100">
-            Once you accept an invite, it will move to your Accepted Shifts.
-          </section>
+          <InvitesMobileFooter
+            invites={invites}
+            inviteNotifications={inviteNotifications}
+          />
         </div>
 
         <InvitesHowItWorksPanel inviteNotifications={inviteNotifications} />

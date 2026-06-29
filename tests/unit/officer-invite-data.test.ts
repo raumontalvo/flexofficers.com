@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  filterDuplicateInviteNotifications,
   filterInvitesByTab,
   formatInvitedTimeAgo,
   getInviteTabCounts,
@@ -73,6 +74,42 @@ describe("officer invite data", () => {
     expect(sortOfficerInvites(invites, "newest").map((invite) => invite.id)).toEqual([
       "newer",
       "older",
+    ]);
+  });
+
+  it("filters invite notifications that duplicate visible invites", () => {
+    const invites = [mapOfficerInvite(baseInvite)];
+    const notifications = [
+      {
+        id: "n-1",
+        title: "New invite",
+        message: "SecureCo invited you to Retail Security",
+        read: false,
+        createdAt: "2026-06-26T10:00:00.000Z",
+        category: "shifts" as const,
+        kind: "general" as const,
+        tone: "info" as const,
+        iconVariant: "bell" as const,
+        typeLabel: "INVITE",
+        primaryAction: { label: "View Shift" as const, href: "/shifts/shift-1" },
+      },
+      {
+        id: "n-2",
+        title: "Profile reminder",
+        message: "Complete your profile to get more invites.",
+        read: false,
+        createdAt: "2026-06-25T10:00:00.000Z",
+        category: "system" as const,
+        kind: "system_profile_reminder" as const,
+        tone: "system" as const,
+        iconVariant: "bell" as const,
+        typeLabel: "SYSTEM",
+        primaryAction: { label: "View Details" as const, href: "/officer/profile" },
+      },
+    ];
+
+    expect(filterDuplicateInviteNotifications(notifications, invites)).toEqual([
+      notifications[1],
     ]);
   });
 

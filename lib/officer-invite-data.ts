@@ -1,4 +1,5 @@
 import type { InviteStatus } from "@/app/generated/prisma/enums";
+import type { OfficerNotificationData } from "@/lib/officer-notification-data";
 import { formatNotificationTimeAgo } from "@/lib/officer-notification-data";
 import {
   formatHourlyRate,
@@ -145,6 +146,46 @@ export function formatInviteHourlyRate(invite: OfficerInviteData) {
 
 export function formatInvitedTimeAgo(invitedAt: string, now = new Date()) {
   return `Invited ${formatNotificationTimeAgo(invitedAt, now)}`;
+}
+
+export const INVITE_HOW_IT_WORKS_STEPS = [
+  {
+    title: "Company invites you",
+    description: "A company finds your profile and invites you to a shift.",
+  },
+  {
+    title: "You review the shift",
+    description: "Check the details and decide if it's a good fit.",
+  },
+  {
+    title: "Accept invite",
+    description:
+      "If you accept, the shift is automatically added to your Accepted Shifts.",
+  },
+  {
+    title: "Show up & get paid",
+    description: "Work the shift and get paid directly by the company.",
+  },
+] as const;
+
+export function filterDuplicateInviteNotifications(
+  notifications: OfficerNotificationData[],
+  invites: OfficerInviteData[]
+): OfficerNotificationData[] {
+  if (invites.length === 0) {
+    return notifications;
+  }
+
+  return notifications.filter((notification) => {
+    const text = `${notification.title} ${notification.message}`.toLowerCase();
+
+    return !invites.some((invite) => {
+      const company = invite.company.companyName.toLowerCase();
+      const title = invite.shift.title.toLowerCase();
+
+      return text.includes(company) && text.includes(title);
+    });
+  });
 }
 
 export function isInviteNotification(notification: {

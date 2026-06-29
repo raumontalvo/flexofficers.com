@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ArmedStatus } from "@/app/generated/prisma/enums";
 import {
+  buildOfficerNameSearchWhere,
   buildOfficerSearchWhere,
   parseOfficerSearchFilters,
   resolveOfficerStateQuery,
@@ -27,9 +28,10 @@ describe("parseOfficerSearchFilters", () => {
     });
   });
 
-  it("parses name, state, and multi-select filters", () => {
+  it("parses first name, last name, state, and multi-select filters", () => {
     const filters = parseOfficerSearchFilters({
-      name: "Raul",
+      firstName: "Raul",
+      lastName: "Martinez",
       city: "Fort Myers",
       state: "Florida",
       background: ["Military", "K9"],
@@ -39,13 +41,26 @@ describe("parseOfficerSearchFilters", () => {
     });
 
     expect(filters).toEqual({
-      name: "Raul",
+      firstName: "Raul",
+      lastName: "Martinez",
       city: "Fort Myers",
       state: "Florida",
       backgrounds: ["Military", "K9"],
       licenseTypes: ["Armed Security"],
       certifications: ["CPR / First Aid", "Taser"],
       availabilities: ["Weekdays", "Days"],
+    });
+  });
+
+  it("keeps legacy name filter when first and last are absent", () => {
+    const filters = parseOfficerSearchFilters({
+      name: "Raul",
+      city: "Fort Myers",
+    });
+
+    expect(filters).toEqual({
+      name: "Raul",
+      city: "Fort Myers",
     });
   });
 
@@ -130,6 +145,48 @@ describe("buildOfficerSearchWhere", () => {
           },
         },
       },
+    });
+  });
+
+  it("matches profile first and last name fields", () => {
+    expect(
+      buildOfficerNameSearchWhere({
+        firstName: "Maria",
+        lastName: "Santos",
+      })
+    ).toEqual({
+      AND: [
+        { firstName: { contains: "Maria", mode: "insensitive" } },
+        { lastName: { contains: "Santos", mode: "insensitive" } },
+      ],
+    });
+
+    expect(
+      buildOfficerSearchWhere({
+        firstName: "Maria",
+        lastName: "Santos",
+      })
+    ).toMatchObject({
+      AND: [
+        { firstName: { contains: "Maria", mode: "insensitive" } },
+        { lastName: { contains: "Santos", mode: "insensitive" } },
+      ],
+    });
+  });
+
+  it("matches legacy full-name search strings", () => {
+    expect(buildOfficerNameSearchWhere({ name: "Maria Santos" })).toEqual({
+      AND: [
+        { firstName: { contains: "Maria", mode: "insensitive" } },
+        { lastName: { contains: "Santos", mode: "insensitive" } },
+      ],
+    });
+
+    expect(buildOfficerSearchWhere({ name: "Maria Santos" })).toMatchObject({
+      AND: [
+        { firstName: { contains: "Maria", mode: "insensitive" } },
+        { lastName: { contains: "Santos", mode: "insensitive" } },
+      ],
     });
   });
 });

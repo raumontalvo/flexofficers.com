@@ -4,6 +4,10 @@ import { useEffect } from "react";
 import { Button, ProfileAvatar } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { SerializedOfficerSearchResult } from "@/lib/company-officers-page";
+import {
+  OfficerProfileName,
+  officerProfileNameLabel,
+} from "@/components/company/officer-profile-name";
 import { LICENSE_DISPLAY_DISCLAIMER } from "@/lib/officer-licenses";
 
 type OfficerProfilePanelProps = {
@@ -105,14 +109,19 @@ export function OfficerProfilePanel({
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
                   <ProfileAvatar
-                    name={officer.fullName}
+                    name={officerProfileNameLabel(
+                      officer.firstName,
+                      officer.lastName
+                    )}
                     src={officer.profilePhotoUrl}
                     size="md"
                   />
                   <div>
-                    <h2 className="text-lg font-bold text-fo-text">
-                      {officer.fullName}
-                    </h2>
+                    <OfficerProfileName
+                      firstName={officer.firstName}
+                      lastName={officer.lastName}
+                      size="md"
+                    />
                     <p className="mt-1 text-sm text-fo-text-muted">
                       {officer.cityStateLabel}
                     </p>
@@ -134,7 +143,8 @@ export function OfficerProfilePanel({
                   Basic Information
                 </h3>
                 <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <DetailField label="Name" value={officer.fullName} />
+                  <DetailField label="First name" value={officer.firstName} />
+                  <DetailField label="Last name" value={officer.lastName} />
                   <DetailField label="Email" value={officer.email} />
                   <DetailField label="Phone" value={officer.phone} />
                   <DetailField label="City, State" value={officer.cityStateLabel} />

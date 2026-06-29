@@ -5,7 +5,6 @@ import { useState } from "react";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
 import {
-  MobileListCard,
   MobileListCardActions,
   MobilePrimaryButton,
   MobileSecondaryButton,
@@ -236,6 +235,83 @@ type InviteCardProps = {
   onRespond: () => void;
 };
 
+function InviteCardMobile({
+  invite,
+  onRespond,
+}: {
+  invite: OfficerInviteData;
+  onRespond: () => void;
+}) {
+  const schedule = formatInviteSchedule(invite);
+  const locationLabel = formatInviteLocation(invite);
+  const hourlyRateLabel = formatInviteHourlyRate(invite);
+  const invitedLabel = formatInvitedTimeAgo(invite.invitedAt);
+
+  return (
+    <article className="fo-glass-card overflow-hidden rounded-2xl border border-white/10 lg:hidden">
+      <div className="space-y-3 p-4">
+        <div className="flex items-start gap-3">
+          <ProfileAvatar
+            name={invite.company.companyName}
+            src={invite.company.logoUrl}
+            size="md"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <p className="truncate text-sm font-semibold text-fo-primary-bright">
+                {invite.company.companyName}
+              </p>
+              <span
+                className={cn(
+                  "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+                  statusBadgeClasses[invite.status]
+                )}
+              >
+                {INVITE_STATUS_LABELS[invite.status]}
+              </span>
+            </div>
+            <h2 className="mt-1 text-base font-bold leading-snug text-fo-text">
+              {invite.shift.title}
+            </h2>
+            <p className="mt-1 text-[11px] text-fo-text-subtle">{invitedLabel}</p>
+          </div>
+        </div>
+
+        <p className="flex items-center gap-1.5 text-sm text-fo-text-muted">
+          <LocationIcon className="h-3.5 w-3.5 shrink-0 text-red-400" />
+          <span className="min-w-0 truncate">{locationLabel}</span>
+        </p>
+
+        <p className="text-2xl font-bold leading-none text-fo-primary-bright">
+          {hourlyRateLabel}
+          <span className="text-sm font-semibold text-fo-text-muted">/hr</span>
+        </p>
+
+        <div className="flex items-center gap-3 border-t border-white/[0.06] pt-3 text-xs text-fo-text-muted">
+          <span className="flex min-w-0 items-center gap-1.5">
+            <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+            <span className="truncate">
+              {schedule.weekday} {schedule.monthDay}
+            </span>
+          </span>
+          <span className="flex min-w-0 items-center gap-1.5">
+            <ClockIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+            <span className="truncate">{schedule.timeRange}</span>
+          </span>
+        </div>
+
+        {invite.status === "PENDING" ? (
+          <p className="rounded-lg border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-xs leading-relaxed text-blue-100">
+            Once you accept an invite, it will move to your Accepted Shifts.
+          </p>
+        ) : null}
+
+        <InviteActions invite={invite} onRespond={onRespond} stacked />
+      </div>
+    </article>
+  );
+}
+
 export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
   const schedule = formatInviteSchedule(invite);
   const locationLabel = formatInviteLocation(invite);
@@ -244,7 +320,10 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
 
   if (viewMode === "grid") {
     return (
-      <article className="fo-glass-card flex h-full min-h-[220px] flex-col rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04]">
+      <div className="contents">
+        <InviteCardMobile invite={invite} onRespond={onRespond} />
+
+        <article className="fo-glass-card hidden h-full min-h-[220px] flex-col rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:flex">
         <div className="flex items-start gap-3">
           <ProfileAvatar
             name={invite.company.companyName}
@@ -296,60 +375,13 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
           <InviteActions invite={invite} onRespond={onRespond} />
         </div>
       </article>
+      </div>
     );
   }
 
   return (
-    <>
-      <MobileListCard className="lg:hidden">
-        <div className="flex items-start gap-3">
-          <ProfileAvatar
-            name={invite.company.companyName}
-            src={invite.company.logoUrl}
-            size="md"
-          />
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-fo-text">
-              {invite.company.companyName}
-            </p>
-            <p className="truncate text-sm font-medium text-blue-100">
-              {invite.shift.title}
-            </p>
-            <span
-              className={cn(
-                "mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-                statusBadgeClasses[invite.status]
-              )}
-            >
-              {INVITE_STATUS_LABELS[invite.status]}
-            </span>
-            <p className="mt-2 text-[11px] text-fo-text-subtle">{invitedLabel}</p>
-          </div>
-        </div>
-
-        <div className="grid min-w-0 gap-2">
-          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-            <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span className="truncate">{locationLabel}</span>
-          </p>
-          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-            <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span>
-              {schedule.weekday} {schedule.monthDay}
-            </span>
-          </p>
-          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-            <ClockIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span>{schedule.timeRange}</span>
-          </p>
-          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-            <DollarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span>{hourlyRateLabel}/hr</span>
-          </p>
-        </div>
-
-        <InviteActions invite={invite} onRespond={onRespond} stacked />
-      </MobileListCard>
+    <div className="contents">
+      <InviteCardMobile invite={invite} onRespond={onRespond} />
 
       <article className="fo-glass-card hidden min-h-[132px] grid-cols-1 gap-4 rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_auto] lg:items-center">
       <div className="flex items-start gap-3">
@@ -400,6 +432,6 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
 
       <InviteActions invite={invite} onRespond={onRespond} />
     </article>
-    </>
+    </div>
   );
 }

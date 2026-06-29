@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { OfficerProfilePanel } from "@/components/company/officer-profile-panel";
+import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
 import { InviteOfficerModal } from "@/components/company/invite-officer-modal";
 import type { CompanyOpenShiftOption } from "@/components/company/invite-officer-to-shift";
 import {
   getOfficerInviteButtonState,
   type CompanyOfficerInviteRecord,
 } from "@/lib/company-invite-workflow";
-import { buttonClassName, ProfileAvatar } from "@/components/ui";
+import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
   OFFICER_AVAILABILITY_FILTER_OPTIONS,
@@ -23,218 +24,27 @@ import {
 } from "@/lib/company-officers-page";
 import type { OfficerSearchFilters } from "@/lib/officer-search";
 import { US_STATES } from "@/lib/license-options";
+import { OfficerSearchCard } from "@/app/company/officers/OfficerSearchCard";
 
 const fieldClassName =
   "min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
-function LocationIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className} aria-hidden="true">
-      <path d="M10 17s5-4.5 5-8.5a5 5 0 1 0-10 0C5 12.5 10 17 10 17Z" />
-      <circle cx="10" cy="8.5" r="1.75" />
-    </svg>
-  );
-}
-
-function CalendarIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className={className} aria-hidden="true">
-      <rect x="3.5" y="4.5" width="13" height="12" rx="1.5" />
-      <path d="M7 3.5v2M13 3.5v2M3.5 8h13" />
-    </svg>
-  );
-}
-
-function ChipList({ values }: { values: readonly string[] }) {
-  return (
-    <div className="flex flex-wrap gap-1">
-      {values.map((value) => (
-        <span
-          key={value}
-          className="inline-flex rounded-full border border-blue-500/25 bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-100"
-        >
-          {value}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function QualificationSection({
-  label,
-  values,
-}: {
-  label: string;
-  values: readonly string[];
-}) {
-  if (values.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="min-w-0">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle">
-        {label}
-      </p>
-      <div className="mt-1">
-        <ChipList values={values} />
-      </div>
-    </div>
-  );
-}
-
-function OfficerQualifications({
-  officer,
-  compact = false,
-}: {
-  officer: SerializedOfficerSearchResult;
-  compact?: boolean;
-}) {
-  const sections = [
-    { label: "Background", values: officer.backgroundCategories },
-    { label: "Licenses", values: officer.licenseTypeLabels },
-    { label: "Certifications", values: officer.certifications },
-    { label: "Availability", values: officer.availabilityLabels },
-  ];
-
-  const visibleSections = sections.filter((section) => section.values.length > 0);
-
-  if (visibleSections.length === 0) {
-    return (
-      <p className="text-sm text-fo-text-muted">Not provided</p>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "grid min-w-0 gap-3",
-        compact ? "grid-cols-1" : "grid-cols-2 xl:grid-cols-4"
-      )}
-    >
-      {visibleSections.map((section) => (
-        <QualificationSection
-          key={section.label}
-          label={section.label}
-          values={section.values}
-        />
-      ))}
-    </div>
-  );
-}
-
-function OfficerIdentity({
-  officer,
-  stacked = false,
-}: {
-  officer: SerializedOfficerSearchResult;
-  stacked?: boolean;
-}) {
-  return (
-    <div
-      className={cn(
-        "min-w-0",
-        stacked ? "flex flex-col items-center text-center" : "flex items-start gap-3"
-      )}
-    >
-      <ProfileAvatar
-        name={officer.fullName}
-        src={officer.profilePhotoUrl}
-        size="md"
-        className={stacked ? "shrink-0" : undefined}
-      />
-      <div className={cn("min-w-0", stacked && "mt-2 w-full")}>
-        <p className="truncate text-sm font-semibold text-fo-text">
-          {officer.fullName}
-        </p>
-        <span className="mt-1 inline-flex max-w-full rounded-full border border-blue-500/25 bg-blue-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-blue-100">
-          <span className="truncate">{officer.statusBadgeLabel}</span>
-        </span>
-        <p className="mt-2 flex items-center gap-1.5 text-xs text-fo-text-muted">
-          <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-          <span className="truncate">{officer.cityStateLabel}</span>
-        </p>
-        <p className="mt-1 flex items-center gap-1.5 text-xs text-fo-text-muted">
-          <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-          <span>{officer.experienceYearsLabel}</span>
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function OfficerCardActions({
-  onViewProfile,
-  onInvite,
-  inviteState,
-}: {
-  onViewProfile: () => void;
-  onInvite: () => void;
-  inviteState: ReturnType<typeof getOfficerInviteButtonState>;
-}) {
-  return (
-    <div className="flex w-[148px] shrink-0 flex-col justify-center gap-2">
-      <button
-        type="button"
-        onClick={onViewProfile}
-        className={buttonClassName({
-          variant: "secondary",
-          size: "md",
-          className:
-            "min-h-9 w-full border-blue-500/30 px-3 text-xs text-blue-100 hover:bg-blue-500/10",
-        })}
-      >
-        View Profile
-      </button>
-      {inviteState.kind === "invite" ? (
-        <button
-          type="button"
-          onClick={onInvite}
-          className={buttonClassName({
-            variant: "secondary",
-            size: "md",
-            className: "min-h-9 w-full px-3 text-xs",
-          })}
-        >
-          Invite to Apply
-        </button>
-      ) : (
-        <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-center">
-          <p className="text-[11px] font-semibold text-amber-100">
-            {inviteState.label}
-          </p>
-          {inviteState.kind === "pending" ? (
-            <p className="mt-0.5 text-[10px] text-amber-200/80">
-              Pending Response
-            </p>
-          ) : null}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function OfficerResultCard({
   officer,
-  viewMode,
   onViewProfile,
   onInvite,
   inviteState,
 }: {
   officer: SerializedOfficerSearchResult;
-  viewMode: OfficerViewMode;
   onViewProfile: () => void;
   onInvite: () => void;
   inviteState: ReturnType<typeof getOfficerInviteButtonState>;
 }) {
-  if (viewMode === "grid") {
-    return (
-      <article className="fo-glass-card flex h-full min-h-[220px] flex-col rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04]">
-        <OfficerIdentity officer={officer} stacked />
-        <div className="mt-4 flex-1">
-          <OfficerQualifications officer={officer} compact />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-2">
+  return (
+    <OfficerSearchCard
+      officer={officer}
+      actions={
+        <>
           <button
             type="button"
             onClick={onViewProfile}
@@ -242,40 +52,39 @@ function OfficerResultCard({
               variant: "secondary",
               size: "md",
               className:
-                "min-h-9 w-full border-blue-500/30 text-xs text-blue-100 hover:bg-blue-500/10",
+                "min-h-10 flex-1 border-blue-500/30 px-4 text-sm text-blue-100 hover:bg-blue-500/10",
             })}
           >
-            View Profile
+            View Full Profile
           </button>
-          <button
-            type="button"
-            onClick={onInvite}
-            disabled={inviteState.kind !== "invite"}
-            className={buttonClassName({
-              variant: "secondary",
-              size: "md",
-              className: "min-h-9 w-full text-center text-xs",
-            })}
-          >
-            {inviteState.kind === "invite"
-              ? "Invite to Apply"
-              : inviteState.label}
-          </button>
-        </div>
-      </article>
-    );
-  }
-
-  return (
-    <article className="fo-glass-card grid min-h-[132px] grid-cols-1 gap-4 rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)_132px] lg:items-center">
-      <OfficerIdentity officer={officer} />
-      <OfficerQualifications officer={officer} />
-      <OfficerCardActions
-        onViewProfile={onViewProfile}
-        onInvite={onInvite}
-        inviteState={inviteState}
-      />
-    </article>
+          {inviteState.kind === "invite" ? (
+            <button
+              type="button"
+              onClick={onInvite}
+              className={buttonClassName({
+                size: "md",
+                className: "min-h-10 flex-1 px-4 text-sm",
+              })}
+            >
+              Invite to Apply
+            </button>
+          ) : (
+            <div className="flex min-h-10 flex-1 items-center justify-center rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-center">
+              <div>
+                <p className="text-sm font-semibold text-amber-100">
+                  {inviteState.label}
+                </p>
+                {inviteState.kind === "pending" ? (
+                  <p className="mt-0.5 text-xs text-amber-200/80">
+                    Pending Response
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </>
+      }
+    />
   );
 }
 
@@ -357,16 +166,28 @@ export function CompanyOfficersPageContent({
     <div className="mt-6 space-y-4">
       <section className="fo-glass-card rounded-xl border border-white/10 p-4">
         <form method="get" className="space-y-3">
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_auto] lg:items-end">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
             <div className="space-y-1.5">
-              <label htmlFor="name" className="text-xs font-medium text-fo-text-muted">
-                Officer Name
+              <label htmlFor="firstName" className="text-xs font-medium text-fo-text-muted">
+                First name
               </label>
               <input
-                id="name"
-                name="name"
-                defaultValue={filters.name ?? ""}
-                placeholder="Officer name"
+                id="firstName"
+                name="firstName"
+                defaultValue={filters.firstName ?? ""}
+                placeholder="First name"
+                className={fieldClassName}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="lastName" className="text-xs font-medium text-fo-text-muted">
+                Last name
+              </label>
+              <input
+                id="lastName"
+                name="lastName"
+                defaultValue={filters.lastName ?? ""}
+                placeholder="Last name"
                 className={fieldClassName}
               />
             </div>
@@ -556,15 +377,14 @@ export function CompanyOfficersPageContent({
           <div
             className={cn(
               viewMode === "grid"
-                ? "grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
-                : "space-y-3"
+                ? "grid gap-4 xl:grid-cols-2"
+                : "space-y-4"
             )}
           >
             {sortedOfficers.map((officer) => (
               <OfficerResultCard
                 key={officer.id}
                 officer={officer}
-                viewMode={viewMode}
                 onViewProfile={() => setProfileOfficerId(officer.id)}
                 onInvite={() => setInviteOfficerId(officer.id)}
                 inviteState={getOfficerInviteButtonState(officer.id, invites)}
@@ -581,7 +401,14 @@ export function CompanyOfficersPageContent({
 
       <InviteOfficerModal
         officerId={inviteOfficerId}
-        officerName={inviteOfficer?.fullName ?? "Officer"}
+        officerName={
+          inviteOfficer
+            ? officerProfileNameLabel(
+                inviteOfficer.firstName,
+                inviteOfficer.lastName
+              )
+            : "Officer"
+        }
         openShifts={openShifts}
         invites={invites}
         onClose={() => setInviteOfficerId(null)}
