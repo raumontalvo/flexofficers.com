@@ -7,6 +7,7 @@ type ProfileWizardFooterProps = {
   isFirstStep: boolean;
   isLastStep: boolean;
   isSaving: boolean;
+  isUploading?: boolean;
   onBack: () => void;
   onContinue: () => void;
   className?: string;
@@ -16,10 +17,12 @@ export function ProfileWizardFooter({
   isFirstStep,
   isLastStep,
   isSaving,
+  isUploading = false,
   onBack,
   onContinue,
   className,
 }: ProfileWizardFooterProps) {
+  const isBusy = isSaving || isUploading;
   return (
     <div
       className={cn(
@@ -34,7 +37,7 @@ export function ProfileWizardFooter({
             variant="secondary"
             size="md"
             onClick={onBack}
-            disabled={isSaving}
+            disabled={isBusy}
             className="w-full sm:w-auto"
           >
             Back
@@ -45,18 +48,20 @@ export function ProfileWizardFooter({
           type="button"
           size="md"
           onClick={onContinue}
-          disabled={isSaving}
+          disabled={isBusy}
           className={cn(
             "w-full sm:w-auto",
             isLastStep &&
               "!bg-emerald-600 !text-white hover:!bg-emerald-500 active:scale-[0.98]"
           )}
         >
-          {isSaving
-            ? "Saving..."
-            : isLastStep
-              ? "Save Profile"
-              : "Save & Continue"}
+          {isUploading
+            ? "Uploading..."
+            : isSaving
+              ? "Saving..."
+              : isLastStep
+                ? "Save Profile"
+                : "Save & Continue"}
         </Button>
       </div>
     </div>

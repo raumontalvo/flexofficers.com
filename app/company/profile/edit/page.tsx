@@ -4,6 +4,7 @@ import { CompanyProfileEditForm } from "@/components/company/company-profile-edi
 import { PageShell } from "@/components/ui";
 import { companyHasPublicProfile } from "@/lib/company-profile-page-data";
 import { buildCompanyProfileEditFormState } from "@/lib/company-profile-edit-data";
+import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
@@ -41,18 +42,21 @@ export default async function EditCompanyProfilePage() {
     },
   });
 
-  const initialForm = buildCompanyProfileEditFormState({
-    company,
-    userEmail: user.email,
-    shifts,
-    hasPublicProfile: companyHasPublicProfile({
-      companyName: company.companyName,
-      description: stripCompanyProfileMeta(company.description),
-      city: company.city,
-      state: company.state,
-      website: company.website,
+  const initialForm = {
+    ...buildCompanyProfileEditFormState({
+      company,
+      userEmail: user.email,
+      shifts,
+      hasPublicProfile: companyHasPublicProfile({
+        companyName: company.companyName,
+        description: stripCompanyProfileMeta(company.description),
+        city: company.city,
+        state: company.state,
+        website: company.website,
+      }),
     }),
-  });
+    logoUrl: resolveProfilePhotoUrl(company.logoUrl, clerkUser.imageUrl),
+  };
 
   return (
     <PageShell nav="company" maxWidth="full" sidebar>

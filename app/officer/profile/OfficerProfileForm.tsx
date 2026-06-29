@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Button,
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
-  ProfileAvatar,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
@@ -33,6 +32,7 @@ import {
   getLicenseDisplayMeta,
   LicenseTypeBadge,
 } from "./license-display";
+import { ProfilePhotoUpload } from "@/components/profile/profile-photo-upload";
 import { ProfileSuccessScreen } from "./ProfileSuccessScreen";
 import { ProfileWizardFooter } from "./ProfileWizardFooter";
 import { ProfileWizardHeader } from "./ProfileWizardHeader";
@@ -165,42 +165,6 @@ function TagToggleGroup({
   );
 }
 
-function ProfilePhotoPreview({
-  name,
-  photoUrl,
-}: {
-  name: string;
-  photoUrl: string;
-}) {
-  const [hasError, setHasError] = useState(false);
-  const showImage = photoUrl.trim().length > 0 && !hasError;
-
-  useEffect(() => {
-    setHasError(false);
-  }, [photoUrl]);
-
-  if (!showImage) {
-    return (
-      <ProfileAvatar
-        name={name}
-        size="xl"
-        className="!h-24 !w-24 !text-2xl sm:!h-28 sm:!w-28"
-      />
-    );
-  }
-
-  return (
-    <div className="relative h-24 w-24 overflow-hidden rounded-full border-2 border-fo-primary-bright/30 bg-fo-bg-elevated shadow-[0_0_24px_rgba(59,130,246,0.15)] sm:h-28 sm:w-28">
-      <img
-        src={photoUrl}
-        alt={name ? `${name} profile photo` : "Profile photo preview"}
-        className="h-full w-full object-cover"
-        onError={() => setHasError(true)}
-      />
-    </div>
-  );
-}
-
 export default function OfficerProfileForm({
   initialForm,
 }: OfficerProfileFormProps) {
@@ -208,6 +172,7 @@ export default function OfficerProfileForm({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const currentStep = PROFILE_WIZARD_STEPS[currentStepIndex];
@@ -512,24 +477,15 @@ export default function OfficerProfileForm({
       case "basic":
         return (
           <div className="space-y-4">
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
-              <ProfilePhotoPreview
-                name={displayName}
-                photoUrl={form.profilePhotoUrl}
-              />
-              <div className="min-w-0 flex-1 space-y-1.5 sm:pt-1">
-                <FieldLabel htmlFor="profilePhotoUrl">Profile photo URL</FieldLabel>
-                <input
-                  id="profilePhotoUrl"
-                  value={form.profilePhotoUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, profilePhotoUrl: e.target.value })
-                  }
-                  className={fieldClassName}
-                  placeholder="https://example.com/photo.jpg"
-                />
-              </div>
-            </div>
+            <ProfilePhotoUpload
+              value={form.profilePhotoUrl}
+              onChange={(profilePhotoUrl) =>
+                setForm({ ...form, profilePhotoUrl })
+              }
+              previewName={displayName}
+              onUploadingChange={setIsUploadingPhoto}
+              disabled={isSaving}
+            />
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
@@ -745,7 +701,7 @@ export default function OfficerProfileForm({
             </div>
             <CardDescription className="text-sm">
               {currentStep.id === "basic" &&
-                "Add a photo URL and contact details companies may review."}
+                "Add a photo and contact details companies may review."}
               {currentStep.id === "experience" &&
                 "Help companies understand your background and credentials."}
               {currentStep.id === "licenses" &&
@@ -783,6 +739,7 @@ export default function OfficerProfileForm({
         isFirstStep={isFirstStep}
         isLastStep={isLastStep}
         isSaving={isSaving}
+        isUploading={isUploadingPhoto}
         onBack={handleBack}
         onContinue={handleContinue}
       />

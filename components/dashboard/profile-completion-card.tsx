@@ -66,9 +66,9 @@ export function ProfileCompletionCard({
             : "Complete your profile before you can apply to shifts."}
         </CardDescription>
 
-        <div className="space-y-1">
+        <div className="space-y-1 pt-1 md:pt-0">
           <div
-            className="h-1.5 overflow-hidden rounded-full bg-slate-800/80"
+            className="h-2 overflow-hidden rounded-full bg-slate-800/80 md:h-1.5"
             role="progressbar"
             aria-valuenow={completionPercent}
             aria-valuemin={0}

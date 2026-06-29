@@ -83,42 +83,46 @@ export default async function OfficerDashboard({
 
   return (
     <PageShell nav="officer" maxWidth="full" sidebar>
-      <div className="space-y-4">
+      <div className="space-y-5 pb-3 md:space-y-4 md:pb-0">
         <DashboardHeader
           firstName={firstName}
           fullName={fullName}
           imageUrl={imageUrl}
         />
 
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_300px]">
-          <MobileStatGrid desktopColumns={4}>
+        <div className="grid gap-5 md:gap-3 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_300px]">
+          <MobileStatGrid desktopColumns={4} className="gap-5 md:gap-3">
             <StatCard
               label="Applications"
               value={applicationsCount}
               hint="Shifts you've applied to"
               tone="purple"
-              icon={<ShiftsIcon className="h-4 w-4" />}
+              showChevron
+              icon={<ShiftsIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
             <StatCard
               label="Accepted Shifts"
               value={acceptedCount}
               hint="Assignments you've won"
               tone="green"
-              icon={<AcceptedIcon className="h-4 w-4" />}
+              showChevron
+              icon={<AcceptedIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
             <StatCard
               label="Upcoming Shifts"
               value={upcomingCount}
               hint="Accepted shifts starting soon"
               tone="blue"
-              icon={<UpcomingIcon className="h-4 w-4" />}
+              showChevron
+              icon={<UpcomingIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
             <StatCard
               label="Available Shifts"
               value={availableShiftsCount}
               hint="Open shifts posted by companies"
               tone="amber"
-              icon={<BrowseIcon className="h-4 w-4" />}
+              showChevron
+              icon={<BrowseIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
           </MobileStatGrid>
 

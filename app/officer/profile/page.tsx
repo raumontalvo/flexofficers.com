@@ -3,8 +3,8 @@ import { PageShell } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { officerProfilePageUserSelect } from "@/lib/officer-fields";
 import { prisma } from "@/lib/prisma";
-import type { ArmedStatusOption } from "@/lib/profile-options";
-import { normalizeExperienceCategories } from "@/lib/profile-options";
+import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
+import { normalizeExperienceCategories, type ArmedStatusOption } from "@/lib/profile-options";
 import OfficerProfileForm from "./OfficerProfileForm";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +59,10 @@ export default async function OfficerProfilePage() {
     phone: officer?.phone ?? "",
     email: user?.email ?? clerkUser.emailAddresses[0]?.emailAddress ?? "",
     city: officer?.city ?? "",
-    profilePhotoUrl: officer?.profilePhotoUrl ?? "",
+    profilePhotoUrl: resolveProfilePhotoUrl(
+      officer?.profilePhotoUrl,
+      clerkUser.imageUrl
+    ),
     armedStatuses: (officer?.armedStatuses ?? []) as ArmedStatusOption[],
     experienceYears:
       officer?.experienceYears !== null && officer?.experienceYears !== undefined

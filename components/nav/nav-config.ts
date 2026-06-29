@@ -123,7 +123,7 @@ export const officerSidebarItems: NavItem[] = [
 export const companySidebarItems: NavItem[] = [
   {
     href: "/dashboard",
-    label: "Dashboard",
+    label: "Home",
     icon: DashboardIcon,
     match: (pathname) => pathname === "/dashboard",
   },
@@ -186,7 +186,7 @@ export const companySidebarItems: NavItem[] = [
 export const companyNavItems: NavItem[] = [
   {
     href: "/dashboard",
-    label: "Dashboard",
+    label: "Home",
     icon: DashboardIcon,
     match: (pathname) => pathname === "/dashboard",
   },

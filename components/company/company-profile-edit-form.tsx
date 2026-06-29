@@ -7,6 +7,7 @@ import {
   parseCompanyPayload,
 } from "@/app/api/company/profile/validation";
 import { buttonClassName } from "@/components/ui";
+import { ProfilePhotoUpload } from "@/components/profile/profile-photo-upload";
 import { cn } from "@/lib/cn";
 import type { CompanyProfileEditFormState } from "@/lib/company-profile-edit-data";
 import {
@@ -83,46 +84,6 @@ function EditSectionCard({
       ) : null}
       <div className="mt-4 space-y-4">{children}</div>
     </section>
-  );
-}
-
-function getCompanyInitials(name: string) {
-  if (!name.trim()) {
-    return "CO";
-  }
-
-  const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || "CO";
-}
-
-function CompanyLogoPreview({
-  companyName,
-  logoUrl,
-}: {
-  companyName: string;
-  logoUrl: string;
-}) {
-  const [hasError, setHasError] = useState(false);
-  const showImage = logoUrl.trim().length > 0 && !hasError;
-
-  if (showImage) {
-    return (
-      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-fo-border-strong bg-fo-bg-elevated">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={logoUrl}
-          alt={companyName ? `${companyName} logo` : "Company logo preview"}
-          className="h-full w-full object-cover"
-          onError={() => setHasError(true)}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full border border-fo-border-strong bg-fo-bg-elevated text-2xl font-bold text-fo-text">
-      {getCompanyInitials(companyName)}
-    </div>
   );
 }
 
@@ -234,8 +195,8 @@ function SelectionChipField({
 
 export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormProps) {
   const [form, setForm] = useState(initialForm);
-  const [showLogoInput, setShowLogoInput] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -364,10 +325,14 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
           </Link>
           <button
             type="submit"
-            disabled={isSaving}
+            disabled={isSaving || isUploadingLogo}
             className={buttonClassName({ size: "md" })}
           >
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isUploadingLogo
+              ? "Uploading..."
+              : isSaving
+                ? "Saving..."
+                : "Save Changes"}
           </button>
         </div>
       </div>
@@ -393,41 +358,15 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start">
         <div className="space-y-4">
           <EditSectionCard title="Company Information">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <CompanyLogoPreview
-                companyName={form.companyName}
-                logoUrl={form.logoUrl}
-              />
-              <div className="flex-1 space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setShowLogoInput((current) => !current)}
-                  className={buttonClassName({
-                    variant: "secondary",
-                    size: "md",
-                  })}
-                >
-                  Change Logo
-                </button>
-                <p className="text-xs text-fo-text-muted">
-                  Recommended: Square JPG or PNG, at least 512x512px.
-                </p>
-                {showLogoInput ? (
-                  <div className="space-y-2">
-                    <OptionalLabel htmlFor="logoUrl">Logo URL</OptionalLabel>
-                    <input
-                      id="logoUrl"
-                      value={form.logoUrl}
-                      onChange={(event) =>
-                        setForm({ ...form, logoUrl: event.target.value })
-                      }
-                      className={fieldClassName}
-                      placeholder="https://example.com/logo.png"
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </div>
+            <ProfilePhotoUpload
+              value={form.logoUrl}
+              onChange={(logoUrl) => setForm({ ...form, logoUrl })}
+              previewName={form.companyName}
+              onUploadingChange={setIsUploadingLogo}
+              disabled={isSaving}
+              previewShape="circle"
+              helperText="Square JPG, PNG, or WEBP recommended. Max 5MB."
+            />
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
