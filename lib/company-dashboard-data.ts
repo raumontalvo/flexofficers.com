@@ -178,6 +178,23 @@ export function getUpcomingConfirmedShifts(
   const windowEnd = new Date(now);
   windowEnd.setDate(windowEnd.getDate() + days);
 
+  return filterUpcomingConfirmedShifts(shifts, now).filter(
+    (shift) => shift.startTime <= windowEnd
+  );
+}
+
+export function getNextUpcomingConfirmedShifts(
+  shifts: CompanyShiftRecord[],
+  now: Date = new Date(),
+  limit = 2
+) {
+  return filterUpcomingConfirmedShifts(shifts, now).slice(0, limit);
+}
+
+function filterUpcomingConfirmedShifts(
+  shifts: CompanyShiftRecord[],
+  now: Date
+) {
   return shifts
     .filter((shift) => {
       const hasAccepted = shift.applications.some(
@@ -187,7 +204,6 @@ export function getUpcomingConfirmedShifts(
       return (
         hasAccepted &&
         shift.startTime >= now &&
-        shift.startTime <= windowEnd &&
         shift.status !== ShiftStatus.CANCELLED
       );
     })

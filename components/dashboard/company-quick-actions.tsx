@@ -3,9 +3,11 @@ import {
   ApplicantsIcon,
   SearchIcon,
   ShiftsIcon,
+  StaffIcon,
+  UpcomingIcon,
 } from "@/components/nav/icons";
 import { Card, CardDescription, CardTitle } from "@/components/ui";
-import { MobileActionCard, MobileActionCardGrid } from "@/components/ui/mobile";
+import { MobileActionCard } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 
 const actions = [
@@ -19,9 +21,16 @@ const actions = [
   {
     href: "/company/applications",
     title: "View Applicants",
-    description: "Review new officer applicants.",
+    description: "Review officer applications.",
     icon: ApplicantsIcon,
     iconClassName: "bg-violet-500/20 text-violet-300",
+  },
+  {
+    href: "/company/accepted-officers",
+    title: "Upcoming Shifts",
+    description: "See confirmed shifts.",
+    icon: UpcomingIcon,
+    iconClassName: "bg-amber-500/20 text-amber-300",
   },
   {
     href: "/company/officers",
@@ -29,6 +38,13 @@ const actions = [
     description: "Search and review officer profiles.",
     icon: SearchIcon,
     iconClassName: "bg-emerald-500/20 text-emerald-300",
+  },
+  {
+    href: "/company/staff",
+    title: "Staff",
+    description: "View your saved officers.",
+    icon: StaffIcon,
+    iconClassName: "bg-sky-500/20 text-sky-300",
   },
 ] as const;
 
@@ -44,7 +60,7 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
         </p>
       </div>
 
-      <MobileActionCardGrid className="md:hidden">
+      <div className="flex flex-col gap-2 lg:hidden">
         {actions.map((action) => {
           const Icon = action.icon;
           const href =
@@ -58,12 +74,13 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
               description={action.description}
               icon={<Icon className="h-4 w-4" />}
               iconClassName={action.iconClassName}
+              className="rounded-2xl p-3.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.55)]"
             />
           );
         })}
-      </MobileActionCardGrid>
+      </div>
 
-      <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 md:grid">
+      <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 lg:grid">
         {actions.map((action) => {
           const Icon = action.icon;
           const href =

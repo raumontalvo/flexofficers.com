@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { dashboardUserSelect } from "@/lib/officer-fields";
 import { getCompanyProfileCompletion } from "@/lib/company-profile-completion";
+import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { prisma } from "@/lib/prisma";
 import CompanyDashboard from "./CompanyDashboard";
 import { DashboardSetupState } from "./DashboardSetupState";
@@ -53,6 +54,10 @@ export default async function DashboardPage() {
     return (
       <CompanyDashboard
         firstName={clerkUser.firstName}
+        logoUrl={resolveProfilePhotoUrl(
+          user.company.logoUrl,
+          clerkUser.imageUrl
+        )}
         company={user.company}
         profileCompletion={profileCompletion}
       />

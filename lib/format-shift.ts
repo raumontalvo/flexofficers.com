@@ -24,6 +24,13 @@ export function formatShiftTime(date: Date) {
   });
 }
 
+export function formatShiftTimeBadgeParts(startTime: Date, endTime: Date) {
+  return {
+    start: formatShiftTime(startTime),
+    end: formatShiftTime(endTime),
+  };
+}
+
 export function formatShiftDateRange(startTime: Date, endTime: Date) {
   const sameDay = startTime.toDateString() === endTime.toDateString();
 

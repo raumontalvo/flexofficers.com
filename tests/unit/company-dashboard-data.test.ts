@@ -9,6 +9,7 @@ import {
   getCompanyApplicationStats,
   getCompanyShiftStats,
   getFilledShiftsThisMonth,
+  getNextUpcomingConfirmedShifts,
   getUpcomingConfirmedShifts,
   isPastShift,
 } from "@/lib/company-dashboard-data";
@@ -126,6 +127,44 @@ describe("company dashboard data helpers", () => {
 
     expect(upcoming).toHaveLength(1);
     expect(upcoming[0]?.title).toBe("Night Patrol");
+  });
+
+  it("returns the next confirmed shifts about to start", () => {
+    const nextUpcoming = getNextUpcomingConfirmedShifts(
+      [
+        {
+          ...baseShift,
+          id: "shift-far",
+          startTime: new Date("2026-08-01T08:00:00.000Z"),
+          applications: [{ status: ApplicationStatus.ACCEPTED }],
+        },
+        {
+          ...baseShift,
+          id: "shift-soonest",
+          startTime: new Date("2026-06-26T08:00:00.000Z"),
+          applications: [{ status: ApplicationStatus.ACCEPTED }],
+        },
+        {
+          ...baseShift,
+          id: "shift-second",
+          startTime: new Date("2026-06-27T08:00:00.000Z"),
+          applications: [{ status: ApplicationStatus.ACCEPTED }],
+        },
+        {
+          ...baseShift,
+          id: "shift-third",
+          startTime: new Date("2026-06-28T08:00:00.000Z"),
+          applications: [{ status: ApplicationStatus.ACCEPTED }],
+        },
+      ],
+      now,
+      2
+    );
+
+    expect(nextUpcoming.map((shift) => shift.id)).toEqual([
+      "shift-soonest",
+      "shift-second",
+    ]);
   });
 
   it("maps application display statuses", () => {

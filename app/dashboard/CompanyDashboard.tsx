@@ -7,7 +7,6 @@ import { CompanyProfileCompletionBanner } from "@/components/dashboard/company-p
 import type { CompanyProfileCompletion } from "@/lib/company-profile-completion";
 import { CompanyQuickActions } from "@/components/dashboard/company-quick-actions";
 import { CompanyRecentApplications } from "@/components/dashboard/company-recent-applications";
-import { CompanyShiftsTable } from "@/components/dashboard/company-shifts-table";
 import { CompanySummaryCards } from "@/components/dashboard/company-summary-cards";
 import { CompanyUpcomingShifts } from "@/components/dashboard/company-upcoming-shifts";
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
@@ -17,20 +16,22 @@ import {
   getCompanyApplicationsSummary,
   getCompanyShiftStats,
   getFilledShiftsThisMonth,
+  getNextUpcomingConfirmedShifts,
   getUpcomingConfirmedShifts,
-  serializeCompanyDashboardShift,
 } from "@/lib/company-dashboard-data";
 import { formatArmedStatuses } from "@/lib/profile-options";
 import { prisma } from "@/lib/prisma";
 
 type CompanyDashboardProps = {
   firstName?: string | null;
+  logoUrl?: string | null;
   company: Prisma.CompanyGetPayload<{ select: typeof companyDashboardSelect }>;
   profileCompletion: CompanyProfileCompletion;
 };
 
 export default async function CompanyDashboard({
   firstName,
+  logoUrl,
   company,
   profileCompletion,
 }: CompanyDashboardProps) {
@@ -118,11 +119,32 @@ export default async function CompanyDashboard({
   });
   const filledThisMonth = getFilledShiftsThisMonth(shifts, now);
   const upcomingShifts = getUpcomingConfirmedShifts(shifts, now);
-  const serializedShifts = shifts.map(serializeCompanyDashboardShift);
+  const nextUpcomingShifts = getNextUpcomingConfirmedShifts(shifts, now, 2);
+
+  function serializeUpcomingShift(
+    shift: (typeof shifts)[number]
+  ) {
+    return {
+      id: shift.id,
+      title: shift.title,
+      startTime: shift.startTime.toISOString(),
+      endTime: shift.endTime.toISOString(),
+      city: shift.city,
+      state: shift.state,
+      location: shift.location,
+      openPositions: Math.max(
+        shift.positionsNeeded -
+          shift.applications.filter(
+            (application) => application.status === ApplicationStatus.ACCEPTED
+          ).length,
+        0
+      ),
+    };
+  }
 
   return (
     <PageShell nav="company" maxWidth="full" sidebar>
-      <div className="space-y-5">
+      <div className="space-y-5 pb-3 lg:pb-0">
         {!profileCompletion.isComplete ? (
           <CompanyProfileCompletionBanner
             completionPercent={profileCompletion.completionPercent}
@@ -132,6 +154,7 @@ export default async function CompanyDashboard({
 
         <CompanyDashboardHeader
           displayName={displayName}
+          logoUrl={logoUrl}
           canPostShifts={canPostShifts}
           unreadNotificationCount={unreadNotificationCount}
         />
@@ -144,27 +167,10 @@ export default async function CompanyDashboard({
           upcomingConfirmedCount={upcomingShifts.length}
         />
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <CompanyShiftsTable shifts={serializedShifts} />
-          <CompanyUpcomingShifts
-            shifts={upcomingShifts.map((shift) => ({
-              id: shift.id,
-              title: shift.title,
-              startTime: shift.startTime.toISOString(),
-              city: shift.city,
-              state: shift.state,
-              location: shift.location,
-              openPositions: Math.max(
-                shift.positionsNeeded -
-                  shift.applications.filter(
-                    (application) =>
-                      application.status === ApplicationStatus.ACCEPTED
-                  ).length,
-                0
-              ),
-            }))}
-          />
-        </div>
+        <CompanyUpcomingShifts
+          shifts={upcomingShifts.map(serializeUpcomingShift)}
+          mobileShifts={nextUpcomingShifts.map(serializeUpcomingShift)}
+        />
 
         <div className="grid gap-5 lg:grid-cols-3">
           <CompanyApplicationsDonut
@@ -173,16 +179,18 @@ export default async function CompanyDashboard({
             acceptedCount={applicationsSummary.accepted}
           />
           <CompanyQuickActions canPostShifts={canPostShifts} />
-          <CompanyRecentApplications
-            applications={applications.slice(0, 5).map((application) => ({
-              id: application.id,
-              officerName:
-                `${application.officer.firstName} ${application.officer.lastName}`.trim(),
-              officerType: formatArmedStatuses(application.officer.armedStatuses),
-              status: application.status,
-              shiftTitle: application.shift.title,
-            }))}
-          />
+          <div className="hidden lg:block">
+            <CompanyRecentApplications
+              applications={applications.slice(0, 5).map((application) => ({
+                id: application.id,
+                officerName:
+                  `${application.officer.firstName} ${application.officer.lastName}`.trim(),
+                officerType: formatArmedStatuses(application.officer.armedStatuses),
+                status: application.status,
+                shiftTitle: application.shift.title,
+              }))}
+            />
+          </div>
         </div>
       </div>
     </PageShell>
