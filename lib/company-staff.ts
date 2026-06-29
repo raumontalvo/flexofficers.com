@@ -47,3 +47,31 @@ export function getShiftVisibilityLabel(visibility: ShiftVisibility) {
     ? "Private — Staff only"
     : "Public post";
 }
+
+export function searchCompanyStaff(
+  staff: SerializedCompanyStaffMember[],
+  query: string
+) {
+  const normalized = query.trim().toLowerCase();
+
+  if (!normalized) {
+    return staff;
+  }
+
+  return staff.filter((member) => {
+    const { officer } = member;
+    const haystack = [
+      officer.firstName,
+      officer.lastName,
+      officer.fullName,
+      officer.city,
+      officer.state,
+      officer.cityStateLabel,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return haystack.includes(normalized);
+  });
+}

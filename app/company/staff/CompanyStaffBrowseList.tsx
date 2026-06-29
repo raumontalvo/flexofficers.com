@@ -11,7 +11,10 @@ import {
   type CompanyOfficerInviteRecord,
 } from "@/lib/company-invite-workflow";
 import { buttonClassName } from "@/components/ui";
-import type { SerializedCompanyStaffMember } from "@/lib/company-staff";
+import {
+  searchCompanyStaff,
+  type SerializedCompanyStaffMember,
+} from "@/lib/company-staff";
 import { OfficerSearchCard } from "@/app/company/officers/OfficerSearchCard";
 import { OfficerSearchMobileCard } from "@/app/company/officers/OfficerSearchMobileCard";
 
@@ -97,8 +100,14 @@ export function CompanyStaffBrowseList({
   const [invites, setInvites] = useState(initialInvites);
   const [profileOfficerId, setProfileOfficerId] = useState<string | null>(null);
   const [inviteOfficerId, setInviteOfficerId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openShiftIds = openShifts.map((shift) => shift.id);
+
+  const filteredStaff = useMemo(
+    () => searchCompanyStaff(staff, searchQuery),
+    [staff, searchQuery]
+  );
 
   const profileOfficer = useMemo(
     () => staff.find((member) => member.officerId === profileOfficerId)?.officer ?? null,
@@ -130,12 +139,33 @@ export function CompanyStaffBrowseList({
 
   return (
     <div className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
+      <label className="block">
+        <span className="sr-only">Search your staff by name</span>
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search your staff by name"
+          className="min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20 lg:min-h-10 lg:rounded-lg lg:border-fo-border lg:bg-fo-bg/80"
+        />
+      </label>
+
       <p className="text-sm font-medium text-fo-text">
-        {staff.length} officer{staff.length === 1 ? "" : "s"} on your staff
+        {filteredStaff.length} of {staff.length} officer
+        {staff.length === 1 ? "" : "s"} on your staff
       </p>
 
+      {filteredStaff.length === 0 ? (
+        <section className="fo-glass-card rounded-xl border border-white/10 px-4 py-10 text-center">
+          <h2 className="text-base font-semibold text-fo-text">No staff found.</h2>
+          <p className="mt-2 text-sm text-fo-text-muted">
+            Try another name from your staff roster.
+          </p>
+        </section>
+      ) : (
+        <>
       <div className="space-y-3 lg:hidden">
-        {staff.map((member) => (
+        {filteredStaff.map((member) => (
           <OfficerSearchMobileCard
             key={member.id}
             officer={member.officer}
@@ -161,7 +191,7 @@ export function CompanyStaffBrowseList({
       </div>
 
       <div className="hidden space-y-4 lg:block">
-        {staff.map((member) => (
+        {filteredStaff.map((member) => (
           <StaffDesktopCard
             key={member.id}
             member={member}
@@ -176,6 +206,8 @@ export function CompanyStaffBrowseList({
           />
         ))}
       </div>
+        </>
+      )}
 
       <OfficerProfilePanel
         officer={profileOfficer}

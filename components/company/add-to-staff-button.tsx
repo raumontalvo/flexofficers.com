@@ -68,14 +68,14 @@ export function AddToStaffButton({
             variant: "secondary",
             size: "md",
             className: cn(
-              "border-emerald-500/30 text-emerald-100 hover:bg-emerald-500/10",
+              "border-red-500/30 text-red-100 hover:bg-red-500/10",
               size === "mobile" ? "!min-h-11 !text-sm" : "min-h-10 text-sm",
               className
             ),
           })
         )}
       >
-        {loading ? "Updating..." : "On Staff"}
+        {loading ? "Removing..." : "Remove Staff"}
       </button>
     );
   }
