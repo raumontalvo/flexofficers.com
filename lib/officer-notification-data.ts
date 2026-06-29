@@ -136,10 +136,10 @@ function inferNotificationMeta(title: string, message: string): InferredMeta {
     return { category: "applications", kind: "application_status_updated" };
   }
 
-  if (includesAny(text, ["starts tomorrow"])) {
+  if (includesAny(text, ["upcoming shift tomorrow", "starts tomorrow"])) {
     return { category: "shifts", kind: "shift_starts_tomorrow" };
   }
-  if (includesAny(text, ["starts soon", "starting soon"])) {
+  if (includesAny(text, ["shift starts soon", "begins in about 2 hours"])) {
     return { category: "shifts", kind: "shift_starts_soon" };
   }
   if (includesAny(text, ["upcoming shift", "shift reminder"])) {
@@ -219,6 +219,12 @@ function inferPrimaryAction(
 
   if (kind === "new_shift_match") {
     return { label: "View Shift", href: "/shifts" };
+  }
+
+  if (
+    includesAny(text, ["upcoming shift tomorrow", "shift starts soon", "begins in about 2 hours"])
+  ) {
+    return { label: "View Shift", href: "/officer/accepted-shifts" };
   }
 
   if (

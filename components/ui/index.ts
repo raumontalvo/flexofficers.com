@@ -12,6 +12,7 @@ export { SectionHeading } from "./section-heading";
 export { ProfileAvatar, type ProfileAvatarSize } from "./profile-avatar";
 export { StatCard } from "./stat-card";
 export { PageShell } from "./page-shell";
+export { StatusToast } from "./status-toast";
 export { MobileBottomNav, type MobileBottomNavRole } from "./mobile-bottom-nav";
 export {
   MobileSectionCard,

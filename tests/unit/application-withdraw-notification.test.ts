@@ -113,7 +113,7 @@ describe("application withdraw company notification", () => {
 
     expect(notification).toMatchObject({ id: "notification-withdraw-2" });
     expect(consoleError).toHaveBeenCalledWith(
-      "[notification-email] Notification email delivery failed",
+      "[notification-email]",
       expect.objectContaining({
         recipientUserId: "company-user-2",
         notificationType: "application_withdrawn",

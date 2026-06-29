@@ -274,7 +274,7 @@ describe("createNotificationWithEmail", () => {
     ).resolves.toMatchObject({ id: "notification-3" });
 
     expect(consoleError).toHaveBeenCalledWith(
-      "[notification-email] Notification email delivery failed",
+      "[notification-email]",
       expect.objectContaining({
         recipientUserId: "user-3",
         notificationType: "new_company_invite",
@@ -327,7 +327,7 @@ describe("createNotificationWithEmail", () => {
     ).resolves.toMatchObject({ id: "notification-5" });
 
     expect(consoleError).toHaveBeenCalledWith(
-      "[notification-email] Resend returned an error",
+      "[notification-email]",
       expect.objectContaining({
         recipientUserId: "company-user-2",
         notificationType: "new_application",

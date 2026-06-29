@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { buttonClassName } from "@/components/ui";
+import { buttonClassName, StatusToast } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
   getInviteableShiftIdsForOfficer,
@@ -77,6 +77,7 @@ export function InviteOfficerModal({
   const [sentInvite, setSentInvite] = useState<CompanyOfficerInviteRecord | null>(
     null
   );
+  const [showSentToast, setShowSentToast] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !officerId) {
@@ -94,6 +95,7 @@ export function InviteOfficerModal({
     setMessage("");
     setError(null);
     setSentInvite(null);
+    setShowSentToast(false);
   }, [isOpen, officerId, openShifts, invites]);
 
   useEffect(() => {
@@ -144,6 +146,7 @@ export function InviteOfficerModal({
 
     if (result.ok) {
       setSentInvite(result.invite);
+      setShowSentToast(true);
       onInviteSent(result.invite);
     } else {
       setError(result.error);
@@ -154,11 +157,15 @@ export function InviteOfficerModal({
 
   return (
     <>
+      {showSentToast ? (
+        <StatusToast message="Invite sent" onClose={() => setShowSentToast(false)} />
+      ) : null}
+
       <button
         type="button"
         aria-label="Close invite officer modal"
         className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px]"
-        onClick={onClose}
+        onClick={sentInvite ? undefined : onClose}
       />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -174,13 +181,13 @@ export function InviteOfficerModal({
                 id="invite-officer-title"
                 className="text-lg font-bold text-fo-text"
               >
-                Invitation Sent
+                Invite sent
               </h2>
               <p className="mt-2 text-sm text-fo-text-muted">
                 {officerName} will be notified about your shift invite.
               </p>
-              <span className="mt-4 inline-flex rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-200">
-                Invited
+              <span className="mt-4 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+                Invite sent
               </span>
               <div className="mt-6 flex flex-col gap-2">
                 {remainingInviteableShiftIds.length > 0 ? (

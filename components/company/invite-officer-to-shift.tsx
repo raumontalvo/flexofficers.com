@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { buttonClassName } from "@/components/ui";
+import { buttonClassName, StatusToast } from "@/components/ui";
 
 export type CompanyOpenShiftOption = {
   id: string;
@@ -59,6 +59,7 @@ export function InviteOfficerToShift({
   const [shiftId, setShiftId] = useState(openShifts[0]?.id ?? "");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [showSentToast, setShowSentToast] = useState(false);
 
   if (openShifts.length === 0) {
     return (
@@ -73,11 +74,13 @@ export function InviteOfficerToShift({
 
     setLoading(true);
     setMessage(null);
+    setShowSentToast(false);
 
     const result = await createInvite(shiftId, officerId);
 
     if (result.ok) {
       setMessage("Invite sent.");
+      setShowSentToast(true);
     } else {
       setMessage(result.error);
     }
@@ -87,6 +90,10 @@ export function InviteOfficerToShift({
 
   return (
     <div className="space-y-2">
+      {showSentToast ? (
+        <StatusToast message="Invite sent" onClose={() => setShowSentToast(false)} />
+      ) : null}
+
       <label className="block text-xs font-medium uppercase tracking-wide text-fo-text-muted">
         Invite to Shift
       </label>
@@ -113,7 +120,15 @@ export function InviteOfficerToShift({
         {loading ? "Sending..." : "Invite to Apply"}
       </button>
       {message ? (
-        <p className="text-xs text-fo-text-muted">{message}</p>
+        <p
+          className={
+            message === "Invite sent."
+              ? "rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-100"
+              : "text-xs text-red-300"
+          }
+        >
+          {message}
+        </p>
       ) : (
         <p className="text-xs text-fo-text-muted">
           The officer will receive a company invite they can accept or decline.

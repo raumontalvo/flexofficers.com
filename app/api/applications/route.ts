@@ -158,10 +158,9 @@ export async function POST(req: Request) {
     const message = `${officerName} applied to ${shift.title}.`;
     const companyRecipientUserId = shift.company.user.id;
 
-    console.log("[application-create] Creating company notification", {
+    console.log("[application-create]", {
       companyRecipientUserId,
-      officerUserId: user.id,
-      companyAccountEmail: shift.company.user.email,
+      companyUserEmail: shift.company.user.email,
       companyProfileEmail: shift.company.email ?? null,
     });
 

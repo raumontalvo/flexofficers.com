@@ -14,7 +14,9 @@ export type NotificationEmailType =
   | "invite_accepted"
   | "invite_declined"
   | "shift_update"
-  | "shift_canceled";
+  | "shift_canceled"
+  | "shift_reminder_24h"
+  | "shift_reminder_2h";
 
 export const NOTIFICATION_EMAIL_SUBJECTS: Record<NotificationEmailType, string> = {
   new_application: "New application",
@@ -26,6 +28,8 @@ export const NOTIFICATION_EMAIL_SUBJECTS: Record<NotificationEmailType, string> 
   invite_declined: "Invite declined",
   shift_update: "Shift update",
   shift_canceled: "Shift canceled",
+  shift_reminder_24h: "Upcoming shift reminder",
+  shift_reminder_2h: "Shift starts soon",
 };
 
 const NOTIFICATION_LINK_PATHS: Record<NotificationEmailType, string> = {
@@ -38,6 +42,8 @@ const NOTIFICATION_LINK_PATHS: Record<NotificationEmailType, string> = {
   invite_declined: "/company/applications",
   shift_update: "/officer/upcoming-shifts",
   shift_canceled: "/officer/upcoming-shifts",
+  shift_reminder_24h: "/officer/accepted-shifts",
+  shift_reminder_2h: "/officer/accepted-shifts",
 };
 
 type NotificationDb = Pick<PrismaClient, "notification" | "user">;
@@ -48,9 +54,37 @@ export type CreateNotificationWithEmailInput = {
   message: string;
   type: NotificationEmailType;
   linkUrl?: string;
+  emailSubject?: string;
+  emailMessage?: string;
 };
 
 type SendNotificationEmailFn = typeof sendNotificationEmail;
+
+type NotificationEmailLog = {
+  notificationType: NotificationEmailType;
+  recipientUserId: string;
+  recipientEmail?: string | null;
+  resendEmailId?: string | null;
+  resendError?: unknown;
+  resendApiKeyConfigured?: boolean;
+  emailFromConfigured?: boolean;
+  emailNotificationsEnabled?: boolean;
+  reason?: string;
+};
+
+function logNotificationEmail(details: NotificationEmailLog) {
+  const payload = {
+    ...getNotificationEmailConfigStatus(),
+    ...details,
+  };
+
+  if (details.resendError || details.reason) {
+    console.error("[notification-email]", payload);
+    return;
+  }
+
+  console.log("[notification-email]", payload);
+}
 
 function getAppBaseUrl() {
   return (
@@ -76,52 +110,22 @@ export function getNotificationLinkUrl(
   return `${getAppBaseUrl()}${NOTIFICATION_LINK_PATHS[type]}`;
 }
 
-function logNotificationEmailDelivery(
-  level: "log" | "warn" | "error",
-  message: string,
-  details: Record<string, unknown>
-) {
-  const payload = {
-    ...getNotificationEmailConfigStatus(),
-    ...details,
-  };
-
-  if (level === "warn") {
-    console.warn(`[notification-email] ${message}`, payload);
-    return;
-  }
-
-  if (level === "error") {
-    console.error(`[notification-email] ${message}`, payload);
-    return;
-  }
-
-  console.log(`[notification-email] ${message}`, payload);
-}
-
 async function deliverNotificationEmail(
   db: NotificationDb,
   input: CreateNotificationWithEmailInput,
   sendEmail: SendNotificationEmailFn
 ) {
-  const deliveryContext = {
-    recipientUserId: input.userId,
+  const baseLog: NotificationEmailLog = {
     notificationType: input.type,
+    recipientUserId: input.userId,
   };
 
   try {
-    logNotificationEmailDelivery(
-      "log",
-      "Starting notification email delivery",
-      deliveryContext
-    );
-
     if (!isNotificationEmailConfigured()) {
-      logNotificationEmailDelivery(
-        "warn",
-        "Skipped email delivery because Resend is not configured",
-        deliveryContext
-      );
+      logNotificationEmail({
+        ...baseLog,
+        reason: "Resend is not configured (missing RESEND_API_KEY or EMAIL_FROM)",
+      });
       return;
     }
 
@@ -135,65 +139,56 @@ async function deliverNotificationEmail(
       },
     });
 
-    const recipientEmail = user?.email?.trim();
+    const recipientEmail = user?.email?.trim() || null;
     const emailNotificationsEnabled = user?.emailNotificationsEnabled !== false;
 
-    logNotificationEmailDelivery("log", "Resolved notification recipient", {
-      ...deliveryContext,
-      recipientEmailExists: Boolean(recipientEmail),
-      emailNotificationsEnabled,
-    });
-
     if (!recipientEmail) {
-      logNotificationEmailDelivery(
-        "warn",
-        "Skipped email delivery because user.email is missing (account email is used for notifications, not company profile email)",
-        deliveryContext
-      );
+      logNotificationEmail({
+        ...baseLog,
+        recipientEmail: null,
+        reason: "Recipient user.email is missing",
+      });
       return;
     }
 
     if (!emailNotificationsEnabled) {
-      logNotificationEmailDelivery(
-        "warn",
-        "Skipped email delivery because emailNotificationsEnabled is false",
-        {
-          ...deliveryContext,
-          recipientEmailExists: true,
-          emailNotificationsEnabled: false,
-        }
-      );
+      logNotificationEmail({
+        ...baseLog,
+        recipientEmail,
+        emailNotificationsEnabled: false,
+        reason: "emailNotificationsEnabled is false",
+      });
       return;
     }
 
     const result = await sendEmail({
       to: recipientEmail,
-      subject: getNotificationEmailSubject(input.type),
+      subject: input.emailSubject ?? getNotificationEmailSubject(input.type),
       title: input.title,
-      message: input.message,
+      message: input.emailMessage ?? input.message,
       linkUrl: getNotificationLinkUrl(input.type, input.linkUrl),
     });
 
     if (result?.error) {
-      logNotificationEmailDelivery("error", "Resend returned an error", {
-        ...deliveryContext,
-        recipientEmailExists: true,
+      logNotificationEmail({
+        ...baseLog,
+        recipientEmail,
         emailNotificationsEnabled: true,
         resendError: result.error,
       });
       return;
     }
 
-    logNotificationEmailDelivery("log", "Resend email sent successfully", {
-      ...deliveryContext,
-      recipientEmailExists: true,
+    logNotificationEmail({
+      ...baseLog,
+      recipientEmail,
       emailNotificationsEnabled: true,
       resendEmailId: result?.data?.id ?? null,
     });
   } catch (error) {
-    logNotificationEmailDelivery("error", "Notification email delivery failed", {
-      ...deliveryContext,
-      error,
+    logNotificationEmail({
+      ...baseLog,
+      resendError: error,
     });
   }
 }
