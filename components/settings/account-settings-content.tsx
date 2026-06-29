@@ -12,6 +12,7 @@ const SUPPORT_PHONE_HREF = "tel:+12399005653";
 export const OFFICER_PRIVACY_ITEMS = [
   "Companies can view your profile after you apply to a shift.",
   "Your phone number and email are shared only after you are accepted for a shift.",
+  "Once you are accepted for a shift, you are responsible for arranging how you will be paid. The company's contact information is shared after acceptance so you can ask about payment and other questions.",
   "License information is self-reported by officers.",
 ];
 
