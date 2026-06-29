@@ -87,17 +87,11 @@ export default async function OfficerDashboard({
     prisma.shift.count({
       where: {
         status: ShiftStatus.OPEN,
-        startTime: {
-          gte: now,
-        },
       },
     }),
     prisma.shift.findMany({
       where: {
         status: ShiftStatus.OPEN,
-        startTime: {
-          gte: now,
-        },
       },
       include: {
         company: {
