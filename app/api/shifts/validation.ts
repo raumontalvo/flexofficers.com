@@ -5,6 +5,7 @@ import {
   toShiftTimeType,
   toShiftWorkType,
 } from "@/lib/shift-form-options";
+import { ShiftVisibility } from "@/app/generated/prisma/enums";
 
 export type ShiftPayload = {
   title?: unknown;
@@ -22,6 +23,7 @@ export type ShiftPayload = {
   otherRequirements?: unknown;
   reportingInstructions?: unknown;
   positionsNeeded?: unknown;
+  visibility?: unknown;
 };
 
 export function parseShiftPayload(payload: ShiftPayload) {
@@ -153,6 +155,14 @@ export function parseShiftPayload(payload: ShiftPayload) {
     return { errors };
   }
 
+  let visibility: ShiftVisibility = ShiftVisibility.PUBLIC;
+  if (
+    typeof payload.visibility === "string" &&
+    payload.visibility.trim() === ShiftVisibility.STAFF_ONLY
+  ) {
+    visibility = ShiftVisibility.STAFF_ONLY;
+  }
+
   return {
     data: {
       title,
@@ -174,6 +184,7 @@ export function parseShiftPayload(payload: ShiftPayload) {
       }),
       reportingInstructions,
       positionsNeeded: positionsNeededRaw,
+      visibility,
     },
   };
 }

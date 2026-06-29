@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { ProfileAvatar } from "@/components/ui";
 import { MobilePrimaryButton, MobileSecondaryButton } from "@/components/ui/mobile";
 import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
@@ -14,6 +15,8 @@ type OfficerSearchMobileCardProps = {
   onViewProfile: () => void;
   onInvite: () => void;
   inviteState: OfficerInviteButtonState;
+  inviteLabel?: string;
+  staffAction?: ReactNode;
 };
 
 function LocationIcon({ className }: { className?: string }) {
@@ -81,6 +84,8 @@ export function OfficerSearchMobileCard({
   onViewProfile,
   onInvite,
   inviteState,
+  inviteLabel = "Invite to Apply",
+  staffAction,
 }: OfficerSearchMobileCardProps) {
   const displayName = officerProfileNameLabel(officer.firstName, officer.lastName);
   const qualificationBadges: string[] = [];
@@ -221,7 +226,7 @@ export function OfficerSearchMobileCard({
               onClick={onInvite}
               className="!min-h-11 !text-sm"
             >
-              Invite to Apply
+              {inviteLabel}
             </MobilePrimaryButton>
           ) : (
             <div className="flex min-h-11 items-center justify-center rounded-xl border border-amber-500/25 bg-amber-500/10 px-2 text-center">
@@ -238,6 +243,8 @@ export function OfficerSearchMobileCard({
             </div>
           )}
         </div>
+
+        {staffAction ? <div className="pt-2">{staffAction}</div> : null}
       </div>
     </article>
   );

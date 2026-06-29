@@ -50,6 +50,7 @@ export default async function EditCompanyShiftPage({
     otherRequirements: shift.otherRequirements,
     armedRequirement: fromShiftArmedRequirement(shift.armedRequirement),
     positionsNeeded: shift.positionsNeeded,
+    visibility: shift.visibility === "STAFF_ONLY" ? "STAFF_ONLY" : "PUBLIC",
   });
 
   return (

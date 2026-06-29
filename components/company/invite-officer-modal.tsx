@@ -51,14 +51,14 @@ async function createInvite(input: {
 
 function formatShiftOptionLabel(shift: CompanyOpenShiftOption) {
   const location = [shift.city, shift.state].filter(Boolean).join(", ");
-  const date = new Date(shift.startTime).toLocaleString("en-US", {
+  const date = new Date(shift.startTime).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
   });
+  const visibilityLabel =
+    shift.visibility === "STAFF_ONLY" ? " · Staff only" : "";
 
-  return location ? `${shift.title} · ${location} · ${date}` : `${shift.title} · ${date}`;
+  return `${shift.title}${location ? ` · ${location}` : ""} · ${date}${visibilityLabel}`;
 }
 
 export function InviteOfficerModal({

@@ -82,6 +82,7 @@ export async function POST(req: Request) {
         specialRequirements: parsed.data.specialRequirements,
         reportingInstructions: parsed.data.reportingInstructions,
         positionsNeeded: parsed.data.positionsNeeded,
+        visibility: parsed.data.visibility,
       },
     });
 

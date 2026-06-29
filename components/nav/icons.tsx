@@ -85,6 +85,17 @@ export function ApplicantsIcon(props: IconProps) {
   );
 }
 
+export function StaffIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <circle cx="9" cy="8" r="3" />
+      <circle cx="16.5" cy="9" r="2.5" />
+      <path d="M4.5 18.5c.8-2.2 2.4-3.5 4.5-3.5s3.7 1.3 4.5 3.5" />
+      <path d="M14.5 17.5c.5-1.4 1.5-2.2 2.8-2.2" />
+    </IconBase>
+  );
+}
+
 export function SearchIcon(props: IconProps) {
   return (
     <IconBase {...props}>

@@ -3,6 +3,9 @@ import {
   SHIFT_WORK_TYPE_OPTIONS,
   type ShiftTimeTypeFormValue,
 } from "@/lib/shift-form-options";
+import { ShiftVisibility } from "@/app/generated/prisma/enums";
+
+export type ShiftPostVisibility = "PUBLIC" | "STAFF_ONLY";
 
 export const POST_SHIFT_LICENSE_OPTIONS = [
   "Armed Security",
@@ -56,6 +59,7 @@ export type PostShiftFormValues = {
   certificationRequirements: PostShiftCertificationOption[];
   otherRequirements: string;
   positionsNeeded: number;
+  visibility: ShiftPostVisibility;
 };
 
 export const emptyPostShiftForm: PostShiftFormValues = {
@@ -76,6 +80,7 @@ export const emptyPostShiftForm: PostShiftFormValues = {
   certificationRequirements: [],
   otherRequirements: "",
   positionsNeeded: 1,
+  visibility: "PUBLIC",
 };
 
 export function combineDateAndTime(date: string, time: string) {
@@ -292,6 +297,10 @@ export function buildShiftApiPayload(
           ? otherRequirementsParts.join("; ")
           : undefined,
       positionsNeeded: String(form.positionsNeeded),
+      visibility:
+        form.visibility === "STAFF_ONLY"
+          ? ShiftVisibility.STAFF_ONLY
+          : ShiftVisibility.PUBLIC,
     },
   };
 }
@@ -380,8 +389,6 @@ export function getWorkTypeLabel(value: string) {
 }
 
 export function getShiftSummaryFields(form: PostShiftFormValues) {
-  const estimatedTotal = calculateEstimatedShiftTotal(form);
-
   return {
     typeOfPost: form.workType ? getWorkTypeLabel(form.workType) : "Not set",
     dateTime: formatPostShiftDateTime(form) || "Not set",
@@ -394,7 +401,10 @@ export function getShiftSummaryFields(form: PostShiftFormValues) {
     certificationRequirements: form.certificationRequirements,
     openPositions: String(form.positionsNeeded),
     description: form.description.trim() || "Not set",
-    estimatedTotal: formatCurrencyAmount(estimatedTotal, form.currency),
+    visibility:
+      form.visibility === "STAFF_ONLY"
+        ? "Private post for staff"
+        : "Public post shift",
   };
 }
 
@@ -557,6 +567,7 @@ export function shiftToPostShiftFormValues(input: {
   otherRequirements?: string | null;
   armedRequirement?: string | null;
   positionsNeeded: number;
+  visibility?: ShiftPostVisibility;
 }): PostShiftFormValues {
   const { locationName, address, zipCode } = parseShiftLocationFields(
     input.location
@@ -591,6 +602,7 @@ export function shiftToPostShiftFormValues(input: {
     }),
     otherRequirements: parseFreeformOtherRequirements(input.otherRequirements),
     positionsNeeded: Math.max(1, input.positionsNeeded),
+    visibility: input.visibility ?? "PUBLIC",
   };
 }
 

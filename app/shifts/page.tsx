@@ -1,4 +1,4 @@
-import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
+import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { PageShell, SectionHeading } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import type { ShiftCardData } from "@/lib/shift-card-data";
@@ -7,6 +7,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { officerProfileCompletionSelect } from "@/lib/officer-fields";
 import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
+import { buildOfficerBrowseShiftsWhere } from "@/lib/company-staff";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,7 @@ export default async function ShiftsPage() {
 
   const [shifts, user] = await Promise.all([
     prisma.shift.findMany({
-    where: {
-      status: ShiftStatus.OPEN,
-    },
+    where: buildOfficerBrowseShiftsWhere(null),
     include: {
       company: {
         select: {

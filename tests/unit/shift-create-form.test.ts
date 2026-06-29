@@ -161,8 +161,19 @@ describe("shift create form helpers", () => {
       "Taser",
     ]);
     expect(summary.openPositions).toBe("2");
-    expect(summary.estimatedTotal).toBe("$448.00");
+    expect(summary.visibility).toBe("Public post shift");
     expect(formatPostShiftDateTime(baseForm)).toContain("Jul");
+  });
+
+  it("labels private staff posts in the summary", () => {
+    const summary = getShiftSummaryFields({
+      ...baseForm,
+      licenseRequirements: [...baseForm.licenseRequirements],
+      certificationRequirements: [...baseForm.certificationRequirements],
+      visibility: "STAFF_ONLY",
+    });
+
+    expect(summary.visibility).toBe("Private post for staff");
   });
 
   it("shows no requirements in summary when none selected", () => {

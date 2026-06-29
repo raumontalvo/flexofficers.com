@@ -24,7 +24,7 @@ export default async function CompanyOfficersPage({
   const params = await searchParams;
   const filters = parseOfficerSearchFilters(params);
 
-  const [officers, openShifts, invites] = await Promise.all([
+  const [officers, openShifts, invites, staffMembers] = await Promise.all([
     prisma.officer.findMany({
       where: buildOfficerSearchWhere(filters),
       select: {
@@ -54,6 +54,7 @@ export default async function CompanyOfficersPage({
         city: true,
         state: true,
         startTime: true,
+        visibility: true,
       },
       orderBy: {
         startTime: "asc",
@@ -76,6 +77,20 @@ export default async function CompanyOfficersPage({
         status: true,
       },
     }),
+    prisma.company.findFirst({
+      where: {
+        user: {
+          clerkId: clerkUser.id,
+        },
+      },
+      select: {
+        staffMembers: {
+          select: {
+            officerId: true,
+          },
+        },
+      },
+    }),
   ]);
 
   const serializedOfficers = officers.map(serializeOfficerSearchResult);
@@ -86,6 +101,7 @@ export default async function CompanyOfficersPage({
     city: shift.city,
     state: shift.state,
     startTime: shift.startTime.toISOString(),
+    visibility: shift.visibility,
   }));
 
   return (
@@ -101,6 +117,9 @@ export default async function CompanyOfficersPage({
         hasActiveFilters={hasActiveFilters}
         openShifts={serializedOpenShifts}
         invites={invites}
+        staffOfficerIds={
+          staffMembers?.staffMembers.map((member) => member.officerId) ?? []
+        }
       />
     </PageShell>
   );

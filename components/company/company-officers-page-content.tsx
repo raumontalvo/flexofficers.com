@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, type FormEvent } from "react";
+import { AddToStaffButton } from "@/components/company/add-to-staff-button";
 import { OfficerProfilePanel } from "@/components/company/officer-profile-panel";
 import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
 import { InviteOfficerModal } from "@/components/company/invite-officer-modal";
@@ -52,17 +53,21 @@ function OfficerResultCard({
   onViewProfile,
   onInvite,
   inviteState,
+  isOnStaff,
+  onStaffChange,
 }: {
   officer: SerializedOfficerSearchResult;
   onViewProfile: () => void;
   onInvite: () => void;
   inviteState: ReturnType<typeof getOfficerInviteButtonState>;
+  isOnStaff: boolean;
+  onStaffChange: (officerId: string, onStaff: boolean) => void;
 }) {
   return (
     <OfficerSearchCard
       officer={officer}
       actions={
-        <>
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={onViewProfile}
@@ -100,7 +105,14 @@ function OfficerResultCard({
               </div>
             </div>
           )}
-        </>
+          <AddToStaffButton
+            officerId={officer.id}
+            isOnStaff={isOnStaff}
+            className="flex-1"
+            onAdded={() => onStaffChange(officer.id, true)}
+            onRemoved={() => onStaffChange(officer.id, false)}
+          />
+        </div>
       }
     />
   );
@@ -142,6 +154,7 @@ type CompanyOfficersPageContentProps = {
   hasActiveFilters: boolean;
   openShifts: CompanyOpenShiftOption[];
   invites: CompanyOfficerInviteRecord[];
+  staffOfficerIds: string[];
 };
 
 export function CompanyOfficersPageContent({
@@ -150,6 +163,7 @@ export function CompanyOfficersPageContent({
   hasActiveFilters: _hasActiveFilters,
   openShifts,
   invites: initialInvites,
+  staffOfficerIds: initialStaffOfficerIds,
 }: CompanyOfficersPageContentProps) {
   const router = useRouter();
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(
@@ -165,6 +179,9 @@ export function CompanyOfficersPageContent({
   const [profileOfficerId, setProfileOfficerId] = useState<string | null>(null);
   const [inviteOfficerId, setInviteOfficerId] = useState<string | null>(null);
   const [invites, setInvites] = useState(initialInvites);
+  const [staffOfficerIds, setStaffOfficerIds] = useState(
+    () => new Set(initialStaffOfficerIds)
+  );
 
   const sortedOfficers = useMemo(
     () => sortOfficerSearchResults(officers, sort),
@@ -183,6 +200,18 @@ export function CompanyOfficersPageContent({
 
   const advancedFilterCount = countAdvancedOfficerFilters(filters);
   const openShiftIds = openShifts.map((shift) => shift.id);
+
+  function handleStaffChange(officerId: string, onStaff: boolean) {
+    setStaffOfficerIds((current) => {
+      const next = new Set(current);
+      if (onStaff) {
+        next.add(officerId);
+      } else {
+        next.delete(officerId);
+      }
+      return next;
+    });
+  }
 
   function handleMobileQuickSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -458,6 +487,16 @@ export function CompanyOfficersPageContent({
                   invites,
                   openShiftIds
                 )}
+                staffAction={
+                  <AddToStaffButton
+                    officerId={officer.id}
+                    isOnStaff={staffOfficerIds.has(officer.id)}
+                    size="mobile"
+                    className="w-full"
+                    onAdded={() => handleStaffChange(officer.id, true)}
+                    onRemoved={() => handleStaffChange(officer.id, false)}
+                  />
+                }
               />
             ))}
           </div>
@@ -474,6 +513,8 @@ export function CompanyOfficersPageContent({
                   invites,
                   openShiftIds
                 )}
+                isOnStaff={staffOfficerIds.has(officer.id)}
+                onStaffChange={handleStaffChange}
               />
             ))}
           </div>

@@ -17,6 +17,7 @@ import {
 } from "@/components/nav/icons";
 import { rankRecommendedShifts } from "@/lib/recommended-shifts";
 import { prisma } from "@/lib/prisma";
+import { buildOfficerBrowseShiftsWhere } from "@/lib/company-staff";
 import {
   ApplicationStatus,
   ShiftStatus,
@@ -85,14 +86,10 @@ export default async function OfficerDashboard({
         })
       : Promise.resolve(0),
     prisma.shift.count({
-      where: {
-        status: ShiftStatus.OPEN,
-      },
+      where: buildOfficerBrowseShiftsWhere(officerId),
     }),
     prisma.shift.findMany({
-      where: {
-        status: ShiftStatus.OPEN,
-      },
+      where: buildOfficerBrowseShiftsWhere(officerId),
       include: {
         company: {
           select: {

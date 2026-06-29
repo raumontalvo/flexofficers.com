@@ -67,6 +67,9 @@ export default function CreateShiftForm() {
         isSubmitting={isSubmitting}
         errorMessage={errorMessage}
         onSubmit={handleSubmit}
+        onVisibilityChange={(visibility) =>
+          setForm((current) => ({ ...current, visibility }))
+        }
       />
     </div>
   );

@@ -11,6 +11,7 @@ import {
   SearchIcon,
   SettingsIcon,
   ShiftsIcon,
+  StaffIcon,
   UpcomingIcon,
 } from "./icons";
 
@@ -155,6 +156,12 @@ export const companySidebarItems: NavItem[] = [
     label: "Search Officers",
     icon: SearchIcon,
     match: (pathname) => pathname.startsWith("/company/officers"),
+  },
+  {
+    href: "/company/staff",
+    label: "Staff",
+    icon: StaffIcon,
+    match: (pathname) => pathname.startsWith("/company/staff"),
   },
   {
     href: "/company/profile",

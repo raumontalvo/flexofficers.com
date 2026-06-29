@@ -4,7 +4,9 @@ import { Button } from "@/components/ui";
 import {
   getShiftSummaryFields,
   type PostShiftFormValues,
+  type ShiftPostVisibility,
 } from "@/lib/shift-create-form";
+import { cn } from "@/lib/cn";
 
 const TIPS = [
   "Be specific in your description",
@@ -18,6 +20,7 @@ type PostShiftSummaryPanelProps = {
   isSubmitting: boolean;
   errorMessage: string | null;
   onSubmit: () => void;
+  onVisibilityChange: (visibility: ShiftPostVisibility) => void;
 };
 
 function SummaryRow({ label, value }: { label: string; value: string }) {
@@ -64,6 +67,7 @@ export function PostShiftSummaryPanel({
   isSubmitting,
   errorMessage,
   onSubmit,
+  onVisibilityChange,
 }: PostShiftSummaryPanelProps) {
   const summary = getShiftSummaryFields(form);
 
@@ -90,14 +94,62 @@ export function PostShiftSummaryPanel({
         </dl>
 
         <div className="mt-4 border-t border-white/[0.06] pt-4">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium text-fo-text-muted">
-              Estimated Total
-            </span>
-            <span className="text-lg font-bold text-fo-primary-bright">
-              {summary.estimatedTotal}
-            </span>
+          <p className="text-sm font-medium text-fo-text">Who can see this shift?</p>
+          <div className="mt-3 grid gap-2">
+            <label
+              className={cn(
+                "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition",
+                form.visibility === "PUBLIC"
+                  ? "border-fo-primary-bright/40 bg-fo-primary/10"
+                  : "border-white/10 bg-white/[0.02] hover:border-white/15"
+              )}
+            >
+              <input
+                type="radio"
+                name="shift-visibility"
+                value="PUBLIC"
+                checked={form.visibility === "PUBLIC"}
+                onChange={() => onVisibilityChange("PUBLIC")}
+                className="mt-1"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-fo-text">
+                  Public post shift
+                </span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-fo-text-muted">
+                  Listed in Browse Shifts for all security officers.
+                </span>
+              </span>
+            </label>
+            <label
+              className={cn(
+                "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition",
+                form.visibility === "STAFF_ONLY"
+                  ? "border-fo-primary-bright/40 bg-fo-primary/10"
+                  : "border-white/10 bg-white/[0.02] hover:border-white/15"
+              )}
+            >
+              <input
+                type="radio"
+                name="shift-visibility"
+                value="STAFF_ONLY"
+                checked={form.visibility === "STAFF_ONLY"}
+                onChange={() => onVisibilityChange("STAFF_ONLY")}
+                className="mt-1"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-fo-text">
+                  Private post for staff
+                </span>
+                <span className="mt-0.5 block text-xs leading-relaxed text-fo-text-muted">
+                  Hidden from public browse. Invite officers from your Staff roster.
+                </span>
+              </span>
+            </label>
           </div>
+          <p className="mt-3 text-xs text-fo-text-subtle">
+            Selected: {summary.visibility}
+          </p>
         </div>
 
         <div className="mt-4 space-y-2">

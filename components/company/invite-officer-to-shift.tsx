@@ -9,6 +9,7 @@ export type CompanyOpenShiftOption = {
   city: string | null;
   state: string | null;
   startTime: string;
+  visibility?: "PUBLIC" | "STAFF_ONLY";
 };
 
 type InviteOfficerToShiftProps = {

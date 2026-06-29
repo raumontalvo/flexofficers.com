@@ -1,6 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
+import { ApplicationStatus, ShiftVisibility, UserRole } from "@/app/generated/prisma/enums";
 import { buildOfficerInviteNotificationMessage } from "@/lib/company-invite-workflow";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -104,6 +104,27 @@ export async function POST(req: Request) {
 
     if (!officer) {
       return NextResponse.json({ error: "Officer not found." }, { status: 404 });
+    }
+
+    if (shift.visibility === ShiftVisibility.STAFF_ONLY) {
+      const staffMember = await prisma.companyStaff.findUnique({
+        where: {
+          companyId_officerId: {
+            companyId: shift.companyId,
+            officerId,
+          },
+        },
+      });
+
+      if (!staffMember) {
+        return NextResponse.json(
+          {
+            error:
+              "Only officers on your staff can be invited to private staff shifts.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const existingApplication = await prisma.application.findUnique({

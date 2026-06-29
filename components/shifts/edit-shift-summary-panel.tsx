@@ -119,18 +119,8 @@ export function EditShiftSummaryPanel({
             labels={summary.certificationRequirements}
           />
           <SummaryRow label="Description" value={summary.description} />
+          <SummaryRow label="Visibility" value={summary.visibility} />
         </dl>
-
-        <div className="mt-4 border-t border-white/[0.06] pt-4">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-medium text-fo-text-muted">
-              Estimated Total
-            </span>
-            <span className="text-lg font-bold text-fo-primary-bright">
-              {summary.estimatedTotal}
-            </span>
-          </div>
-        </div>
 
         <div className="mt-4 space-y-2">
           <Button
