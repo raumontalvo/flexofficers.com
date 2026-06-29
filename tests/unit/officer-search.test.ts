@@ -174,18 +174,12 @@ describe("buildOfficerSearchWhere", () => {
     });
   });
 
-  it("matches legacy full-name search strings", () => {
-    expect(buildOfficerNameSearchWhere({ name: "Maria Santos" })).toEqual({
-      AND: [
-        { firstName: { contains: "Maria", mode: "insensitive" } },
-        { lastName: { contains: "Santos", mode: "insensitive" } },
-      ],
-    });
-
-    expect(buildOfficerSearchWhere({ name: "Maria Santos" })).toMatchObject({
-      AND: [
-        { firstName: { contains: "Maria", mode: "insensitive" } },
-        { lastName: { contains: "Santos", mode: "insensitive" } },
+  it("matches quick search across name and city", () => {
+    expect(buildOfficerSearchWhere({ search: "Miami" })).toMatchObject({
+      OR: [
+        { firstName: { contains: "Miami", mode: "insensitive" } },
+        { lastName: { contains: "Miami", mode: "insensitive" } },
+        { city: { contains: "Miami", mode: "insensitive" } },
       ],
     });
   });

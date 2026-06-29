@@ -16,6 +16,7 @@ import {
 } from "@/lib/profile-options";
 
 export type OfficerSearchFilters = {
+  search?: string;
   firstName?: string;
   lastName?: string;
   /** @deprecated Use firstName and lastName instead. */
@@ -100,6 +101,11 @@ export function parseOfficerSearchFilters(
   searchParams: Record<string, SearchParamValue>
 ): OfficerSearchFilters {
   const filters: OfficerSearchFilters = {};
+
+  const search = readParam(searchParams.search);
+  if (search) {
+    filters.search = search;
+  }
 
   const firstName = readParam(searchParams.firstName);
   if (firstName) {
@@ -242,6 +248,43 @@ export function buildOfficerNameSearchWhere(filters: {
   };
 }
 
+export function buildOfficerQuickSearchWhere(
+  search: string
+): Prisma.OfficerWhereInput {
+  const trimmed = search.trim();
+
+  if (!trimmed) {
+    return {};
+  }
+
+  const terms = trimmed.split(/\s+/).filter(Boolean);
+
+  if (terms.length >= 2) {
+    const [first, ...rest] = terms;
+    const last = rest.join(" ");
+
+    return {
+      OR: [
+        {
+          AND: [
+            { firstName: { contains: first, mode: "insensitive" } },
+            { lastName: { contains: last, mode: "insensitive" } },
+          ],
+        },
+        { city: { contains: trimmed, mode: "insensitive" } },
+      ],
+    };
+  }
+
+  return {
+    OR: [
+      { firstName: { contains: trimmed, mode: "insensitive" } },
+      { lastName: { contains: trimmed, mode: "insensitive" } },
+      { city: { contains: trimmed, mode: "insensitive" } },
+    ],
+  };
+}
+
 export function buildOfficerSearchWhere(
   filters: OfficerSearchFilters
 ): Prisma.OfficerWhereInput {
@@ -260,6 +303,8 @@ export function buildOfficerSearchWhere(
         name: filters.name,
       })
     );
+  } else if (filters.search) {
+    Object.assign(where, buildOfficerQuickSearchWhere(filters.search));
   }
 
   if (filters.city) {
