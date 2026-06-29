@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ShiftStatus } from "@/app/generated/prisma/enums";
+import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import {
   buttonClassName,
   Card,
@@ -55,15 +56,15 @@ export function RecommendedShiftCard({
         </div>
       </div>
 
-      <Link
-        href={`/shifts/${id}`}
+      <ShiftDetailLink
+        shiftId={id}
         className={buttonClassName({
           fullWidth: true,
           className: "mt-auto !min-h-9 w-full !py-2 !text-xs",
         })}
       >
         View &amp; Apply
-      </Link>
+      </ShiftDetailLink>
     </Card>
   );
 }

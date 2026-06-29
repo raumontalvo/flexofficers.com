@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
+import { MobilePrimaryButton, MobileSecondaryButton } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 type ShiftRowActionsProps = {
   shiftId: string;
   status: ShiftStatus;
+  stacked?: boolean;
 };
 
 const iconButtonClassName =
@@ -74,7 +76,7 @@ function DeleteIcon({ className }: { className?: string }) {
   );
 }
 
-export function ShiftRowActions({ shiftId, status }: ShiftRowActionsProps) {
+export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowActionsProps) {
   const isCancelled = status === ShiftStatus.CANCELLED;
 
   async function cancelShift() {
@@ -123,6 +125,27 @@ export function ShiftRowActions({ shiftId, status }: ShiftRowActionsProps) {
     } else {
       alert("Failed to delete shift");
     }
+  }
+
+  if (stacked) {
+    return (
+      <div className="flex w-full flex-col gap-2">
+        <MobileSecondaryButton href={`/shifts/${shiftId}`}>View</MobileSecondaryButton>
+        {isCancelled ? (
+          <MobileSecondaryButton disabled>Edit</MobileSecondaryButton>
+        ) : (
+          <MobileSecondaryButton href={`/company/shifts/${shiftId}/edit`}>
+            Edit
+          </MobileSecondaryButton>
+        )}
+        <MobileSecondaryButton onClick={cancelShift} disabled={isCancelled}>
+          Cancel
+        </MobileSecondaryButton>
+        <MobilePrimaryButton onClick={deleteShift} variant="danger">
+          Delete
+        </MobilePrimaryButton>
+      </div>
+    );
   }
 
   return (

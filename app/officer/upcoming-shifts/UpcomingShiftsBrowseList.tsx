@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Button, Card, StatCard } from "@/components/ui";
+import { Button, Card, StatCard, MobileStatGrid } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { OfficerAcceptedShiftData } from "@/lib/officer-accepted-shift-data";
 import {
@@ -67,7 +67,7 @@ export function UpcomingShiftsBrowseList({
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <MobileStatGrid>
         <StatCard label="Upcoming Shifts" value={summary.count} tone="blue" />
         <StatCard
           label="Expected Earnings"
@@ -85,7 +85,7 @@ export function UpcomingShiftsBrowseList({
           hint={summary.nextShiftStartsIn ?? undefined}
           tone="amber"
         />
-      </div>
+      </MobileStatGrid>
 
       <div className="fo-glass-card grid gap-3 rounded-lg border border-white/10 p-3 md:grid-cols-[minmax(0,1fr)_180px]">
         <div className="flex flex-wrap gap-2">

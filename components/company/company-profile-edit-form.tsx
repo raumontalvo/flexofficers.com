@@ -429,7 +429,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
                 <RequiredLabel htmlFor="companyName">Company Name</RequiredLabel>
                 <input

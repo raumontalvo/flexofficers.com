@@ -2,13 +2,20 @@
 
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import type { ReactNode } from "react";
 
 export default function WithdrawApplicationButton({
   applicationId,
   compact = false,
+  className,
+  label = "Withdraw Application",
+  icon,
 }: {
   applicationId: string;
   compact?: boolean;
+  className?: string;
+  label?: string;
+  icon?: ReactNode;
 }) {
   async function withdrawApplication() {
     const confirmed = window.confirm(
@@ -44,10 +51,12 @@ export default function WithdrawApplicationButton({
         type="button"
         onClick={withdrawApplication}
         className={cn(
-          "inline-flex min-h-8 items-center justify-center rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs font-semibold text-fo-pending transition hover:bg-fo-pending-bg"
+          "inline-flex min-h-8 items-center justify-center gap-1.5 rounded-lg border border-yellow-500/30 px-3 py-1.5 text-xs font-semibold text-fo-pending transition hover:bg-fo-pending-bg",
+          className
         )}
       >
-        Withdraw
+        {icon}
+        {label}
       </button>
     );
   }
@@ -60,7 +69,7 @@ export default function WithdrawApplicationButton({
       className="w-full border-yellow-500/30 text-fo-pending hover:bg-fo-pending-bg"
       onClick={withdrawApplication}
     >
-      Withdraw Application
+      {label}
     </Button>
   );
 }

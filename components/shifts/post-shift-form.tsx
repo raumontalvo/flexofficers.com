@@ -140,7 +140,7 @@ export function PostShiftForm({
       </SectionCard>
 
       <SectionCard number={2} title="Date & Time">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <RequiredLabel htmlFor="startDate">Start Date</RequiredLabel>
             <input
@@ -211,7 +211,7 @@ export function PostShiftForm({
           />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <RequiredLabel htmlFor="city">City</RequiredLabel>
             <input
@@ -252,7 +252,7 @@ export function PostShiftForm({
       </SectionCard>
 
       <SectionCard number={4} title="Pay & Requirements">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <RequiredLabel htmlFor="hourlyRate">Pay Rate</RequiredLabel>
             <input
@@ -303,7 +303,7 @@ export function PostShiftForm({
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <RequiredLabel htmlFor="licenseRequirements">
               License Requirements

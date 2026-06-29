@@ -33,7 +33,7 @@ export function StatCard({
       variant="elevated"
       padding="none"
       className={cn(
-        "fo-glass-card fo-glass-card-hover flex h-full items-start gap-3 p-3.5",
+        "fo-glass-card fo-glass-card-hover flex h-full items-start gap-3 p-4 md:p-3.5",
         className
       )}
     >
@@ -50,11 +50,11 @@ export function StatCard({
 
       <div className="min-w-0 space-y-0.5">
         <p className="text-xs font-medium text-fo-text-muted">{label}</p>
-        <p className="text-2xl font-bold leading-none tracking-tight text-fo-text">
+        <p className="text-xl font-bold leading-none tracking-tight text-fo-text sm:text-2xl">
           {value}
         </p>
         {hint ? (
-          <p className="text-[11px] leading-snug text-fo-text-subtle">{hint}</p>
+          <p className="text-xs leading-snug text-fo-text-subtle">{hint}</p>
         ) : null}
       </div>
     </Card>

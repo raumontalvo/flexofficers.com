@@ -49,7 +49,7 @@ function SettingsRow({
         type="button"
         onClick={onAction}
         disabled={actionDisabled}
-        className={actionButtonClassName}
+        className={cn(actionButtonClassName, "w-full sm:w-auto sm:min-h-9 min-h-12")}
       >
         {actionLabel}
       </button>
@@ -76,7 +76,10 @@ function SignOutRow() {
         </p>
       </div>
       <SignOutButton redirectUrl="/">
-        <button type="button" className={actionButtonClassName}>
+        <button
+          type="button"
+          className={cn(actionButtonClassName, "w-full min-h-12 sm:w-auto sm:min-h-9")}
+        >
           Sign Out
         </button>
       </SignOutButton>

@@ -15,6 +15,7 @@ import {
 import { markAllNotificationsRead } from "./actions";
 import { getHiddenNotificationIds } from "./hidden-notifications";
 import { NotificationCard } from "./NotificationCard";
+import { notifyNotificationsChanged } from "@/lib/notifications-changed";
 
 const PAGE_SIZE = 10;
 
@@ -102,6 +103,7 @@ export function NotificationsBrowseList({
 
     startTransition(async () => {
       await markAllNotificationsRead();
+      notifyNotificationsChanged();
       router.refresh();
     });
   }

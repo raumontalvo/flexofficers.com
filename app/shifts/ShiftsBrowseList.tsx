@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Card } from "@/components/ui";
+import { MobileStack } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import { US_STATES } from "@/lib/license-options";
 import {
@@ -10,6 +11,8 @@ import {
   filterBrowseShifts,
   formatOpenShiftCount,
   formatPaginationRange,
+  formatShiftFilterChipsSummary,
+  hasMoreShiftFilters,
   sortBrowseShifts,
   SORT_OPTIONS,
   WORK_TYPE_OPTIONS,
@@ -18,9 +21,38 @@ import {
 } from "@/lib/shift-browse-filters";
 import type { ShiftCardData } from "@/lib/shift-card-data";
 import { ShiftCard } from "./ShiftCard";
+import { ShiftSearchSheet } from "./ShiftSearchSheet";
 import { ShiftsNoResults } from "./ShiftsNoResults";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
+
+function SearchIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
+      <circle cx="8.75" cy="8.75" r="5.25" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M13.5 13.5L17.25 17.25"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className={className}>
+      <path
+        d="M7.5 5l5 5-5 5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 const fieldClassName =
   "min-h-9 w-full rounded-lg border border-fo-border bg-fo-bg-elevated px-2.5 py-1.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30";
@@ -85,22 +117,13 @@ function buildPageNumbers(currentPage: number, totalPages: number) {
   return [...pages].sort((a, b) => a - b);
 }
 
-function hasMoreFiltersActive(filters: ShiftBrowseFilters) {
-  return (
-    filters.armed ||
-    filters.unarmed ||
-    filters.dayShift ||
-    filters.nightShift ||
-    filters.overnight
-  );
-}
-
 export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
   const listTopRef = useRef<HTMLDivElement>(null);
   const moreFiltersRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<ShiftBrowseFilters>(emptyShiftBrowseFilters);
   const [sortBy, setSortBy] = useState<ShiftSortOption>("newest");
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [searchSheetOpen, setSearchSheetOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -139,8 +162,10 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
     rangeEnd,
     filteredShifts.length
   );
+  const filterChipsSummary = formatShiftFilterChipsSummary(filters);
   const hasNoDatabaseShifts = shifts.length === 0;
   const hasNoMatchingShifts = !hasNoDatabaseShifts && filteredShifts.length === 0;
+  const moreFiltersActive = hasMoreShiftFilters(filters);
 
   function scrollToListTop() {
     listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -152,6 +177,12 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
   ) {
     setFilters((current) => ({ ...current, [key]: value }));
     setCurrentPage(1);
+  }
+
+  function handleApplySearch(applied: ShiftBrowseFilters) {
+    setFilters(applied);
+    setCurrentPage(1);
+    scrollToListTop();
   }
 
   function handleViewAllOpenShifts() {
@@ -173,9 +204,65 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
     scrollToListTop();
   }
 
+  const sortSelect = (
+    <select
+      id="shift-sort-by"
+      value={sortBy}
+      onChange={(e) => {
+        setSortBy(e.target.value as ShiftSortOption);
+        setCurrentPage(1);
+      }}
+      className={cn(
+        fieldClassName,
+        "min-h-9 w-auto min-w-[120px] py-1.5 md:min-w-[148px]"
+      )}
+    >
+      {SORT_OPTIONS.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  );
+
   return (
     <div className="space-y-2">
-      <div className="fo-glass-card rounded-lg border border-white/10 p-3">
+      <button
+        type="button"
+        onClick={() => setSearchSheetOpen(true)}
+        className="fo-glass-card w-full overflow-hidden rounded-2xl border border-fo-primary-bright/25 text-left transition hover:border-fo-primary-bright/40 hover:bg-white/[0.03] md:hidden"
+      >
+        <div className="flex items-start gap-3 p-3.5">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-fo-primary/20 text-fo-primary-bright">
+            <SearchIcon className="h-5 w-5" />
+          </span>
+
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center justify-between gap-2">
+              <span className="text-sm font-semibold text-fo-text">Search Shifts</span>
+              <ChevronRightIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
+            </span>
+            <span className="mt-0.5 block text-xs leading-snug text-fo-text-muted">
+              Set your filters to find the perfect shift.
+            </span>
+          </span>
+        </div>
+
+        <div className="border-t border-white/[0.06] px-3.5 py-2.5">
+          <p className="line-clamp-2 text-[11px] leading-relaxed text-fo-text-muted">
+            {filterChipsSummary}
+          </p>
+        </div>
+      </button>
+
+      <ShiftSearchSheet
+        open={searchSheetOpen}
+        filters={filters}
+        onClose={() => setSearchSheetOpen(false)}
+        onApply={handleApplySearch}
+      />
+
+      <div className="fo-glass-card hidden rounded-lg border border-white/10 p-3 md:block">
         <div className="grid gap-3 md:grid-cols-6 lg:grid-cols-12">
           <div className="space-y-1.5 md:col-span-6 lg:col-span-5">
             <PrimaryFilterLabel>📍 Location</PrimaryFilterLabel>
@@ -262,7 +349,7 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
               onClick={() => setShowMoreFilters((open) => !open)}
               className={cn(
                 "inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition",
-                showMoreFilters || hasMoreFiltersActive(filters)
+                showMoreFilters || moreFiltersActive
                   ? "border-fo-primary-bright/50 bg-fo-primary/10 text-fo-primary-bright"
                   : "border-fo-border bg-fo-bg-elevated text-fo-text hover:border-fo-border-strong hover:text-fo-text"
               )}
@@ -272,7 +359,7 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
               <span aria-hidden className="text-[10px] text-fo-text-muted">
                 {showMoreFilters ? "▲" : "▼"}
               </span>
-              {hasMoreFiltersActive(filters) ? (
+              {moreFiltersActive ? (
                 <span className="ml-0.5 rounded-full bg-fo-primary/25 px-1.5 py-0.5 text-[10px] font-semibold text-fo-primary-bright">
                   Active
                 </span>
@@ -339,36 +426,51 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
 
       <div ref={listTopRef} className="scroll-mt-4 space-y-2">
         {!hasNoDatabaseShifts ? (
-          <div className="flex flex-col gap-2 px-0.5 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-semibold text-fo-text">{resultsHeader}</p>
-            <div className="flex items-center gap-2">
-              <label htmlFor="shift-sort-by" className="text-xs text-fo-text-muted">
-                Sort by
-              </label>
-              <select
-                id="shift-sort-by"
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value as ShiftSortOption);
-                  setCurrentPage(1);
-                }}
-                className={cn(fieldClassName, "w-auto min-w-[148px]")}
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+          <>
+            <div className="flex items-center justify-between gap-2 md:hidden">
+              <p className="text-sm font-semibold tracking-tight text-fo-text">
+                {resultsHeader}
+              </p>
+              <div className="flex shrink-0 items-center gap-1.5">
+                <label
+                  htmlFor="shift-sort-by-mobile"
+                  className="text-[11px] text-fo-text-muted"
+                >
+                  Sort by
+                </label>
+                <select
+                  id="shift-sort-by-mobile"
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value as ShiftSortOption);
+                    setCurrentPage(1);
+                  }}
+                  className="min-h-8 max-w-[108px] rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-xs text-fo-text focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
+
+            <div className="hidden flex-col gap-2 px-0.5 sm:flex-row sm:items-center sm:justify-between md:flex">
+              <p className="text-sm font-semibold text-fo-text">{resultsHeader}</p>
+              <div className="flex items-center gap-2">
+                <label htmlFor="shift-sort-by" className="text-xs text-fo-text-muted">
+                  Sort by
+                </label>
+                {sortSelect}
+              </div>
+            </div>
+          </>
         ) : null}
 
         {hasNoDatabaseShifts ? (
           <Card variant="muted" className="py-8 text-center">
-            <p className="text-base font-medium text-fo-text">
-              No shifts posted yet.
-            </p>
+            <p className="text-base font-medium text-fo-text">No shifts posted yet.</p>
             <p className="mt-1 text-sm text-fo-text-muted">
               Check back soon for new security opportunities.
             </p>
@@ -379,70 +481,84 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
             onViewAllOpenShifts={handleViewAllOpenShifts}
           />
         ) : (
-          <div className="space-y-1">
+          <MobileStack className="space-y-2 md:space-y-1">
             {pageShifts.map((shift) => (
               <ShiftCard key={shift.id} shift={shift} />
             ))}
-          </div>
+          </MobileStack>
         )}
       </div>
 
       {filteredShifts.length > 0 ? (
-        <div className="fo-glass-card flex flex-col gap-3 rounded-lg border border-white/10 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-fo-text-muted">{paginationLabel}</p>
+        <div className="flex flex-col gap-2 pt-1 md:fo-glass-card md:flex-row md:items-center md:justify-between md:gap-3 md:rounded-lg md:border md:border-white/10 md:px-3 md:py-2.5 md:pt-2.5">
+          <p className="hidden text-xs text-fo-text-muted md:block md:text-left">
+            {paginationLabel}
+          </p>
 
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => goToPage(safePage - 1)}
-              disabled={safePage <= 1}
-              className={cn(
-                "rounded-md border border-fo-border px-2.5 py-1 text-xs font-medium text-fo-text-muted transition",
-                safePage > 1 && "hover:border-fo-border-strong hover:text-fo-text",
-                safePage <= 1 && "cursor-not-allowed opacity-40"
-              )}
-            >
-              Previous
-            </button>
+          <div className="flex items-center justify-between gap-2 md:justify-end">
+            <p className="text-[11px] text-fo-text-muted md:hidden">{paginationLabel}</p>
 
-            {pageNumbers.map((page, index) => {
-              const prev = pageNumbers[index - 1];
-              const showEllipsis = prev !== undefined && page - prev > 1;
+            <div className="flex shrink-0 items-center gap-0.5">
+              <button
+                type="button"
+                onClick={() => goToPage(safePage - 1)}
+                disabled={safePage <= 1}
+                aria-label="Previous page"
+                className={cn(
+                  "rounded-md px-2 py-1 text-xs font-medium text-fo-text-muted transition md:border md:border-fo-border",
+                  safePage > 1 && "hover:text-fo-text md:hover:border-fo-border-strong",
+                  safePage <= 1 && "cursor-not-allowed opacity-40"
+                )}
+              >
+                Prev
+              </button>
 
-              return (
-                <span key={page} className="flex items-center gap-1.5">
-                  {showEllipsis ? (
-                    <span className="px-1 text-xs text-fo-text-subtle">…</span>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => goToPage(page)}
-                    className={cn(
-                      "min-w-8 rounded-md border px-2 py-1 text-xs font-medium transition",
-                      page === safePage
-                        ? "border-fo-primary-bright bg-fo-primary/15 text-fo-primary-bright"
-                        : "border-fo-border text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text"
-                    )}
-                  >
-                    {page}
-                  </button>
-                </span>
-              );
-            })}
+              <span className="hidden items-center gap-1 md:flex">
+                {pageNumbers.map((page, index) => {
+                  const prev = pageNumbers[index - 1];
+                  const showEllipsis = prev !== undefined && page - prev > 1;
 
-            <button
-              type="button"
-              onClick={() => goToPage(safePage + 1)}
-              disabled={safePage >= totalPages}
-              className={cn(
-                "rounded-md border border-fo-border px-2.5 py-1 text-xs font-medium text-fo-text-muted transition",
-                safePage < totalPages &&
-                  "hover:border-fo-border-strong hover:text-fo-text",
-                safePage >= totalPages && "cursor-not-allowed opacity-40"
-              )}
-            >
-              Next
-            </button>
+                  return (
+                    <span key={page} className="flex items-center gap-1">
+                      {showEllipsis ? (
+                        <span className="px-0.5 text-xs text-fo-text-subtle">…</span>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => goToPage(page)}
+                        className={cn(
+                          "min-w-7 rounded-md border px-1.5 py-1 text-xs font-medium transition",
+                          page === safePage
+                            ? "border-fo-primary-bright bg-fo-primary/15 text-fo-primary-bright"
+                            : "border-fo-border text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text"
+                        )}
+                      >
+                        {page}
+                      </button>
+                    </span>
+                  );
+                })}
+              </span>
+
+              <span className="px-1.5 text-[11px] font-medium text-fo-text-muted md:hidden">
+                {safePage}/{totalPages}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => goToPage(safePage + 1)}
+                disabled={safePage >= totalPages}
+                aria-label="Next page"
+                className={cn(
+                  "rounded-md px-2 py-1 text-xs font-medium text-fo-text-muted transition md:border md:border-fo-border",
+                  safePage < totalPages &&
+                    "hover:text-fo-text md:hover:border-fo-border-strong",
+                  safePage >= totalPages && "cursor-not-allowed opacity-40"
+                )}
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

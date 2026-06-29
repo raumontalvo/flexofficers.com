@@ -58,9 +58,8 @@ export function PageShell({
 
           <main
             className={cn(
-              "relative flex-1 px-4 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-6",
-              showNav &&
-                "pb-[calc(var(--fo-nav-height)+env(safe-area-inset-bottom))] md:pb-8",
+              "relative min-w-0 flex-1 overflow-x-hidden px-4 py-3 sm:px-5 sm:py-5 lg:px-7 lg:py-6 md:pb-8",
+              showNav && "fo-mobile-nav-scroll-padding",
               contentClassName
             )}
           >
@@ -91,8 +90,8 @@ export function PageShell({
       ) : null}
       <main
         className={cn(
-          "mx-auto w-full px-4 py-6 sm:px-6 sm:py-8",
-          showNav && "pb-[calc(var(--fo-nav-height)+env(safe-area-inset-bottom))] md:pb-8",
+          "mx-auto w-full overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 md:pb-8",
+          showNav && "fo-mobile-nav-scroll-padding",
           contentClassName
         )}
       >

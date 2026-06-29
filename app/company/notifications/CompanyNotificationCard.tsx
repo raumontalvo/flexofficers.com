@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { useTransition } from "react";
 import { cn } from "@/lib/cn";
+import { MobileListCard } from "@/components/ui/mobile";
 import {
   formatNotificationTimeAgo,
   notificationToneClasses,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/company-notification-data";
 import { deleteCompanyNotification } from "./actions";
 import { hideCompanyNotificationFromList } from "./hidden-notifications";
+import { notifyNotificationsChanged } from "@/lib/notifications-changed";
 
 function CheckIcon() {
   return (
@@ -132,6 +134,7 @@ export function CompanyNotificationCard({
     startTransition(async () => {
       try {
         await deleteCompanyNotification(notification.id);
+        notifyNotificationsChanged();
       } catch {
         // Local hide remains if server delete fails.
       }
@@ -139,10 +142,10 @@ export function CompanyNotificationCard({
   }
 
   return (
-    <article
+    <MobileListCard
       className={cn(
         "fo-glass-card rounded-lg border border-white/10 transition",
-        "min-h-[112px] md:h-[116px] md:overflow-hidden",
+        "min-h-[112px] md:h-[116px] md:overflow-hidden md:rounded-lg",
         !notification.read && "border-fo-primary-bright/20 bg-fo-primary/5"
       )}
     >
@@ -200,6 +203,6 @@ export function CompanyNotificationCard({
           </button>
         </div>
       </div>
-    </article>
+    </MobileListCard>
   );
 }

@@ -403,8 +403,15 @@ export function CompanyOfficersPageContent({
                 ))}
               </datalist>
             </div>
-            <div className="flex gap-2">
-              <button type="submit" className={buttonClassName({ size: "md", className: "min-h-10 flex-1" })}>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="submit"
+                className={buttonClassName({
+                  size: "md",
+                  fullWidth: true,
+                  className: "min-h-12 sm:min-h-10 sm:flex-1",
+                })}
+              >
                 Search
               </button>
               <Link
@@ -412,7 +419,8 @@ export function CompanyOfficersPageContent({
                 className={buttonClassName({
                   variant: "secondary",
                   size: "md",
-                  className: "min-h-10 flex-1 text-center",
+                  fullWidth: true,
+                  className: "min-h-12 text-center sm:min-h-10 sm:flex-1",
                 })}
               >
                 Clear Filters

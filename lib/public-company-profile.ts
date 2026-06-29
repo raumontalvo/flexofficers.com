@@ -4,6 +4,7 @@ import {
   serializeCompanyProfile,
   type SerializedCompanyProfile,
 } from "@/lib/company-profile-page-data";
+import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
 
 type CompanyRecord = {
   id: string;
@@ -33,7 +34,7 @@ export function serializePublicCompanyProfile(
   if (
     !companyHasPublicProfile({
       companyName: company.companyName,
-      description: sanitizeDisplayValue(company.description),
+      description: stripCompanyProfileMeta(company.description),
       city: sanitizeDisplayValue(company.city),
       state: sanitizeDisplayValue(company.state),
       website: sanitizeDisplayValue(company.website),

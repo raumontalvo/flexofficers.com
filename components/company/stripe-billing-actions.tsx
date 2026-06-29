@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button, buttonClassName } from "@/components/ui";
+import { MobileSettingsRow } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import { parseApiJsonResponse } from "@/lib/parse-api-response";
 
@@ -86,6 +87,52 @@ export function StripeBillingAction({
         {isLoading ? "Opening..." : label}
       </Button>
       {error ? <p className="mt-2 text-sm text-fo-rejected">{error}</p> : null}
+    </div>
+  );
+}
+
+type StripeBillingSettingRowProps = {
+  action: StripeBillingActionType;
+  label: string;
+  disabled?: boolean;
+  className?: string;
+};
+
+export function StripeBillingSettingRow({
+  action,
+  label,
+  disabled = false,
+  className,
+}: StripeBillingSettingRowProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleClick() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const url = await requestStripeBillingUrl(STRIPE_BILLING_ENDPOINTS[action]);
+      window.location.href = url;
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Unable to open billing."
+      );
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <div className={className}>
+      <MobileSettingsRow
+        label={label}
+        onClick={handleClick}
+        disabled={disabled}
+        loading={isLoading}
+      />
+      {error ? <p className="mt-1.5 text-xs text-fo-rejected">{error}</p> : null}
     </div>
   );
 }

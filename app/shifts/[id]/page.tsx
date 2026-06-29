@@ -7,6 +7,7 @@ import {
   UserRole,
 } from "@/app/generated/prisma/enums";
 import { ShiftDetailActions } from "@/components/shifts/shift-detail-actions";
+import { ShiftDetailBackLink } from "@/components/shifts/shift-detail-back-link";
 import {
   Card,
   PageShell,
@@ -32,6 +33,8 @@ import {
   fromShiftWorkType,
 } from "@/lib/shift-form-options";
 import { getShiftRequirementChips } from "@/lib/shift-requirements";
+import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
+import { ShiftDetailMobile } from "./ShiftDetailMobile";
 
 export const dynamic = "force-dynamic";
 
@@ -119,9 +122,10 @@ export default async function ShiftDetailPage({
   const armedLabel = fromShiftArmedRequirement(shift.armedRequirement);
   const displayCompanyName =
     formatTitleCase(shift.company.companyName) ?? shift.company.companyName;
+  const companyDescription = stripCompanyProfileMeta(shift.company.description);
   const hasPublicProfile = companyHasPublicProfile({
     companyName: shift.company.companyName,
-    description: shift.company.description,
+    description: companyDescription,
     city: shift.company.city,
     state: shift.company.state,
     website: shift.company.website,
@@ -133,13 +137,45 @@ export default async function ShiftDetailPage({
   const companyContactName = sanitizeDisplayValue(shift.company.contactName);
 
   return (
-    <PageShell nav="officer" maxWidth="lg" sidebar>
-      <Link
-        href="/shifts"
-        className="inline-flex min-h-11 items-center text-sm font-medium text-fo-primary-hover hover:text-fo-primary-bright"
-      >
-        ← Back to available shifts
-      </Link>
+    <PageShell nav="officer" maxWidth="lg" sidebar contentClassName="!pt-2 md:!py-3">
+      <ShiftDetailMobile
+        shift={{
+          id: shift.id,
+          companyId: shift.companyId,
+          title: shift.title,
+          description: shift.description,
+          location: shift.location,
+          hourlyRate: shift.hourlyRate,
+          startTime: shift.startTime,
+          endTime: shift.endTime,
+          positionsNeeded: shift.positionsNeeded,
+          status: shift.status,
+          requirements: shift.requirements,
+          otherRequirements: shift.otherRequirements,
+          specialRequirements: shift.specialRequirements,
+          reportingInstructions: shift.reportingInstructions,
+        }}
+        company={{
+          companyName: shift.company.companyName,
+          description: companyDescription,
+        }}
+        displayCompanyName={displayCompanyName}
+        hasPublicProfile={hasPublicProfile}
+        openPositions={openPositions}
+        locationLabel={locationLabel}
+        estimatedPay={estimatedPay}
+        workTypeLabel={workTypeLabel}
+        shiftTimeLabel={shiftTimeLabel}
+        armedLabel={armedLabel}
+        canApply={canApply}
+        applicationStatus={applicationStatus}
+        isSignedIn={Boolean(clerkUser)}
+        shiftAcceptingApplications={shiftAcceptingApplications}
+        isAcceptedOfficer={isAcceptedOfficer}
+      />
+
+      <div className="hidden md:block">
+      <ShiftDetailBackLink />
 
       <div className="mt-6 space-y-4">
         <Card variant="elevated" className="space-y-5">
@@ -349,6 +385,7 @@ export default async function ShiftDetailPage({
           isSignedIn={Boolean(clerkUser)}
           shiftAcceptingApplications={shiftAcceptingApplications}
         />
+      </div>
       </div>
     </PageShell>
   );

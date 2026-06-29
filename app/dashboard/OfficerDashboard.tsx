@@ -1,5 +1,5 @@
 import type { ArmedStatus } from "@/app/generated/prisma/enums";
-import { PageShell, StatCard } from "@/components/ui";
+import { PageShell, StatCard, MobileStatGrid } from "@/components/ui";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { DashboardSidebarWidgets } from "@/components/dashboard/dashboard-sidebar-widgets";
 import { ProfileCompletionCard } from "@/components/dashboard/profile-completion-card";
@@ -133,7 +133,7 @@ export default async function OfficerDashboard({
         />
 
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_280px] xl:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <MobileStatGrid desktopColumns={4}>
             <StatCard
               label="Applications"
               value={applicationsCount}
@@ -162,7 +162,7 @@ export default async function OfficerDashboard({
               tone="amber"
               icon={<BrowseIcon className="h-4 w-4" />}
             />
-          </div>
+          </MobileStatGrid>
 
           <ProfileCompletionCard officer={officer} compact />
         </div>

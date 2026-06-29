@@ -22,7 +22,8 @@
   --fo-neutral-bg: rgba(148, 163, 184, 0.12);
   --fo-radius-card: 1.375rem;
   --fo-radius-button: 0.875rem;
-  --fo-nav-height: 4.5rem;
+  --fo-nav-height: 6rem;
+  --fo-mobile-header-height: 4.5rem;
   --landing-header-h: 5rem;
 }
 
@@ -468,5 +469,45 @@ html {
 
   .hero-badge-particle {
     opacity: 0;
+  }
+}
+
+/* Mobile dashboard utilities — desktop unchanged above md */
+@media (max-width: 767px) {
+  .fo-mobile-nav-scroll-padding {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .fo-scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .fo-scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .fo-mobile-card {
+    width: 100%;
+    padding: 1rem;
+    border-radius: var(--fo-radius-card);
+  }
+
+  .fo-mobile-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .fo-mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .fo-mobile-actions > * {
+    width: 100%;
+    min-height: 3rem;
   }
 }

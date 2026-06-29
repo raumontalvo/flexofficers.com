@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { StatusBadge } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
@@ -149,12 +150,12 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Link
-            href={`/shifts/${shift.id}`}
+          <ShiftDetailLink
+            shiftId={shift.id}
             className="inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10"
           >
             View Details
-          </Link>
+          </ShiftDetailLink>
           <button
             type="button"
             disabled

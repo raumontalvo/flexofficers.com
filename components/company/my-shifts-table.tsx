@@ -6,6 +6,12 @@ import { ShiftStatus } from "@/app/generated/prisma/enums";
 import { ShiftRowActions } from "@/components/company/shift-row-actions";
 import { ShiftWorkforcePanel } from "@/components/company/shift-workforce-panel";
 import { buttonClassName } from "@/components/ui";
+import {
+  MobileListCard,
+  MobileListCardActions,
+  MobileListCardGroup,
+  MobileSecondaryButton,
+} from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
 import {
@@ -187,8 +193,9 @@ export function MyShiftsTable({
 
   return (
     <section className="fo-glass-card mt-6 overflow-hidden rounded-xl border border-white/10">
-      <div className="flex flex-col gap-4 border-b border-white/[0.06] px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col gap-3 border-b border-white/[0.06] px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max flex-nowrap gap-2">
           {TABS.map((tab) => {
             const count = tabCounts[tab.id];
 
@@ -211,6 +218,7 @@ export function MyShiftsTable({
               </button>
             );
           })}
+          </div>
         </div>
 
         <label className="relative block w-full lg:max-w-xs">
@@ -225,7 +233,94 @@ export function MyShiftsTable({
         </label>
       </div>
 
-      <div className="overflow-x-auto">
+      <MobileListCardGroup className="md:hidden border-0 bg-transparent rounded-none">
+        {pagination.items.length === 0 ? (
+          <div className="px-4 py-12 text-center text-sm text-fo-text-muted">
+            No shifts match this filter.
+          </div>
+        ) : (
+          pagination.items.map((shift) => {
+            const startTime = new Date(shift.startTime);
+            const endTime = new Date(shift.endTime);
+            const duration = formatShiftDurationLabel(startTime, endTime);
+
+            return (
+              <MobileListCard key={shift.id}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-fo-text">{shift.title}</p>
+                    <p className="mt-1 flex items-center gap-1.5 text-xs text-fo-text-muted">
+                      <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+                      <span>
+                        {shift.locationSubtext
+                          ? `${shift.locationLabel} · ${shift.locationSubtext}`
+                          : shift.locationLabel}
+                      </span>
+                    </p>
+                  </div>
+                  <MyShiftStatusBadge status={shift.status} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-xs text-fo-text-muted">Date</p>
+                    <p className="mt-0.5 font-medium text-fo-text">
+                      {formatShiftTableDate(startTime)}
+                    </p>
+                    <p className="mt-0.5 text-xs text-fo-text-muted">
+                      {formatShiftTime(startTime)} – {formatShiftTime(endTime)}
+                      {duration ? ` ${duration}` : ""}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-fo-text-muted">Pay</p>
+                    <p className="mt-0.5 font-medium text-fo-text">
+                      {formatHourlyRate(shift.hourlyRate)}
+                      <span className="text-fo-text-muted">/hr</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-fo-text-muted">Filled</p>
+                    <p className="mt-0.5 font-medium text-fo-text">
+                      {shift.filledCount} / {shift.positionsNeeded}
+                    </p>
+                    <FillProgressBar
+                      filledCount={shift.filledCount}
+                      positionsNeeded={shift.positionsNeeded}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs text-fo-text-muted">Applicants</p>
+                    <p className="mt-0.5 inline-flex items-center gap-1.5 font-medium text-fo-text">
+                      <PeopleIcon className="h-4 w-4 shrink-0 text-fo-text-muted" />
+                      {shift.applicantCount}
+                    </p>
+                  </div>
+                </div>
+
+                <MobileListCardActions>
+                  <MobileSecondaryButton
+                    onClick={() =>
+                      setExpandedShiftId((current) =>
+                        current === shift.id ? null : shift.id
+                      )
+                    }
+                  >
+                    {expandedShiftId === shift.id ? "Hide Roster" : "View Roster"}
+                  </MobileSecondaryButton>
+                  <ShiftRowActions shiftId={shift.id} status={shift.status} stacked />
+                </MobileListCardActions>
+
+                {expandedShiftId === shift.id && workforceByShiftId[shift.id] ? (
+                  <ShiftWorkforcePanel workforce={workforceByShiftId[shift.id]} />
+                ) : null}
+              </MobileListCard>
+            );
+          })
+        )}
+      </MobileListCardGroup>
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="min-w-[960px] w-full text-left text-sm">
           <thead className="border-b border-white/[0.06] bg-white/[0.02] text-[11px] uppercase tracking-wide text-fo-text-muted">
             <tr>

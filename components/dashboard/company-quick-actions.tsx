@@ -5,6 +5,7 @@ import {
   ShiftsIcon,
 } from "@/components/nav/icons";
 import { Card, CardDescription, CardTitle } from "@/components/ui";
+import { MobileActionCard, MobileActionCardGrid } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 
 const actions = [
@@ -43,7 +44,26 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
         </p>
       </div>
 
-      <div className="grid gap-2.5 sm:grid-cols-2">
+      <MobileActionCardGrid className="md:hidden">
+        {actions.map((action) => {
+          const Icon = action.icon;
+          const href =
+            action.href === "/shifts/create" ? postShiftHref : action.href;
+
+          return (
+            <MobileActionCard
+              key={action.href}
+              href={href}
+              title={action.title}
+              description={action.description}
+              icon={<Icon className="h-4 w-4" />}
+              iconClassName={action.iconClassName}
+            />
+          );
+        })}
+      </MobileActionCardGrid>
+
+      <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 md:grid">
         {actions.map((action) => {
           const Icon = action.icon;
           const href =
@@ -54,7 +74,7 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
               <Card
                 variant="elevated"
                 padding="none"
-                className="fo-glass-card fo-glass-card-hover flex h-full flex-col gap-2.5 p-3.5"
+                className="fo-glass-card fo-glass-card-hover flex h-full flex-col gap-2 p-3 sm:gap-2.5 sm:p-3.5"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div

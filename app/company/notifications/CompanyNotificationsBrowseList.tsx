@@ -15,6 +15,7 @@ import {
 import { markAllCompanyNotificationsRead } from "./actions";
 import { CompanyNotificationCard } from "./CompanyNotificationCard";
 import { getHiddenCompanyNotificationIds } from "./hidden-notifications";
+import { notifyNotificationsChanged } from "@/lib/notifications-changed";
 
 const PAGE_SIZE = 10;
 
@@ -102,6 +103,7 @@ export function CompanyNotificationsBrowseList({
 
     startTransition(async () => {
       await markAllCompanyNotificationsRead();
+      notifyNotificationsChanged();
       router.refresh();
     });
   }

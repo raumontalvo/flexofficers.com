@@ -1,8 +1,16 @@
 "use client";
 
-import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
+import {
+  MobileListCard,
+  MobileListCardActions,
+  MobilePrimaryButton,
+  MobileSecondaryButton,
+  MobileSettingsRow,
+} from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import {
   formatInviteHourlyRate,
@@ -12,6 +20,7 @@ import {
   INVITE_STATUS_LABELS,
   type OfficerInviteData,
 } from "@/lib/officer-invite-data";
+import { shiftDetailHref } from "@/lib/shift-detail-navigation";
 
 const statusBadgeClasses = {
   PENDING: "border-amber-500/30 bg-amber-500/10 text-amber-200",
@@ -22,6 +31,7 @@ const statusBadgeClasses = {
 type InviteActionsProps = {
   invite: OfficerInviteData;
   onRespond: () => void;
+  stacked?: boolean;
 };
 
 async function respondToInvite(inviteId: string, response: "accept" | "decline") {
@@ -80,8 +90,10 @@ function DollarIcon({ className }: { className?: string }) {
   );
 }
 
-export function InviteActions({ invite, onRespond }: InviteActionsProps) {
+export function InviteActions({ invite, onRespond, stacked = false }: InviteActionsProps) {
   const [loading, setLoading] = useState<"accept" | "decline" | null>(null);
+  const pathname = usePathname();
+  const shiftHref = shiftDetailHref(invite.shift.id, pathname);
 
   async function handleRespond(response: "accept" | "decline") {
     setLoading(response);
@@ -93,11 +105,55 @@ export function InviteActions({ invite, onRespond }: InviteActionsProps) {
     }
   }
 
+  if (stacked && invite.status === "PENDING") {
+    return (
+      <MobileListCardActions>
+        <MobilePrimaryButton
+          onClick={() => handleRespond("accept")}
+          disabled={loading !== null}
+          loading={loading === "accept"}
+        >
+          Accept Invite
+        </MobilePrimaryButton>
+        <MobileSettingsRow label="View Shift" href={shiftHref} />
+        <MobileSecondaryButton
+          onClick={() => handleRespond("decline")}
+          disabled={loading !== null}
+          loading={loading === "decline"}
+        >
+          Decline Invite
+        </MobileSecondaryButton>
+      </MobileListCardActions>
+    );
+  }
+
+  if (stacked && invite.status === "ACCEPTED") {
+    return (
+      <MobileListCardActions>
+        <MobileSettingsRow label="View Shift Details" href={shiftHref} />
+        <p className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-center text-xs font-semibold text-emerald-200">
+          Added to Accepted Shifts
+        </p>
+      </MobileListCardActions>
+    );
+  }
+
+  if (stacked) {
+    return (
+      <MobileListCardActions>
+        <MobileSettingsRow label="View Shift" href={shiftHref} />
+        <p className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-center text-xs font-medium text-red-200/90">
+          You declined this invite
+        </p>
+      </MobileListCardActions>
+    );
+  }
+
   if (invite.status === "PENDING") {
     return (
       <div className="flex w-[148px] shrink-0 flex-col justify-center gap-2">
-        <Link
-          href={`/shifts/${invite.shift.id}`}
+        <ShiftDetailLink
+          shiftId={invite.shift.id}
           className={buttonClassName({
             variant: "secondary",
             size: "md",
@@ -106,7 +162,7 @@ export function InviteActions({ invite, onRespond }: InviteActionsProps) {
           })}
         >
           View Shift
-        </Link>
+        </ShiftDetailLink>
         <button
           type="button"
           disabled={loading !== null}
@@ -137,8 +193,8 @@ export function InviteActions({ invite, onRespond }: InviteActionsProps) {
   if (invite.status === "ACCEPTED") {
     return (
       <div className="flex w-[168px] shrink-0 flex-col justify-center gap-2">
-        <Link
-          href={`/shifts/${invite.shift.id}`}
+        <ShiftDetailLink
+          shiftId={invite.shift.id}
           className={buttonClassName({
             variant: "secondary",
             size: "md",
@@ -147,7 +203,7 @@ export function InviteActions({ invite, onRespond }: InviteActionsProps) {
           })}
         >
           View Shift Details
-        </Link>
+        </ShiftDetailLink>
         <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-center text-[11px] font-semibold text-emerald-200">
           Added to Accepted Shifts
         </div>
@@ -157,8 +213,8 @@ export function InviteActions({ invite, onRespond }: InviteActionsProps) {
 
   return (
     <div className="flex w-[148px] shrink-0 flex-col justify-center gap-2">
-      <Link
-        href={`/shifts/${invite.shift.id}`}
+      <ShiftDetailLink
+        shiftId={invite.shift.id}
         className={buttonClassName({
           variant: "secondary",
           size: "md",
@@ -166,7 +222,7 @@ export function InviteActions({ invite, onRespond }: InviteActionsProps) {
         })}
       >
         View Shift
-      </Link>
+      </ShiftDetailLink>
       <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-center text-[11px] font-medium text-red-200/90">
         You declined this invite
       </div>
@@ -244,7 +300,58 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
   }
 
   return (
-    <article className="fo-glass-card grid min-h-[132px] grid-cols-1 gap-4 rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_auto] lg:items-center">
+    <>
+      <MobileListCard className="lg:hidden">
+        <div className="flex items-start gap-3">
+          <ProfileAvatar
+            name={invite.company.companyName}
+            src={invite.company.logoUrl}
+            size="md"
+          />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-fo-text">
+              {invite.company.companyName}
+            </p>
+            <p className="truncate text-sm font-medium text-blue-100">
+              {invite.shift.title}
+            </p>
+            <span
+              className={cn(
+                "mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold",
+                statusBadgeClasses[invite.status]
+              )}
+            >
+              {INVITE_STATUS_LABELS[invite.status]}
+            </span>
+            <p className="mt-2 text-[11px] text-fo-text-subtle">{invitedLabel}</p>
+          </div>
+        </div>
+
+        <div className="grid min-w-0 gap-2">
+          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
+            <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+            <span className="truncate">{locationLabel}</span>
+          </p>
+          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
+            <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+            <span>
+              {schedule.weekday} {schedule.monthDay}
+            </span>
+          </p>
+          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
+            <ClockIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+            <span>{schedule.timeRange}</span>
+          </p>
+          <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
+            <DollarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
+            <span>{hourlyRateLabel}/hr</span>
+          </p>
+        </div>
+
+        <InviteActions invite={invite} onRespond={onRespond} stacked />
+      </MobileListCard>
+
+      <article className="fo-glass-card hidden min-h-[132px] grid-cols-1 gap-4 rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_auto] lg:items-center">
       <div className="flex items-start gap-3">
         <ProfileAvatar
           name={invite.company.companyName}
@@ -293,5 +400,6 @@ export function InviteCard({ invite, viewMode, onRespond }: InviteCardProps) {
 
       <InviteActions invite={invite} onRespond={onRespond} />
     </article>
+    </>
   );
 }

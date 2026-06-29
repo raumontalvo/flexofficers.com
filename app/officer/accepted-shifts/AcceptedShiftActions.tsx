@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { cn } from "@/lib/cn";
 import type { AcceptedShiftTab } from "@/lib/officer-accepted-shift-data";
 import { RemoveFromAcceptedListButton } from "./RemoveFromAcceptedListButton";
@@ -22,14 +22,14 @@ export function AcceptedShiftActions({
 }: AcceptedShiftActionsProps) {
   return (
     <div className="flex flex-col items-stretch gap-1.5">
-      <Link
-        href={`/shifts/${shiftId}`}
+      <ShiftDetailLink
+        shiftId={shiftId}
         className={cn(
           "inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10"
         )}
       >
         View Shift
-      </Link>
+      </ShiftDetailLink>
 
       {tab === "upcoming" ? (
         <div className="space-y-1">

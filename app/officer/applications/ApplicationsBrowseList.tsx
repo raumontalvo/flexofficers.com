@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Button, Card } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/officer-application-data";
 import { getHiddenApplicationIds } from "./RemoveFromListButton";
 import { ApplicationCard } from "./ApplicationCard";
+import { ApplicationStatusSummaryCard } from "./ApplicationStatusSummaryCard";
 
 const PAGE_SIZE = 6;
 
@@ -57,15 +59,21 @@ type ApplicationsBrowseListProps = {
 export function ApplicationsBrowseList({
   applications,
 }: ApplicationsBrowseListProps) {
+  const router = useRouter();
   const listTopRef = useRef<HTMLDivElement>(null);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(() => new Set());
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const visibleApplications = useMemo(() => {
     const hiddenIds = new Set(getHiddenApplicationIds());
-    return applications.filter((application) => !hiddenIds.has(application.id));
-  }, [applications, hiddenVersion]);
+    return applications.filter(
+      (application) =>
+        !hiddenIds.has(application.id) && !deletedIds.has(application.id)
+    );
+  }, [applications, hiddenVersion, deletedIds]);
 
   const filteredApplications = useMemo(() => {
     if (!statusFilter) {
@@ -123,20 +131,39 @@ export function ApplicationsBrowseList({
     setCurrentPage(1);
   }
 
+  function handleApplicationDeleted(applicationId: string) {
+    setDeletedIds((current) => new Set(current).add(applicationId));
+    setCurrentPage(1);
+    setSuccessMessage("Application removed from your list.");
+    router.refresh();
+    window.setTimeout(() => setSuccessMessage(null), 4000);
+  }
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<ApplicationStatusFilter, number> = {
+      "": countByStatus(visibleApplications, ""),
+      PENDING: countByStatus(visibleApplications, "PENDING"),
+      ACCEPTED: countByStatus(visibleApplications, "ACCEPTED"),
+      REJECTED: countByStatus(visibleApplications, "REJECTED"),
+      WITHDRAWN: countByStatus(visibleApplications, "WITHDRAWN"),
+    };
+    return counts;
+  }, [visibleApplications]);
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
+    <div className="space-y-2 md:space-y-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-4">
+        <div className="space-y-0.5 md:space-y-2">
+          <h1 className="text-xl font-bold tracking-tight text-fo-text md:text-3xl lg:text-4xl">
             My Applications
           </h1>
-          <p className="max-w-2xl text-base text-fo-text-muted sm:text-lg">
+          <p className="max-w-2xl text-sm text-fo-text-muted md:text-base lg:text-lg">
             Shifts you&apos;ve applied to.
           </p>
         </div>
 
         {!hasNoApplications ? (
-          <div className="w-full space-y-1 lg:w-auto lg:min-w-[200px]">
+          <div className="hidden w-full space-y-1 lg:block lg:w-auto lg:min-w-[200px]">
             <label htmlFor="application-status-filter" className="text-xs text-fo-text-muted">
               Filter by status
             </label>
@@ -158,31 +185,48 @@ export function ApplicationsBrowseList({
         ) : null}
       </div>
 
-      {!hasNoApplications ? (
-        <div className="border-b border-white/[0.06]">
-          <div className="flex gap-1 overflow-x-auto pb-px">
-            {APPLICATION_STATUS_TABS.map((tab) => {
-              const isActive = statusFilter === tab.value;
-              const count = countByStatus(visibleApplications, tab.value);
-
-              return (
-                <button
-                  key={tab.value || "all"}
-                  type="button"
-                  onClick={() => updateStatusFilter(tab.value)}
-                  className={cn(
-                    "shrink-0 border-b-2 px-3 py-2.5 text-sm font-semibold transition",
-                    isActive
-                      ? "border-fo-primary-bright text-fo-text"
-                      : cn("border-transparent", tabColorClasses[tab.value])
-                  )}
-                >
-                  {tab.label} ({count})
-                </button>
-              );
-            })}
-          </div>
+      {successMessage ? (
+        <div
+          role="status"
+          className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200"
+        >
+          {successMessage}
         </div>
+      ) : null}
+
+      {!hasNoApplications ? (
+        <>
+          <ApplicationStatusSummaryCard
+            activeFilter={statusFilter}
+            counts={statusCounts}
+            onSelect={updateStatusFilter}
+          />
+
+          <div className="hidden border-b border-white/[0.06] md:block">
+            <div className="flex gap-1 pb-px">
+              {APPLICATION_STATUS_TABS.map((tab) => {
+                const isActive = statusFilter === tab.value;
+                const count = statusCounts[tab.value];
+
+                return (
+                  <button
+                    key={tab.value || "all"}
+                    type="button"
+                    onClick={() => updateStatusFilter(tab.value)}
+                    className={cn(
+                      "shrink-0 border-b-2 px-3 py-2.5 text-sm font-semibold transition",
+                      isActive
+                        ? "border-fo-primary-bright text-fo-text"
+                        : cn("border-transparent", tabColorClasses[tab.value])
+                    )}
+                  >
+                    {tab.label} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
       ) : null}
 
       <div ref={listTopRef} className="scroll-mt-4 space-y-2">
@@ -225,12 +269,13 @@ export function ApplicationsBrowseList({
             </Button>
           </Card>
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-2 md:space-y-1.5">
             {pageApplications.map((application) => (
               <ApplicationCard
                 key={application.id}
                 application={application}
                 onListChange={handleListChange}
+                onDeleted={handleApplicationDeleted}
               />
             ))}
           </div>

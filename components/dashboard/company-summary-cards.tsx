@@ -1,4 +1,4 @@
-import { StatCard } from "@/components/ui";
+import { StatCard, MobileStatGrid } from "@/components/ui";
 
 type CompanySummaryCardsProps = {
   shiftStats: {
@@ -29,7 +29,7 @@ export function CompanySummaryCards({
   upcomingConfirmedCount,
 }: CompanySummaryCardsProps) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <MobileStatGrid>
       <StatCard
         label="Total Shifts"
         value={shiftStats.total}
@@ -54,6 +54,6 @@ export function CompanySummaryCards({
         tone="amber"
         hint="Confirmed in the next 7 days"
       />
-    </div>
+    </MobileStatGrid>
   );
 }

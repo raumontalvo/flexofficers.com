@@ -70,6 +70,101 @@ export function clearPrimaryShiftFilters(
   };
 }
 
+export const SHIFT_FILTER_SUMMARY_PLACEHOLDER =
+  "Search by city, state, date, pay, and work type";
+
+export const SHIFT_FILTER_CHIPS_DEFAULT =
+  "Any location • Any date • Any pay • All types";
+
+export function hasMoreShiftFilters(filters: ShiftBrowseFilters) {
+  return (
+    filters.armed ||
+    filters.unarmed ||
+    filters.dayShift ||
+    filters.nightShift ||
+    filters.overnight
+  );
+}
+
+function formatFilterDate(value: string) {
+  const parsed = new Date(`${value}T12:00:00`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function formatLocationSummary(filters: ShiftBrowseFilters) {
+  const city = filters.city.trim();
+  const state = filters.state.trim();
+
+  if (city && state) {
+    return `${city}, ${state}`;
+  }
+
+  if (city) {
+    return city;
+  }
+
+  if (state) {
+    return state;
+  }
+
+  return null;
+}
+
+export function formatShiftFilterSummary(filters: ShiftBrowseFilters) {
+  const parts: string[] = [];
+
+  const location = formatLocationSummary(filters);
+  if (location) {
+    parts.push(location);
+  }
+
+  if (filters.date.trim()) {
+    parts.push(formatFilterDate(filters.date.trim()));
+  }
+
+  if (filters.minHourlyRate.trim()) {
+    parts.push(`$${filters.minHourlyRate.trim()}+/hr`);
+  }
+
+  if (filters.workType.trim()) {
+    parts.push(filters.workType);
+  }
+
+  if (hasMoreShiftFilters(filters)) {
+    parts.push("More filters");
+  }
+
+  return parts.length > 0 ? parts.join(" • ") : null;
+}
+
+export function formatShiftFilterChipsSummary(filters: ShiftBrowseFilters) {
+  const location = formatLocationSummary(filters) ?? "Any location";
+  const datePart = filters.date.trim()
+    ? formatFilterDate(filters.date.trim())
+    : "Any date";
+  const payPart = filters.minHourlyRate.trim()
+    ? `$${filters.minHourlyRate.trim()}+/hr`
+    : "Any pay";
+  const workTypePart = filters.workType.trim() || "All types";
+
+  const parts = [location, datePart, payPart, workTypePart];
+
+  if (hasMoreShiftFilters(filters)) {
+    parts.push("More filters");
+  }
+
+  return parts.join(" • ");
+}
+
 export function formatOpenShiftCount(count: number) {
   if (count === 1) {
     return "1 Open Shift";

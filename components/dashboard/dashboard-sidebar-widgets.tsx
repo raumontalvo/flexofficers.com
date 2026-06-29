@@ -2,7 +2,6 @@ import type { ComponentType, SVGProps } from "react";
 import Link from "next/link";
 import {
   AcceptedIcon,
-  BrowseIcon,
   NotificationsIcon,
 } from "@/components/nav/icons";
 import {
@@ -97,19 +96,6 @@ export function DashboardSidebarWidgets({
             actionLabel="Browse Shifts"
           />
         )}
-      </Card>
-
-      <Card
-        variant="elevated"
-        padding="none"
-        className="fo-glass-card fo-glass-card-hover space-y-2.5 p-3.5"
-      >
-        <CardTitle className="text-sm font-semibold">Earnings Overview</CardTitle>
-        <WidgetEmptyState
-          icon={BrowseIcon}
-          title="No earnings data yet"
-          description="Completed shift earnings will appear here."
-        />
       </Card>
 
       <Card

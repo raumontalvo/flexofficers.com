@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { NotificationsIcon } from "@/components/nav/icons";
-import { buttonClassName } from "@/components/ui";
+import { MobilePrimaryButton } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 type CompanyDashboardHeaderProps = {
@@ -33,7 +33,7 @@ export function CompanyDashboardHeader({
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 self-start">
+      <div className="flex w-full shrink-0 flex-col gap-2 self-stretch sm:w-auto sm:flex-row sm:items-center sm:self-start">
         <Link
           href="/company/notifications"
           className="relative hidden h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#070f1c]/60 text-fo-text-muted transition hover:border-fo-primary-bright/35 hover:text-fo-primary-hover md:flex"
@@ -47,15 +47,12 @@ export function CompanyDashboardHeader({
           ) : null}
         </Link>
 
-        <Link
+        <MobilePrimaryButton
           href={canPostShifts ? "/shifts/create" : "/company/billing"}
-          className={buttonClassName({
-            size: "md",
-            className: "shrink-0",
-          })}
+          className="sm:w-auto sm:min-h-11 sm:text-sm"
         >
           Post a New Shift
-        </Link>
+        </MobilePrimaryButton>
       </div>
     </header>
   );

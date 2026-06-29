@@ -96,7 +96,7 @@ export default async function CompanyBillingPage() {
           subtitle="Manage your FlexOfficers subscription and payment method."
         />
 
-        <div className="mt-8">
+        <div className="mt-4 md:mt-8">
           <CompanyBillingPageContent billing={billing} />
         </div>
       </PageShell>

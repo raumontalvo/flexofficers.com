@@ -10,7 +10,7 @@ export type CompanyProfileMeta = {
   established: string | null;
 };
 
-const META_BLOCK_REGEX = /\n?\[fo-meta\]([\s\S]*?)\[\/fo-meta\]$/;
+const META_BLOCK_CAPTURE = /\[fo-meta\]([\s\S]*?)\[\/fo-meta\]/;
 
 export const EMPTY_COMPANY_PROFILE_META: CompanyProfileMeta = {
   services: [],
@@ -29,7 +29,7 @@ export function stripCompanyProfileMeta(description: string | null | undefined) 
     return null;
   }
 
-  const stripped = description.replace(META_BLOCK_REGEX, "").trim();
+  const stripped = description.replace(META_BLOCK_CAPTURE, "").trim();
   return stripped || null;
 }
 
@@ -40,7 +40,7 @@ export function parseCompanyProfileMeta(
     return { ...EMPTY_COMPANY_PROFILE_META };
   }
 
-  const match = description.match(META_BLOCK_REGEX);
+  const match = description.match(META_BLOCK_CAPTURE);
 
   if (!match?.[1]) {
     return { ...EMPTY_COMPANY_PROFILE_META };

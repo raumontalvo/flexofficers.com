@@ -6,6 +6,13 @@ import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { ApplicationReviewPanel } from "@/components/company/application-review-panel";
 import { ApplicantsShiftSummaryPanel } from "@/components/company/applicants-shift-summary-panel";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
+import {
+  MobileListCard,
+  MobileListCardActions,
+  MobileListCardGroup,
+  MobilePrimaryButton,
+  MobileSecondaryButton,
+} from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import {
   filterCompanyApplicantsByShift,
@@ -132,7 +139,7 @@ function ApplicantStatusBadge({ status }: { status: ApplicationStatus }) {
   return (
     <span
       className={cn(
-        "inline-flex max-w-full items-center justify-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide",
+        "inline-flex max-w-full items-center justify-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-wide",
         styles[status]
       )}
     >
@@ -141,7 +148,11 @@ function ApplicantStatusBadge({ status }: { status: ApplicationStatus }) {
   );
 }
 
-function ApplicantRowActions({ application, onView }: ApplicantRowActionsProps) {
+function ApplicantRowActions({
+  application,
+  onView,
+  stacked = false,
+}: ApplicantRowActionsProps & { stacked?: boolean }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isPending = application.status === ApplicationStatus.PENDING;
@@ -160,6 +171,29 @@ function ApplicantRowActions({ application, onView }: ApplicantRowActionsProps) 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
+
+  if (stacked) {
+    return (
+      <MobileListCardActions>
+        <MobileSecondaryButton onClick={onView}>View</MobileSecondaryButton>
+        {isPending ? (
+          <>
+            <MobilePrimaryButton
+              onClick={() => void updateApplicationStatus(application.id, "ACCEPTED")}
+            >
+              Accept
+            </MobilePrimaryButton>
+            <MobileSecondaryButton
+              onClick={() => void updateApplicationStatus(application.id, "REJECTED")}
+              variant="danger"
+            >
+              Reject
+            </MobileSecondaryButton>
+          </>
+        ) : null}
+      </MobileListCardActions>
+    );
+  }
 
   return (
     <div className="flex shrink-0 items-center justify-end gap-1">
@@ -365,7 +399,7 @@ export function CompanyApplicantsPageContent({
             </div>
           </div>
 
-          <div className="mt-3 flex min-w-0 items-center gap-2">
+          <div className="mt-3 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
             <label className="relative min-w-0 flex-1">
               <span className="sr-only">Search applicants</span>
               <input
@@ -377,12 +411,12 @@ export function CompanyApplicantsPageContent({
               />
             </label>
 
-            <div className="relative shrink-0">
+            <div className="relative w-full shrink-0 sm:w-auto">
               <button
                 type="button"
                 onClick={() => setFilterOpen((open) => !open)}
                 className={cn(
-                  "min-h-9 rounded-lg border px-3 py-2 text-xs font-semibold transition",
+                  "min-h-12 w-full rounded-lg border px-3 py-2 text-xs font-semibold transition sm:min-h-9 sm:w-auto",
                   shiftFilter
                     ? "border-fo-primary-bright/40 bg-fo-primary-bright/10 text-fo-primary-hover"
                     : "border-white/10 text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
@@ -433,7 +467,7 @@ export function CompanyApplicantsPageContent({
         <div
           className={cn(
             ROW_GRID,
-            "border-b border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted sm:px-4"
+            "hidden border-b border-white/[0.06] bg-white/[0.02] px-3 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted sm:px-4 lg:grid"
           )}
         >
           <div>Applicant</div>
@@ -448,7 +482,61 @@ export function CompanyApplicantsPageContent({
             No applicants match this filter.
           </div>
         ) : (
-          <div className="divide-y divide-white/[0.04]">
+          <MobileListCardGroup className="lg:hidden">
+            {filteredApplications.map((application) => {
+              const schedule = formatApplicantShiftSchedule(
+                application.shiftStartTime,
+                application.shiftEndTime
+              );
+              const locationLine = application.shiftLocationSubtext
+                ? `${application.shiftLocationLabel} · ${application.shiftLocationSubtext}`
+                : application.shiftLocationLabel;
+              const isSelected = selectedApplication?.id === application.id;
+
+              return (
+                <MobileListCard
+                  key={application.id}
+                  onClick={() => setSelectedApplicationId(application.id)}
+                  selected={isSelected}
+                >
+                    <div className="flex items-start gap-3">
+                      <OfficerAvatar
+                        name={application.officerName}
+                        photoUrl={application.profilePhotoUrl}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-fo-text">
+                          {application.officerName}
+                        </p>
+                        <ApplicantStatusBadge status={application.status} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 text-sm">
+                      <p className="font-medium text-fo-text">{application.shiftTitle}</p>
+                      <MetaLine icon={LocationIcon}>{locationLine}</MetaLine>
+                      <MetaLine icon={CalendarIcon}>
+                        {`${schedule.dateLabel} · ${schedule.timeLabel}`}
+                      </MetaLine>
+                      <p className="text-xs text-fo-text-muted">
+                        Applied {application.appliedDateLabel} ·{" "}
+                        {application.appliedTimeLabel}
+                      </p>
+                    </div>
+
+                    <ApplicantRowActions
+                      application={application}
+                      onView={() => setReviewApplicationId(application.id)}
+                      stacked
+                    />
+                </MobileListCard>
+              );
+            })}
+          </MobileListCardGroup>
+        )}
+
+        {filteredApplications.length > 0 ? (
+          <div className="hidden divide-y divide-white/[0.04] lg:block">
             {filteredApplications.map((application) => {
               const schedule = formatApplicantShiftSchedule(
                 application.shiftStartTime,
@@ -537,7 +625,7 @@ export function CompanyApplicantsPageContent({
               );
             })}
           </div>
-        )}
+        ) : null}
       </section>
 
       <div className="min-w-0 shrink-0 lg:w-[320px]">

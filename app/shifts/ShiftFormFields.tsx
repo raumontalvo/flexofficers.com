@@ -136,7 +136,7 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
           </CardDescription>
         </CardHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <FieldLabel htmlFor="city">City</FieldLabel>
             <input
@@ -186,7 +186,7 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
           </CardDescription>
         </CardHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <FieldLabel htmlFor="hourlyRate">Pay (hourly rate)</FieldLabel>
             <input
@@ -222,7 +222,7 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
           <CardDescription>When the shift runs.</CardDescription>
         </CardHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <FieldLabel htmlFor="startTime">Start time</FieldLabel>
             <input
@@ -246,7 +246,7 @@ export function ShiftFormFields({ form, onChange }: ShiftFormFieldsProps) {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <FieldLabel htmlFor="workType">Work type</FieldLabel>
             <select

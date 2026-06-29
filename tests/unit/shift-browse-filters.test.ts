@@ -6,6 +6,8 @@ import {
   filterBrowseShifts,
   formatOpenShiftCount,
   formatPaginationRange,
+  formatShiftFilterChipsSummary,
+  formatShiftFilterSummary,
   hasActiveShiftFilters,
   sortBrowseShifts,
 } from "@/lib/shift-browse-filters";
@@ -64,6 +66,35 @@ describe("shift browse filters", () => {
       armed: true,
       dayShift: true,
     });
+  });
+
+  it("formats filter summary for mobile search card", () => {
+    expect(formatShiftFilterSummary(emptyShiftBrowseFilters)).toBeNull();
+    expect(
+      formatShiftFilterSummary({
+        ...emptyShiftBrowseFilters,
+        city: "Miami",
+        state: "FL",
+        date: "2026-06-09",
+        minHourlyRate: "25",
+        workType: "Gig",
+        armed: true,
+      })
+    ).toBe("Miami, FL • Jun 9, 2026 • $25+/hr • Gig • More filters");
+  });
+
+  it("formats always-on filter chips for mobile search card", () => {
+    expect(formatShiftFilterChipsSummary(emptyShiftBrowseFilters)).toBe(
+      "Any location • Any date • Any pay • All types"
+    );
+    expect(
+      formatShiftFilterChipsSummary({
+        ...emptyShiftBrowseFilters,
+        city: "Lehigh Acres",
+        state: "FL",
+        minHourlyRate: "20",
+      })
+    ).toBe("Lehigh Acres, FL • Any date • $20+/hr • All types");
   });
 
   it("formats open shift counts and pagination", () => {

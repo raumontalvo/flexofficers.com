@@ -51,7 +51,7 @@ function ProfileSectionCard({
   return (
     <section
       className={cn(
-        "fo-glass-card h-auto self-start rounded-xl border border-white/10 p-4 sm:p-5",
+        "fo-glass-card h-auto self-start rounded-xl border border-white/10 p-3 sm:p-4 md:p-5",
         className
       )}
     >
@@ -302,17 +302,17 @@ function ProfileSidebar({ profile }: { profile: SerializedCompanyProfile }) {
 function ProfileHero({ profile }: { profile: SerializedCompanyProfile }) {
   return (
     <section className="fo-glass-card h-auto self-start rounded-xl border border-white/10 p-4 sm:p-5">
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start">
-        <div className="flex gap-4">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start lg:gap-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
           <ProfileAvatar
             name={profile.displayCompanyName}
             src={profile.logoUrl}
             size="xl"
-            className="h-24 w-24 text-2xl"
+            className="h-16 w-16 text-xl sm:h-24 sm:w-24 sm:text-2xl"
           />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-xl font-bold text-fo-text sm:text-2xl">
+              <h2 className="text-lg font-bold text-fo-text sm:text-2xl">
                 {profile.displayCompanyName}
               </h2>
               {profile.verified ? (

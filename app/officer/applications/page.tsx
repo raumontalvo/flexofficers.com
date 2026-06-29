@@ -59,7 +59,7 @@ export default async function OfficerApplicationsPage() {
   );
 
   return (
-    <PageShell nav="officer" maxWidth="6xl" sidebar>
+    <PageShell nav="officer" maxWidth="6xl" sidebar contentClassName="!pt-2 md:!pt-5">
       <ApplicationsBrowseList applications={applicationData} />
     </PageShell>
   );

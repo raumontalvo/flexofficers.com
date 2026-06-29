@@ -20,6 +20,11 @@ describe("company profile meta", () => {
     });
 
     expect(stripCompanyProfileMeta(stored)).toBe("Professional security services.");
+    expect(
+      stripCompanyProfileMeta(
+        "Summary text [fo-meta]{\"services\":[\"Armed Security\"]}[/fo-meta] trailing"
+      )
+    ).toBe("Summary text  trailing");
     expect(parseCompanyProfileMeta(stored)).toEqual({
       services: ["Armed Security"],
       officerBenefits: ["Weekly Pay"],
