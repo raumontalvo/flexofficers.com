@@ -23,6 +23,8 @@ import type { ShiftCardData } from "@/lib/shift-card-data";
 import { ShiftCard } from "./ShiftCard";
 import { ShiftSearchSheet } from "./ShiftSearchSheet";
 import { ShiftsNoResults } from "./ShiftsNoResults";
+import { OfficerProfileApplyNotice } from "@/components/officer/officer-profile-apply-notice";
+import type { ArmedStatus } from "@/app/generated/prisma/enums";
 
 const PAGE_SIZE = 10;
 
@@ -102,6 +104,20 @@ function MoreFilterToggle({
 
 type ShiftsBrowseListProps = {
   shifts: ShiftCardData[];
+  showProfileApplyNotice?: boolean;
+  officer?: {
+    phone?: string | null;
+    armedStatuses?: ArmedStatus[];
+    experienceCategories?: string[];
+    experienceYears?: number | null;
+    licenses?: Array<{
+      id: string;
+      licenseType: string;
+      licenseNumber: string;
+      issuingState: string;
+      expirationDate: Date;
+    }>;
+  } | null;
 };
 
 function buildPageNumbers(currentPage: number, totalPages: number) {
@@ -117,7 +133,11 @@ function buildPageNumbers(currentPage: number, totalPages: number) {
   return [...pages].sort((a, b) => a - b);
 }
 
-export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
+export function ShiftsBrowseList({
+  shifts,
+  showProfileApplyNotice = false,
+  officer = null,
+}: ShiftsBrowseListProps) {
   const listTopRef = useRef<HTMLDivElement>(null);
   const moreFiltersRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<ShiftBrowseFilters>(emptyShiftBrowseFilters);
@@ -227,6 +247,10 @@ export function ShiftsBrowseList({ shifts }: ShiftsBrowseListProps) {
 
   return (
     <div className="space-y-2">
+      {showProfileApplyNotice ? (
+        <OfficerProfileApplyNotice officer={officer} compact className="mb-1" />
+      ) : null}
+
       <button
         type="button"
         onClick={() => setSearchSheetOpen(true)}

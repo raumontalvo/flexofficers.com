@@ -70,3 +70,10 @@ export function getProfileCompletionPercent(
   const completeCount = fields.filter((field) => field.complete).length;
   return Math.round((completeCount / fields.length) * 100);
 }
+
+export const OFFICER_PROFILE_APPLY_REQUIRED_MESSAGE =
+  "Complete your officer profile before applying to shifts.";
+
+export function isOfficerProfileComplete(officer: OfficerProfileSnapshot): boolean {
+  return getProfileCompletionPercent(officer) === 100;
+}

@@ -62,8 +62,8 @@ export function ProfileCompletionCard({
 
         <CardDescription className="text-[11px] leading-snug">
           {isComplete
-            ? "Ready for companies to review."
-            : "Complete your profile for more matches."}
+            ? "Ready to apply to shifts and be reviewed by companies."
+            : "Complete your profile before you can apply to shifts."}
         </CardDescription>
 
         <div className="space-y-1">

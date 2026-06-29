@@ -44,6 +44,23 @@ export type OfficerProfileRecord = Prisma.OfficerGetPayload<{
   select: typeof officerProfileSelect;
 }>;
 
+export const officerProfileCompletionSelect = {
+  phone: true,
+  armedStatuses: true,
+  experienceCategories: true,
+  experienceYears: true,
+  licenses: {
+    select: officerLicenseSelect,
+    orderBy: {
+      createdAt: "asc" as const,
+    },
+  },
+} satisfies Prisma.OfficerSelect;
+
+export type OfficerProfileCompletionRecord = Prisma.OfficerGetPayload<{
+  select: typeof officerProfileCompletionSelect;
+}>;
+
 export const officerProfilePageUserSelect = {
   id: true,
   email: true,

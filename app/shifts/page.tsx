@@ -3,11 +3,18 @@ import { PageShell, SectionHeading } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import type { ShiftCardData } from "@/lib/shift-card-data";
 import { ShiftsBrowseList } from "./ShiftsBrowseList";
+import { currentUser } from "@clerk/nextjs/server";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { officerProfileCompletionSelect } from "@/lib/officer-fields";
+import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
 
 export const dynamic = "force-dynamic";
 
 export default async function ShiftsPage() {
-  const shifts = await prisma.shift.findMany({
+  const clerkUser = await currentUser();
+
+  const [shifts, user] = await Promise.all([
+    prisma.shift.findMany({
     where: {
       status: ShiftStatus.OPEN,
     },
@@ -26,7 +33,19 @@ export default async function ShiftsPage() {
     orderBy: {
       createdAt: "desc",
     },
-  });
+  }),
+    clerkUser
+      ? prisma.user.findUnique({
+          where: { clerkId: clerkUser.id },
+          select: {
+            role: true,
+            officer: {
+              select: officerProfileCompletionSelect,
+            },
+          },
+        })
+      : Promise.resolve(null),
+  ]);
 
   const browseShifts: ShiftCardData[] = shifts.map((shift) => ({
     id: shift.id,
@@ -50,6 +69,10 @@ export default async function ShiftsPage() {
     status: shift.status,
   }));
 
+  const showProfileApplyNotice =
+    user?.role === UserRole.OFFICER &&
+    !isOfficerProfileComplete(user.officer ?? null);
+
   return (
     <PageShell nav="officer" maxWidth="6xl" sidebar contentClassName="!pt-2 md:!pt-5">
       <div className="space-y-0.5 md:hidden">
@@ -66,7 +89,11 @@ export default async function ShiftsPage() {
       />
 
       <div className="mt-2 md:mt-3">
-        <ShiftsBrowseList shifts={browseShifts} />
+        <ShiftsBrowseList
+          shifts={browseShifts}
+          showProfileApplyNotice={showProfileApplyNotice}
+          officer={user?.officer ?? null}
+        />
       </div>
     </PageShell>
   );

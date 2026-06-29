@@ -5,6 +5,7 @@ import { ShiftDetailActions } from "@/components/shifts/shift-detail-actions";
 import { ShiftDetailBackLink } from "@/components/shifts/shift-detail-back-link";
 import { ShiftStatusBadge, StatusBadge } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import type { ArmedStatus } from "@/app/generated/prisma/enums";
 import {
   formatHourlyRate,
   formatShiftScheduleParts,
@@ -46,6 +47,20 @@ type ShiftDetailMobileProps = {
   shiftTimeLabel: string | null;
   armedLabel: string | null;
   canApply: boolean;
+  profileIncomplete?: boolean;
+  officer?: {
+    phone?: string | null;
+    armedStatuses?: ArmedStatus[];
+    experienceCategories?: string[];
+    experienceYears?: number | null;
+    licenses?: Array<{
+      id: string;
+      licenseType: string;
+      licenseNumber: string;
+      issuingState: string;
+      expirationDate: Date;
+    }>;
+  } | null;
   applicationStatus: ApplicationStatus | null;
   isSignedIn: boolean;
   shiftAcceptingApplications: boolean;
@@ -134,6 +149,8 @@ export function ShiftDetailMobile({
   shiftTimeLabel,
   armedLabel,
   canApply,
+  profileIncomplete = false,
+  officer = null,
   applicationStatus,
   isSignedIn,
   shiftAcceptingApplications,
@@ -330,6 +347,8 @@ export function ShiftDetailMobile({
         companyId={shift.companyId}
         hasPublicProfile={hasPublicProfile}
         canApply={canApply}
+        profileIncomplete={profileIncomplete}
+        officer={officer}
         applicationStatus={applicationStatus}
         isSignedIn={isSignedIn}
         shiftAcceptingApplications={shiftAcceptingApplications}

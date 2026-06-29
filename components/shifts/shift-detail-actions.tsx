@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ApplicationStatus } from "@/app/generated/prisma/enums";
+import { ApplicationStatus, type ArmedStatus } from "@/app/generated/prisma/enums";
 import ApplyButton from "@/app/shifts/ApplyButton";
+import { OfficerProfileApplyNotice } from "@/components/officer/officer-profile-apply-notice";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -11,6 +12,20 @@ type ShiftDetailActionsProps = {
   companyId: string;
   hasPublicProfile: boolean;
   canApply: boolean;
+  profileIncomplete?: boolean;
+  officer?: {
+    phone?: string | null;
+    armedStatuses?: ArmedStatus[];
+    experienceCategories?: string[];
+    experienceYears?: number | null;
+    licenses?: Array<{
+      id: string;
+      licenseType: string;
+      licenseNumber: string;
+      issuingState: string;
+      expirationDate: Date;
+    }>;
+  } | null;
   applicationStatus: ApplicationStatus | null;
   isSignedIn: boolean;
   shiftAcceptingApplications: boolean;
@@ -34,6 +49,8 @@ export function ShiftDetailActions({
   companyId,
   hasPublicProfile,
   canApply,
+  profileIncomplete = false,
+  officer = null,
   applicationStatus,
   isSignedIn,
   shiftAcceptingApplications,
@@ -57,6 +74,10 @@ export function ShiftDetailActions({
     <button type="button" disabled className={actionButtonClassName("primary", mobile)}>
       Application Pending
     </button>
+  ) : profileIncomplete ? (
+    <Link href="/officer/profile" className={actionButtonClassName("primary", mobile)}>
+      Complete Profile to Apply
+    </Link>
   ) : !isSignedIn && shiftAcceptingApplications ? (
     <Link href="/sign-in" className={actionButtonClassName("primary", mobile)}>
       Sign in to apply
@@ -96,6 +117,9 @@ export function ShiftDetailActions({
   if (mobile) {
     return (
       <div className="flex flex-col gap-2 pb-4">
+        {profileIncomplete ? (
+          <OfficerProfileApplyNotice officer={officer} compact />
+        ) : null}
         {applyControl}
         {companyControl}
       </div>
@@ -103,9 +127,14 @@ export function ShiftDetailActions({
   }
 
   return (
-    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-stretch">
-      {companyControl}
-      {applyControl}
+    <div className="space-y-3">
+      {profileIncomplete ? (
+        <OfficerProfileApplyNotice officer={officer} />
+      ) : null}
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-stretch">
+        {companyControl}
+        {applyControl}
+      </div>
     </div>
   );
 }

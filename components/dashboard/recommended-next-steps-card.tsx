@@ -72,7 +72,7 @@ export function RecommendedNextStepsCard({
       <div>
         <CardTitle className="text-sm font-semibold">Recommended Next Steps</CardTitle>
         <CardDescription className="mt-0.5 text-xs">
-          Complete these to improve your visibility.
+          Complete these before you can apply to shifts.
         </CardDescription>
       </div>
 

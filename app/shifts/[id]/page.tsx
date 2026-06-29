@@ -34,6 +34,8 @@ import {
 } from "@/lib/shift-form-options";
 import { getShiftRequirementChips } from "@/lib/shift-requirements";
 import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
+import { officerProfileCompletionSelect } from "@/lib/officer-fields";
+import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
 import { ShiftDetailMobile } from "./ShiftDetailMobile";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +79,7 @@ export default async function ShiftDetailPage({
             officer: {
               select: {
                 id: true,
+                ...officerProfileCompletionSelect,
                 applications: {
                   where: {
                     shiftId: id,
@@ -106,10 +109,13 @@ export default async function ShiftDetailPage({
     applicationStatus === ApplicationStatus.PENDING ||
     applicationStatus === ApplicationStatus.ACCEPTED;
   const shiftAcceptingApplications = shift.status === ShiftStatus.OPEN;
-  const canApply =
+  const officerWouldApply =
     user?.role === UserRole.OFFICER &&
     shiftAcceptingApplications &&
     !hasBlockingApplication;
+  const profileComplete = isOfficerProfileComplete(user?.officer ?? null);
+  const profileIncomplete = officerWouldApply && !profileComplete;
+  const canApply = officerWouldApply && profileComplete;
   const requirementChips = getShiftRequirementChips(shift, 20);
   const locationLabel = formatShiftCityState(shift);
   const estimatedPay = formatEstimatedShiftPay(
@@ -168,6 +174,8 @@ export default async function ShiftDetailPage({
         shiftTimeLabel={shiftTimeLabel}
         armedLabel={armedLabel}
         canApply={canApply}
+        profileIncomplete={profileIncomplete}
+        officer={user?.officer ?? null}
         applicationStatus={applicationStatus}
         isSignedIn={Boolean(clerkUser)}
         shiftAcceptingApplications={shiftAcceptingApplications}
@@ -381,6 +389,8 @@ export default async function ShiftDetailPage({
           companyId={shift.companyId}
           hasPublicProfile={hasPublicProfile}
           canApply={canApply}
+          profileIncomplete={profileIncomplete}
+          officer={user?.officer ?? null}
           applicationStatus={applicationStatus}
           isSignedIn={Boolean(clerkUser)}
           shiftAcceptingApplications={shiftAcceptingApplications}

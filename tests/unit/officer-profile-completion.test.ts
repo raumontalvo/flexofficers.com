@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getIncompleteProfileLabels,
   getProfileCompletionPercent,
+  isOfficerProfileComplete,
 } from "@/lib/officer-profile-completion";
 
 const completeLicense = {
@@ -40,5 +41,24 @@ describe("officer profile completion", () => {
         licenses: [completeLicense],
       })
     ).toBe(100);
+  });
+
+  it("reports profile complete only at 100%", () => {
+    const completeOfficer = {
+      phone: "555-0100",
+      armedStatuses: ["ARMED"] as const,
+      experienceCategories: ["Retail Security"],
+      experienceYears: 4,
+      licenses: [completeLicense],
+    };
+
+    expect(isOfficerProfileComplete(completeOfficer)).toBe(true);
+    expect(
+      isOfficerProfileComplete({
+        ...completeOfficer,
+        licenses: [],
+      })
+    ).toBe(false);
+    expect(isOfficerProfileComplete(null)).toBe(false);
   });
 });

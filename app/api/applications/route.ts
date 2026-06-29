@@ -7,6 +7,11 @@ import {
   ShiftStatus,
   UserRole,
 } from "@/app/generated/prisma/enums";
+import { officerProfileCompletionSelect } from "@/lib/officer-fields";
+import {
+  isOfficerProfileComplete,
+  OFFICER_PROFILE_APPLY_REQUIRED_MESSAGE,
+} from "@/lib/officer-profile-completion";
 
 export async function POST(req: Request) {
   try {
@@ -111,7 +116,18 @@ export async function POST(req: Request) {
         firstName: clerkUser.firstName ?? "Officer",
         lastName: clerkUser.lastName ?? "User",
       },
+      select: {
+        id: true,
+        ...officerProfileCompletionSelect,
+      },
     });
+
+    if (!isOfficerProfileComplete(officer)) {
+      return NextResponse.json(
+        { error: OFFICER_PROFILE_APPLY_REQUIRED_MESSAGE },
+        { status: 400 }
+      );
+    }
 
     const existingApplication = await prisma.application.findUnique({
       where: {
