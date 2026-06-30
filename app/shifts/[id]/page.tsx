@@ -4,6 +4,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import {
   ApplicationStatus,
   ShiftStatus,
+  ShiftVisibility,
   UserRole,
 } from "@/app/generated/prisma/enums";
 import { ShiftDetailActions } from "@/components/shifts/shift-detail-actions";
@@ -38,6 +39,7 @@ import { officerProfileCompletionSelect } from "@/lib/officer-fields";
 import { applicationIdOnlySelect, applicationIdStatusSelect } from "@/lib/application-fields";
 import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
 import { isAcceptedShiftPastOrClosed } from "@/lib/officer-application-delete";
+import { buildShiftJobPostingJsonLd } from "@/lib/shift-job-posting-json-ld";
 import { ShiftDetailMobile } from "./ShiftDetailMobile";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +79,7 @@ export default async function ShiftDetailPage({
         positionsNeeded: true,
         status: true,
         visibility: true,
+        createdAt: true,
         applications: {
           where: {
             status: ApplicationStatus.ACCEPTED,
@@ -177,9 +180,32 @@ export default async function ShiftDetailPage({
     sanitizeDisplayValue(shift.company.user.email);
   const companyContactPhone = formatDisplayPhone(shift.company.phone);
   const companyContactName = sanitizeDisplayValue(shift.company.contactName);
+  const jobPostingJsonLd =
+    shift.visibility === ShiftVisibility.PUBLIC
+      ? buildShiftJobPostingJsonLd({
+          title: shift.title,
+          description: shift.description,
+          createdAt: shift.createdAt,
+          startTime: shift.startTime,
+          hourlyRate: shift.hourlyRate,
+          companyName: shift.company.companyName,
+          city: shift.city,
+          state: shift.state,
+          companyCity: shift.company.city,
+          companyState: shift.company.state,
+        })
+      : null;
 
   return (
     <PageShell nav="officer" maxWidth="lg" sidebar contentClassName="!pt-2 md:!py-3">
+      {jobPostingJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jobPostingJsonLd),
+          }}
+        />
+      ) : null}
       <ShiftDetailMobile
         shift={{
           id: shift.id,
