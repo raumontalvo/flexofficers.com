@@ -152,7 +152,7 @@ export function PostShiftSummaryPanel({
           </p>
         </div>
 
-        <div className="mt-4 space-y-2">
+        <div className="mt-4">
           <Button
             type="button"
             fullWidth
@@ -160,17 +160,7 @@ export function PostShiftSummaryPanel({
             disabled={isSubmitting}
             onClick={onSubmit}
           >
-            {isSubmitting ? "Posting..." : "Review & Post Shift"}
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            fullWidth
-            className="w-full"
-            disabled
-            title="Draft saving is not supported yet"
-          >
-            Save as Draft
+            {isSubmitting ? "Posting..." : "Post Shift"}
           </Button>
         </div>
 
