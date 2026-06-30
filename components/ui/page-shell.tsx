@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import {
-  FlexOfficersBadgeLink,
   FlexOfficersLogoLink,
 } from "@/components/brand";
 import { OfficerSidebar } from "@/components/dashboard/officer-sidebar";
@@ -79,11 +78,15 @@ export function PageShell({
       {showBrand ? (
         <header className="border-b border-white/[0.04] px-4 py-4 sm:px-6">
           <div className={cn("mx-auto w-full", maxWidthClasses[maxWidth])}>
-            <FlexOfficersBadgeLink href="/" height={40} className="md:hidden" />
             <FlexOfficersLogoLink
               href="/"
               height={40}
               className="hidden md:inline-flex"
+            />
+            <FlexOfficersLogoLink
+              href="/"
+              height={56}
+              className="inline-flex md:hidden"
             />
           </div>
         </header>
