@@ -472,54 +472,10 @@ html {
   }
 }
 
-.fo-shift-form {
-  overflow-x: hidden;
-}
-
-.fo-shift-form .fo-shift-field {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.fo-shift-form input,
-.fo-shift-form select,
-.fo-shift-form textarea {
-  box-sizing: border-box;
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.fo-shift-form input[type="date"]::-webkit-datetime-edit,
-.fo-shift-form input[type="time"]::-webkit-datetime-edit,
-.fo-shift-form input[type="datetime-local"]::-webkit-datetime-edit {
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.fo-shift-form input[type="date"]::-webkit-datetime-edit-fields-wrapper,
-.fo-shift-form input[type="time"]::-webkit-datetime-edit-fields-wrapper,
-.fo-shift-form input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
-  min-width: 0;
-  max-width: 100%;
-}
-
-.fo-shift-form input[type="date"]::-webkit-calendar-picker-indicator,
-.fo-shift-form input[type="time"]::-webkit-calendar-picker-indicator,
-.fo-shift-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
 /* Mobile dashboard utilities — desktop unchanged above md */
 @media (max-width: 767px) {
   .fo-mobile-nav-scroll-padding {
-    padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .fo-scrollbar-hide {

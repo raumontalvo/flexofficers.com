@@ -50,7 +50,7 @@ export function PageShell({
       <div className={cn("fo-dashboard-shell min-h-screen overflow-x-hidden text-fo-text", className)}>
         <Sidebar />
 
-        <div className="relative flex min-h-screen min-w-0 flex-col overflow-x-hidden md:pl-[250px]">
+        <div className="relative flex min-h-screen min-w-0 flex-col md:pl-[250px]">
           <div className="fo-dashboard-glow pointer-events-none fixed inset-y-0 right-0 left-0 md:left-[250px]" aria-hidden="true" />
 
           <MobileDashboardHeader role={nav} />
@@ -62,7 +62,7 @@ export function PageShell({
               contentClassName
             )}
           >
-            <div className={cn("mx-auto w-full min-w-0", maxWidthClasses[maxWidth])}>
+            <div className={cn("mx-auto w-full", maxWidthClasses[maxWidth])}>
               {children}
             </div>
           </main>
@@ -98,7 +98,7 @@ export function PageShell({
           contentClassName
         )}
       >
-        <div className={cn("mx-auto w-full min-w-0", maxWidthClasses[maxWidth])}>
+        <div className={cn("mx-auto w-full", maxWidthClasses[maxWidth])}>
           {children}
         </div>
       </main>
