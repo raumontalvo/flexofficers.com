@@ -9,6 +9,7 @@ type ShiftJobPostingInput = {
   state: string | null;
   companyCity: string | null;
   companyState: string | null;
+  pageUrl?: string;
 };
 
 function toIsoString(value: Date | string) {
@@ -52,6 +53,7 @@ export function buildShiftJobPostingJsonLd(input: ShiftJobPostingInput) {
     datePosted: toIsoString(input.createdAt),
     validThrough: toIsoString(input.startTime),
     employmentType: "CONTRACTOR",
+    ...(input.pageUrl ? { url: input.pageUrl } : {}),
     hiringOrganization: {
       "@type": "Organization",
       name: input.companyName.trim() || "Security Company",

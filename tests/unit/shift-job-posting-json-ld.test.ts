@@ -72,4 +72,24 @@ describe("buildShiftJobPostingJsonLd", () => {
     expect(jsonLd.jobLocation.address.addressRegion).toBe("TX");
     expect(jsonLd.baseSalary).toBeUndefined();
   });
+
+  it("includes the public job page url when provided", () => {
+    const jsonLd = buildShiftJobPostingJsonLd({
+      title: "Night Patrol",
+      description: "Overnight security coverage.",
+      createdAt: "2026-06-01T12:00:00.000Z",
+      startTime: "2026-06-10T08:00:00.000Z",
+      hourlyRate: "32.50",
+      companyName: "Acme Security",
+      city: "Austin",
+      state: "TX",
+      companyCity: null,
+      companyState: null,
+      pageUrl: "https://flexofficers.com/jobs/night-patrol-austin-tx-abc12345",
+    });
+
+    expect(jsonLd.url).toBe(
+      "https://flexofficers.com/jobs/night-patrol-austin-tx-abc12345"
+    );
+  });
 });

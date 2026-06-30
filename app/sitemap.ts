@@ -15,6 +15,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: buildPublicShiftSitemapWhere(now),
       select: {
         id: true,
+        title: true,
+        city: true,
+        state: true,
+        location: true,
         updatedAt: true,
       },
       orderBy: {

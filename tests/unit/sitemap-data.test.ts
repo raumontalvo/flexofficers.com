@@ -105,7 +105,11 @@ describe("sitemap data", () => {
       now,
       shifts: [
         {
-          id: "shift-1",
+          id: "e186c480-2f4a-4b1d-9c3e-8a7f6d5e4c3b",
+          title: "Security Officer",
+          city: "Lehigh Acres",
+          state: "FL",
+          location: "123 Main St, Lehigh Acres, FL",
           updatedAt: new Date("2026-06-25T08:00:00.000Z"),
         },
       ],
@@ -125,7 +129,14 @@ describe("sitemap data", () => {
     });
 
     expect(entries).toContainEqual({
-      url: `${SITEMAP_BASE_URL}/shifts/shift-1`,
+      url: `${SITEMAP_BASE_URL}/shifts/e186c480-2f4a-4b1d-9c3e-8a7f6d5e4c3b`,
+      lastModified: new Date("2026-06-25T08:00:00.000Z"),
+      changeFrequency: "daily",
+      priority: 0.9,
+    });
+
+    expect(entries).toContainEqual({
+      url: `${SITEMAP_BASE_URL}/jobs/security-officer-lehigh-acres-fl-e186c480`,
       lastModified: new Date("2026-06-25T08:00:00.000Z"),
       changeFrequency: "daily",
       priority: 0.9,

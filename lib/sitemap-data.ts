@@ -10,6 +10,7 @@ import {
   companyHasPublicProfile,
   sanitizeDisplayValue,
 } from "@/lib/company-profile-page-data";
+import { buildJobPageSlug } from "@/lib/job-page-slug";
 import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
 
 export const SITEMAP_BASE_URL = "https://flexofficers.com";
@@ -87,8 +88,28 @@ export function buildFutureCitySitemapEntries(): MetadataRoute.Sitemap {
   ];
 }
 
+export type SitemapShiftRecord = {
+  id: string;
+  title: string;
+  city: string | null;
+  state: string | null;
+  location: string;
+  updatedAt: Date;
+};
+
+export function buildJobSitemapEntries(
+  shifts: SitemapShiftRecord[]
+): MetadataRoute.Sitemap {
+  return shifts.map((shift) => ({
+    url: `${SITEMAP_BASE_URL}/jobs/${buildJobPageSlug(shift)}`,
+    lastModified: shift.updatedAt,
+    changeFrequency: "daily",
+    priority: 0.9,
+  }));
+}
+
 export function buildSitemapEntries(input: {
-  shifts: { id: string; updatedAt: Date }[];
+  shifts: SitemapShiftRecord[];
   companies: SitemapCompanyRecord[];
   now?: Date;
 }): MetadataRoute.Sitemap {
@@ -100,6 +121,8 @@ export function buildSitemapEntries(input: {
     changeFrequency: "daily",
     priority: 0.9,
   }));
+
+  const jobEntries = buildJobSitemapEntries(input.shifts);
 
   const companyEntries: MetadataRoute.Sitemap = input.companies
     .filter((company) => isCompanyEligibleForSitemap(company, now))
@@ -113,6 +136,7 @@ export function buildSitemapEntries(input: {
   return [
     ...buildStaticSitemapEntries(now),
     ...shiftEntries,
+    ...jobEntries,
     ...companyEntries,
     ...buildFutureCitySitemapEntries(),
   ];
