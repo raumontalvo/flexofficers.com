@@ -6,6 +6,7 @@ import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { ApplicantMobileCard } from "@/components/company/applicant-mobile-card";
 import { ApplicationReviewPanel } from "@/components/company/application-review-panel";
 import { ApplicantsShiftSummaryPanel } from "@/components/company/applicants-shift-summary-panel";
+import { getHiddenCompanyApplicantIds } from "@/components/company/remove-company-applicant-button";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
 import { MobileSecondaryButton } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
@@ -463,6 +464,7 @@ export function CompanyApplicantsPageContent({
   const [reviewApplicationId, setReviewApplicationId] = useState<string | null>(
     null
   );
+  const [hiddenVersion, setHiddenVersion] = useState(0);
 
   const tabCounts = useMemo(
     () => getCompanyApplicantsTabCounts(applications),
@@ -478,6 +480,17 @@ export function CompanyApplicantsPageContent({
     const byShift = filterCompanyApplicantsByShift(byTab, shiftFilter);
     return searchCompanyApplicants(byShift, searchQuery);
   }, [activeTab, applications, searchQuery, shiftFilter]);
+
+  const mobileVisibleApplications = useMemo(() => {
+    const hidden = new Set(getHiddenCompanyApplicantIds());
+    return filteredApplications.filter(
+      (application) => !hidden.has(application.id)
+    );
+  }, [filteredApplications, hiddenVersion]);
+
+  function handleApplicantHidden() {
+    setHiddenVersion((version) => version + 1);
+  }
 
   const selectedApplication = useMemo(() => {
     return (
@@ -552,17 +565,18 @@ export function CompanyApplicantsPageContent({
           />
         </div>
 
-        {filteredApplications.length === 0 ? (
+        {mobileVisibleApplications.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-fo-text-muted">
             No applicants match this filter.
           </div>
         ) : (
           <div className="space-y-2.5">
-            {filteredApplications.map((application) => (
+            {mobileVisibleApplications.map((application) => (
               <ApplicantMobileCard
                 key={application.id}
                 application={application}
                 onView={() => setReviewApplicationId(application.id)}
+                onRemove={handleApplicantHidden}
               />
             ))}
           </div>

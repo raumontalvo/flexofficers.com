@@ -3,6 +3,7 @@
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { ProfileAvatar } from "@/components/ui";
 import { MobileSecondaryButton } from "@/components/ui/mobile";
+import { RemoveCompanyApplicantButton } from "@/components/company/remove-company-applicant-button";
 import { cn } from "@/lib/cn";
 import {
   formatApplicantShiftSchedule,
@@ -51,11 +52,13 @@ function OfficerAvatar({
 type ApplicantMobileCardProps = {
   application: SerializedCompanyApplicant;
   onView: () => void;
+  onRemove: () => void;
 };
 
 export function ApplicantMobileCard({
   application,
   onView,
+  onRemove,
 }: ApplicantMobileCardProps) {
   const schedule = formatApplicantShiftSchedule(
     application.shiftStartTime,
@@ -80,6 +83,11 @@ export function ApplicantMobileCard({
             <ApplicantStatusBadge status={application.status} />
           </div>
         </div>
+        <RemoveCompanyApplicantButton
+          applicationId={application.id}
+          officerName={application.officerName}
+          onRemoved={onRemove}
+        />
       </div>
 
       <div className="mt-2.5 space-y-1">
