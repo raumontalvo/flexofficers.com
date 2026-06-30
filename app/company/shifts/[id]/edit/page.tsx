@@ -54,7 +54,7 @@ export default async function EditCompanyShiftPage({
   });
 
   return (
-    <PageShell nav="company" maxWidth="full" sidebar>
+    <PageShell nav="company" maxWidth="full" sidebar contentClassName="overflow-x-hidden">
       <div className="min-w-0 space-y-5">
         <nav
           aria-label="Breadcrumb"

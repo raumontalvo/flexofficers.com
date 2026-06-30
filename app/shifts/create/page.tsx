@@ -32,7 +32,7 @@ export default async function CreateShiftPage() {
     : null;
 
   return (
-    <PageShell nav="company" maxWidth="full" sidebar>
+    <PageShell nav="company" maxWidth="full" sidebar contentClassName="overflow-x-hidden">
       <div className="min-w-0 space-y-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>

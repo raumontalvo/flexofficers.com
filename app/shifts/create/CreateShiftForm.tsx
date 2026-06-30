@@ -60,7 +60,7 @@ export default function CreateShiftForm() {
   }
 
   return (
-    <div className="grid w-full min-w-0 max-w-full gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid w-full min-w-0 max-w-full gap-5 overflow-x-hidden xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="min-w-0 w-full max-w-full">
         <PostShiftForm form={form} onChange={setForm} />
       </div>
