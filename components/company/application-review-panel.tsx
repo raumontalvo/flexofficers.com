@@ -290,7 +290,7 @@ export function ApplicationReviewPanel({
               </div>
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3.5 lg:space-y-4 lg:px-5 lg:py-4">
+            <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3.5 pb-28 lg:space-y-4 lg:px-5 lg:py-4 lg:pb-4">
               {shiftOverview ? (
                 <MobileShiftDetailsSection
                   application={application}
@@ -459,9 +459,41 @@ export function ApplicationReviewPanel({
                   </div>
                 </div>
               </section>
+
+              <div className="space-y-2 lg:hidden">
+                {isPending ? (
+                  <>
+                    <Button
+                      type="button"
+                      fullWidth
+                      className="w-full bg-fo-success hover:bg-green-500"
+                      disabled={isSubmitting}
+                      onClick={() => updateStatus("ACCEPTED")}
+                    >
+                      {isSubmitting ? "Updating..." : "Accept Applicant"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="danger"
+                      fullWidth
+                      className="w-full"
+                      disabled={isSubmitting}
+                      onClick={() => updateStatus("REJECTED")}
+                    >
+                      Reject Applicant
+                    </Button>
+                  </>
+                ) : null}
+                <MobileSecondaryButton
+                  href="/company/shifts"
+                  className="min-h-10 text-sm"
+                >
+                  Back to My Shifts
+                </MobileSecondaryButton>
+              </div>
             </div>
 
-            <div className="border-t border-white/[0.06] px-4 py-3.5 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] lg:px-5 lg:py-4">
+            <div className="hidden border-t border-white/[0.06] px-4 py-3.5 lg:block lg:px-5 lg:py-4">
               <div className="flex flex-col gap-2 sm:flex-row">
                 {isPending ? (
                   <>
@@ -490,18 +522,12 @@ export function ApplicationReviewPanel({
                   type="button"
                   variant="secondary"
                   fullWidth
-                  className="hidden w-full lg:inline-flex"
+                  className="w-full"
                   disabled={isSubmitting}
                   onClick={onClose}
                 >
                   Close
                 </Button>
-                <MobileSecondaryButton
-                  href="/company/shifts"
-                  className="min-h-10 text-sm lg:hidden"
-                >
-                  Back to My Shifts
-                </MobileSecondaryButton>
               </div>
             </div>
           </>
