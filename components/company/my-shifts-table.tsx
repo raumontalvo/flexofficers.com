@@ -30,6 +30,28 @@ const TABS: { id: CompanyShiftsPageTab; label: string }[] = [
   { id: "cancelled", label: "Cancelled" },
 ];
 
+const MOBILE_TAB_STYLES: Record<
+  CompanyShiftsPageTab,
+  { selected: string; unselected: string }
+> = {
+  all: {
+    selected: "border-blue-500/45 bg-blue-500/20 text-blue-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  open: {
+    selected: "border-green-500/45 bg-green-500/20 text-green-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  filled: {
+    selected: "border-blue-500/45 bg-blue-500/20 text-blue-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  cancelled: {
+    selected: "border-red-500/45 bg-red-500/20 text-red-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+};
+
 type MyShiftsTableProps = {
   shifts: SerializedCompanyShiftRow[];
   workforceByShiftId: Record<string, SerializedShiftWorkforce>;
@@ -233,32 +255,32 @@ export function MyShiftsTable({
     <>
       <section className="mt-4 space-y-4 pb-24 md:hidden">
         <div className="fo-glass-card space-y-3 rounded-2xl border border-white/10 p-3.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)]">
-          <div className="overflow-x-auto">
-            <div className="flex min-w-max flex-nowrap gap-2">
+          <div className="grid w-full min-w-0 grid-cols-4 gap-1.5">
               {TABS.map((tab) => {
                 const count = tabCounts[tab.id];
+                const isActive = activeTab === tab.id;
+                const styles = MOBILE_TAB_STYLES[tab.id];
 
                 return (
                   <button
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id)}
+                    aria-label={tab.label}
+                    aria-pressed={isActive}
                     className={cn(
-                      "rounded-full px-3 py-1.5 text-xs font-semibold transition",
-                      activeTab === tab.id
-                        ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                        : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                      "min-w-0 rounded-full border px-0.5 py-1.5 text-center text-[9px] font-semibold leading-tight transition sm:text-[10px]",
+                      isActive ? styles.selected : styles.unselected
                     )}
                   >
-                    {tab.label}
+                    <span className="block whitespace-normal">{tab.label}</span>
                     {count > 0 ? (
-                      <span className="ml-1.5 text-[11px] opacity-80">({count})</span>
+                      <span className="mt-0.5 block text-[9px] opacity-80">({count})</span>
                     ) : null}
                   </button>
                 );
               })}
             </div>
-          </div>
 
           <label className="relative block">
             <span className="sr-only">Search shifts</span>
