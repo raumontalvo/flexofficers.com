@@ -44,7 +44,7 @@ export default async function OnboardingPage({
   }
 
   return (
-    <PageShell maxWidth="lg">
+    <PageShell maxWidth="lg" contentClassName="!pt-4 sm:!pt-5">
       <OnboardingRoleChoice initialRole={selectedRole} />
     </PageShell>
   );

@@ -13,6 +13,7 @@ import {
   CardTitle,
   SectionHeading,
 } from "@/components/ui";
+import { cn } from "@/lib/cn";
 
 type Role = "OFFICER" | "COMPANY";
 
@@ -22,13 +23,18 @@ type OnboardingRoleChoiceProps = {
 
 const PENDING_ROLE_KEY = "flexofficers.pendingRole";
 
+const roleCardClassName = cn(
+  "flex h-full flex-col border-slate-700/80 bg-gradient-to-b from-[#0c1424] via-fo-bg-elevated to-[#070d18]",
+  "!p-8 sm:!p-9 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-colors md:hover:border-fo-primary-bright/60"
+);
+
 function isValidRole(value: string | null): value is Role {
   return value === "OFFICER" || value === "COMPANY";
 }
 
 function RoleCardIcon({ children }: { children: ReactNode }) {
   return (
-    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-fo-primary-bright/50 bg-fo-primary/10 text-fo-primary-bright shadow-[0_0_24px_rgba(59,130,246,0.12)]">
+    <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-fo-primary-bright/50 bg-fo-primary/10 text-fo-primary-bright shadow-[0_0_28px_rgba(59,130,246,0.15)]">
       {children}
     </div>
   );
@@ -118,7 +124,7 @@ export default function OnboardingRoleChoice({
 
   return (
     <>
-      <div className="mb-6 flex justify-center">
+      <div className="mb-4 flex justify-center">
         <FlexOfficersLogoLink
           href="/"
           height={120}
@@ -131,18 +137,19 @@ export default function OnboardingRoleChoice({
         title="Welcome to FlexOfficers"
         subtitle="Choose how you want to use the platform."
         align="center"
+        className="!flex-col !items-center !justify-center !text-center sm:!items-center sm:!text-center [&>div]:mx-auto [&>div]:text-center [&>div>p]:mx-auto"
       />
 
       {error ? (
-        <Card className="mt-6 border-red-500/20 bg-fo-rejected-bg">
+        <Card className="mt-5 border-red-500/20 bg-fo-rejected-bg">
           <p className="text-sm text-fo-rejected">{error}</p>
         </Card>
       ) : null}
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <Card variant="elevated" className="flex h-full flex-col !p-7 sm:!p-8">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <Card variant="elevated" className={roleCardClassName}>
           <RoleCardIcon>
-            <ProfileIcon className="h-6 w-6" />
+            <ProfileIcon className="h-7 w-7" />
           </RoleCardIcon>
           <CardTitle className="text-xl sm:text-2xl">Security Officer</CardTitle>
           <CardDescription className="mt-2">
@@ -165,7 +172,7 @@ export default function OnboardingRoleChoice({
           <Button
             type="button"
             fullWidth
-            className="mt-8 w-full gap-2"
+            className="mt-auto w-full gap-2 pt-8"
             disabled={savingRole !== null}
             onClick={() => chooseRole("OFFICER")}
           >
@@ -174,9 +181,9 @@ export default function OnboardingRoleChoice({
           </Button>
         </Card>
 
-        <Card variant="elevated" className="flex h-full flex-col !p-7 sm:!p-8">
+        <Card variant="elevated" className={roleCardClassName}>
           <RoleCardIcon>
-            <CompaniesIcon className="h-6 w-6" />
+            <CompaniesIcon className="h-7 w-7" />
           </RoleCardIcon>
           <CardTitle className="text-xl sm:text-2xl">Security Company</CardTitle>
           <CardDescription className="mt-2">
@@ -199,7 +206,7 @@ export default function OnboardingRoleChoice({
           <Button
             type="button"
             fullWidth
-            className="mt-8 w-full gap-2"
+            className="mt-auto w-full gap-2 pt-8"
             disabled={savingRole !== null}
             onClick={() => chooseRole("COMPANY")}
           >
@@ -209,10 +216,10 @@ export default function OnboardingRoleChoice({
         </Card>
       </div>
 
-      <Card variant="muted" className="mt-6">
-        <div className="flex items-start gap-3">
-          <IconShield className="mt-0.5 h-5 w-5 shrink-0 text-fo-primary-bright" />
-          <p className="text-sm leading-relaxed text-fo-text-muted">
+      <Card variant="muted" className="mt-6 !p-5 sm:!p-6">
+        <div className="flex items-start gap-4">
+          <IconShield className="mt-0.5 h-7 w-7 shrink-0 text-fo-primary-bright" />
+          <p className="text-sm leading-relaxed text-fo-text sm:text-base">
             Companies are responsible for verifying licenses, credentials, hiring
             requirements, and paying officers directly for completed work.
           </p>
