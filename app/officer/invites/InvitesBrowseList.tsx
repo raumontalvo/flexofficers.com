@@ -24,6 +24,28 @@ const tabColorClasses: Record<InviteTab, string> = {
   declined: "text-fo-rejected hover:text-red-300",
 };
 
+const MOBILE_INVITE_TAB_STYLES: Record<
+  InviteTab,
+  { selected: string; unselected: string }
+> = {
+  all: {
+    selected: "border-blue-500/45 bg-blue-500/20 text-blue-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  pending: {
+    selected: "border-amber-500/45 bg-amber-500/20 text-amber-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  accepted: {
+    selected: "border-green-500/45 bg-green-500/20 text-green-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  declined: {
+    selected: "border-red-500/45 bg-red-500/20 text-red-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+};
+
 type InvitesBrowseListProps = {
   invites: OfficerInviteData[];
   inviteNotifications: OfficerNotificationData[];
@@ -64,7 +86,32 @@ export function InvitesBrowseList({
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-2 border-b border-white/[0.06] pb-3">
+          <div className="grid grid-cols-2 gap-2 border-b border-white/[0.06] pb-3 sm:grid-cols-4 lg:hidden">
+            {INVITE_TABS.map((item) => {
+              const isActive = tab === item.value;
+              const styles = MOBILE_INVITE_TAB_STYLES[item.value];
+
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  onClick={() => setTab(item.value)}
+                  aria-pressed={isActive}
+                  className={cn(
+                    "min-w-0 rounded-full border px-2 py-2 text-center text-[11px] font-semibold leading-tight transition sm:px-2.5 sm:text-xs",
+                    isActive ? styles.selected : styles.unselected
+                  )}
+                >
+                  <span className="block whitespace-normal">{item.label}</span>
+                  <span className="mt-0.5 block text-[10px] opacity-80">
+                    ({tabCounts[item.value]})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="hidden flex-wrap gap-2 border-b border-white/[0.06] pb-3 lg:flex">
             {INVITE_TABS.map((item) => (
               <button
                 key={item.value}
