@@ -64,9 +64,9 @@ export function LandingNavbar() {
   }, [open, closeMenu]);
 
   return (
-    <header className="landing-header sticky top-0 z-50 border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-4 lg:px-8 lg:py-5">
-        <div className="flex shrink-0 max-w-[130px] items-center sm:max-w-none">
+    <header className="landing-header sticky top-0 z-50 overflow-x-hidden border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
+      <nav className="mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 overflow-x-hidden px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-4 lg:px-8 lg:py-5">
+        <div className="flex min-w-0 shrink-0 max-w-[130px] items-center sm:max-w-none">
           <FlexOfficersLogoLink
             href="/"
             height={320}
@@ -88,7 +88,7 @@ export function LandingNavbar() {
           ))}
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
+        <div className="flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
           <Link
             href="/onboarding?force=1"
             className={buttonClassName({
@@ -105,17 +105,7 @@ export function LandingNavbar() {
               variant: "secondary",
               size: "md",
               className:
-                "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:hidden",
-            })}
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/sign-in"
-            className={buttonClassName({
-              variant: "ghost",
-              size: "md",
-              className: "hidden shrink-0 whitespace-nowrap lg:inline-flex",
+                "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:border-transparent lg:bg-transparent lg:font-semibold lg:text-fo-text-muted lg:hover:bg-fo-surface lg:hover:text-fo-text",
             })}
           >
             Sign In
