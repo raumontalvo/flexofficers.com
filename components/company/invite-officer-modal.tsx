@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { buttonClassName, StatusToast } from "@/components/ui";
+import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
   getInviteableShiftIdsForOfficer,
   getInviteStateForShift,
   type CompanyOfficerInviteRecord,
+  type CompanyOfficerShiftAssignment,
 } from "@/lib/company-invite-workflow";
 import type { CompanyOpenShiftOption } from "@/components/company/invite-officer-to-shift";
 
@@ -15,6 +16,7 @@ type InviteOfficerModalProps = {
   officerName: string;
   openShifts: CompanyOpenShiftOption[];
   invites: CompanyOfficerInviteRecord[];
+  acceptedAssignments?: CompanyOfficerShiftAssignment[];
   onClose: () => void;
   onInviteSent: (invite: CompanyOfficerInviteRecord) => void;
 };
@@ -66,6 +68,7 @@ export function InviteOfficerModal({
   officerName,
   openShifts,
   invites,
+  acceptedAssignments = [],
   onClose,
   onInviteSent,
 }: InviteOfficerModalProps) {
@@ -74,10 +77,6 @@ export function InviteOfficerModal({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sentInvite, setSentInvite] = useState<CompanyOfficerInviteRecord | null>(
-    null
-  );
-  const [showSentToast, setShowSentToast] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !officerId) {
@@ -88,15 +87,14 @@ export function InviteOfficerModal({
     const inviteableShiftIds = getInviteableShiftIdsForOfficer(
       officerId,
       openShiftIds,
-      invites
+      invites,
+      acceptedAssignments
     );
 
     setShiftId(inviteableShiftIds[0] ?? openShifts[0]?.id ?? "");
     setMessage("");
     setError(null);
-    setSentInvite(null);
-    setShowSentToast(false);
-  }, [isOpen, officerId, openShifts, invites]);
+  }, [acceptedAssignments, isOpen, officerId, openShifts, invites]);
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -120,15 +118,16 @@ export function InviteOfficerModal({
     return null;
   }
 
-  const openShiftIds = openShifts.map((shift) => shift.id);
   const selectedShiftState =
     shiftId && officerId
-      ? getInviteStateForShift(officerId, shiftId, invites)
+      ? getInviteStateForShift(
+          officerId,
+          shiftId,
+          invites,
+          acceptedAssignments
+        )
       : null;
   const canSendInvite = Boolean(shiftId) && selectedShiftState?.kind === "invite";
-  const remainingInviteableShiftIds = officerId
-    ? getInviteableShiftIdsForOfficer(officerId, openShiftIds, invites)
-    : [];
 
   async function handleSendInvite() {
     if (!shiftId || !canSendInvite) {
@@ -145,9 +144,8 @@ export function InviteOfficerModal({
     });
 
     if (result.ok) {
-      setSentInvite(result.invite);
-      setShowSentToast(true);
       onInviteSent(result.invite);
+      onClose();
     } else {
       setError(result.error);
     }
@@ -157,15 +155,11 @@ export function InviteOfficerModal({
 
   return (
     <>
-      {showSentToast ? (
-        <StatusToast message="Invite sent" onClose={() => setShowSentToast(false)} />
-      ) : null}
-
       <button
         type="button"
         aria-label="Close invite officer modal"
         className="fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px]"
-        onClick={sentInvite ? undefined : onClose}
+        onClick={onClose}
       />
 
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -175,55 +169,7 @@ export function InviteOfficerModal({
           aria-labelledby="invite-officer-title"
           className="fo-glass-card w-full max-w-lg rounded-xl border border-white/10 p-5 shadow-2xl"
         >
-          {sentInvite ? (
-            <div className="text-center">
-              <h2
-                id="invite-officer-title"
-                className="text-lg font-bold text-fo-text"
-              >
-                Invite sent
-              </h2>
-              <p className="mt-2 text-sm text-fo-text-muted">
-                {officerName} will be notified about your shift invite.
-              </p>
-              <span className="mt-4 inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
-                Invite sent
-              </span>
-              <div className="mt-6 flex flex-col gap-2">
-                {remainingInviteableShiftIds.length > 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSentInvite(null);
-                      setShiftId(remainingInviteableShiftIds[0] ?? "");
-                      setMessage("");
-                      setError(null);
-                    }}
-                    className={buttonClassName({
-                      size: "md",
-                      className: "w-full",
-                    })}
-                  >
-                    Invite to Another Shift
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className={buttonClassName({
-                    variant:
-                      remainingInviteableShiftIds.length > 0
-                        ? "secondary"
-                        : "primary",
-                    size: "md",
-                    className: "w-full",
-                  })}
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          ) : openShifts.length === 0 ? (
+          {openShifts.length === 0 ? (
             <div>
               <h2
                 id="invite-officer-title"
@@ -287,14 +233,15 @@ export function InviteOfficerModal({
                       const shiftState = getInviteStateForShift(
                         officerId,
                         shift.id,
-                        invites
+                        invites,
+                        acceptedAssignments
                       );
                       const shiftBlocked = shiftState.kind !== "invite";
                       const statusSuffix =
                         shiftState.kind === "pending"
                           ? " · Invite sent"
                           : shiftState.kind === "accepted"
-                            ? " · Accepted"
+                            ? ` · ${shiftState.label}`
                             : "";
 
                       return (
@@ -337,8 +284,9 @@ export function InviteOfficerModal({
 
                 {selectedShiftState?.kind === "accepted" ? (
                   <p className="text-xs text-emerald-200">
-                    This officer already accepted an invite for the selected
-                    shift.
+                    {selectedShiftState.label === "Assigned to Shift"
+                      ? "This officer is already assigned to the selected shift."
+                      : "This officer already accepted an invite for the selected shift."}
                   </p>
                 ) : null}
 

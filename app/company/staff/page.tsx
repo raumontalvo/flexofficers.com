@@ -1,4 +1,4 @@
-import { UserRole } from "@/app/generated/prisma/enums";
+import { UserRole, ApplicationStatus } from "@/app/generated/prisma/enums";
 import { PageShell, SectionHeading } from "@/components/ui";
 import {
   companyStaffMemberSelect,
@@ -29,7 +29,8 @@ export default async function CompanyStaffPage() {
     return null;
   }
 
-  const [staffMembers, openShifts, invites] = await Promise.all([
+  const [staffMembers, openShifts, invites, acceptedAssignments] =
+    await Promise.all([
     prisma.companyStaff.findMany({
       where: {
         companyId: company.id,
@@ -71,6 +72,21 @@ export default async function CompanyStaffPage() {
         status: true,
       },
     }),
+    prisma.application.findMany({
+      where: {
+        status: ApplicationStatus.ACCEPTED,
+        shift: {
+          companyId: company.id,
+          status: {
+            in: INVITEABLE_SHIFT_STATUSES,
+          },
+        },
+      },
+      select: {
+        officerId: true,
+        shiftId: true,
+      },
+    }),
   ]);
 
   const serializedStaff = staffMembers.map(serializeCompanyStaffMember);
@@ -94,6 +110,7 @@ export default async function CompanyStaffPage() {
         staff={serializedStaff}
         openShifts={serializedOpenShifts}
         invites={invites}
+        acceptedAssignments={acceptedAssignments}
       />
     </PageShell>
   );

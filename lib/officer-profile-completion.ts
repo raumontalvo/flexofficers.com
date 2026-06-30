@@ -1,4 +1,5 @@
 import type { ArmedStatus } from "@/app/generated/prisma/enums";
+import type { Prisma } from "@/app/generated/prisma/client";
 import type { OfficerLicenseSnapshot } from "@/lib/officer-licenses";
 import { hasAtLeastOneLicense } from "@/lib/officer-licenses";
 
@@ -76,4 +77,17 @@ export const OFFICER_PROFILE_APPLY_REQUIRED_MESSAGE =
 
 export function isOfficerProfileComplete(officer: OfficerProfileSnapshot): boolean {
   return getProfileCompletionPercent(officer) === 100;
+}
+
+export function buildOfficerProfileCompleteWhere(): Prisma.OfficerWhereInput {
+  return {
+    AND: [
+      { phone: { not: null } },
+      { NOT: { phone: "" } },
+      { armedStatuses: { isEmpty: false } },
+      { experienceCategories: { isEmpty: false } },
+      { experienceYears: { not: null } },
+      { licenses: { some: {} } },
+    ],
+  };
 }

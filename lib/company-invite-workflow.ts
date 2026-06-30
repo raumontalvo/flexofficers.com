@@ -7,16 +7,37 @@ export type CompanyOfficerInviteRecord = {
   status: InviteStatus;
 };
 
+export type CompanyOfficerShiftAssignment = {
+  officerId: string;
+  shiftId: string;
+};
+
 export type OfficerInviteButtonState =
   | { kind: "invite" }
   | { kind: "pending"; label: "Invitation Sent" }
-  | { kind: "accepted"; label: "Invite Accepted" };
+  | { kind: "accepted"; label: "Invite Accepted" | "Assigned to Shift" };
+
+function isOfficerAssignedToShift(
+  officerId: string,
+  shiftId: string,
+  acceptedAssignments: readonly CompanyOfficerShiftAssignment[]
+) {
+  return acceptedAssignments.some(
+    (assignment) =>
+      assignment.officerId === officerId && assignment.shiftId === shiftId
+  );
+}
 
 export function getInviteStateForShift(
   officerId: string,
   shiftId: string,
-  invites: readonly CompanyOfficerInviteRecord[]
+  invites: readonly CompanyOfficerInviteRecord[],
+  acceptedAssignments: readonly CompanyOfficerShiftAssignment[] = []
 ): OfficerInviteButtonState {
+  if (isOfficerAssignedToShift(officerId, shiftId, acceptedAssignments)) {
+    return { kind: "accepted", label: "Assigned to Shift" };
+  }
+
   const invite = invites.find(
     (entry) => entry.officerId === officerId && entry.shiftId === shiftId
   );
@@ -35,25 +56,37 @@ export function getInviteStateForShift(
 export function getInviteableShiftIdsForOfficer(
   officerId: string,
   openShiftIds: readonly string[],
-  invites: readonly CompanyOfficerInviteRecord[]
+  invites: readonly CompanyOfficerInviteRecord[],
+  acceptedAssignments: readonly CompanyOfficerShiftAssignment[] = []
 ) {
   return openShiftIds.filter(
     (shiftId) =>
-      getInviteStateForShift(officerId, shiftId, invites).kind === "invite"
+      getInviteStateForShift(
+        officerId,
+        shiftId,
+        invites,
+        acceptedAssignments
+      ).kind === "invite"
   );
 }
 
 export function getOfficerInviteButtonState(
   officerId: string,
   invites: readonly CompanyOfficerInviteRecord[],
-  openShiftIds: readonly string[] = []
+  openShiftIds: readonly string[] = [],
+  acceptedAssignments: readonly CompanyOfficerShiftAssignment[] = []
 ): OfficerInviteButtonState {
   if (openShiftIds.length === 0) {
     return { kind: "invite" };
   }
 
   if (
-    getInviteableShiftIdsForOfficer(officerId, openShiftIds, invites).length > 0
+    getInviteableShiftIdsForOfficer(
+      officerId,
+      openShiftIds,
+      invites,
+      acceptedAssignments
+    ).length > 0
   ) {
     return { kind: "invite" };
   }
@@ -67,20 +100,33 @@ export function getOfficerInviteButtonState(
     return { kind: "pending", label: "Invitation Sent" };
   }
 
+  if (
+    openShiftIds.some((shiftId) =>
+      isOfficerAssignedToShift(officerId, shiftId, acceptedAssignments)
+    )
+  ) {
+    return { kind: "accepted", label: "Assigned to Shift" };
+  }
+
   if (officerShiftInvites.some((invite) => invite.status === "ACCEPTED")) {
     return { kind: "accepted", label: "Invite Accepted" };
   }
 
   return { kind: "invite" };
 }
-
 export function hasPendingInviteForShift(
   officerId: string,
   shiftId: string,
-  invites: readonly CompanyOfficerInviteRecord[]
+  invites: readonly CompanyOfficerInviteRecord[],
+  acceptedAssignments: readonly CompanyOfficerShiftAssignment[] = []
 ) {
   return (
-    getInviteStateForShift(officerId, shiftId, invites).kind === "pending"
+    getInviteStateForShift(
+      officerId,
+      shiftId,
+      invites,
+      acceptedAssignments
+    ).kind === "pending"
   );
 }
 
@@ -97,6 +143,25 @@ export function buildOfficerInviteNotificationMessage(input: {
   }
 
   return `${base}\n\n${trimmedMessage}`;
+}
+
+export function buildOfficerInviteNotificationPayload(input: {
+  companyName: string;
+  shiftTitle: string;
+  message?: string | null;
+}) {
+  const message = buildOfficerInviteNotificationMessage(input);
+  const emailMessage = `${input.companyName} has sent you an invite to apply for ${input.shiftTitle}. Sign in to FlexOfficers to review the invite and respond.`;
+  const trimmedMessage = input.message?.trim();
+
+  return {
+    title: "Company Invite to Apply",
+    message,
+    emailSubject: `${input.companyName} sent you an invite to apply`,
+    emailMessage: trimmedMessage
+      ? `${emailMessage}\n\nMessage from the company:\n${trimmedMessage}`
+      : emailMessage,
+  };
 }
 
 export function buildCompanyInviteResponseNotification(input: {

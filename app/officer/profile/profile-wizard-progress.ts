@@ -115,7 +115,12 @@ export function validateWizardStep(
       }
       return null;
     case "licenses": {
-      if (form.licenses.some((license) => !license.licenseType.trim())) {
+      if (
+        form.licenses.some(
+          (license) =>
+            !license.licenseType.trim() || license.licenseType === "Other"
+        )
+      ) {
         return LICENSE_TYPE_REQUIRED_ERROR;
       }
       for (const license of form.licenses) {

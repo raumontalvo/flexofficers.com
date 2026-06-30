@@ -23,7 +23,7 @@ export const NOTIFICATION_EMAIL_SUBJECTS: Record<NotificationEmailType, string> 
   application_accepted: "Application accepted",
   application_rejected: "Application rejected",
   application_withdrawn: "Application withdrawn",
-  new_company_invite: "New company invite",
+  new_company_invite: "Company invite to apply",
   invite_accepted: "Invite accepted",
   invite_declined: "Invite declined",
   shift_update: "Shift update",
@@ -56,6 +56,7 @@ export type CreateNotificationWithEmailInput = {
   linkUrl?: string;
   emailSubject?: string;
   emailMessage?: string;
+  recipientEmail?: string;
 };
 
 type SendNotificationEmailFn = typeof sendNotificationEmail;
@@ -91,6 +92,11 @@ function getAppBaseUrl() {
     process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
     "https://flexofficers.com"
   );
+}
+
+function normalizeEmail(email: string | null | undefined) {
+  const trimmed = email?.trim();
+  return trimmed || null;
 }
 
 export function getNotificationEmailSubject(type: NotificationEmailType) {
@@ -139,7 +145,8 @@ async function deliverNotificationEmail(
       },
     });
 
-    const recipientEmail = user?.email?.trim() || null;
+    const recipientEmail =
+      normalizeEmail(input.recipientEmail) ?? normalizeEmail(user?.email);
     const emailNotificationsEnabled = user?.emailNotificationsEnabled !== false;
 
     if (!recipientEmail) {

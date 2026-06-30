@@ -6,6 +6,7 @@ import {
   parseOfficerSearchFilters,
   resolveOfficerStateQuery,
 } from "@/lib/officer-search";
+import { buildOfficerProfileCompleteWhere } from "@/lib/officer-profile-completion";
 
 describe("parseOfficerSearchFilters", () => {
   it("parses valid filter values", () => {
@@ -85,6 +86,12 @@ describe("resolveOfficerStateQuery", () => {
 });
 
 describe("buildOfficerSearchWhere", () => {
+  it("requires a completed officer profile", () => {
+    expect(buildOfficerSearchWhere({})).toEqual({
+      AND: [buildOfficerProfileCompleteWhere(), {}],
+    });
+  });
+
   it("builds a Prisma where clause for officer search", () => {
     const where = buildOfficerSearchWhere({
       city: "Austin",
@@ -96,25 +103,30 @@ describe("buildOfficerSearchWhere", () => {
     });
 
     expect(where).toEqual({
-      city: {
-        contains: "Austin",
-        mode: "insensitive",
-      },
-      armedStatuses: {
-        has: ArmedStatus.UNARMED,
-      },
-      experienceYears: {
-        gte: 2,
-      },
-      certifications: {
-        has: "Taser",
-      },
-      availability: {
-        has: "Weekends",
-      },
-      experienceCategories: {
-        hasSome: expect.arrayContaining(["Retail Security", "Retail security"]),
-      },
+      AND: [
+        buildOfficerProfileCompleteWhere(),
+        {
+          city: {
+            contains: "Austin",
+            mode: "insensitive",
+          },
+          armedStatuses: {
+            has: ArmedStatus.UNARMED,
+          },
+          experienceYears: {
+            gte: 2,
+          },
+          certifications: {
+            has: "Taser",
+          },
+          availability: {
+            has: "Weekends",
+          },
+          experienceCategories: {
+            hasSome: expect.arrayContaining(["Retail Security", "Retail security"]),
+          },
+        },
+      ],
     });
   });
 
@@ -126,22 +138,30 @@ describe("buildOfficerSearchWhere", () => {
       licenseTypes: ["Armed Security"],
     });
 
-    expect(where).toMatchObject({
-      OR: [
-        { firstName: { contains: "Raul", mode: "insensitive" } },
-        { lastName: { contains: "Raul", mode: "insensitive" } },
-      ],
-      state: {
-        equals: "FL",
-        mode: "insensitive",
-      },
-      licenses: {
-        some: {
-          licenseType: {
-            in: ["Armed Security"],
+    expect(where).toEqual({
+      AND: [
+        buildOfficerProfileCompleteWhere(),
+        {
+          OR: [
+            { firstName: { contains: "Raul", mode: "insensitive" } },
+            { lastName: { contains: "Raul", mode: "insensitive" } },
+          ],
+          state: {
+            equals: "FL",
+            mode: "insensitive",
+          },
+          licenses: {
+            some: {
+              licenseType: {
+                in: ["Armed Security"],
+              },
+            },
+          },
+          experienceCategories: {
+            hasSome: expect.arrayContaining(["Military"]),
           },
         },
-      },
+      ],
     });
   });
 
@@ -163,20 +183,30 @@ describe("buildOfficerSearchWhere", () => {
         firstName: "Maria",
         lastName: "Santos",
       })
-    ).toMatchObject({
+    ).toEqual({
       AND: [
-        { firstName: { contains: "Maria", mode: "insensitive" } },
-        { lastName: { contains: "Santos", mode: "insensitive" } },
+        buildOfficerProfileCompleteWhere(),
+        {
+          AND: [
+            { firstName: { contains: "Maria", mode: "insensitive" } },
+            { lastName: { contains: "Santos", mode: "insensitive" } },
+          ],
+        },
       ],
     });
   });
 
   it("matches quick search across name and city", () => {
-    expect(buildOfficerSearchWhere({ search: "Miami" })).toMatchObject({
-      OR: [
-        { firstName: { contains: "Miami", mode: "insensitive" } },
-        { lastName: { contains: "Miami", mode: "insensitive" } },
-        { city: { contains: "Miami", mode: "insensitive" } },
+    expect(buildOfficerSearchWhere({ search: "Miami" })).toEqual({
+      AND: [
+        buildOfficerProfileCompleteWhere(),
+        {
+          OR: [
+            { firstName: { contains: "Miami", mode: "insensitive" } },
+            { lastName: { contains: "Miami", mode: "insensitive" } },
+            { city: { contains: "Miami", mode: "insensitive" } },
+          ],
+        },
       ],
     });
   });

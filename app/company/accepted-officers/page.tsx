@@ -1,7 +1,7 @@
 import { ApplicationStatus, UserRole } from "@/app/generated/prisma/enums";
 import { PageShell } from "@/components/ui";
 import { buildShiftWorkforceGroups } from "@/lib/company-workforce-data";
-import { companyAcceptedOfficerSelect } from "@/lib/officer-fields";
+import { companyWorkforceApplicationSelect } from "@/lib/application-fields";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 import { CompanyWorkforceBrowseList } from "./CompanyWorkforceBrowseList";
@@ -22,12 +22,7 @@ export default async function CompanyAcceptedOfficersPage() {
         },
       },
     },
-    include: {
-      shift: true,
-      officer: {
-        select: companyAcceptedOfficerSelect,
-      },
-    },
+    select: companyWorkforceApplicationSelect,
     orderBy: {
       shift: {
         startTime: "asc",

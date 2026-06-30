@@ -3,6 +3,8 @@ import type {
   ShiftStatus,
   ShiftTimeType,
 } from "@/app/generated/prisma/enums";
+import type { Prisma } from "@/app/generated/prisma/client";
+import { officerApplicationListSelect } from "@/lib/application-fields";
 
 export type OfficerApplicationData = {
   id: string;
@@ -25,6 +27,36 @@ export type OfficerApplicationData = {
     status: ShiftStatus;
   };
 };
+
+export type OfficerApplicationRecord = Prisma.ApplicationGetPayload<{
+  select: typeof officerApplicationListSelect;
+}>;
+
+export function mapOfficerApplication(
+  application: OfficerApplicationRecord
+): OfficerApplicationData {
+  return {
+    id: application.id,
+    status: application.status,
+    appliedAt: application.appliedAt.toISOString(),
+    shift: {
+      id: application.shift.id,
+      title: application.shift.title,
+      hourlyRate: application.shift.hourlyRate.toString(),
+      companyName: application.shift.company.companyName,
+      location: application.shift.location,
+      city: application.shift.city,
+      state: application.shift.state,
+      startTime: application.shift.startTime.toISOString(),
+      endTime: application.shift.endTime.toISOString(),
+      shiftTimeType: application.shift.shiftTimeType,
+      requirements: application.shift.requirements,
+      otherRequirements: application.shift.otherRequirements,
+      specialRequirements: application.shift.specialRequirements,
+      status: application.shift.status,
+    },
+  };
+}
 
 export type ApplicationStatusFilter =
   | ""

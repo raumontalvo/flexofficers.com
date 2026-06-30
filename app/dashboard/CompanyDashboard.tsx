@@ -6,7 +6,6 @@ import { CompanyDashboardHeader } from "@/components/dashboard/company-dashboard
 import { CompanyProfileCompletionBanner } from "@/components/dashboard/company-profile-completion-banner";
 import type { CompanyProfileCompletion } from "@/lib/company-profile-completion";
 import { CompanyQuickActions } from "@/components/dashboard/company-quick-actions";
-import { CompanyRecentApplications } from "@/components/dashboard/company-recent-applications";
 import { CompanySummaryCards } from "@/components/dashboard/company-summary-cards";
 import { CompanyUpcomingShifts } from "@/components/dashboard/company-upcoming-shifts";
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
@@ -19,7 +18,6 @@ import {
   getNextUpcomingConfirmedShifts,
   getUpcomingConfirmedShifts,
 } from "@/lib/company-dashboard-data";
-import { formatArmedStatuses } from "@/lib/profile-options";
 import { prisma } from "@/lib/prisma";
 
 type CompanyDashboardProps = {
@@ -74,26 +72,8 @@ export default async function CompanyDashboard({
         },
       },
       select: {
-        id: true,
         status: true,
-        appliedAt: true,
-        shift: {
-          select: {
-            title: true,
-          },
-        },
-        officer: {
-          select: {
-            firstName: true,
-            lastName: true,
-            armedStatuses: true,
-          },
-        },
       },
-      orderBy: {
-        appliedAt: "desc",
-      },
-      take: 20,
     }),
     prisma.shiftInvite.count({
       where: {
@@ -173,22 +153,15 @@ export default async function CompanyDashboard({
         />
 
         <div className="grid gap-5 lg:grid-cols-3">
-          <CompanyApplicationsDonut
-            pendingCount={applicationsSummary.pending}
-            invitedCount={applicationsSummary.invited}
-            acceptedCount={applicationsSummary.accepted}
-          />
-          <CompanyQuickActions canPostShifts={canPostShifts} />
-          <div className="hidden lg:block">
-            <CompanyRecentApplications
-              applications={applications.slice(0, 5).map((application) => ({
-                id: application.id,
-                officerName:
-                  `${application.officer.firstName} ${application.officer.lastName}`.trim(),
-                officerType: formatArmedStatuses(application.officer.armedStatuses),
-                status: application.status,
-                shiftTitle: application.shift.title,
-              }))}
+          <div className="order-2 lg:order-none lg:col-span-2">
+            <CompanyQuickActions canPostShifts={canPostShifts} />
+          </div>
+
+          <div className="order-1 lg:order-none">
+            <CompanyApplicationsDonut
+              pendingCount={applicationsSummary.pending}
+              invitedCount={applicationsSummary.invited}
+              acceptedCount={applicationsSummary.accepted}
             />
           </div>
         </div>

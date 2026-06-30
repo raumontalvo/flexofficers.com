@@ -11,9 +11,13 @@ import {
   type CompanyShiftWorkforceGroup,
   type WorkforceShiftFilter,
 } from "@/lib/company-workforce-data";
+import { cn } from "@/lib/cn";
 
 const fieldClassName =
   "min-h-9 w-full rounded-lg border border-fo-border bg-fo-bg-elevated px-2.5 py-1.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30";
+
+const mobileFieldClassName =
+  "min-h-9 w-full rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
 type CompanyWorkforceBrowseListProps = {
   groups: CompanyShiftWorkforceGroup[];
@@ -74,51 +78,99 @@ export function CompanyWorkforceBrowseList({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
-            {mode === "accepted" ? "Accepted Officers" : "Completed Shifts"}
-          </h1>
-          <p className="max-w-2xl text-base text-fo-text-muted sm:text-lg">
-            {mode === "accepted"
-              ? "Manage officers confirmed for your upcoming shifts."
-              : "Review completed assignments and cancelled shift history."}
-          </p>
-        </div>
+    <div className="space-y-3 pb-24 lg:space-y-4 lg:pb-0">
+      <div className="lg:hidden">
+        <h1 className="text-xl font-bold tracking-tight text-fo-text">
+          {mode === "accepted" ? "Accepted Officers" : "Completed Shifts"}
+        </h1>
+        <p className="mt-1 text-sm text-fo-text-muted">
+          {mode === "accepted"
+            ? "Manage officers confirmed for your upcoming shifts."
+            : "Review completed assignments and cancelled shift history."}
+        </p>
 
-        {mode === "accepted" ? (
-          <div className="w-full space-y-1 sm:w-[200px] sm:shrink-0">
-            <label htmlFor="workforce-shift-filter" className="text-xs text-fo-text-muted">
-              Filter by shift
+        <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+          {mode === "accepted" ? (
+            <label className="block">
+              <span className="text-[11px] font-medium text-fo-text-muted">
+                Filter by shift
+              </span>
+              <select
+                id="workforce-shift-filter-mobile"
+                value={shiftFilter}
+                onChange={(e) =>
+                  setShiftFilter(e.target.value as WorkforceShiftFilter)
+                }
+                className={cn(mobileFieldClassName, "mt-1")}
+              >
+                <option value="">All Shifts</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="completed">Completed</option>
+              </select>
             </label>
-            <select
-              id="workforce-shift-filter"
-              value={shiftFilter}
-              onChange={(e) =>
-                setShiftFilter(e.target.value as WorkforceShiftFilter)
-              }
-              className={fieldClassName}
-            >
-              <option value="">All Shifts</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-        ) : null}
+          ) : null}
+
+          <label className={cn("block", mode === "accepted" ? "mt-2.5" : "")}>
+            <span className="text-[11px] font-medium text-fo-text-muted">
+              Search by officer name
+            </span>
+            <input
+              id="workforce-officer-search-mobile"
+              value={officerSearch}
+              onChange={(e) => setOfficerSearch(e.target.value)}
+              className={cn(mobileFieldClassName, "mt-1")}
+              placeholder="Officer name"
+            />
+          </label>
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="workforce-officer-search" className="text-xs text-fo-text-muted">
-          Search by officer name
-        </label>
-        <input
-          id="workforce-officer-search"
-          value={officerSearch}
-          onChange={(e) => setOfficerSearch(e.target.value)}
-          className={fieldClassName}
-          placeholder="Officer name"
-        />
+      <div className="hidden lg:flex lg:flex-col lg:gap-4">
+        <div className="flex flex-row items-start justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
+              {mode === "accepted" ? "Accepted Officers" : "Completed Shifts"}
+            </h1>
+            <p className="max-w-2xl text-base text-fo-text-muted sm:text-lg">
+              {mode === "accepted"
+                ? "Manage officers confirmed for your upcoming shifts."
+                : "Review completed assignments and cancelled shift history."}
+            </p>
+          </div>
+
+          {mode === "accepted" ? (
+            <div className="w-[200px] shrink-0 space-y-1">
+              <label htmlFor="workforce-shift-filter" className="text-xs text-fo-text-muted">
+                Filter by shift
+              </label>
+              <select
+                id="workforce-shift-filter"
+                value={shiftFilter}
+                onChange={(e) =>
+                  setShiftFilter(e.target.value as WorkforceShiftFilter)
+                }
+                className={fieldClassName}
+              >
+                <option value="">All Shifts</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="workforce-officer-search" className="text-xs text-fo-text-muted">
+            Search by officer name
+          </label>
+          <input
+            id="workforce-officer-search"
+            value={officerSearch}
+            onChange={(e) => setOfficerSearch(e.target.value)}
+            className={fieldClassName}
+            placeholder="Officer name"
+          />
+        </div>
       </div>
 
       {mode === "accepted" && !hasAnyOfficers ? (
@@ -146,7 +198,7 @@ export function CompanyWorkforceBrowseList({
       ) : null}
 
       {mode === "accepted" && filteredAcceptedGroups.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-2.5 lg:space-y-4">
           {filteredAcceptedGroups.map((group) => (
             <ShiftWorkforceGroup key={group.shift.id} group={group} showRemove />
           ))}

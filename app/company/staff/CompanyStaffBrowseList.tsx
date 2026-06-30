@@ -5,23 +5,24 @@ import { OfficerProfilePanel } from "@/components/company/officer-profile-panel"
 import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
 import { InviteOfficerModal } from "@/components/company/invite-officer-modal";
 import type { CompanyOpenShiftOption } from "@/components/company/invite-officer-to-shift";
-import { AddToStaffButton } from "@/components/company/add-to-staff-button";
 import {
   getOfficerInviteButtonState,
   type CompanyOfficerInviteRecord,
+  type CompanyOfficerShiftAssignment,
 } from "@/lib/company-invite-workflow";
-import { buttonClassName } from "@/components/ui";
+import { StatusToast } from "@/components/ui";
 import {
   searchCompanyStaff,
   type SerializedCompanyStaffMember,
 } from "@/lib/company-staff";
-import { OfficerSearchCard } from "@/app/company/officers/OfficerSearchCard";
 import { OfficerSearchMobileCard } from "@/app/company/officers/OfficerSearchMobileCard";
+import { StaffRosterCard } from "./StaffRosterCard";
 
 type CompanyStaffBrowseListProps = {
   staff: SerializedCompanyStaffMember[];
   openShifts: CompanyOpenShiftOption[];
   invites: CompanyOfficerInviteRecord[];
+  acceptedAssignments: CompanyOfficerShiftAssignment[];
 };
 
 function StaffDesktopCard({
@@ -38,55 +39,12 @@ function StaffDesktopCard({
   inviteState: ReturnType<typeof getOfficerInviteButtonState>;
 }) {
   return (
-    <OfficerSearchCard
+    <StaffRosterCard
       officer={member.officer}
-      actions={
-        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <button
-            type="button"
-            onClick={onViewProfile}
-            className={buttonClassName({
-              variant: "secondary",
-              size: "md",
-              className:
-                "min-h-10 flex-1 border-blue-500/30 px-4 text-sm text-blue-100 hover:bg-blue-500/10",
-            })}
-          >
-            View Full Profile
-          </button>
-          {inviteState.kind === "invite" ? (
-            <button
-              type="button"
-              onClick={onInvite}
-              className={buttonClassName({
-                size: "md",
-                className: "min-h-10 flex-1 px-4 text-sm",
-              })}
-            >
-              Invite to Shift
-            </button>
-          ) : (
-            <div className="flex min-h-10 flex-1 items-center justify-center rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-center">
-              <div>
-                <p className="text-sm font-semibold text-amber-100">
-                  {inviteState.label}
-                </p>
-                {inviteState.kind === "pending" ? (
-                  <p className="mt-0.5 text-xs text-amber-200/80">
-                    Pending Response
-                  </p>
-                ) : null}
-              </div>
-            </div>
-          )}
-          <AddToStaffButton
-            officerId={member.officerId}
-            isOnStaff
-            onRemoved={onRemoveFromStaff}
-            className="flex-1"
-          />
-        </div>
-      }
+      onViewProfile={onViewProfile}
+      onInvite={onInvite}
+      onRemoveFromStaff={onRemoveFromStaff}
+      inviteState={inviteState}
     />
   );
 }
@@ -95,12 +53,14 @@ export function CompanyStaffBrowseList({
   staff: initialStaff,
   openShifts,
   invites: initialInvites,
+  acceptedAssignments,
 }: CompanyStaffBrowseListProps) {
   const [staff, setStaff] = useState(initialStaff);
   const [invites, setInvites] = useState(initialInvites);
   const [profileOfficerId, setProfileOfficerId] = useState<string | null>(null);
   const [inviteOfficerId, setInviteOfficerId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showInviteSentToast, setShowInviteSentToast] = useState(false);
 
   const openShiftIds = openShifts.map((shift) => shift.id);
 
@@ -139,6 +99,12 @@ export function CompanyStaffBrowseList({
 
   return (
     <div className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
+      {showInviteSentToast ? (
+        <StatusToast
+          message="Invite sent"
+          onClose={() => setShowInviteSentToast(false)}
+        />
+      ) : null}
       <label className="block">
         <span className="sr-only">Search your staff by name</span>
         <input
@@ -174,14 +140,15 @@ export function CompanyStaffBrowseList({
             inviteState={getOfficerInviteButtonState(
               member.officerId,
               invites,
-              openShiftIds
+              openShiftIds,
+              acceptedAssignments
             )}
             inviteLabel="Invite to Shift"
           />
         ))}
       </div>
 
-      <div className="hidden space-y-4 lg:block">
+      <div className="hidden space-y-3 lg:block">
         {filteredStaff.map((member) => (
           <StaffDesktopCard
             key={member.id}
@@ -192,7 +159,8 @@ export function CompanyStaffBrowseList({
             inviteState={getOfficerInviteButtonState(
               member.officerId,
               invites,
-              openShiftIds
+              openShiftIds,
+              acceptedAssignments
             )}
           />
         ))}
@@ -227,8 +195,9 @@ export function CompanyStaffBrowseList({
         }
         openShifts={openShifts}
         invites={invites}
+        acceptedAssignments={acceptedAssignments}
         onClose={() => setInviteOfficerId(null)}
-        onInviteSent={(invite) =>
+        onInviteSent={(invite) => {
           setInvites((current) => {
             const withoutDuplicate = current.filter(
               (item) =>
@@ -239,8 +208,9 @@ export function CompanyStaffBrowseList({
             );
 
             return [...withoutDuplicate, invite];
-          })
-        }
+          });
+          setShowInviteSentToast(true);
+        }}
       />
     </div>
   );

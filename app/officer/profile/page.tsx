@@ -3,6 +3,7 @@ import { PageShell } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { officerProfilePageUserSelect } from "@/lib/officer-fields";
 import { syncOfficerProfilePhotoFromClerk } from "@/lib/clerk-photo-sync";
+import { syncUserEmailFromClerk } from "@/lib/clerk-email-sync";
 import { prisma } from "@/lib/prisma";
 import { normalizeExperienceCategories, type ArmedStatusOption } from "@/lib/profile-options";
 import OfficerProfileForm from "./OfficerProfileForm";
@@ -33,6 +34,19 @@ export default async function OfficerProfilePage() {
 
   const officer = user?.officer;
   let profilePhotoUrl = officer?.profilePhotoUrl?.trim() ?? "";
+  let profileEmail = user?.email ?? "";
+
+  if (user) {
+    profileEmail =
+      (await syncUserEmailFromClerk({
+        userId: user.id,
+        storedEmail: user.email,
+        clerkEmail: clerkUser.emailAddresses[0]?.emailAddress,
+      })) ??
+      user.email ??
+      clerkUser.emailAddresses[0]?.emailAddress ??
+      "";
+  }
 
   if (officer) {
     profilePhotoUrl =
@@ -67,7 +81,7 @@ export default async function OfficerProfilePage() {
     firstName: officer?.firstName ?? clerkUser?.firstName ?? "",
     lastName: officer?.lastName ?? clerkUser?.lastName ?? "",
     phone: officer?.phone ?? "",
-    email: user?.email ?? clerkUser.emailAddresses[0]?.emailAddress ?? "",
+    email: profileEmail,
     city: officer?.city ?? "",
     profilePhotoUrl,
     armedStatuses: (officer?.armedStatuses ?? []) as ArmedStatusOption[],

@@ -1,5 +1,6 @@
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { PageShell, SectionHeading } from "@/components/ui";
+import { applicationIdOnlySelect, officerBrowseShiftSelect } from "@/lib/application-fields";
 import { prisma } from "@/lib/prisma";
 import type { ShiftCardData } from "@/lib/shift-card-data";
 import { ShiftsBrowseList } from "./ShiftsBrowseList";
@@ -16,23 +17,20 @@ export default async function ShiftsPage() {
 
   const [shifts, user] = await Promise.all([
     prisma.shift.findMany({
-    where: buildOfficerBrowseShiftsWhere(null),
-    include: {
-      company: {
-        select: {
-          companyName: true,
+      where: buildOfficerBrowseShiftsWhere(null),
+      select: {
+        ...officerBrowseShiftSelect,
+        applications: {
+          where: {
+            status: ApplicationStatus.ACCEPTED,
+          },
+          select: applicationIdOnlySelect,
         },
       },
-      applications: {
-        where: {
-          status: ApplicationStatus.ACCEPTED,
-        },
+      orderBy: {
+        createdAt: "desc",
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  }),
+    }),
     clerkUser
       ? prisma.user.findUnique({
           where: { clerkId: clerkUser.id },

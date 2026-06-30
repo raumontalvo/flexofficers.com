@@ -91,13 +91,6 @@ export function OfficerSearchCard({ officer, actions }: OfficerSearchCardProps) 
         values={normalizeExperienceCategories(officer.experienceCategories)}
       />
 
-      {officer.backgroundCategories.length > 0 ? (
-        <TagList
-          label="Military / Law Enforcement"
-          values={[...officer.backgroundCategories]}
-        />
-      ) : null}
-
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
           Licenses

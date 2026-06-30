@@ -332,6 +332,9 @@ export function PostShiftForm({
               onChange={(certificationRequirements) =>
                 updateField("certificationRequirements", certificationRequirements)
               }
+              allowCustom
+              customLabel="Add a custom certification"
+              customPlaceholder="e.g. De-escalation Training"
             />
           </div>
         </div>

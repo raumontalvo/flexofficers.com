@@ -35,6 +35,7 @@ import {
 import { getShiftRequirementChips } from "@/lib/shift-requirements";
 import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
 import { officerProfileCompletionSelect } from "@/lib/officer-fields";
+import { applicationIdOnlySelect } from "@/lib/application-fields";
 import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
 import { ShiftDetailMobile } from "./ShiftDetailMobile";
 
@@ -54,14 +55,45 @@ export default async function ShiftDetailPage({
       where: {
         id,
       },
-      include: {
+      select: {
+        id: true,
+        companyId: true,
+        title: true,
+        description: true,
+        location: true,
+        city: true,
+        state: true,
+        hourlyRate: true,
+        startTime: true,
+        endTime: true,
+        workType: true,
+        shiftTimeType: true,
+        armedRequirement: true,
+        requirements: true,
+        otherRequirements: true,
+        specialRequirements: true,
+        reportingInstructions: true,
+        positionsNeeded: true,
+        status: true,
+        visibility: true,
         applications: {
           where: {
             status: ApplicationStatus.ACCEPTED,
           },
+          select: applicationIdOnlySelect,
         },
         company: {
-          include: {
+          select: {
+            id: true,
+            companyName: true,
+            contactName: true,
+            phone: true,
+            email: true,
+            website: true,
+            address: true,
+            city: true,
+            state: true,
+            description: true,
             user: {
               select: {
                 email: true,

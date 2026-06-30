@@ -1,18 +1,34 @@
 "use client";
 
+import { useState } from "react";
+import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
+
+const CUSTOM_ITEM_MAX_LENGTH = 80;
 
 type RequirementsMultiSelectPickerProps<T extends string> = {
   options: readonly T[];
   selected: T[];
   onChange: (next: T[]) => void;
+  allowCustom?: boolean;
+  customLabel?: string;
+  customPlaceholder?: string;
+  addButtonLabel?: string;
 };
 
 export function RequirementsMultiSelectPicker<T extends string>({
   options,
   selected,
   onChange,
+  allowCustom = false,
+  customLabel = "Add your own",
+  customPlaceholder = "Type a custom option",
+  addButtonLabel = "Add",
 }: RequirementsMultiSelectPickerProps<T>) {
+  const [customValue, setCustomValue] = useState("");
+  const optionSet = new Set<string>(options);
+  const customSelected = selected.filter((entry) => !optionSet.has(entry));
+
   function toggleOption(option: T) {
     if (selected.includes(option)) {
       onChange(selected.filter((entry) => entry !== option));
@@ -24,6 +40,22 @@ export function RequirementsMultiSelectPicker<T extends string>({
 
   function removeOption(option: T) {
     onChange(selected.filter((entry) => entry !== option));
+  }
+
+  function addCustomOption() {
+    const trimmed = customValue.trim();
+
+    if (!trimmed || trimmed.length > CUSTOM_ITEM_MAX_LENGTH) {
+      return;
+    }
+
+    if (selected.includes(trimmed as T)) {
+      setCustomValue("");
+      return;
+    }
+
+    onChange([...selected, trimmed as T]);
+    setCustomValue("");
   }
 
   return (
@@ -76,6 +108,44 @@ export function RequirementsMultiSelectPicker<T extends string>({
           })}
         </div>
       </div>
+
+      {allowCustom ? (
+        <div className="space-y-2">
+          {customSelected.length > 0 ? (
+            <p className="text-xs text-fo-text-muted">
+              {customSelected.length} custom{" "}
+              {customSelected.length === 1 ? "entry" : "entries"} selected
+            </p>
+          ) : null}
+          <p className="text-xs font-medium text-fo-text-muted">{customLabel}</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <input
+              value={customValue}
+              onChange={(event) => setCustomValue(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  addCustomOption();
+                }
+              }}
+              placeholder={customPlaceholder}
+              maxLength={CUSTOM_ITEM_MAX_LENGTH}
+              className="min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
+            />
+            <button
+              type="button"
+              onClick={addCustomOption}
+              className={buttonClassName({
+                variant: "secondary",
+                size: "md",
+                className: "shrink-0",
+              })}
+            >
+              {addButtonLabel}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

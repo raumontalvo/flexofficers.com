@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { NotificationsIcon } from "@/components/nav/icons";
-import { MobilePrimaryButton } from "@/components/ui";
+import { MobilePrimaryButton, buttonClassName } from "@/components/ui";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { cn } from "@/lib/cn";
 import { getTimeOfDayGreeting } from "@/lib/time-of-day-greeting";
@@ -75,10 +75,10 @@ export function CompanyDashboardHeader({
           </p>
         </div>
 
-        <div className="flex w-full shrink-0 flex-col gap-2 self-stretch sm:w-auto sm:flex-row sm:items-center sm:self-start">
+        <div className="flex shrink-0 items-center gap-3">
           <Link
             href="/company/notifications"
-            className="relative hidden h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-[#070f1c]/60 text-fo-text-muted transition hover:border-fo-primary-bright/35 hover:text-fo-primary-hover md:flex"
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#070f1c]/60 text-fo-text-muted transition hover:border-fo-primary-bright/35 hover:text-fo-primary-hover"
             aria-label="Notifications"
           >
             <NotificationsIcon className="h-4 w-4" />
@@ -89,12 +89,15 @@ export function CompanyDashboardHeader({
             ) : null}
           </Link>
 
-          <MobilePrimaryButton
+          <Link
             href={postShiftHref}
-            className="sm:w-auto sm:min-h-11 sm:text-sm"
+            className={buttonClassName({
+              size: "md",
+              className: "min-h-10 whitespace-nowrap px-4",
+            })}
           >
             Post a New Shift
-          </MobilePrimaryButton>
+          </Link>
         </div>
       </header>
     </>

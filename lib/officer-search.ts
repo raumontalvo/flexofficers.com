@@ -14,6 +14,7 @@ import {
   getExperienceCategoryFilterValues,
   type ExperienceCategory,
 } from "@/lib/profile-options";
+import { buildOfficerProfileCompleteWhere } from "@/lib/officer-profile-completion";
 
 export type OfficerSearchFilters = {
   search?: string;
@@ -409,5 +410,7 @@ export function buildOfficerSearchWhere(
     };
   }
 
-  return where;
+  return {
+    AND: [buildOfficerProfileCompleteWhere(), where],
+  };
 }

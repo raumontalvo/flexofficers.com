@@ -1,7 +1,8 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { ApplicationStatus, ShiftVisibility, UserRole } from "@/app/generated/prisma/enums";
-import { buildOfficerInviteNotificationMessage } from "@/lib/company-invite-workflow";
+import { buildOfficerInviteNotificationPayload } from "@/lib/company-invite-workflow";
+import { resolveOfficerNotificationEmail } from "@/lib/clerk-email-sync";
 import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -167,6 +168,12 @@ export async function POST(req: Request) {
       );
     }
 
+    const inviteNotification = buildOfficerInviteNotificationPayload({
+      companyName: shift.company.companyName,
+      shiftTitle: shift.title,
+      message: typeof message === "string" ? message.trim() || null : null,
+    });
+
     const invite = await prisma.$transaction(async (tx) => {
       const nextInvite = existingInvite
         ? await tx.shiftInvite.update({
@@ -188,20 +195,31 @@ export async function POST(req: Request) {
             },
           });
 
-      await createNotificationWithEmail(tx, {
-        userId: officer.user.id,
-        title: "New Company Invite",
-        message: buildOfficerInviteNotificationMessage({
-          companyName: shift.company.companyName,
-          shiftTitle: shift.title,
-          message: nextInvite.message,
-        }),
-        type: "new_company_invite",
-      });
-
       await syncShiftFillStatus(tx, shiftId);
 
       return nextInvite;
+    });
+
+    console.log("[invite-create]", {
+      officerUserId: officer.user.id,
+      officerUserEmail: officer.user.email,
+      shiftId,
+      shiftTitle: shift.title,
+      companyName: shift.company.companyName,
+    });
+
+    const recipientEmail = await resolveOfficerNotificationEmail({
+      userId: officer.user.id,
+      clerkId: officer.user.clerkId,
+      storedEmail: officer.user.email,
+    });
+
+    await createNotificationWithEmail(prisma, {
+      userId: officer.user.id,
+      recipientEmail: recipientEmail ?? undefined,
+      type: "new_company_invite",
+      linkUrl: "/officer/invites",
+      ...inviteNotification,
     });
 
     return NextResponse.json(invite);

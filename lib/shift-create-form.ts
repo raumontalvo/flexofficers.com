@@ -33,6 +33,8 @@ export const POST_SHIFT_CERTIFICATION_OPTIONS = [
 export type PostShiftCertificationOption =
   (typeof POST_SHIFT_CERTIFICATION_OPTIONS)[number];
 
+export type PostShiftRequirementValue = string;
+
 const CERTIFICATION_TO_REQUIREMENT_CHIP: Partial<
   Record<PostShiftCertificationOption, string>
 > = {
@@ -55,8 +57,8 @@ export type PostShiftFormValues = {
   zipCode: string;
   hourlyRate: string;
   currency: string;
-  licenseRequirements: PostShiftLicenseOption[];
-  certificationRequirements: PostShiftCertificationOption[];
+  licenseRequirements: PostShiftRequirementValue[];
+  certificationRequirements: PostShiftRequirementValue[];
   otherRequirements: string;
   positionsNeeded: number;
   visibility: ShiftPostVisibility;
@@ -157,9 +159,9 @@ export function buildShiftLocation(form: Pick<
 }
 
 export function mapLicenseRequirements(
-  licenseRequirements: readonly PostShiftLicenseOption[]
+  licenseRequirements: readonly PostShiftRequirementValue[]
 ) {
-  const selected = [...new Set(licenseRequirements)];
+  const selected = [...new Set(licenseRequirements.map((entry) => entry.trim()).filter(Boolean))];
   const requirementChips: string[] = [];
 
   for (const requirement of selected) {
@@ -191,14 +193,21 @@ export function mapLicenseRequirements(
 }
 
 export function mapCertificationRequirements(
-  certificationRequirements: readonly PostShiftCertificationOption[]
+  certificationRequirements: readonly PostShiftRequirementValue[]
 ) {
-  const selected = [...new Set(certificationRequirements)];
+  const selected = [
+    ...new Set(
+      certificationRequirements.map((entry) => entry.trim()).filter(Boolean)
+    ),
+  ];
   const requirementChips: string[] = [];
-  const unmappedLabels: PostShiftCertificationOption[] = [];
+  const unmappedLabels: string[] = [];
 
   for (const certification of selected) {
-    const chip = CERTIFICATION_TO_REQUIREMENT_CHIP[certification];
+    const chip =
+      CERTIFICATION_TO_REQUIREMENT_CHIP[
+        certification as PostShiftCertificationOption
+      ];
 
     if (chip) {
       requirementChips.push(chip);
@@ -214,7 +223,7 @@ export function mapCertificationRequirements(
 }
 
 export function buildCertificationRequirementsText(
-  unmappedLabels: readonly PostShiftCertificationOption[]
+  unmappedLabels: readonly PostShiftRequirementValue[]
 ) {
   if (unmappedLabels.length === 0) {
     return "";
@@ -224,7 +233,7 @@ export function buildCertificationRequirementsText(
 }
 
 export function buildLicenseRequirementsText(
-  licenseRequirements: readonly PostShiftLicenseOption[]
+  licenseRequirements: readonly PostShiftRequirementValue[]
 ) {
   if (licenseRequirements.length === 0) {
     return "";
@@ -469,16 +478,14 @@ export function parseLicenseRequirementsFromShift(input: {
   otherRequirements?: string | null;
   armedRequirement?: string | null;
 }) {
-  const licenses = new Set<PostShiftLicenseOption>();
+  const licenses = new Set<string>();
   const otherRequirements = input.otherRequirements ?? "";
   const licenseMatch = otherRequirements.match(/License requirements:\s*([^;]+)/);
 
   if (licenseMatch) {
     for (const label of licenseMatch[1].split(",").map((entry) => entry.trim())) {
-      if (
-        POST_SHIFT_LICENSE_OPTIONS.includes(label as PostShiftLicenseOption)
-      ) {
-        licenses.add(label as PostShiftLicenseOption);
+      if (label) {
+        licenses.add(label);
       }
     }
   }
@@ -502,7 +509,7 @@ export function parseCertificationRequirementsFromShift(input: {
   requirements: readonly string[];
   otherRequirements?: string | null;
 }) {
-  const certifications = new Set<PostShiftCertificationOption>();
+  const certifications = new Set<string>();
 
   for (const requirement of input.requirements) {
     const certification = REQUIREMENT_CHIP_TO_CERTIFICATION[requirement];
@@ -521,12 +528,8 @@ export function parseCertificationRequirementsFromShift(input: {
     for (const label of certificationMatch[1]
       .split(",")
       .map((entry) => entry.trim())) {
-      if (
-        POST_SHIFT_CERTIFICATION_OPTIONS.includes(
-          label as PostShiftCertificationOption
-        )
-      ) {
-        certifications.add(label as PostShiftCertificationOption);
+      if (label) {
+        certifications.add(label);
       }
     }
   }

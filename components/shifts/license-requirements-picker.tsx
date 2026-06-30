@@ -2,13 +2,13 @@
 
 import {
   POST_SHIFT_LICENSE_OPTIONS,
-  type PostShiftLicenseOption,
+  type PostShiftRequirementValue,
 } from "@/lib/shift-create-form";
 import { RequirementsMultiSelectPicker } from "@/components/shifts/requirements-multi-select-picker";
 
 type LicenseRequirementsPickerProps = {
-  selected: PostShiftLicenseOption[];
-  onChange: (next: PostShiftLicenseOption[]) => void;
+  selected: PostShiftRequirementValue[];
+  onChange: (next: PostShiftRequirementValue[]) => void;
 };
 
 export function LicenseRequirementsPicker({
@@ -20,6 +20,9 @@ export function LicenseRequirementsPicker({
       options={POST_SHIFT_LICENSE_OPTIONS}
       selected={selected}
       onChange={onChange}
+      allowCustom
+      customLabel="Add a custom license requirement"
+      customPlaceholder="e.g. Class D Guard Card"
     />
   );
 }

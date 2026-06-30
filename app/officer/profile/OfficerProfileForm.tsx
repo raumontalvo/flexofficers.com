@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { RequirementsMultiSelectPicker } from "@/components/shifts/requirements-multi-select-picker";
 import {
   Button,
   Card,
@@ -101,6 +102,36 @@ function toggleValue(values: string[], value: string) {
 
 function getStateName(code: string) {
   return US_STATES.find((state) => state.code === code)?.name ?? code;
+}
+
+function getLicenseTypeSelectValue(licenseType: string) {
+  if (!licenseType) {
+    return "";
+  }
+
+  if (
+    LICENSE_TYPE_OPTIONS.includes(
+      licenseType as (typeof LICENSE_TYPE_OPTIONS)[number]
+    )
+  ) {
+    return licenseType;
+  }
+
+  return "Other";
+}
+
+function getCustomLicenseTypeValue(licenseType: string) {
+  if (
+    !licenseType ||
+    licenseType === "Other" ||
+    LICENSE_TYPE_OPTIONS.includes(
+      licenseType as (typeof LICENSE_TYPE_OPTIONS)[number]
+    )
+  ) {
+    return "";
+  }
+
+  return licenseType;
 }
 
 function FieldLabel({
@@ -338,12 +369,14 @@ export default function OfficerProfileForm({
                     )}
                     <select
                       aria-label="License type"
-                      value={license.licenseType}
-                      onChange={(e) =>
+                      value={getLicenseTypeSelectValue(license.licenseType)}
+                      onChange={(e) => {
+                        const nextType = e.target.value;
+
                         updateLicense(license.clientId, {
-                          licenseType: e.target.value,
-                        })
-                      }
+                          licenseType: nextType === "Other" ? "Other" : nextType,
+                        });
+                      }}
                       className={compactFieldClassName}
                     >
                       <option value="">License type</option>
@@ -352,15 +385,20 @@ export default function OfficerProfileForm({
                           {option}
                         </option>
                       ))}
-                      {license.licenseType &&
-                      !LICENSE_TYPE_OPTIONS.includes(
-                        license.licenseType as (typeof LICENSE_TYPE_OPTIONS)[number]
-                      ) ? (
-                        <option value={license.licenseType}>
-                          {license.licenseType}
-                        </option>
-                      ) : null}
                     </select>
+                    {getLicenseTypeSelectValue(license.licenseType) === "Other" ? (
+                      <input
+                        aria-label="Custom license type"
+                        value={getCustomLicenseTypeValue(license.licenseType)}
+                        onChange={(e) =>
+                          updateLicense(license.clientId, {
+                            licenseType: e.target.value.trim() || "Other",
+                          })
+                        }
+                        placeholder="Enter your license type"
+                        className={cn(compactFieldClassName, "mt-1.5")}
+                      />
+                    ) : null}
                   </div>
 
                   <div className="space-y-1">
@@ -632,13 +670,22 @@ export default function OfficerProfileForm({
 
       case "certifications":
         return (
-          <TagToggleGroup
-            label="Your certifications"
-            description="Select any certifications you currently hold."
-            options={CERTIFICATION_OPTIONS}
-            selected={form.certifications}
-            onChange={(certifications) => setForm({ ...form, certifications })}
-          />
+          <div className="space-y-2.5">
+            <div>
+              <p className="text-sm font-semibold text-fo-text">Your certifications</p>
+              <p className="mt-0.5 text-sm text-fo-text-muted">
+                Select any certifications you currently hold, or add your own.
+              </p>
+            </div>
+            <RequirementsMultiSelectPicker
+              options={CERTIFICATION_OPTIONS}
+              selected={form.certifications}
+              onChange={(certifications) => setForm({ ...form, certifications })}
+              allowCustom
+              customLabel="Add your own certification"
+              customPlaceholder="e.g. De-escalation Training"
+            />
+          </div>
         );
 
       case "availability":

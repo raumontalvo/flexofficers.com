@@ -2,10 +2,8 @@ import {
   ALL_EXPERIENCE_CATEGORIES,
   ARMED_STATUS_OPTIONS,
   AVAILABILITY_OPTIONS,
-  CERTIFICATION_OPTIONS,
 } from "@/lib/profile-options";
 import {
-  LICENSE_TYPE_OPTIONS,
   US_STATE_OPTIONS,
 } from "@/lib/license-options";
 import { ArmedStatus } from "@/app/generated/prisma/enums";
@@ -161,6 +159,68 @@ function parseStringArrayFromOptions(
   return parsed;
 }
 
+function parseStringArrayWithCustomValues(
+  value: unknown,
+  field: string,
+  errors: FieldError[],
+  maxItemLength = 80,
+  maxItems = 20
+) {
+  if (typeof value === "undefined" || value === null) {
+    return [] as string[];
+  }
+
+  if (!Array.isArray(value)) {
+    errors.push({
+      field,
+      message: `${field} must be an array`,
+    });
+
+    return [] as string[];
+  }
+
+  const parsed: string[] = [];
+
+  value.forEach((entry, index) => {
+    if (typeof entry !== "string") {
+      errors.push({
+        field: `${field}[${index}]`,
+        message: "must be a string",
+      });
+
+      return;
+    }
+
+    const trimmed = entry.trim();
+
+    if (!trimmed) {
+      return;
+    }
+
+    if (trimmed.length > maxItemLength) {
+      errors.push({
+        field: `${field}[${index}]`,
+        message: `must be ${maxItemLength} characters or fewer`,
+      });
+
+      return;
+    }
+
+    if (!parsed.includes(trimmed)) {
+      parsed.push(trimmed);
+    }
+  });
+
+  if (parsed.length > maxItems) {
+    errors.push({
+      field,
+      message: `no more than ${maxItems} items are allowed`,
+    });
+  }
+
+  return parsed;
+}
+
 function parseArmedStatuses(
   payload: OfficerProfilePayload,
   errors: FieldError[]
@@ -246,9 +306,9 @@ function parseLicenses(
     return [];
   }
 
-  const licenseTypeSet = new Set<string>(LICENSE_TYPE_OPTIONS);
   const stateSet = new Set<string>(US_STATE_OPTIONS);
   const parsed: ParsedOfficerLicense[] = [];
+  const LICENSE_TYPE_MAX_LENGTH = 80;
 
   value.forEach((entry, index) => {
     const prefix = `licenses[${index}]`;
@@ -280,10 +340,15 @@ function parseLicenses(
       errors
     );
 
-    if (licenseType && !licenseTypeSet.has(licenseType)) {
+    if (licenseType === "Other") {
       errors.push({
         field: `${prefix}.licenseType`,
-        message: "invalid license type",
+        message: "enter a custom license type",
+      });
+    } else if (licenseType.length > LICENSE_TYPE_MAX_LENGTH) {
+      errors.push({
+        field: `${prefix}.licenseType`,
+        message: `license type must be ${LICENSE_TYPE_MAX_LENGTH} characters or fewer`,
       });
     }
 
@@ -415,10 +480,9 @@ export function parseOfficerPayload(payload: OfficerProfilePayload) {
     AVAILABILITY_OPTIONS,
     errors
   );
-  const certifications = parseStringArrayFromOptions(
+  const certifications = parseStringArrayWithCustomValues(
     payload.certifications,
     "certifications",
-    CERTIFICATION_OPTIONS,
     errors
   );
   const experienceCategories = parseStringArrayFromOptions(

@@ -63,9 +63,10 @@ export function CompanyRecentApplications({
             const displayStatus = getApplicationDisplayStatus(application.status);
 
             return (
-              <div
+              <Link
                 key={application.id}
-                className="rounded-lg border border-white/10 bg-white/[0.03] p-3"
+                href="/company/applications"
+                className="block rounded-lg border border-white/10 bg-white/[0.03] p-3 transition hover:bg-white/[0.05]"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
@@ -83,7 +84,7 @@ export function CompanyRecentApplications({
                     {displayStatus}
                   </StatusBadge>
                 </div>
-              </div>
+              </Link>
             );
           })
         )}

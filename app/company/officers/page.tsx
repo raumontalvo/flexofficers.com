@@ -1,4 +1,4 @@
-import { UserRole } from "@/app/generated/prisma/enums";
+import { UserRole, ApplicationStatus } from "@/app/generated/prisma/enums";
 import { CompanyOfficersPageContent } from "@/components/company/company-officers-page-content";
 import { PageShell, SectionHeading } from "@/components/ui";
 import { serializeOfficerSearchResult } from "@/lib/company-officers-page";
@@ -24,7 +24,8 @@ export default async function CompanyOfficersPage({
   const params = await searchParams;
   const filters = parseOfficerSearchFilters(params);
 
-  const [officers, openShifts, invites, staffMembers] = await Promise.all([
+  const [officers, openShifts, invites, staffMembers, acceptedAssignments] =
+    await Promise.all([
     prisma.officer.findMany({
       where: buildOfficerSearchWhere(filters),
       select: {
@@ -82,11 +83,31 @@ export default async function CompanyOfficersPage({
         },
       },
       select: {
+        id: true,
         staffMembers: {
           select: {
             officerId: true,
           },
         },
+      },
+    }),
+    prisma.application.findMany({
+      where: {
+        status: ApplicationStatus.ACCEPTED,
+        shift: {
+          company: {
+            user: {
+              clerkId: clerkUser.id,
+            },
+          },
+          status: {
+            in: INVITEABLE_SHIFT_STATUSES,
+          },
+        },
+      },
+      select: {
+        officerId: true,
+        shiftId: true,
       },
     }),
   ]);
@@ -115,6 +136,7 @@ export default async function CompanyOfficersPage({
         hasActiveFilters={hasActiveFilters}
         openShifts={serializedOpenShifts}
         invites={invites}
+        acceptedAssignments={acceptedAssignments}
         staffOfficerIds={
           staffMembers?.staffMembers.map((member) => member.officerId) ?? []
         }

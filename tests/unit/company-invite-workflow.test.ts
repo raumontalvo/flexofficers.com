@@ -4,6 +4,7 @@ import {
   getInviteableShiftIdsForOfficer,
   getInviteStateForShift,
   getOfficerInviteButtonState,
+  buildOfficerInviteNotificationPayload,
 } from "@/lib/company-invite-workflow";
 import { getCompanyApplicationsSummary } from "@/lib/company-dashboard-data";
 
@@ -68,6 +69,68 @@ describe("company invite workflow", () => {
     ).toEqual({
       kind: "pending",
       label: "Invitation Sent",
+    });
+  });
+
+  it("blocks inviting an officer already assigned to a shift", () => {
+    const acceptedAssignments = [
+      { officerId: "officer-1", shiftId: "shift-1" },
+    ];
+
+    expect(
+      getInviteStateForShift(
+        "officer-1",
+        "shift-1",
+        [],
+        acceptedAssignments
+      )
+    ).toEqual({
+      kind: "accepted",
+      label: "Assigned to Shift",
+    });
+    expect(
+      getInviteableShiftIdsForOfficer(
+        "officer-1",
+        ["shift-1", "shift-2"],
+        [],
+        acceptedAssignments
+      )
+    ).toEqual(["shift-2"]);
+    expect(
+      getOfficerInviteButtonState(
+        "officer-1",
+        [],
+        ["shift-1", "shift-2"],
+        acceptedAssignments
+      )
+    ).toEqual({
+      kind: "invite",
+    });
+  });
+
+  it("builds officer invite notification and email copy", () => {
+    expect(
+      buildOfficerInviteNotificationPayload({
+        companyName: "Acme Security",
+        shiftTitle: "Night Patrol",
+      })
+    ).toEqual({
+      title: "Company Invite to Apply",
+      message: "Acme Security invited you to: Night Patrol",
+      emailSubject: "Acme Security sent you an invite to apply",
+      emailMessage:
+        "Acme Security has sent you an invite to apply for Night Patrol. Sign in to FlexOfficers to review the invite and respond.",
+    });
+
+    expect(
+      buildOfficerInviteNotificationPayload({
+        companyName: "Acme Security",
+        shiftTitle: "Night Patrol",
+        message: "We need coverage this weekend.",
+      })
+    ).toMatchObject({
+      emailMessage:
+        "Acme Security has sent you an invite to apply for Night Patrol. Sign in to FlexOfficers to review the invite and respond.\n\nMessage from the company:\nWe need coverage this weekend.",
     });
   });
 

@@ -16,6 +16,43 @@ type ShiftWorkforceGroupProps = {
   onHidden?: () => void;
 };
 
+function ShiftStaffingSummary({
+  filledCount,
+  positionsNeeded,
+  staffing,
+}: {
+  filledCount: number;
+  positionsNeeded: number;
+  staffing: ReturnType<typeof getStaffingProgress>;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-3 text-xs">
+        <span className="font-semibold text-fo-text">
+          {filledCount} / {positionsNeeded} Filled
+        </span>
+        <span
+          className={cn(
+            "font-medium",
+            staffing.fullyStaffed ? "text-fo-success" : "text-fo-text-muted"
+          )}
+        >
+          {staffing.remainingLabel}
+        </span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-slate-800/80">
+        <div
+          className={cn(
+            "h-full rounded-full transition-all",
+            staffing.fullyStaffed ? "bg-green-500" : "bg-fo-primary-bright"
+          )}
+          style={{ width: `${staffing.percent}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function ShiftWorkforceGroup({
   group,
   showRemove = true,
@@ -33,31 +70,30 @@ export function ShiftWorkforceGroup({
   );
 
   return (
-    <section className="space-y-2">
-      <div className="fo-glass-card rounded-lg border border-white/10 p-3">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-fo-text">{group.shift.title}</h2>
-            <p className="mt-1 text-sm text-fo-text-muted">{schedule.dateLabel}</p>
-            <p className="text-sm text-fo-text-muted">{schedule.timeLabel}</p>
-          </div>
-
-          <div className="min-w-[220px] space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-fo-text-muted">
-                Need: {group.shift.positionsNeeded}{" "}
-                {group.shift.positionsNeeded === 1 ? "Officer" : "Officers"}
-              </span>
+    <section>
+      <div className="lg:hidden">
+        <div className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.03]">
+          <div className="border-b border-white/[0.06] p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <h2 className="truncate text-sm font-semibold text-fo-text">
+                  {group.shift.title}
+                </h2>
+                <p className="mt-0.5 text-xs text-fo-text-muted">
+                  {schedule.dateLabel} · {schedule.timeLabel}
+                </p>
+              </div>
               <span
                 className={cn(
-                  "font-semibold",
+                  "shrink-0 text-xs font-semibold tabular-nums",
                   staffing.fullyStaffed ? "text-fo-success" : "text-fo-text"
                 )}
               >
-                {staffing.label}
+                {group.filledCount} / {group.shift.positionsNeeded}
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-800/80">
+
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800/80">
               <div
                 className={cn(
                   "h-full rounded-full transition-all",
@@ -66,30 +102,70 @@ export function ShiftWorkforceGroup({
                 style={{ width: `${staffing.percent}%` }}
               />
             </div>
+
             <p
               className={cn(
-                "text-xs font-medium",
+                "mt-1 text-[11px] font-medium",
                 staffing.fullyStaffed ? "text-fo-success" : "text-fo-text-muted"
               )}
             >
               {staffing.remainingLabel}
             </p>
           </div>
+
+          <div className="divide-y divide-white/[0.04]">
+            {group.officers.map((officerRecord) => (
+              <AcceptedOfficerCard
+                key={officerRecord.applicationId}
+                officerRecord={officerRecord}
+                showRemove={showRemove}
+                showHideFromList={showHideFromList}
+                cancelled={cancelled}
+                shiftId={group.shift.id}
+                onHidden={onHidden}
+                layout="mobile-compact"
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        {group.officers.map((officerRecord) => (
-          <AcceptedOfficerCard
-            key={officerRecord.applicationId}
-            officerRecord={officerRecord}
-            showRemove={showRemove}
-            showHideFromList={showHideFromList}
-            cancelled={cancelled}
-            shiftId={group.shift.id}
-            onHidden={onHidden}
-          />
-        ))}
+      <div className="hidden overflow-hidden rounded-xl border border-white/10 bg-white/[0.02] lg:block">
+        <div className="border-b border-white/[0.06] px-4 py-3">
+          <div className="flex items-start justify-between gap-6">
+            <div className="min-w-0">
+              <h2 className="truncate text-base font-semibold text-fo-text">
+                {group.shift.title}
+              </h2>
+              <p className="mt-1 text-sm text-fo-text-muted">
+                {schedule.dateLabel} · {schedule.timeLabel}
+              </p>
+            </div>
+
+            <div className="w-[220px] shrink-0">
+              <ShiftStaffingSummary
+                filledCount={group.filledCount}
+                positionsNeeded={group.shift.positionsNeeded}
+                staffing={staffing}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="divide-y divide-white/[0.04]">
+          {group.officers.map((officerRecord) => (
+            <AcceptedOfficerCard
+              key={officerRecord.applicationId}
+              officerRecord={officerRecord}
+              showRemove={showRemove}
+              showHideFromList={showHideFromList}
+              cancelled={cancelled}
+              shiftId={group.shift.id}
+              onHidden={onHidden}
+              layout="desktop-row"
+            />
+          ))}
+        </div>
       </div>
     </section>
   );

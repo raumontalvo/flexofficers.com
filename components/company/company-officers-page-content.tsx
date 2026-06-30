@@ -11,8 +11,9 @@ import type { CompanyOpenShiftOption } from "@/components/company/invite-officer
 import {
   getOfficerInviteButtonState,
   type CompanyOfficerInviteRecord,
+  type CompanyOfficerShiftAssignment,
 } from "@/lib/company-invite-workflow";
-import { buttonClassName } from "@/components/ui";
+import { buttonClassName, StatusToast } from "@/components/ui";
 import {
   OFFICER_AVAILABILITY_FILTER_OPTIONS,
   OFFICER_BACKGROUND_FILTER_OPTIONS,
@@ -29,8 +30,8 @@ import {
   getOfficerQuickSearchDisplay,
 } from "@/lib/officer-search-params";
 import { US_STATES } from "@/lib/license-options";
-import { OfficerSearchCard } from "@/app/company/officers/OfficerSearchCard";
 import { OfficerFiltersSheet } from "@/app/company/officers/OfficerFiltersSheet";
+import { OfficerRosterCard } from "@/app/company/officers/OfficerRosterCard";
 import { OfficerSearchMobileCard } from "@/app/company/officers/OfficerSearchMobileCard";
 
 const fieldClassName =
@@ -64,10 +65,10 @@ function OfficerResultCard({
   onStaffChange: (officerId: string, onStaff: boolean) => void;
 }) {
   return (
-    <OfficerSearchCard
+    <OfficerRosterCard
       officer={officer}
       actions={
-        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={onViewProfile}
@@ -154,6 +155,7 @@ type CompanyOfficersPageContentProps = {
   hasActiveFilters: boolean;
   openShifts: CompanyOpenShiftOption[];
   invites: CompanyOfficerInviteRecord[];
+  acceptedAssignments: CompanyOfficerShiftAssignment[];
   staffOfficerIds: string[];
 };
 
@@ -163,6 +165,7 @@ export function CompanyOfficersPageContent({
   hasActiveFilters: _hasActiveFilters,
   openShifts,
   invites: initialInvites,
+  acceptedAssignments,
   staffOfficerIds: initialStaffOfficerIds,
 }: CompanyOfficersPageContentProps) {
   const router = useRouter();
@@ -179,6 +182,7 @@ export function CompanyOfficersPageContent({
   const [profileOfficerId, setProfileOfficerId] = useState<string | null>(null);
   const [inviteOfficerId, setInviteOfficerId] = useState<string | null>(null);
   const [invites, setInvites] = useState(initialInvites);
+  const [showInviteSentToast, setShowInviteSentToast] = useState(false);
   const [staffOfficerIds, setStaffOfficerIds] = useState(
     () => new Set(initialStaffOfficerIds)
   );
@@ -262,6 +266,12 @@ export function CompanyOfficersPageContent({
 
   return (
     <div className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
+      {showInviteSentToast ? (
+        <StatusToast
+          message="Invite sent"
+          onClose={() => setShowInviteSentToast(false)}
+        />
+      ) : null}
       <div className="lg:hidden">
         <form
           onSubmit={handleMobileQuickSearch}
@@ -485,13 +495,14 @@ export function CompanyOfficersPageContent({
                 inviteState={getOfficerInviteButtonState(
                   officer.id,
                   invites,
-                  openShiftIds
+                  openShiftIds,
+                  acceptedAssignments
                 )}
               />
             ))}
           </div>
 
-          <div className="hidden space-y-4 lg:block">
+          <div className="hidden space-y-3 lg:block">
             {sortedOfficers.map((officer) => (
               <OfficerResultCard
                 key={officer.id}
@@ -501,7 +512,8 @@ export function CompanyOfficersPageContent({
                 inviteState={getOfficerInviteButtonState(
                   officer.id,
                   invites,
-                  openShiftIds
+                  openShiftIds,
+                  acceptedAssignments
                 )}
                 isOnStaff={staffOfficerIds.has(officer.id)}
                 onStaffChange={handleStaffChange}
@@ -540,8 +552,9 @@ export function CompanyOfficersPageContent({
         }
         openShifts={openShifts}
         invites={invites}
+        acceptedAssignments={acceptedAssignments}
         onClose={() => setInviteOfficerId(null)}
-        onInviteSent={(invite) =>
+        onInviteSent={(invite) => {
           setInvites((current) => {
             const withoutDuplicate = current.filter(
               (item) =>
@@ -552,8 +565,9 @@ export function CompanyOfficersPageContent({
             );
 
             return [...withoutDuplicate, invite];
-          })
-        }
+          });
+          setShowInviteSentToast(true);
+        }}
       />
     </div>
   );

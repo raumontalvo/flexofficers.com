@@ -166,10 +166,6 @@ export function OfficerProfilePanel({
 
               <section className="rounded-xl border border-white/10 bg-white/[0.03] p-4 space-y-4">
                 <TagList label="Experience" values={officer.experienceCategories} />
-                <TagList
-                  label="Military / Law Enforcement"
-                  values={officer.backgroundCategories}
-                />
 
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">

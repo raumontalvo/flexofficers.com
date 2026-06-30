@@ -142,35 +142,43 @@ export function CompanyUpcomingShifts({
           </Link>
         </div>
 
-        <div className="mt-4 space-y-3">
-          {shifts.length === 0 ? (
-            <p className="text-sm text-fo-text-muted">
-              No confirmed shifts in the next 7 days.
-            </p>
-          ) : (
-            shifts.slice(0, 5).map((shift) => (
-              <Link
-                key={shift.id}
-                href={`/shifts/${shift.id}`}
-                className="block rounded-lg border border-white/10 bg-white/[0.03] p-3 transition hover:bg-white/[0.05]"
-              >
-                <p className="text-xs font-semibold uppercase tracking-wide text-fo-primary-hover">
-                  {formatUpcomingDate(shift.startTime)}
-                </p>
-                <p className="mt-1 text-sm font-semibold text-fo-text">
-                  {shift.title}
-                </p>
-                <p className="mt-1 text-xs text-fo-text-muted">
-                  {formatShiftCityState(shift)}
-                </p>
-                <p className="mt-2 text-xs text-fo-text-muted">
-                  {shift.openPositions} open position
-                  {shift.openPositions === 1 ? "" : "s"} remaining
-                </p>
-              </Link>
-            ))
-          )}
-        </div>
+        {shifts.length === 0 ? (
+          <p className="mt-4 text-sm text-fo-text-muted">
+            No confirmed shifts in the next 7 days.
+          </p>
+        ) : (
+          <div className="mt-4">
+            <div className="grid grid-cols-[7.5rem_minmax(0,1.2fr)_minmax(0,1fr)_6.5rem] gap-x-4 border-b border-white/[0.06] px-3 pb-2 text-[11px] font-semibold uppercase tracking-wide text-fo-text-muted">
+              <div>Date</div>
+              <div>Shift</div>
+              <div>Location</div>
+              <div className="text-right">Open</div>
+            </div>
+
+            <div className="divide-y divide-white/[0.04]">
+              {shifts.slice(0, 5).map((shift) => (
+                <Link
+                  key={shift.id}
+                  href={`/shifts/${shift.id}`}
+                  className="grid grid-cols-[7.5rem_minmax(0,1.2fr)_minmax(0,1fr)_6.5rem] items-center gap-x-4 px-3 py-3 transition hover:bg-white/[0.03]"
+                >
+                  <p className="text-xs font-semibold text-fo-primary-hover">
+                    {formatUpcomingDate(shift.startTime)}
+                  </p>
+                  <p className="truncate text-sm font-semibold text-fo-text">
+                    {shift.title}
+                  </p>
+                  <p className="truncate text-xs text-fo-text-muted">
+                    {formatShiftCityState(shift)}
+                  </p>
+                  <p className="text-right text-xs font-medium text-fo-text-muted">
+                    {shift.openPositions} open
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </Card>
     </>
   );

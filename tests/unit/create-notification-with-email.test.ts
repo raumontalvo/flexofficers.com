@@ -342,7 +342,7 @@ describe("notification email metadata", () => {
     expect(getNotificationEmailSubject("invite_declined")).toBe("Invite declined");
     expect(getNotificationEmailSubject("new_application")).toBe("New application");
     expect(getNotificationEmailSubject("new_company_invite")).toBe(
-      "New company invite"
+      "Company invite to apply"
     );
     expect(getNotificationLinkUrl("new_company_invite")).toContain(
       "/officer/invites"

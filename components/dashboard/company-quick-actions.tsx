@@ -80,7 +80,7 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
         })}
       </div>
 
-      <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 lg:grid">
+      <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 lg:grid lg:grid-cols-3">
         {actions.map((action) => {
           const Icon = action.icon;
           const href =
