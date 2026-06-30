@@ -77,16 +77,16 @@ export function PageShell({
     <div className={cn("min-h-screen bg-fo-bg text-fo-text", className)}>
       {showBrand ? (
         <header className="border-b border-white/[0.04] px-4 py-4 sm:px-6">
-          <div className={cn("mx-auto w-full", maxWidthClasses[maxWidth])}>
+          <div
+            className={cn(
+              "mx-auto flex w-full justify-center md:justify-start",
+              maxWidthClasses[maxWidth]
+            )}
+          >
             <FlexOfficersLogoLink
               href="/"
               height={40}
-              className="hidden md:inline-flex"
-            />
-            <FlexOfficersLogoLink
-              href="/"
-              height={56}
-              className="inline-flex md:hidden"
+              imageClassName="!h-16 !max-h-16 md:!h-10 md:!max-h-10"
             />
           </div>
         </header>
