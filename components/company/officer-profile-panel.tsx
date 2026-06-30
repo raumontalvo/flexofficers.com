@@ -89,7 +89,7 @@ export function OfficerProfilePanel({
     };
   }, [officer, onClose]);
 
-  const isMobileStaffDetail = Boolean(onStaffChange && isOnStaff);
+  const hideMobileFooter = Boolean(onStaffChange);
 
   return (
     <>
@@ -147,7 +147,7 @@ export function OfficerProfilePanel({
             <div
               className={cn(
                 "flex-1 space-y-4 overflow-y-auto px-5 py-4",
-                isMobileStaffDetail && "pb-28 lg:pb-4"
+                hideMobileFooter && "pb-28 lg:pb-4"
               )}
             >
               <section className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
@@ -238,7 +238,7 @@ export function OfficerProfilePanel({
                 </div>
               </section>
 
-              {onStaffChange && isOnStaff ? (
+              {onStaffChange ? (
                 <div className="lg:hidden">
                   <AddToStaffButton
                     officerId={officer.id}
@@ -255,19 +255,9 @@ export function OfficerProfilePanel({
             <div
               className={cn(
                 "space-y-2 border-t border-white/[0.06] px-5 py-4",
-                isMobileStaffDetail && "hidden lg:block"
+                hideMobileFooter && "hidden lg:block"
               )}
             >
-              {onStaffChange && officer && !isOnStaff ? (
-                <AddToStaffButton
-                  officerId={officer.id}
-                  isOnStaff={isOnStaff}
-                  size="mobile"
-                  className="mb-2 w-full lg:hidden"
-                  onAdded={() => onStaffChange(true)}
-                  onRemoved={() => onStaffChange(false)}
-                />
-              ) : null}
               <Button
                 type="button"
                 variant="secondary"

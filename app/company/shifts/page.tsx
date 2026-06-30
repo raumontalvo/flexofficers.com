@@ -103,7 +103,7 @@ export default async function CompanyShiftsPage() {
           <MobilePrimaryButton
             href={canPostShifts ? "/shifts/create" : "/company/billing"}
           >
-            + Post a Shift
+            Post a Shift
           </MobilePrimaryButton>
         </div>
 

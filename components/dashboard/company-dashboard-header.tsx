@@ -55,7 +55,7 @@ export function CompanyDashboardHeader({
         </div>
 
         <MobilePrimaryButton href={postShiftHref} className="mt-4">
-          + Post a New Shift
+          Post a New Shift
         </MobilePrimaryButton>
       </header>
 
