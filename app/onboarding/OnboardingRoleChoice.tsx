@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { FlexOfficersLogoLink } from "@/components/brand";
+import { IconShield } from "@/components/landing/icons";
+import { CompaniesIcon, ProfileIcon } from "@/components/nav/icons";
 import {
   Button,
   Card,
@@ -21,6 +24,14 @@ const PENDING_ROLE_KEY = "flexofficers.pendingRole";
 
 function isValidRole(value: string | null): value is Role {
   return value === "OFFICER" || value === "COMPANY";
+}
+
+function RoleCardIcon({ children }: { children: ReactNode }) {
+  return (
+    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-fo-primary-bright/50 bg-fo-primary/10 text-fo-primary-bright shadow-[0_0_24px_rgba(59,130,246,0.12)]">
+      {children}
+    </div>
+  );
 }
 
 function RoleFeatureList({ items }: { items: string[] }) {
@@ -107,6 +118,15 @@ export default function OnboardingRoleChoice({
 
   return (
     <>
+      <div className="mb-6 flex justify-center">
+        <FlexOfficersLogoLink
+          href="/"
+          height={120}
+          priority
+          imageClassName="!h-auto !w-[180px] !max-w-[180px] md:!w-[260px] md:!max-w-[260px]"
+        />
+      </div>
+
       <SectionHeading
         title="Welcome to FlexOfficers"
         subtitle="Choose how you want to use the platform."
@@ -120,7 +140,10 @@ export default function OnboardingRoleChoice({
       ) : null}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <Card variant="elevated" className="flex h-full flex-col">
+        <Card variant="elevated" className="flex h-full flex-col !p-7 sm:!p-8">
+          <RoleCardIcon>
+            <ProfileIcon className="h-6 w-6" />
+          </RoleCardIcon>
           <CardTitle className="text-xl sm:text-2xl">Security Officer</CardTitle>
           <CardDescription className="mt-2">
             Browse shifts and find the right opportunities on your schedule.
@@ -142,15 +165,19 @@ export default function OnboardingRoleChoice({
           <Button
             type="button"
             fullWidth
-            className="mt-8 w-full"
+            className="mt-8 w-full gap-2"
             disabled={savingRole !== null}
             onClick={() => chooseRole("OFFICER")}
           >
+            <ProfileIcon className="h-5 w-5 shrink-0" />
             {savingRole === "OFFICER" ? "Saving..." : "Continue as Officer"}
           </Button>
         </Card>
 
-        <Card variant="elevated" className="flex h-full flex-col">
+        <Card variant="elevated" className="flex h-full flex-col !p-7 sm:!p-8">
+          <RoleCardIcon>
+            <CompaniesIcon className="h-6 w-6" />
+          </RoleCardIcon>
           <CardTitle className="text-xl sm:text-2xl">Security Company</CardTitle>
           <CardDescription className="mt-2">
             Post shifts, review licensed officers, and fill coverage faster.
@@ -172,20 +199,24 @@ export default function OnboardingRoleChoice({
           <Button
             type="button"
             fullWidth
-            className="mt-8 w-full"
+            className="mt-8 w-full gap-2"
             disabled={savingRole !== null}
             onClick={() => chooseRole("COMPANY")}
           >
+            <CompaniesIcon className="h-5 w-5 shrink-0" />
             {savingRole === "COMPANY" ? "Saving..." : "Continue as Company"}
           </Button>
         </Card>
       </div>
 
       <Card variant="muted" className="mt-6">
-        <p className="text-sm leading-relaxed text-fo-text-muted">
-          Companies are responsible for verifying licenses, credentials, hiring
-          requirements, and paying officers directly for completed work.
-        </p>
+        <div className="flex items-start gap-3">
+          <IconShield className="mt-0.5 h-5 w-5 shrink-0 text-fo-primary-bright" />
+          <p className="text-sm leading-relaxed text-fo-text-muted">
+            Companies are responsible for verifying licenses, credentials, hiring
+            requirements, and paying officers directly for completed work.
+          </p>
+        </div>
       </Card>
     </>
   );
