@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
   POST_SHIFT_CERTIFICATION_OPTIONS,
   type PostShiftFormValues,
@@ -101,16 +102,36 @@ function ShiftDateTimeField({
   placeholder: string;
   icon: "calendar" | "clock";
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const display =
     type === "date" ? formatShiftFormDate(value) : formatShiftFormTime(value);
   const Icon = icon === "calendar" ? CalendarIcon : ClockIcon;
 
+  function openPicker() {
+    const input = inputRef.current;
+    if (!input) {
+      return;
+    }
+
+    input.focus({ preventScroll: true });
+
+    if (typeof input.showPicker === "function") {
+      try {
+        input.showPicker();
+      } catch {
+        // showPicker can throw if the browser blocks it.
+      }
+    }
+  }
+
   return (
-    <div
+    <label
+      htmlFor={id}
       className={cn(
-        "relative w-full max-w-full min-w-0 rounded-2xl border border-fo-border bg-fo-bg/80 box-border transition",
+        "relative block w-full max-w-full min-w-0 cursor-pointer rounded-2xl border border-fo-border bg-fo-bg/80 box-border transition touch-manipulation",
         "focus-within:border-fo-primary-bright/50 focus-within:ring-2 focus-within:ring-fo-primary-bright/20"
       )}
+      onClick={openPicker}
     >
       <div className="pointer-events-none flex min-h-11 w-full max-w-full min-w-0 items-center gap-4 px-4">
         <Icon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
@@ -124,13 +145,15 @@ function ShiftDateTimeField({
         </span>
       </div>
       <input
+        ref={inputRef}
         id={id}
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="absolute inset-0 h-full w-full max-w-full min-w-0 cursor-pointer opacity-0"
+        onClick={openPicker}
+        className="absolute inset-0 z-10 h-full w-full max-w-full min-w-0 cursor-pointer opacity-[0.001]"
       />
-    </div>
+    </label>
   );
 }
 
