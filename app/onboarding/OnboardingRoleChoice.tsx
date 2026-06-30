@@ -123,14 +123,19 @@ export default function OnboardingRoleChoice({
         <Card variant="elevated" className="flex h-full flex-col">
           <CardTitle className="text-xl sm:text-2xl">Security Officer</CardTitle>
           <CardDescription className="mt-2">
-            Browse shifts and apply for work on your schedule.
+            Browse shifts and find the right opportunities on your schedule.
           </CardDescription>
 
           <RoleFeatureList
             items={[
               "Find open shifts",
-              "Apply for free",
-              "Get company contact info after acceptance",
+              "Get company invites",
+              "Apply to shifts in seconds",
+              "Build your professional profile",
+              "Showcase licenses and certifications",
+              "Get company contact information after acceptance",
+              "Track your applications and upcoming shifts",
+              "Work when it fits your schedule",
             ]}
           />
 
@@ -148,13 +153,18 @@ export default function OnboardingRoleChoice({
         <Card variant="elevated" className="flex h-full flex-col">
           <CardTitle className="text-xl sm:text-2xl">Security Company</CardTitle>
           <CardDescription className="mt-2">
-            Post shifts and connect with qualified officers.
+            Post shifts, review licensed officers, and fill coverage faster.
           </CardDescription>
 
           <RoleFeatureList
             items={[
+              "Create public & private job posts",
               "Post open shifts",
-              "Review officer profiles",
+              "Invite officers to apply",
+              "Review profiles, licenses & certifications",
+              "Accept or reject applicants",
+              "Manage staff",
+              "Manage accepted officers",
               "Fill shifts faster",
             ]}
           />
@@ -173,8 +183,8 @@ export default function OnboardingRoleChoice({
 
       <Card variant="muted" className="mt-6">
         <p className="text-sm leading-relaxed text-fo-text-muted">
-          Companies are responsible for verifying licenses, credentials, and
-          hiring requirements.
+          Companies are responsible for verifying licenses, credentials, hiring
+          requirements, and paying officers directly for completed work.
         </p>
       </Card>
     </>
