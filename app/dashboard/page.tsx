@@ -3,7 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { dashboardUserSelect } from "@/lib/officer-fields";
 import { getCompanyProfileCompletion } from "@/lib/company-profile-completion";
-import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
+import { syncCompanyLogoFromClerk, syncOfficerProfilePhotoFromClerk } from "@/lib/clerk-photo-sync";
 import { prisma } from "@/lib/prisma";
 import CompanyDashboard from "./CompanyDashboard";
 import { DashboardSetupState } from "./DashboardSetupState";
@@ -46,6 +46,13 @@ export default async function DashboardPage() {
       );
     }
 
+    const logoUrl =
+      (await syncCompanyLogoFromClerk({
+        companyId: user.company.id,
+        logoUrl: user.company.logoUrl,
+        clerkImageUrl: clerkUser.imageUrl,
+      })) ?? "";
+
     const profileCompletion = getCompanyProfileCompletion(
       user.company,
       user.email
@@ -54,10 +61,7 @@ export default async function DashboardPage() {
     return (
       <CompanyDashboard
         firstName={clerkUser.firstName}
-        logoUrl={resolveProfilePhotoUrl(
-          user.company.logoUrl,
-          clerkUser.imageUrl
-        )}
+        logoUrl={logoUrl}
         company={user.company}
         profileCompletion={profileCompletion}
       />
@@ -65,6 +69,14 @@ export default async function DashboardPage() {
   }
 
   if (user.role === UserRole.OFFICER) {
+    if (user.officer && clerkUser.imageUrl) {
+      await syncOfficerProfilePhotoFromClerk({
+        officerId: user.officer.id,
+        profilePhotoUrl: user.officer.profilePhotoUrl,
+        clerkImageUrl: clerkUser.imageUrl,
+      });
+    }
+
     if (!user.officer) {
       return (
         <DashboardSetupState

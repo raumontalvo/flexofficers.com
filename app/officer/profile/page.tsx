@@ -2,8 +2,8 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { PageShell } from "@/components/ui";
 import { requirePageRole } from "@/lib/page-rbac";
 import { officerProfilePageUserSelect } from "@/lib/officer-fields";
+import { syncOfficerProfilePhotoFromClerk } from "@/lib/clerk-photo-sync";
 import { prisma } from "@/lib/prisma";
-import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
 import { normalizeExperienceCategories, type ArmedStatusOption } from "@/lib/profile-options";
 import OfficerProfileForm from "./OfficerProfileForm";
 
@@ -32,6 +32,16 @@ export default async function OfficerProfilePage() {
   });
 
   const officer = user?.officer;
+  let profilePhotoUrl = officer?.profilePhotoUrl?.trim() ?? "";
+
+  if (officer) {
+    profilePhotoUrl =
+      (await syncOfficerProfilePhotoFromClerk({
+        officerId: officer.id,
+        profilePhotoUrl: officer.profilePhotoUrl,
+        clerkImageUrl: clerkUser.imageUrl,
+      })) ?? profilePhotoUrl;
+  }
 
   const initialLicenses =
     officer?.licenses && officer.licenses.length > 0
@@ -59,10 +69,7 @@ export default async function OfficerProfilePage() {
     phone: officer?.phone ?? "",
     email: user?.email ?? clerkUser.emailAddresses[0]?.emailAddress ?? "",
     city: officer?.city ?? "",
-    profilePhotoUrl: resolveProfilePhotoUrl(
-      officer?.profilePhotoUrl,
-      clerkUser.imageUrl
-    ),
+    profilePhotoUrl,
     armedStatuses: (officer?.armedStatuses ?? []) as ArmedStatusOption[],
     experienceYears:
       officer?.experienceYears !== null && officer?.experienceYears !== undefined

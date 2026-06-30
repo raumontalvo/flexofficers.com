@@ -213,6 +213,7 @@ export const dashboardUserSelect = {
   officer: {
     select: {
       id: true,
+      profilePhotoUrl: true,
       phone: true,
       armedStatuses: true,
       experienceCategories: true,

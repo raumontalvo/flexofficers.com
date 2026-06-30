@@ -4,9 +4,7 @@ import type { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { normalizeExperienceCategories } from "@/lib/profile-options";
 import { enforceRateLimit } from "@/lib/rate-limit";
-import {
-  resolveProfilePhotoUrl,
-} from "@/lib/profile-photo";
+import { normalizePhotoUrl, resolveSyncedPhotoUrl } from "@/lib/clerk-photo-sync";
 import {
   parseOfficerPayload,
   type OfficerProfilePayload,
@@ -160,8 +158,10 @@ export async function POST(req: Request) {
       parsed.data.experienceCategories
     );
     const profilePhotoUrl =
-      resolveProfilePhotoUrl(parsed.data.profilePhotoUrl, clerkUser.imageUrl) ||
-      null;
+      resolveSyncedPhotoUrl(
+        parsed.data.profilePhotoUrl,
+        clerkUser.imageUrl
+      ) ?? normalizePhotoUrl(parsed.data.profilePhotoUrl);
 
     const result = await prisma.$transaction(async (tx) => {
       const user = existingUser

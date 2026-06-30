@@ -4,7 +4,7 @@ import { CompanyProfileEditForm } from "@/components/company/company-profile-edi
 import { PageShell } from "@/components/ui";
 import { companyHasPublicProfile } from "@/lib/company-profile-page-data";
 import { buildCompanyProfileEditFormState } from "@/lib/company-profile-edit-data";
-import { resolveProfilePhotoUrl } from "@/lib/profile-photo";
+import { syncCompanyLogoFromClerk } from "@/lib/clerk-photo-sync";
 import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
@@ -42,6 +42,13 @@ export default async function EditCompanyProfilePage() {
     },
   });
 
+  const logoUrl =
+    (await syncCompanyLogoFromClerk({
+      companyId: company.id,
+      logoUrl: company.logoUrl,
+      clerkImageUrl: clerkUser.imageUrl,
+    })) ?? "";
+
   const initialForm = {
     ...buildCompanyProfileEditFormState({
       company,
@@ -55,7 +62,7 @@ export default async function EditCompanyProfilePage() {
         website: company.website,
       }),
     }),
-    logoUrl: resolveProfilePhotoUrl(company.logoUrl, clerkUser.imageUrl),
+    logoUrl,
   };
 
   return (

@@ -361,6 +361,19 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
             <ProfilePhotoUpload
               value={form.logoUrl}
               onChange={(logoUrl) => setForm({ ...form, logoUrl })}
+              onPersistPhotoUrl={async (logoUrl) => {
+                const response = await fetch("/api/company/profile/logo", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ logoUrl }),
+                });
+
+                if (!response.ok) {
+                  throw new Error("Failed to save company logo");
+                }
+              }}
               previewName={form.companyName}
               onUploadingChange={setIsUploadingLogo}
               disabled={isSaving}

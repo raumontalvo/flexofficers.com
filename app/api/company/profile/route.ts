@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { getDefaultTrialFields } from "@/lib/company-trial";
 import { embedCompanyProfileMeta } from "@/lib/company-profile-meta";
+import { normalizePhotoUrl, resolveSyncedPhotoUrl } from "@/lib/clerk-photo-sync";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import {
@@ -101,6 +102,9 @@ export async function POST(req: Request) {
       });
 
   const trialDefaults = getDefaultTrialFields();
+  const logoUrl =
+    resolveSyncedPhotoUrl(parsed.data.logoUrl, clerkUser.imageUrl) ??
+    normalizePhotoUrl(parsed.data.logoUrl);
   const storedDescription = embedCompanyProfileMeta(parsed.data.description, {
     services: parsed.data.services,
     officerBenefits: parsed.data.officerBenefits,
@@ -124,7 +128,7 @@ export async function POST(req: Request) {
       email: parsed.data.email,
       address: parsed.data.address,
       website: parsed.data.website,
-      logoUrl: parsed.data.logoUrl,
+      logoUrl: logoUrl ?? undefined,
       city: parsed.data.city,
       state: parsed.data.state,
       description: storedDescription,
@@ -140,7 +144,7 @@ export async function POST(req: Request) {
       email: parsed.data.email,
       address: parsed.data.address,
       website: parsed.data.website,
-      logoUrl: parsed.data.logoUrl,
+      logoUrl: logoUrl ?? undefined,
       city: parsed.data.city,
       state: parsed.data.state,
       description: storedDescription,

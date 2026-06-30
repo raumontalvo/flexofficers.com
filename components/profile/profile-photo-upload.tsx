@@ -18,6 +18,7 @@ type ProfilePhotoUploadProps = {
   previewName: string;
   disabled?: boolean;
   onUploadingChange?: (isUploading: boolean) => void;
+  onPersistPhotoUrl?: (url: string) => Promise<void>;
   helperText?: string;
   previewShape?: "circle" | "rounded";
 };
@@ -91,6 +92,7 @@ export function ProfilePhotoUpload({
   previewName,
   disabled = false,
   onUploadingChange,
+  onPersistPhotoUrl,
   helperText = "JPG, PNG, or WEBP. Max 5MB.",
   previewShape = "circle",
 }: ProfilePhotoUploadProps) {
@@ -169,6 +171,22 @@ export function ProfilePhotoUpload({
           return null;
         });
         return;
+      }
+
+      if (onPersistPhotoUrl) {
+        try {
+          await onPersistPhotoUrl(uploadedUrl);
+        } catch {
+          setUploadError("Failed to save photo. Please try again.");
+          setLocalPreviewUrl((current) => {
+            if (current) {
+              URL.revokeObjectURL(current);
+            }
+
+            return null;
+          });
+          return;
+        }
       }
 
       onChange(uploadedUrl);

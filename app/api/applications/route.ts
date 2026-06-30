@@ -8,6 +8,7 @@ import {
   UserRole,
 } from "@/app/generated/prisma/enums";
 import { officerProfileCompletionSelect } from "@/lib/officer-fields";
+import { resolveSyncedPhotoUrl } from "@/lib/clerk-photo-sync";
 import {
   isOfficerProfileComplete,
   OFFICER_PROFILE_APPLY_REQUIRED_MESSAGE,
@@ -104,6 +105,19 @@ export async function POST(req: Request) {
       },
     });
 
+    const existingOfficer = await prisma.officer.findUnique({
+      where: {
+        userId: user.id,
+      },
+      select: {
+        profilePhotoUrl: true,
+      },
+    });
+    const profilePhotoUrl = resolveSyncedPhotoUrl(
+      existingOfficer?.profilePhotoUrl,
+      clerkUser.imageUrl
+    );
+
     const officer = await prisma.officer.upsert({
       where: {
         userId: user.id,
@@ -111,11 +125,13 @@ export async function POST(req: Request) {
       update: {
         firstName: clerkUser.firstName ?? "Officer",
         lastName: clerkUser.lastName ?? "User",
+        ...(profilePhotoUrl ? { profilePhotoUrl } : {}),
       },
       create: {
         userId: user.id,
         firstName: clerkUser.firstName ?? "Officer",
         lastName: clerkUser.lastName ?? "User",
+        ...(profilePhotoUrl ? { profilePhotoUrl } : {}),
       },
       select: {
         id: true,

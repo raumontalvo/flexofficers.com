@@ -482,6 +482,19 @@ export default function OfficerProfileForm({
               onChange={(profilePhotoUrl) =>
                 setForm({ ...form, profilePhotoUrl })
               }
+              onPersistPhotoUrl={async (profilePhotoUrl) => {
+                const response = await fetch("/api/officer/profile/photo", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({ profilePhotoUrl }),
+                });
+
+                if (!response.ok) {
+                  throw new Error("Failed to save profile photo");
+                }
+              }}
               previewName={displayName}
               onUploadingChange={setIsUploadingPhoto}
               disabled={isSaving}
