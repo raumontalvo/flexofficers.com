@@ -209,7 +209,7 @@ html {
 
 /* Landing navbar logo — clipped wordmark on mobile/tablet, full desktop treatment */
 .landing-nav-logo-clip {
-  --landing-nav-logo-h: 56px;
+  --landing-nav-logo-h: 48px;
   --landing-nav-logo-w: calc(var(--landing-nav-logo-h) * 1.5 / 0.72);
   display: inline-flex;
   flex-shrink: 0;
@@ -217,7 +217,7 @@ html {
   line-height: 0;
   height: var(--landing-nav-logo-h);
   width: var(--landing-nav-logo-w);
-  max-width: min(38vw, var(--landing-nav-logo-w));
+  max-width: min(150px, var(--landing-nav-logo-w));
 }
 
 .landing-nav-logo-image {
@@ -230,8 +230,8 @@ html {
 
 @media (min-width: 390px) and (max-width: 1023px) {
   .landing-nav-logo-clip {
-    --landing-nav-logo-h: 64px;
-    max-width: min(40vw, var(--landing-nav-logo-w));
+    --landing-nav-logo-h: 56px;
+    max-width: min(180px, var(--landing-nav-logo-w));
   }
 }
 

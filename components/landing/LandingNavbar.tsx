@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { FlexOfficersLogoLink } from "@/components/brand";
+import { ProfileIcon } from "@/components/nav/icons";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -65,8 +66,8 @@ export function LandingNavbar() {
 
   return (
     <header className="landing-header sticky top-0 z-50 border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
-      <nav className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-3.5 sm:gap-3 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-4 lg:px-8 lg:py-5">
-        <div className="flex min-w-0 max-w-[42%] items-center justify-self-start sm:max-w-none">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-4 lg:px-8 lg:py-5">
+        <div className="flex min-w-0 shrink-0 max-w-[150px] items-center sm:max-w-none">
           <FlexOfficersLogoLink
             href="/"
             height={320}
@@ -88,7 +89,31 @@ export function LandingNavbar() {
           ))}
         </div>
 
-        <div className="col-start-2 flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 lg:col-start-3 lg:gap-3">
+        <div className="flex shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
+          <Link
+            href="/sign-in"
+            aria-label="Sign In"
+            className={buttonClassName({
+              variant: "secondary",
+              size: "md",
+              className:
+                "inline-flex min-h-10 min-w-10 shrink-0 px-2.5 min-[390px]:hidden lg:hidden",
+            })}
+          >
+            <ProfileIcon className="h-5 w-5" />
+          </Link>
+          <Link
+            href="/sign-in"
+            className={buttonClassName({
+              variant: "secondary",
+              size: "md",
+              className:
+                "hidden shrink-0 gap-1.5 whitespace-nowrap max-lg:min-h-10 max-lg:px-3.5 max-lg:text-xs min-[390px]:inline-flex lg:hidden",
+            })}
+          >
+            <ProfileIcon className="h-4 w-4" />
+            Sign In
+          </Link>
           <Link
             href="/sign-in"
             className={buttonClassName({
