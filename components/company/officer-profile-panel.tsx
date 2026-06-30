@@ -230,10 +230,23 @@ export function OfficerProfilePanel({
                   </p>
                 </div>
               </section>
+
+              {onStaffChange && isOnStaff ? (
+                <div className="lg:hidden">
+                  <AddToStaffButton
+                    officerId={officer.id}
+                    isOnStaff={isOnStaff}
+                    size="mobile"
+                    className="w-full"
+                    onAdded={() => onStaffChange(true)}
+                    onRemoved={() => onStaffChange(false)}
+                  />
+                </div>
+              ) : null}
             </div>
 
             <div className="space-y-2 border-t border-white/[0.06] px-5 py-4">
-              {onStaffChange && officer ? (
+              {onStaffChange && officer && !isOnStaff ? (
                 <AddToStaffButton
                   officerId={officer.id}
                   isOnStaff={isOnStaff}
