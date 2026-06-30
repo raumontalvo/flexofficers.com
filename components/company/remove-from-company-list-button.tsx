@@ -46,11 +46,15 @@ export function hideCompanyWorkforceApplication(applicationId: string) {
 type RemoveFromCompanyListButtonProps = {
   applicationId: string;
   onRemoved: () => void;
+  label?: string;
+  className?: string;
 };
 
 export function RemoveFromCompanyListButton({
   applicationId,
   onRemoved,
+  label = "Remove from List",
+  className,
 }: RemoveFromCompanyListButtonProps) {
   function handleRemove() {
     const confirmed = window.confirm(
@@ -70,10 +74,11 @@ export function RemoveFromCompanyListButton({
       type="button"
       onClick={handleRemove}
       className={cn(
-        "inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-border px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:border-fo-border-strong hover:text-fo-text"
+        "inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-border px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:border-fo-border-strong hover:text-fo-text",
+        className
       )}
     >
-      Remove from List
+      {label}
     </button>
   );
 }

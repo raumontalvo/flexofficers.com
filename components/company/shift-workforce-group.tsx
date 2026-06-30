@@ -14,6 +14,7 @@ type ShiftWorkforceGroupProps = {
   showHideFromList?: boolean;
   cancelled?: boolean;
   onHidden?: () => void;
+  onRemoved?: () => void;
 };
 
 function ShiftStaffingSummary({
@@ -59,6 +60,7 @@ export function ShiftWorkforceGroup({
   showHideFromList = false,
   cancelled = false,
   onHidden,
+  onRemoved,
 }: ShiftWorkforceGroupProps) {
   const schedule = formatShiftGroupSchedule(
     group.shift.startTime,
@@ -122,7 +124,9 @@ export function ShiftWorkforceGroup({
                 showHideFromList={showHideFromList}
                 cancelled={cancelled}
                 shiftId={group.shift.id}
+                shiftTitle={group.shift.title}
                 onHidden={onHidden}
+                onRemoved={onRemoved}
                 layout="mobile-compact"
               />
             ))}
@@ -161,7 +165,9 @@ export function ShiftWorkforceGroup({
               showHideFromList={showHideFromList}
               cancelled={cancelled}
               shiftId={group.shift.id}
+              shiftTitle={group.shift.title}
               onHidden={onHidden}
+              onRemoved={onRemoved}
               layout="desktop-row"
             />
           ))}

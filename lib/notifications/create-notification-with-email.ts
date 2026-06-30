@@ -10,6 +10,7 @@ export type NotificationEmailType =
   | "application_accepted"
   | "application_rejected"
   | "application_withdrawn"
+  | "assignment_removed"
   | "new_company_invite"
   | "invite_accepted"
   | "invite_declined"
@@ -23,6 +24,7 @@ export const NOTIFICATION_EMAIL_SUBJECTS: Record<NotificationEmailType, string> 
   application_accepted: "Application accepted",
   application_rejected: "Application rejected",
   application_withdrawn: "Application withdrawn",
+  assignment_removed: "Removed from shift",
   new_company_invite: "Company invite to apply",
   invite_accepted: "Invite accepted",
   invite_declined: "Invite declined",
@@ -37,6 +39,7 @@ const NOTIFICATION_LINK_PATHS: Record<NotificationEmailType, string> = {
   application_accepted: "/officer/applications",
   application_rejected: "/officer/applications",
   application_withdrawn: "/company/applications",
+  assignment_removed: "/officer/applications",
   new_company_invite: "/officer/invites",
   invite_accepted: "/company/applications",
   invite_declined: "/company/applications",

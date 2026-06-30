@@ -20,12 +20,34 @@ import {
   type SerializedCompanyApplicant,
 } from "@/lib/company-applications-page";
 
-const TABS: { id: CompanyApplicantsTab; label: string }[] = [
-  { id: "all", label: "All Applicants" },
+const TABS: { id: CompanyApplicantsTab; label: string; mobileLabel?: string }[] = [
+  { id: "all", label: "All Applicants", mobileLabel: "Applicants" },
   { id: "pending", label: "Pending" },
   { id: "accepted", label: "Accepted" },
   { id: "rejected", label: "Rejected" },
 ];
+
+const MOBILE_TAB_STYLES: Record<
+  CompanyApplicantsTab,
+  { selected: string; unselected: string }
+> = {
+  all: {
+    selected: "border-blue-500/45 bg-blue-500/20 text-blue-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  pending: {
+    selected: "border-amber-500/45 bg-amber-500/20 text-amber-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  accepted: {
+    selected: "border-green-500/45 bg-green-500/20 text-green-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+  rejected: {
+    selected: "border-red-500/45 bg-red-500/20 text-red-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
+};
 
 const DESKTOP_CARD_GRID = "grid grid-cols-[260px_minmax(0,1fr)_180px] items-center gap-x-6";
 
@@ -297,33 +319,62 @@ function ApplicantFilters({
 
   return (
     <div className={cn("space-y-2.5", compact && "space-y-2")}>
-      <div className="overflow-x-auto">
-        <div className="flex min-w-max flex-nowrap gap-1.5">
+      {compact ? (
+        <div className="grid w-full min-w-0 grid-cols-4 gap-1.5">
           {TABS.map((tab) => {
             const count = tabCounts[tab.id];
+            const isActive = activeTab === tab.id;
+            const styles = MOBILE_TAB_STYLES[tab.id];
 
             return (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => onTabChange(tab.id)}
+                aria-pressed={isActive}
                 className={cn(
-                  "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition",
-                  compact && "px-2.5 py-1",
-                  activeTab === tab.id
-                    ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                    : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                  "min-w-0 rounded-full border px-0.5 py-1.5 text-center text-[9px] font-semibold leading-tight transition sm:text-[10px]",
+                  isActive ? styles.selected : styles.unselected
                 )}
               >
-                {tab.label}
+                <span className="block whitespace-normal">
+                  {tab.mobileLabel ?? tab.label}
+                </span>
                 {count > 0 ? (
-                  <span className="ml-1 text-[10px] opacity-80">({count})</span>
+                  <span className="mt-0.5 block text-[9px] opacity-80">({count})</span>
                 ) : null}
               </button>
             );
           })}
         </div>
-      </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <div className="flex min-w-max flex-nowrap gap-1.5">
+            {TABS.map((tab) => {
+              const count = tabCounts[tab.id];
+
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => onTabChange(tab.id)}
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition",
+                    activeTab === tab.id
+                      ? "bg-fo-primary-bright/20 text-fo-primary-hover"
+                      : "text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
+                  )}
+                >
+                  {tab.label}
+                  {count > 0 ? (
+                    <span className="ml-1 text-[10px] opacity-80">({count})</span>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="flex min-w-0 items-center gap-2">
         <label className="relative min-w-0 flex-1">

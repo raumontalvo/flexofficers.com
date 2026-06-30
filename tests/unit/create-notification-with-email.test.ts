@@ -340,6 +340,9 @@ describe("createNotificationWithEmail", () => {
 describe("notification email metadata", () => {
   it("maps notification types to subjects and links", () => {
     expect(getNotificationEmailSubject("invite_declined")).toBe("Invite declined");
+    expect(getNotificationEmailSubject("assignment_removed")).toBe(
+      "Removed from shift"
+    );
     expect(getNotificationEmailSubject("new_application")).toBe("New application");
     expect(getNotificationEmailSubject("new_company_invite")).toBe(
       "Company invite to apply"

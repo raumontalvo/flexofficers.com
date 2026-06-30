@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Button, Card } from "@/components/ui";
 import { ShiftWorkforceGroup } from "@/components/company/shift-workforce-group";
@@ -28,6 +29,7 @@ export function CompanyWorkforceBrowseList({
   groups,
   mode,
 }: CompanyWorkforceBrowseListProps) {
+  const router = useRouter();
   const [shiftFilter, setShiftFilter] = useState<WorkforceShiftFilter>("");
   const [officerSearch, setOfficerSearch] = useState("");
   const [hiddenVersion, setHiddenVersion] = useState(0);
@@ -72,6 +74,10 @@ export function CompanyWorkforceBrowseList({
   }, [visibleGroups, officerSearch]);
 
   const hasAnyOfficers = visibleGroups.some((group) => group.officers.length > 0);
+
+  function handleRemoved() {
+    router.refresh();
+  }
 
   function handleHidden() {
     setHiddenVersion((version) => version + 1);
@@ -200,7 +206,12 @@ export function CompanyWorkforceBrowseList({
       {mode === "accepted" && filteredAcceptedGroups.length > 0 ? (
         <div className="space-y-2.5 lg:space-y-4">
           {filteredAcceptedGroups.map((group) => (
-            <ShiftWorkforceGroup key={group.shift.id} group={group} showRemove />
+            <ShiftWorkforceGroup
+              key={group.shift.id}
+              group={group}
+              showRemove
+              onRemoved={handleRemoved}
+            />
           ))}
         </div>
       ) : null}

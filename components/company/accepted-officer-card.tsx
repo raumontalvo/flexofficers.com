@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ProfileAvatar, StatusBadge, buttonClassName } from "@/components/ui";
 import { CompanyOfficerLicenses } from "@/components/company/company-officer-licenses";
 import { RemoveFromCompanyListButton } from "@/components/company/remove-from-company-list-button";
+import { RemoveAcceptedOfficerButton } from "@/components/company/remove-accepted-officer-button";
 import type { CompanyWorkforceOfficer } from "@/lib/company-workforce-data";
 import {
   formatArmedStatuses,
@@ -17,8 +18,10 @@ type AcceptedOfficerCardProps = {
   showRemove?: boolean;
   showHideFromList?: boolean;
   onHidden?: () => void;
+  onRemoved?: () => void;
   cancelled?: boolean;
   shiftId?: string;
+  shiftTitle?: string;
   layout?: "default" | "desktop-row" | "mobile-compact";
 };
 
@@ -170,8 +173,10 @@ export function AcceptedOfficerCard({
   showRemove = true,
   showHideFromList = false,
   onHidden,
+  onRemoved,
   cancelled = false,
   shiftId,
+  shiftTitle,
   layout = "default",
 }: AcceptedOfficerCardProps) {
   const [expanded, setExpanded] = useState(false);
@@ -252,14 +257,13 @@ export function AcceptedOfficerCard({
             />
           ) : null}
           {showRemove ? (
-            <button
-              type="button"
-              disabled
-              title="Officer removal is not supported yet."
-              className="inline-flex min-h-9 cursor-not-allowed items-center justify-center rounded-lg border border-red-500/20 px-2.5 text-xs font-semibold text-red-300/50"
-            >
-              Remove
-            </button>
+            <RemoveAcceptedOfficerButton
+              applicationId={officerRecord.applicationId}
+              officerName={officerName}
+              shiftTitle={shiftTitle ?? "this shift"}
+              onRemoved={() => onRemoved?.()}
+              className="min-h-9 w-full px-2.5"
+            />
           ) : null}
         </div>
 
@@ -346,19 +350,14 @@ export function AcceptedOfficerCard({
               />
             ) : null}
             {showRemove ? (
-              <button
-                type="button"
-                disabled
-                title="Officer removal is not supported yet."
-                className={buttonClassName({
-                  variant: "secondary",
-                  size: "md",
-                  className:
-                    "min-h-9 cursor-not-allowed whitespace-nowrap border-red-500/20 px-3 text-xs text-red-300/50",
-                })}
-              >
-                Remove Officer
-              </button>
+              <RemoveAcceptedOfficerButton
+                applicationId={officerRecord.applicationId}
+                officerName={officerName}
+                shiftTitle={shiftTitle ?? "this shift"}
+                onRemoved={() => onRemoved?.()}
+                label="Remove Officer"
+                className="min-h-9 whitespace-nowrap px-3"
+              />
             ) : null}
           </div>
         </div>
