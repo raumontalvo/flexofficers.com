@@ -13,8 +13,126 @@ import { cn } from "@/lib/cn";
 const fieldClassName =
   "min-h-11 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
-const dateTimeInputClassName =
-  "min-h-11 w-[calc(100%-2px)] max-w-full box-border mr-px rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
+function CalendarIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden className={className}>
+      <rect
+        x="2.5"
+        y="3.5"
+        width="11"
+        height="10"
+        rx="1.2"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
+      <path
+        d="M5 2.5v2M11 2.5v2M2.5 6.5h11"
+        stroke="currentColor"
+        strokeWidth="1.2"
+      />
+    </svg>
+  );
+}
+
+function ClockIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden className={className}>
+      <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.2" />
+      <path
+        d="M8 5v3.2l2 1.2"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function formatShiftFormDate(value: string) {
+  if (!value) {
+    return "";
+  }
+
+  const [year, month, day] = value.split("-").map(Number);
+
+  if (!year || !month || !day) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(year, month - 1, day));
+}
+
+function formatShiftFormTime(value: string) {
+  if (!value) {
+    return "";
+  }
+
+  const [hours, minutes] = value.split(":").map(Number);
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+    return "";
+  }
+
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function ShiftDateTimeField({
+  id,
+  type,
+  value,
+  onChange,
+  placeholder,
+  icon,
+}: {
+  id: string;
+  type: "date" | "time";
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  icon: "calendar" | "clock";
+}) {
+  const display =
+    type === "date" ? formatShiftFormDate(value) : formatShiftFormTime(value);
+  const Icon = icon === "calendar" ? CalendarIcon : ClockIcon;
+
+  return (
+    <div
+      className={cn(
+        "relative w-full max-w-full min-w-0 rounded-2xl border border-fo-border bg-fo-bg/80 box-border transition",
+        "focus-within:border-fo-primary-bright/50 focus-within:ring-2 focus-within:ring-fo-primary-bright/20"
+      )}
+    >
+      <div className="pointer-events-none flex min-h-11 w-full max-w-full min-w-0 items-center gap-4 px-4">
+        <Icon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
+        <span
+          className={cn(
+            "min-w-0 flex-1 truncate text-sm",
+            display ? "text-fo-text" : "text-fo-text-subtle"
+          )}
+        >
+          {display || placeholder}
+        </span>
+      </div>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="absolute inset-0 h-full w-full max-w-full min-w-0 cursor-pointer opacity-0"
+      />
+    </div>
+  );
+}
 
 function SectionCard({
   number,
@@ -154,38 +272,41 @@ export function PostShiftForm({
       <SectionCard
         number={2}
         title="Date & Time"
-        className="fo-shift-datetime-section overflow-visible"
-        contentClassName="w-full max-w-full min-w-0 overflow-visible"
+        className="fo-shift-datetime-section"
+        contentClassName="w-full max-w-full min-w-0"
       >
-        <div className="grid grid-cols-1 gap-4 w-full max-w-full min-w-0 md:grid-cols-3">
-          <div className="w-full max-w-full min-w-0 space-y-2 overflow-visible">
+        <div className="grid w-full max-w-full min-w-0 grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="w-full max-w-full min-w-0 space-y-2">
             <RequiredLabel htmlFor="startDate">Start Date</RequiredLabel>
-            <input
+            <ShiftDateTimeField
               id="startDate"
               type="date"
               value={form.startDate}
-              onChange={(event) => updateField("startDate", event.target.value)}
-              className={dateTimeInputClassName}
+              onChange={(startDate) => updateField("startDate", startDate)}
+              placeholder="Select date"
+              icon="calendar"
             />
           </div>
-          <div className="w-full max-w-full min-w-0 space-y-2 overflow-visible">
+          <div className="w-full max-w-full min-w-0 space-y-2">
             <RequiredLabel htmlFor="startTime">Start Time</RequiredLabel>
-            <input
+            <ShiftDateTimeField
               id="startTime"
               type="time"
               value={form.startTime}
-              onChange={(event) => updateField("startTime", event.target.value)}
-              className={dateTimeInputClassName}
+              onChange={(startTime) => updateField("startTime", startTime)}
+              placeholder="Select time"
+              icon="clock"
             />
           </div>
-          <div className="w-full max-w-full min-w-0 space-y-2 overflow-visible">
+          <div className="w-full max-w-full min-w-0 space-y-2">
             <RequiredLabel htmlFor="endTime">End Time</RequiredLabel>
-            <input
+            <ShiftDateTimeField
               id="endTime"
               type="time"
               value={form.endTime}
-              onChange={(event) => updateField("endTime", event.target.value)}
-              className={dateTimeInputClassName}
+              onChange={(endTime) => updateField("endTime", endTime)}
+              placeholder="Select time"
+              icon="clock"
             />
           </div>
         </div>
