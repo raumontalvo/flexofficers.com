@@ -21,11 +21,65 @@ type OnboardingRoleChoiceProps = {
   initialRole?: Role | null;
 };
 
+type FeatureGroup = {
+  title: string;
+  items: string[];
+};
+
 const PENDING_ROLE_KEY = "flexofficers.pendingRole";
 
+const officerFeatureGroups: FeatureGroup[] = [
+  {
+    title: "Find Work",
+    items: [
+      "Find open shifts",
+      "Get company invites",
+      "Apply to shifts in seconds",
+    ],
+  },
+  {
+    title: "Build Your Career",
+    items: [
+      "Build your professional profile",
+      "Showcase licenses and certifications",
+      "Work when it fits your schedule",
+    ],
+  },
+  {
+    title: "After Acceptance",
+    items: [
+      "Get company contact information after acceptance",
+      "Track your applications and upcoming shifts",
+    ],
+  },
+];
+
+const companyFeatureGroups: FeatureGroup[] = [
+  {
+    title: "Post Jobs",
+    items: [
+      "Create public & private job posts",
+      "Post open shifts",
+      "Fill shifts faster",
+    ],
+  },
+  {
+    title: "Hire Officers",
+    items: [
+      "Invite officers to apply",
+      "Review profiles, licenses & certifications",
+      "Accept or reject applicants",
+    ],
+  },
+  {
+    title: "Manage Team",
+    items: ["Manage staff", "Manage accepted officers"],
+  },
+];
+
 const roleCardClassName = cn(
-  "flex h-full flex-col border-slate-700/80 bg-gradient-to-b from-[#0c1424] via-fo-bg-elevated to-[#070d18]",
-  "!p-8 sm:!p-9 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-colors md:hover:border-fo-primary-bright/60"
+  "flex h-full min-h-0 flex-col overflow-visible border-slate-700/80 bg-gradient-to-b from-[#0c1424] via-fo-bg-elevated to-[#070d18]",
+  "!px-8 !pt-8 !pb-10 sm:!px-9 sm:!pt-9 sm:!pb-10 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-colors md:hover:border-fo-primary-bright/60"
 );
 
 function isValidRole(value: string | null): value is Role {
@@ -40,18 +94,36 @@ function RoleCardIcon({ children }: { children: ReactNode }) {
   );
 }
 
-function RoleFeatureList({ items }: { items: string[] }) {
+function RoleFeatureGroups({
+  groups,
+  className,
+}: {
+  groups: FeatureGroup[];
+  className?: string;
+}) {
   return (
-    <ul className="mt-5 space-y-3 text-left">
-      {items.map((item) => (
-        <li key={item} className="flex items-start gap-3 text-sm text-fo-text-muted">
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fo-primary/15 text-xs font-bold text-fo-primary-hover">
-            ✓
-          </span>
-          <span>{item}</span>
-        </li>
+    <div className={cn("mt-5 space-y-6 text-left", className)}>
+      {groups.map((group) => (
+        <div key={group.title}>
+          <h4 className="text-xs font-semibold uppercase tracking-[0.14em] text-fo-primary-hover">
+            {group.title}
+          </h4>
+          <ul className="mt-3 space-y-3">
+            {group.items.map((item) => (
+              <li
+                key={item}
+                className="flex items-start gap-3 text-sm text-fo-text-muted"
+              >
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-fo-primary/15 text-xs font-bold text-fo-primary-hover">
+                  ✓
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -124,12 +196,12 @@ export default function OnboardingRoleChoice({
 
   return (
     <>
-      <div className="mb-4 flex justify-center">
+      <div className="-mt-6 mb-3 flex justify-center sm:-mt-8">
         <FlexOfficersLogoLink
           href="/"
           height={120}
           priority
-          imageClassName="!h-auto !w-[180px] !max-w-[180px] md:!w-[260px] md:!max-w-[260px]"
+          imageClassName="!h-auto !w-[180px] !max-w-[180px] md:!w-[240px] md:!max-w-[240px]"
         />
       </div>
 
@@ -146,7 +218,7 @@ export default function OnboardingRoleChoice({
         </Card>
       ) : null}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-2">
         <Card variant="elevated" className={roleCardClassName}>
           <RoleCardIcon>
             <ProfileIcon className="h-7 w-7" />
@@ -156,29 +228,20 @@ export default function OnboardingRoleChoice({
             Browse shifts and find the right opportunities on your schedule.
           </CardDescription>
 
-          <RoleFeatureList
-            items={[
-              "Find open shifts",
-              "Get company invites",
-              "Apply to shifts in seconds",
-              "Build your professional profile",
-              "Showcase licenses and certifications",
-              "Get company contact information after acceptance",
-              "Track your applications and upcoming shifts",
-              "Work when it fits your schedule",
-            ]}
-          />
+          <RoleFeatureGroups groups={officerFeatureGroups} className="flex-1" />
 
-          <Button
-            type="button"
-            fullWidth
-            className="mt-auto w-full gap-2 pt-8"
-            disabled={savingRole !== null}
-            onClick={() => chooseRole("OFFICER")}
-          >
-            <ProfileIcon className="h-5 w-5 shrink-0" />
-            {savingRole === "OFFICER" ? "Saving..." : "Continue as Officer"}
-          </Button>
+          <div className="mt-auto shrink-0 pt-8">
+            <Button
+              type="button"
+              fullWidth
+              className="w-full gap-2"
+              disabled={savingRole !== null}
+              onClick={() => chooseRole("OFFICER")}
+            >
+              <ProfileIcon className="h-5 w-5 shrink-0" />
+              {savingRole === "OFFICER" ? "Saving..." : "Continue as Officer"}
+            </Button>
+          </div>
         </Card>
 
         <Card variant="elevated" className={roleCardClassName}>
@@ -190,35 +253,31 @@ export default function OnboardingRoleChoice({
             Post shifts, review licensed officers, and fill coverage faster.
           </CardDescription>
 
-          <RoleFeatureList
-            items={[
-              "Create public & private job posts",
-              "Post open shifts",
-              "Invite officers to apply",
-              "Review profiles, licenses & certifications",
-              "Accept or reject applicants",
-              "Manage staff",
-              "Manage accepted officers",
-              "Fill shifts faster",
-            ]}
-          />
+          <RoleFeatureGroups groups={companyFeatureGroups} className="flex-1" />
 
-          <Button
-            type="button"
-            fullWidth
-            className="mt-auto w-full gap-2 pt-8"
-            disabled={savingRole !== null}
-            onClick={() => chooseRole("COMPANY")}
-          >
-            <CompaniesIcon className="h-5 w-5 shrink-0" />
-            {savingRole === "COMPANY" ? "Saving..." : "Continue as Company"}
-          </Button>
+          <div className="mt-auto shrink-0 pt-8">
+            <Button
+              type="button"
+              fullWidth
+              className="w-full gap-2"
+              disabled={savingRole !== null}
+              onClick={() => chooseRole("COMPANY")}
+            >
+              <CompaniesIcon className="h-5 w-5 shrink-0" />
+              {savingRole === "COMPANY" ? "Saving..." : "Continue as Company"}
+            </Button>
+          </div>
         </Card>
       </div>
 
-      <Card variant="muted" className="mt-6 !p-5 sm:!p-6">
-        <div className="flex items-start gap-4">
-          <IconShield className="mt-0.5 h-7 w-7 shrink-0 text-fo-primary-bright" />
+      <Card variant="muted" className="mt-8 !p-5 sm:!p-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <IconShield className="h-7 w-7 shrink-0 text-fo-primary-bright" />
+            <h3 className="text-sm font-semibold text-fo-text sm:text-base">
+              Important
+            </h3>
+          </div>
           <p className="text-sm leading-relaxed text-fo-text sm:text-base">
             Companies are responsible for verifying licenses, credentials, hiring
             requirements, and paying officers directly for completed work.
