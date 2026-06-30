@@ -16,6 +16,9 @@ export const officerUserSummarySelect = {
   email: true,
 } satisfies Prisma.UserSelect;
 
+/** Email only — do not add imageUrl until User.imageUrl exists in production. */
+export const officerApplicantEmailSelect = officerUserSummarySelect;
+
 /** Explicit Officer columns for Prisma select/include — matches current schema. */
 export const officerProfileSelect = {
   id: true,

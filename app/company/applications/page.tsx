@@ -1,8 +1,7 @@
 import { UserRole } from "@/app/generated/prisma/enums";
 import { CompanyApplicantsPageContent } from "@/components/company/company-applicants-page-content";
 import { PageShell, SectionHeading } from "@/components/ui";
-import { serializeCompanyApplicant } from "@/lib/company-applications-page";
-import { officerApplicantSelect, officerUserSummarySelect } from "@/lib/officer-fields";
+import { serializeCompanyApplicant, companyApplicationListSelect } from "@/lib/company-applications-page";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 
@@ -21,37 +20,7 @@ export default async function CompanyApplicationsPage() {
         },
       },
     },
-    include: {
-      shift: {
-        select: {
-          id: true,
-          title: true,
-          location: true,
-          city: true,
-          state: true,
-          startTime: true,
-          endTime: true,
-          status: true,
-          hourlyRate: true,
-          positionsNeeded: true,
-          workType: true,
-          requirements: true,
-          otherRequirements: true,
-          armedRequirement: true,
-        },
-      },
-      officer: {
-        select: {
-          ...officerApplicantSelect,
-          phone: true,
-          availability: true,
-          state: true,
-          user: {
-            select: officerUserSummarySelect,
-          },
-        },
-      },
-    },
+    select: companyApplicationListSelect,
     orderBy: {
       appliedAt: "desc",
     },

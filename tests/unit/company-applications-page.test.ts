@@ -4,6 +4,7 @@ import {
   ShiftStatus,
 } from "@/app/generated/prisma/enums";
 import {
+  companyApplicationListSelect,
   filterCompanyApplicantsByShift,
   filterCompanyApplicantsByTab,
   getCompanyApplicantsTabCounts,
@@ -11,6 +12,34 @@ import {
   searchCompanyApplicants,
   serializeCompanyApplicant,
 } from "@/lib/company-applications-page";
+
+describe("companyApplicationListSelect", () => {
+  it("selects officer profilePhotoUrl and user email only", () => {
+    expect(companyApplicationListSelect.officer.select.profilePhotoUrl).toBe(true);
+    expect(companyApplicationListSelect.officer.select.user.select).toEqual({
+      email: true,
+    });
+    expect(
+      "imageUrl" in companyApplicationListSelect.officer.select.user.select
+    ).toBe(false);
+  });
+
+  it("does not select reminder tracking columns on Application", () => {
+    expect(companyApplicationListSelect).toEqual({
+      id: true,
+      status: true,
+      appliedAt: true,
+      shift: expect.any(Object),
+      officer: expect.any(Object),
+    });
+    expect("shift24HourReminderSentAt" in companyApplicationListSelect).toBe(
+      false
+    );
+    expect("shift2HourReminderSentAt" in companyApplicationListSelect).toBe(
+      false
+    );
+  });
+});
 
 const baseApplication = {
   id: "app-1",

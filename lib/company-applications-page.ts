@@ -6,6 +6,10 @@ import {
 } from "@/app/generated/prisma/enums";
 import type { OfficerApplicantRecord } from "@/lib/officer-fields";
 import {
+  officerApplicantEmailSelect,
+  officerApplicantSelect,
+} from "@/lib/officer-fields";
+import {
   formatShiftTableDate,
   getShiftLocationParts,
 } from "@/lib/company-shifts-page";
@@ -25,6 +29,42 @@ import {
   fromShiftArmedRequirement,
   fromShiftWorkType,
 } from "@/lib/shift-form-options";
+
+/** Explicit select for /company/applications — avoids unmigrated Application columns. */
+export const companyApplicationListSelect = {
+  id: true,
+  status: true,
+  appliedAt: true,
+  shift: {
+    select: {
+      id: true,
+      title: true,
+      location: true,
+      city: true,
+      state: true,
+      startTime: true,
+      endTime: true,
+      status: true,
+      hourlyRate: true,
+      positionsNeeded: true,
+      workType: true,
+      requirements: true,
+      otherRequirements: true,
+      armedRequirement: true,
+    },
+  },
+  officer: {
+    select: {
+      ...officerApplicantSelect,
+      phone: true,
+      availability: true,
+      state: true,
+      user: {
+        select: officerApplicantEmailSelect,
+      },
+    },
+  },
+} as const;
 
 export type CompanyApplicantsTab = "all" | "pending" | "accepted" | "rejected";
 
