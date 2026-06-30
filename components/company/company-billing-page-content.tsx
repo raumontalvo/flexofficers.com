@@ -238,8 +238,8 @@ function CompanyBillingMobileContent({
               </div>
             ) : null}
             <p className="mt-2 text-xs leading-relaxed text-fo-text-muted">
-              After your trial ends, your annual subscription will begin
-              automatically.
+              After your trial ends, you will not be able to use the features
+              until you start a subscription.
             </p>
           </div>
         ) : null}
@@ -458,8 +458,8 @@ export function CompanyBillingPageContent({
                     </p>
                   ) : null}
                   <p className="mt-3 text-sm leading-relaxed text-fo-text-muted">
-                    After your trial ends, your annual subscription will begin
-                    automatically.
+                    After your trial ends, you will not be able to use the
+                    features until you start a subscription.
                   </p>
                   <div className="mt-4">
                     {billing.stripeBillingReady ? (
