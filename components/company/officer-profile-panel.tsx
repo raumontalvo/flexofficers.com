@@ -16,7 +16,6 @@ type OfficerProfilePanelProps = {
   onClose: () => void;
   isOnStaff?: boolean;
   onStaffChange?: (onStaff: boolean) => void;
-  hideMobileSideBorders?: boolean;
 };
 
 function DetailField({
@@ -71,7 +70,6 @@ export function OfficerProfilePanel({
   onClose,
   isOnStaff = false,
   onStaffChange,
-  hideMobileSideBorders = false,
 }: OfficerProfilePanelProps) {
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -107,10 +105,7 @@ export function OfficerProfilePanel({
 
       <aside
         className={cn(
-          "fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-[#07101c]/95 shadow-2xl backdrop-blur-xl transition-transform duration-300",
-          hideMobileSideBorders
-            ? "max-lg:border-x-0 lg:border-l lg:border-white/10"
-            : "border-l border-white/10",
+          "fixed inset-y-0 right-0 z-50 flex w-full max-w-xl flex-col bg-[#07101c]/95 shadow-2xl backdrop-blur-xl transition-transform duration-300 max-lg:border-x-0 lg:border-l lg:border-white/10",
           officer ? "translate-x-0" : "translate-x-full"
         )}
         aria-hidden={!officer}

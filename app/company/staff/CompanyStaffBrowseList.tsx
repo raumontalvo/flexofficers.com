@@ -172,7 +172,6 @@ export function CompanyStaffBrowseList({
         officer={profileOfficer}
         onClose={() => setProfileOfficerId(null)}
         isOnStaff={Boolean(profileOfficer)}
-        hideMobileSideBorders
         onStaffChange={
           profileOfficer
             ? (onStaff) => {
