@@ -14,7 +14,7 @@ const fieldClassName =
   "min-h-11 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
 const dateTimeInputClassName =
-  "min-h-11 w-full max-w-full min-w-0 box-border rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
+  "min-h-11 w-[calc(100%-2px)] max-w-full box-border mr-px rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
 function SectionCard({
   number,
@@ -154,11 +154,11 @@ export function PostShiftForm({
       <SectionCard
         number={2}
         title="Date & Time"
-        className="fo-shift-datetime-section overflow-hidden"
-        contentClassName="w-full max-w-full min-w-0 overflow-hidden"
+        className="fo-shift-datetime-section overflow-visible"
+        contentClassName="w-full max-w-full min-w-0 overflow-visible"
       >
         <div className="grid grid-cols-1 gap-4 w-full max-w-full min-w-0 md:grid-cols-3">
-          <div className="w-full max-w-full min-w-0 space-y-2">
+          <div className="w-full max-w-full min-w-0 space-y-2 overflow-visible">
             <RequiredLabel htmlFor="startDate">Start Date</RequiredLabel>
             <input
               id="startDate"
@@ -168,7 +168,7 @@ export function PostShiftForm({
               className={dateTimeInputClassName}
             />
           </div>
-          <div className="w-full max-w-full min-w-0 space-y-2">
+          <div className="w-full max-w-full min-w-0 space-y-2 overflow-visible">
             <RequiredLabel htmlFor="startTime">Start Time</RequiredLabel>
             <input
               id="startTime"
@@ -178,7 +178,7 @@ export function PostShiftForm({
               className={dateTimeInputClassName}
             />
           </div>
-          <div className="w-full max-w-full min-w-0 space-y-2">
+          <div className="w-full max-w-full min-w-0 space-y-2 overflow-visible">
             <RequiredLabel htmlFor="endTime">End Time</RequiredLabel>
             <input
               id="endTime"
