@@ -269,7 +269,7 @@ export function ApplicationsBrowseList({
             </Button>
           </Card>
         ) : (
-          <div className="space-y-2 md:space-y-1.5">
+          <div className="space-y-2 md:space-y-4">
             {pageApplications.map((application) => (
               <ApplicationCard
                 key={application.id}

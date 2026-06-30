@@ -1,7 +1,8 @@
 "use client";
 
+import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
-import { StatusBadge, buttonClassName } from "@/components/ui";
+import { StatusBadge, ProfileAvatar, buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
   formatEstimatedShiftPay,
@@ -16,7 +17,6 @@ import {
   getDaysUntilStart,
   getUpcomingUrgencyTone,
 } from "@/lib/officer-upcoming-shift-data";
-import { getShiftRequirementChips } from "@/lib/shift-requirements";
 
 const urgencyToneClasses = {
   urgent: "border-red-500/40 bg-red-500/10 text-red-200",
@@ -59,6 +59,13 @@ function LocationIcon({ className }: { className?: string }) {
   );
 }
 
+function formatUrgencyBadgeLabel(label: string) {
+  return label
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
   const { shift, company } = application;
   const startTime = new Date(shift.startTime);
@@ -68,11 +75,11 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
   const estimatedPay = formatEstimatedShiftPay(hourlyRate, startTime, endTime);
   const locationLabel = formatShiftCityState(shift);
   const shiftTimeLabel = fromShiftTimeType(shift.shiftTimeType);
-  const requirementChips = getShiftRequirementChips(shift, 6);
   const contactAvailable = hasCompanyContact(company);
   const daysUntilStart = getDaysUntilStart(shift.startTime);
-  const urgencyLabel = formatStartsInLabel(daysUntilStart);
+  const urgencyLabel = formatUrgencyBadgeLabel(formatStartsInLabel(daysUntilStart));
   const urgencyTone = getUpcomingUrgencyTone(daysUntilStart);
+  const contactName = company.contactName?.trim() || company.companyName;
 
   return (
     <>
@@ -146,122 +153,121 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
         </div>
       </article>
 
-      <article className="fo-glass-card fo-glass-card-hover hidden rounded-lg border border-white/10 transition lg:block">
-        <div className="flex flex-col gap-3 p-3 lg:grid lg:grid-cols-[108px_minmax(0,1.1fr)_minmax(120px,0.9fr)_minmax(88px,0.55fr)_minmax(0,0.75fr)_minmax(0,0.85fr)_auto] lg:items-center lg:gap-2.5 lg:px-3 lg:py-2.5">
-          <div className="flex items-center lg:justify-center">
-            <span
-              className={cn(
-                "inline-flex min-h-[52px] w-full max-w-[108px] flex-col items-center justify-center rounded-lg border px-2 py-1.5 text-center text-[10px] font-semibold leading-tight",
-                urgencyToneClasses[urgencyTone]
-              )}
-            >
-              {urgencyLabel}
-            </span>
+      <article className="fo-glass-card fo-glass-card-hover hidden min-h-[220px] rounded-xl border border-white/10 lg:block">
+        <div className="grid h-full grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-5 p-5">
+          <div className="flex min-w-0 flex-col gap-3 border-r border-white/[0.06] pr-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={cn(
+                  "inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                  urgencyToneClasses[urgencyTone]
+                )}
+              >
+                {urgencyLabel}
+              </span>
+              <StatusBadge
+                variant="success"
+                className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
+              >
+                CONFIRMED
+              </StatusBadge>
+            </div>
+
+            <div className="space-y-1.5">
+              <h2 className="text-xl font-bold leading-tight text-fo-text">{shift.title}</h2>
+              <p className="text-base font-semibold text-fo-primary-bright">
+                {company.companyName}
+              </p>
+            </div>
+
+            <div className="space-y-2 text-sm text-fo-text-muted">
+              <p className="flex items-center gap-2">
+                <LocationIcon className="h-4 w-4 shrink-0 text-red-400" />
+                <span className="min-w-0 truncate">{locationLabel}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
+                <span>
+                  {schedule.weekday}, {schedule.monthDay}
+                </span>
+              </p>
+              <p className="flex items-center gap-2">
+                <ClockIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
+                <span>{schedule.timeRange}</span>
+              </p>
+              {shiftTimeLabel ? (
+                <p className="text-xs text-fo-text-subtle">{shiftTimeLabel}</p>
+              ) : null}
+            </div>
           </div>
 
-          <div className="min-w-0 space-y-1">
-            <StatusBadge
-              variant="success"
-              className="!min-h-5 !px-1.5 !py-0 !text-[9px] !leading-5"
-            >
-              CONFIRMED
-            </StatusBadge>
-            <h2 className="truncate text-sm font-bold leading-tight text-fo-text">
-              {shift.title}
-            </h2>
-            <p className="truncate text-xs font-medium text-fo-primary-bright">
-              {company.companyName}
-            </p>
-            <p className="truncate text-[11px] text-fo-text-muted">
-              📍 {locationLabel}
-            </p>
-          </div>
-
-          <div className="min-w-0 space-y-0.5 text-[11px] leading-tight">
-            <p className="text-fo-text">📅 {schedule.weekday}, {schedule.monthDay}</p>
-            <p className="text-fo-text-muted">🕑 {schedule.timeRange}</p>
-            {shiftTimeLabel ? (
-              <p className="text-[10px] text-fo-text-subtle">{shiftTimeLabel}</p>
-            ) : null}
-          </div>
-
-          <div className="min-w-0 shrink-0">
-            <p className="text-lg font-bold leading-none text-fo-primary-bright">
+          <div className="flex min-w-0 flex-col justify-center gap-2 border-r border-white/[0.06] px-1 pr-5">
+            <p className="text-3xl font-bold leading-none text-fo-primary-bright">
               {formatHourlyRate(hourlyRate)}
-              <span className="text-[11px] font-semibold text-fo-text-muted">/hr</span>
+              <span className="ml-1 text-base font-semibold text-fo-text-muted">/hr</span>
             </p>
             {estimatedPay ? (
-              <p className="mt-0.5 text-[10px] text-fo-text-muted">
-                Est. {estimatedPay}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="min-w-0">
-            {requirementChips.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
-                {requirementChips.map((chip) => (
-                  <span
-                    key={chip}
-                    className="rounded-full border border-slate-600/50 bg-slate-800/50 px-2 py-0.5 text-[10px] font-medium text-slate-300"
-                  >
-                    {chip}
-                  </span>
-                ))}
-              </div>
+              <p className="text-sm text-fo-text-muted">Est. earnings {estimatedPay}</p>
             ) : (
-              <p className="text-[11px] text-fo-text-subtle">—</p>
+              <p className="text-sm text-fo-text-subtle">Estimated earnings unavailable</p>
             )}
           </div>
 
-          <div className="min-w-0">
-            {contactAvailable ? (
-              <div className="space-y-0.5 text-[10px] leading-tight text-fo-text-muted">
-                {company.contactName ? (
-                  <p className="truncate font-medium text-fo-text">
-                    {company.contactName}
-                  </p>
-                ) : null}
-                {company.phone ? (
-                  <p className="truncate">
-                    <a href={`tel:${company.phone}`} className="hover:text-fo-primary-bright">
-                      {company.phone}
-                    </a>
-                  </p>
-                ) : null}
-                {company.email ? (
-                  <p className="truncate">
-                    <a
-                      href={`mailto:${company.email}`}
-                      className="break-all hover:text-fo-primary-bright"
-                    >
-                      {company.email}
-                    </a>
-                  </p>
-                ) : null}
-              </div>
-            ) : (
-              <p className="text-[10px] leading-tight text-fo-text-subtle">
-                Company contact details not provided yet.
+          <div className="flex min-w-0 flex-col justify-between gap-4">
+            <div className="space-y-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted">
+                Company contact
               </p>
-            )}
-          </div>
+              <div className="flex items-start gap-3">
+                <ProfileAvatar
+                  name={company.companyName}
+                  size="sm"
+                  className="!h-10 !w-10 shrink-0 !text-xs"
+                />
+                <div className="min-w-0 space-y-1">
+                  <p className="truncate text-sm font-semibold text-fo-text">{contactName}</p>
+                  {contactAvailable && company.phone ? (
+                    <p className="truncate text-xs text-fo-text-muted">
+                      <a
+                        href={`tel:${company.phone}`}
+                        className="transition hover:text-fo-primary-bright"
+                      >
+                        {company.phone}
+                      </a>
+                    </p>
+                  ) : (
+                    <p className="text-xs text-fo-text-subtle">Phone not provided</p>
+                  )}
+                  {contactAvailable && company.email ? (
+                    <p className="truncate text-xs text-fo-text-muted">
+                      <a
+                        href={`mailto:${company.email}`}
+                        className="break-all transition hover:text-fo-primary-bright"
+                      >
+                        {company.email}
+                      </a>
+                    </p>
+                  ) : (
+                    <p className="text-xs text-fo-text-subtle">Email not provided</p>
+                  )}
+                </div>
+              </div>
+            </div>
 
-          <div className="flex flex-col gap-1.5">
-            <ShiftDetailLink
-              shiftId={shift.id}
-              className="inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10"
-            >
-              View Details
-            </ShiftDetailLink>
-            <button
-              type="button"
-              disabled
-              title="Cancellation is not supported yet. Contact the company directly."
-              className="inline-flex min-h-8 cursor-not-allowed items-center justify-center rounded-lg border border-red-500/20 px-3 py-1.5 text-xs font-semibold text-red-300/50"
-            >
-              Cancel Assignment
-            </button>
+            <div className="flex flex-col gap-2">
+              <ShiftDetailLink
+                shiftId={shift.id}
+                className={buttonClassName({
+                  variant: "secondary",
+                  size: "md",
+                  className:
+                    "w-full border-fo-primary-bright/40 text-fo-primary-bright hover:border-fo-primary-bright hover:bg-fo-primary/10",
+                })}
+              >
+                View Details
+              </ShiftDetailLink>
+              <CancelAssignmentButton applicationId={application.id} />
+            </div>
           </div>
         </div>
       </article>

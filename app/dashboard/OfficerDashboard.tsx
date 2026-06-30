@@ -97,7 +97,6 @@ export default async function OfficerDashboard({
               value={applicationsCount}
               hint="Shifts you've applied to"
               tone="purple"
-              showChevron
               icon={<ShiftsIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
             <StatCard
@@ -105,7 +104,6 @@ export default async function OfficerDashboard({
               value={acceptedCount}
               hint="Assignments you've won"
               tone="green"
-              showChevron
               icon={<AcceptedIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
             <StatCard
@@ -113,7 +111,6 @@ export default async function OfficerDashboard({
               value={upcomingCount}
               hint="Accepted shifts starting soon"
               tone="blue"
-              showChevron
               icon={<UpcomingIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
             <StatCard
@@ -121,7 +118,6 @@ export default async function OfficerDashboard({
               value={availableShiftsCount}
               hint="Open shifts posted by companies"
               tone="amber"
-              showChevron
               icon={<BrowseIcon className="h-5 w-5 md:h-4 md:w-4" />}
             />
           </MobileStatGrid>

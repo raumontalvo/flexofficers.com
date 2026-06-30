@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
 import { ApplicationStatus, type ArmedStatus } from "@/app/generated/prisma/enums";
 import ApplyButton from "@/app/shifts/ApplyButton";
 import { OfficerProfileApplyNotice } from "@/components/officer/officer-profile-apply-notice";
@@ -27,6 +28,8 @@ type ShiftDetailActionsProps = {
     }>;
   } | null;
   applicationStatus: ApplicationStatus | null;
+  applicationId?: string | null;
+  canCancelAssignment?: boolean;
   isSignedIn: boolean;
   shiftAcceptingApplications: boolean;
   layout?: "default" | "mobile";
@@ -52,6 +55,8 @@ export function ShiftDetailActions({
   profileIncomplete = false,
   officer = null,
   applicationStatus,
+  applicationId = null,
+  canCancelAssignment = false,
   isSignedIn,
   shiftAcceptingApplications,
   layout = "default",
@@ -122,6 +127,12 @@ export function ShiftDetailActions({
         ) : null}
         {applyControl}
         {companyControl}
+        {canCancelAssignment && applicationId ? (
+          <CancelAssignmentButton
+            applicationId={applicationId}
+            className="min-h-12 rounded-xl text-sm"
+          />
+        ) : null}
       </div>
     );
   }

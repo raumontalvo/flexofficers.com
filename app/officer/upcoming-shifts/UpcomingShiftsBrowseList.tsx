@@ -234,7 +234,7 @@ export function UpcomingShiftsBrowseList({
       ) : null}
 
       {filteredApplications.length > 0 ? (
-        <div className="space-y-3 lg:space-y-2">
+        <div className="space-y-3 lg:space-y-4">
           {filteredApplications.map((application) => (
             <UpcomingShiftCard key={application.id} application={application} />
           ))}

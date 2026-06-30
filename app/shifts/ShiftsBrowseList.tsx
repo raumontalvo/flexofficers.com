@@ -505,7 +505,7 @@ export function ShiftsBrowseList({
             onViewAllOpenShifts={handleViewAllOpenShifts}
           />
         ) : (
-          <MobileStack className="space-y-2 md:space-y-1">
+          <MobileStack className="space-y-2 md:space-y-4">
             {pageShifts.map((shift) => (
               <ShiftCard key={shift.id} shift={shift} />
             ))}

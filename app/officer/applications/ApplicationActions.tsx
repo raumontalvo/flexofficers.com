@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import type { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { cn } from "@/lib/cn";
 import { canOfficerDeleteApplication } from "@/lib/officer-application-delete";
+import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
 import WithdrawApplicationButton from "./WithdrawApplicationButton";
 
@@ -16,7 +16,7 @@ type ApplicationActionsProps = {
   shiftEndTime: string;
   onListChange: () => void;
   onDeleted?: (applicationId: string) => void;
-  layout?: "compact" | "mobile-row";
+  layout?: "compact" | "mobile-row" | "desktop";
 };
 
 function EyeIcon({ className }: { className?: string }) {
@@ -80,6 +80,7 @@ export function ApplicationActions({
   layout = "compact",
 }: ApplicationActionsProps) {
   const mobileRow = layout === "mobile-row";
+  const desktop = layout === "desktop";
   const showDelete = canOfficerDeleteApplication({
     status,
     shiftStatus,
@@ -89,6 +90,19 @@ export function ApplicationActions({
   function handleDeleted(applicationId: string) {
     onDeleted?.(applicationId);
   }
+
+  const viewShiftClassName = cn(
+    desktop
+      ? "inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-2 text-sm font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10"
+      : cn(
+          compactButtonClass,
+          "border border-fo-primary-bright/40 bg-transparent text-fo-primary-bright hover:border-fo-primary-bright hover:bg-fo-primary/10"
+        )
+  );
+
+  const actionButtonClass = desktop
+    ? "min-h-10 w-full px-3 py-2 text-sm"
+    : compactButtonClass;
 
   if (mobileRow) {
     return (
@@ -118,12 +132,11 @@ export function ApplicationActions({
         ) : null}
 
         {status === "ACCEPTED" && !showDelete ? (
-          <Link
-            href="/officer/accepted-shifts"
+          <CancelAssignmentButton
+            applicationId={applicationId}
+            label="Cancel"
             className={cn(mobileActionClass, deleteButtonClass)}
-          >
-            <span className="truncate">Cancel</span>
-          </Link>
+          />
         ) : null}
 
         {showDelete ? (
@@ -140,14 +153,8 @@ export function ApplicationActions({
   }
 
   return (
-    <div className="flex flex-col items-stretch gap-1.5">
-      <ShiftDetailLink
-        shiftId={shiftId}
-        className={cn(
-          compactButtonClass,
-          "border border-fo-primary-bright/40 bg-transparent text-fo-primary-bright hover:border-fo-primary-bright hover:bg-fo-primary/10"
-        )}
-      >
+    <div className={cn("flex flex-col items-stretch", desktop ? "gap-2" : "gap-1.5")}>
+      <ShiftDetailLink shiftId={shiftId} className={viewShiftClassName}>
         View Shift
       </ShiftDetailLink>
 
@@ -156,16 +163,15 @@ export function ApplicationActions({
           applicationId={applicationId}
           compact
           label="Withdraw"
+          className={desktop ? actionButtonClass : undefined}
         />
       ) : null}
 
       {status === "ACCEPTED" && !showDelete ? (
-        <Link
-          href="/officer/accepted-shifts"
-          className={cn(compactButtonClass, deleteButtonClass)}
-        >
-          Cancel Assignment
-        </Link>
+        <CancelAssignmentButton
+          applicationId={applicationId}
+          className={cn(actionButtonClass, deleteButtonClass)}
+        />
       ) : null}
 
       {showDelete ? (
@@ -173,7 +179,7 @@ export function ApplicationActions({
           applicationId={applicationId}
           onDeleted={handleDeleted}
           label="Delete"
-          className={cn(compactButtonClass, deleteButtonClass)}
+          className={cn(actionButtonClass, deleteButtonClass)}
         />
       ) : null}
     </div>

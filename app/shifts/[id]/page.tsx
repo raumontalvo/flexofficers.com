@@ -35,8 +35,9 @@ import {
 import { getShiftRequirementChips } from "@/lib/shift-requirements";
 import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
 import { officerProfileCompletionSelect } from "@/lib/officer-fields";
-import { applicationIdOnlySelect } from "@/lib/application-fields";
+import { applicationIdOnlySelect, applicationIdStatusSelect } from "@/lib/application-fields";
 import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
+import { isAcceptedShiftPastOrClosed } from "@/lib/officer-application-delete";
 import { ShiftDetailMobile } from "./ShiftDetailMobile";
 
 export const dynamic = "force-dynamic";
@@ -116,9 +117,7 @@ export default async function ShiftDetailPage({
                   where: {
                     shiftId: id,
                   },
-                  select: {
-                    status: true,
-                  },
+                  select: applicationIdStatusSelect,
                   take: 1,
                 },
               },
@@ -135,8 +134,13 @@ export default async function ShiftDetailPage({
   const filledCount = shift.applications.length;
   const openPositions = Math.max(shift.positionsNeeded - filledCount, 0);
   const officerApplication = user?.officer?.applications[0] ?? null;
+  const applicationId = officerApplication?.id ?? null;
   const applicationStatus = officerApplication?.status ?? null;
   const isAcceptedOfficer = applicationStatus === ApplicationStatus.ACCEPTED;
+  const canCancelAssignment =
+    isAcceptedOfficer &&
+    applicationId !== null &&
+    !isAcceptedShiftPastOrClosed(shift.status, shift.endTime);
   const hasBlockingApplication =
     applicationStatus === ApplicationStatus.PENDING ||
     applicationStatus === ApplicationStatus.ACCEPTED;
@@ -209,6 +213,8 @@ export default async function ShiftDetailPage({
         profileIncomplete={profileIncomplete}
         officer={user?.officer ?? null}
         applicationStatus={applicationStatus}
+        applicationId={applicationId}
+        canCancelAssignment={canCancelAssignment}
         isSignedIn={Boolean(clerkUser)}
         shiftAcceptingApplications={shiftAcceptingApplications}
         isAcceptedOfficer={isAcceptedOfficer}

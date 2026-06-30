@@ -6,6 +6,7 @@ import { SignOutButton, useUser } from "@clerk/nextjs";
 import { FlexOfficersBadge } from "@/components/brand";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { officerSidebarItems } from "@/components/nav/nav-config";
+import { useUnreadNotificationCount } from "@/components/dashboard/use-unread-notification-count";
 import { cn } from "@/lib/cn";
 
 function isActive(pathname: string, href: string, match?: (pathname: string) => boolean) {
@@ -23,6 +24,7 @@ type OfficerSidebarProps = {
 export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
   const pathname = usePathname();
   const { user } = useUser();
+  const unreadNotificationCount = useUnreadNotificationCount();
 
   const displayName =
     user?.fullName?.trim() ||
@@ -55,15 +57,18 @@ export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
         {officerSidebarItems.map((item) => {
           const active = isActive(pathname, item.href, item.match);
           const Icon = item.icon;
-          const badgeKey =
-            item.href === "/officer/notifications" ? "notifications" : null;
-          const badgeCount = badgeKey ? badgeCounts?.[badgeKey] : undefined;
-          const showBadge = typeof badgeCount === "number" && badgeCount > 0;
+          const notificationCount =
+            badgeCounts?.notifications ?? unreadNotificationCount;
+          const hasUnreadNotifications =
+            item.href === "/officer/notifications" && notificationCount > 0;
 
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-label={
+                hasUnreadNotifications ? `${item.label}, unread` : item.label
+              }
               className={cn(
                 "flex min-h-9 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors",
                 active
@@ -73,10 +78,11 @@ export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
-              {showBadge ? (
-                <span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-                  {badgeCount > 99 ? "99+" : badgeCount}
-                </span>
+              {hasUnreadNotifications ? (
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full bg-red-500"
+                  aria-hidden
+                />
               ) : null}
             </Link>
           );

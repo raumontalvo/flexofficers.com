@@ -189,7 +189,7 @@ export function AcceptedShiftsBrowseList({
             ) : null}
           </Card>
         ) : (
-          <div className="space-y-1.5">
+          <div className="space-y-2 lg:space-y-4">
             {pageApplications.map((application) => (
               <AcceptedShiftCard
                 key={application.id}

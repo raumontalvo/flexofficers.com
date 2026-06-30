@@ -59,28 +59,24 @@ export function CompanySummaryCards({
           label="Total Shifts"
           value={shiftStats.total}
           tone="blue"
-          showChevron
           icon={<ShiftsIcon className="h-5 w-5" />}
         />
         <StatCard
           label="Applicants"
           value={applicationsSummary.total}
           tone="purple"
-          showChevron
           icon={<ApplicantsIcon className="h-5 w-5" />}
         />
         <StatCard
           label="Filled Shifts"
           value={filledThisMonth}
           tone="green"
-          showChevron
           icon={<AcceptedShiftsIcon className="h-5 w-5" />}
         />
         <StatCard
           label="Upcoming Shifts"
           value={upcomingConfirmedCount}
           tone="amber"
-          showChevron
           icon={<UpcomingIcon className="h-5 w-5" />}
         />
       </MobileStatGrid>

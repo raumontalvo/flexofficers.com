@@ -62,6 +62,8 @@ type ShiftDetailMobileProps = {
     }>;
   } | null;
   applicationStatus: ApplicationStatus | null;
+  applicationId?: string | null;
+  canCancelAssignment?: boolean;
   isSignedIn: boolean;
   shiftAcceptingApplications: boolean;
   isAcceptedOfficer: boolean;
@@ -152,6 +154,8 @@ export function ShiftDetailMobile({
   profileIncomplete = false,
   officer = null,
   applicationStatus,
+  applicationId = null,
+  canCancelAssignment = false,
   isSignedIn,
   shiftAcceptingApplications,
   isAcceptedOfficer,
@@ -350,6 +354,8 @@ export function ShiftDetailMobile({
         profileIncomplete={profileIncomplete}
         officer={officer}
         applicationStatus={applicationStatus}
+        applicationId={applicationId}
+        canCancelAssignment={canCancelAssignment}
         isSignedIn={isSignedIn}
         shiftAcceptingApplications={shiftAcceptingApplications}
         layout="mobile"

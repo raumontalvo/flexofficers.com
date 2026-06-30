@@ -164,7 +164,8 @@ export const INVITE_HOW_IT_WORKS_STEPS = [
   },
   {
     title: "Show up & get paid",
-    description: "Work the shift and get paid directly by the company.",
+    description:
+      "Work the shift and get paid directly by the security company. The company is in charge of paying you—not through FlexOfficers.",
   },
 ] as const;
 

@@ -10,7 +10,6 @@ import {
   sortOfficerInvites,
   type InviteSortOption,
   type InviteTab,
-  type InviteViewMode,
   type OfficerInviteData,
 } from "@/lib/officer-invite-data";
 import type { OfficerNotificationData } from "@/lib/officer-notification-data";
@@ -36,7 +35,6 @@ export function InvitesBrowseList({
 }: InvitesBrowseListProps) {
   const [tab, setTab] = useState<InviteTab>("all");
   const [sort, setSort] = useState<InviteSortOption>("newest");
-  const [viewMode, setViewMode] = useState<InviteViewMode>("list");
   const [removedInviteIds, setRemovedInviteIds] = useState<string[]>([]);
 
   const activeInvites = useMemo(
@@ -64,7 +62,7 @@ export function InvitesBrowseList({
         subtitle="Companies interested in working with you."
       />
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2 border-b border-white/[0.06] pb-3">
             {INVITE_TABS.map((item) => (
@@ -118,63 +116,26 @@ export function InvitesBrowseList({
                   {visibleInvites.length === 1 ? "" : "s"}
                 </p>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <label className="flex items-center gap-2 text-xs text-fo-text-muted">
-                    <span>Sort By</span>
-                    <select
-                      value={sort}
-                      onChange={(event) =>
-                        setSort(event.target.value as InviteSortOption)
-                      }
-                      className="min-h-9 rounded-lg border border-fo-border bg-fo-bg/80 px-2 py-1.5 text-sm text-fo-text"
-                    >
-                      <option value="newest">Newest</option>
-                      <option value="oldest">Oldest</option>
-                    </select>
-                  </label>
-
-                  <div className="inline-flex rounded-lg border border-white/10 p-0.5">
-                    <button
-                      type="button"
-                      onClick={() => setViewMode("list")}
-                      className={cn(
-                        "rounded-md px-3 py-1.5 text-xs font-semibold transition",
-                        viewMode === "list"
-                          ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                          : "text-fo-text-muted hover:text-fo-text"
-                      )}
-                    >
-                      List
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode("grid")}
-                      className={cn(
-                        "rounded-md px-3 py-1.5 text-xs font-semibold transition",
-                        viewMode === "grid"
-                          ? "bg-fo-primary-bright/20 text-fo-primary-hover"
-                          : "text-fo-text-muted hover:text-fo-text"
-                      )}
-                    >
-                      Grid
-                    </button>
-                  </div>
-                </div>
+                <label className="flex items-center gap-2 text-xs text-fo-text-muted">
+                  <span>Sort By</span>
+                  <select
+                    value={sort}
+                    onChange={(event) =>
+                      setSort(event.target.value as InviteSortOption)
+                    }
+                    className="min-h-9 rounded-lg border border-fo-border bg-fo-bg/80 px-2 py-1.5 text-sm text-fo-text"
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                  </select>
+                </label>
               </div>
 
-              <div
-                className={cn(
-                  "flex flex-col gap-6",
-                  viewMode === "grid"
-                    ? "lg:grid lg:grid-cols-2 lg:gap-3"
-                    : "lg:block lg:gap-0 lg:space-y-3"
-                )}
-              >
+              <div className="flex flex-col gap-6 lg:space-y-4 lg:gap-0">
                 {visibleInvites.map((invite) => (
                   <InviteCard
                     key={invite.id}
                     invite={invite}
-                    viewMode={viewMode}
                     onRespond={() => undefined}
                     onDeleted={handleInviteDeleted}
                   />
@@ -189,7 +150,7 @@ export function InvitesBrowseList({
           />
         </div>
 
-        <InvitesHowItWorksPanel inviteNotifications={inviteNotifications} />
+        <InvitesHowItWorksPanel />
       </div>
     </div>
   );

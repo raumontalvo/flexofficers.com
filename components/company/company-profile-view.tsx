@@ -186,8 +186,6 @@ function SidebarDetails({
 }
 
 function ProfileSidebar({ profile }: { profile: SerializedCompanyProfile }) {
-  const contactEmail = profile.details.contactEmail ?? profile.support.email;
-
   return (
     <aside className="space-y-4 self-start">
       <ProfileSectionCard title="License Information">
@@ -201,34 +199,6 @@ function ProfileSidebar({ profile }: { profile: SerializedCompanyProfile }) {
             value={profile.license.expirationDate}
           />
         </dl>
-
-        {profile.license.hasDocument ? (
-          <Link
-            href="/company/profile/edit"
-            className={buttonClassName({
-              variant: "secondary",
-              size: "md",
-              className: "mt-4 w-full",
-            })}
-          >
-            View License Document
-          </Link>
-        ) : (
-          <div className="mt-4 space-y-2">
-            <p className="text-sm text-fo-text-muted">License document not uploaded.</p>
-            <button
-              type="button"
-              disabled
-              className={buttonClassName({
-                variant: "secondary",
-                size: "md",
-                className: "w-full",
-              })}
-            >
-              View License Document
-            </button>
-          </div>
-        )}
       </ProfileSectionCard>
 
       <ProfileSectionCard title="Company Details">
@@ -252,31 +222,6 @@ function ProfileSidebar({ profile }: { profile: SerializedCompanyProfile }) {
             </>
           )}
         </dl>
-
-        {profile.showContactDetails && contactEmail ? (
-          <a
-            href={`mailto:${contactEmail}`}
-            className={buttonClassName({
-              variant: "secondary",
-              size: "md",
-              className: "mt-4 w-full text-center",
-            })}
-          >
-            Contact Company
-          </a>
-        ) : (
-          <button
-            type="button"
-            disabled
-            className={buttonClassName({
-              variant: "secondary",
-              size: "md",
-              className: "mt-4 w-full",
-            })}
-          >
-            Contact Company
-          </button>
-        )}
       </ProfileSectionCard>
 
       <ProfileSectionCard title="Support & Contact">

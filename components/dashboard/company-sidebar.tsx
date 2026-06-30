@@ -6,6 +6,7 @@ import { SignOutButton, useUser } from "@clerk/nextjs";
 import { FlexOfficersBadge } from "@/components/brand";
 import { companySidebarItems } from "@/components/nav/nav-config";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { useUnreadNotificationCount } from "@/components/dashboard/use-unread-notification-count";
 import { cn } from "@/lib/cn";
 
 function isActive(pathname: string, href: string, match?: (pathname: string) => boolean) {
@@ -19,6 +20,7 @@ function isActive(pathname: string, href: string, match?: (pathname: string) => 
 export function CompanySidebar() {
   const pathname = usePathname();
   const { user } = useUser();
+  const unreadNotificationCount = useUnreadNotificationCount();
 
   const displayName =
     user?.fullName?.trim() ||
@@ -51,11 +53,16 @@ export function CompanySidebar() {
         {companySidebarItems.map((item) => {
           const active = isActive(pathname, item.href, item.match);
           const Icon = item.icon;
+          const hasUnreadNotifications =
+            item.href === "/company/notifications" && unreadNotificationCount > 0;
 
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-label={
+                hasUnreadNotifications ? `${item.label}, unread` : item.label
+              }
               className={cn(
                 "flex min-h-9 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors",
                 active
@@ -65,6 +72,12 @@ export function CompanySidebar() {
             >
               <Icon className="h-4 w-4 shrink-0" />
               <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              {hasUnreadNotifications ? (
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full bg-red-500"
+                  aria-hidden
+                />
+              ) : null}
             </Link>
           );
         })}

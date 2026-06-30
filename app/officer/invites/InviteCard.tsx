@@ -33,6 +33,7 @@ type InviteActionsProps = {
   onRespond: () => void;
   onDeleted?: (inviteId: string) => void;
   stacked?: boolean;
+  layout?: "compact" | "desktop";
 };
 
 async function respondToInvite(inviteId: string, response: "accept" | "decline") {
@@ -96,10 +97,36 @@ export function InviteActions({
   onRespond,
   onDeleted,
   stacked = false,
+  layout = "compact",
 }: InviteActionsProps) {
   const [loading, setLoading] = useState<"accept" | "decline" | null>(null);
   const pathname = usePathname();
   const shiftHref = shiftDetailHref(invite.shift.id, pathname);
+  const desktop = layout === "desktop";
+
+  const actionColumnClass = desktop
+    ? "flex w-full flex-col justify-center gap-2"
+    : "flex w-[148px] shrink-0 flex-col justify-center gap-2";
+
+  const viewShiftClass = buttonClassName({
+    variant: "secondary",
+    size: "md",
+    className: cn(
+      desktop ? "min-h-10 w-full px-3 text-sm" : "min-h-9 w-full px-3 text-xs",
+      "border-fo-primary-bright/40 text-center text-fo-primary-bright hover:border-fo-primary-bright hover:bg-fo-primary/10"
+    ),
+  });
+
+  const primaryActionClass = buttonClassName({
+    size: "md",
+    className: desktop ? "min-h-10 w-full px-3 text-sm" : "min-h-9 w-full px-3 text-xs",
+  });
+
+  const secondaryActionClass = buttonClassName({
+    variant: "secondary",
+    size: "md",
+    className: desktop ? "min-h-10 w-full px-3 text-sm" : "min-h-9 w-full px-3 text-xs",
+  });
 
   async function handleRespond(response: "accept" | "decline") {
     setLoading(response);
@@ -137,9 +164,6 @@ export function InviteActions({
     return (
       <MobileListCardActions>
         <MobileSettingsRow label="View Shift Details" href={shiftHref} />
-        <p className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-center text-xs font-semibold text-emerald-200">
-          Added to Accepted Shifts
-        </p>
       </MobileListCardActions>
     );
   }
@@ -165,26 +189,15 @@ export function InviteActions({
 
   if (invite.status === "PENDING") {
     return (
-      <div className="flex w-[148px] shrink-0 flex-col justify-center gap-2">
-        <ShiftDetailLink
-          shiftId={invite.shift.id}
-          className={buttonClassName({
-            variant: "secondary",
-            size: "md",
-            className:
-              "min-h-9 w-full border-blue-500/30 px-3 text-center text-xs text-blue-100 hover:bg-blue-500/10",
-          })}
-        >
-          View Shift
+      <div className={actionColumnClass}>
+        <ShiftDetailLink shiftId={invite.shift.id} className={viewShiftClass}>
+          View Shift Details
         </ShiftDetailLink>
         <button
           type="button"
           disabled={loading !== null}
           onClick={() => handleRespond("accept")}
-          className={buttonClassName({
-            size: "md",
-            className: "min-h-9 w-full px-3 text-xs",
-          })}
+          className={primaryActionClass}
         >
           {loading === "accept" ? "Accepting..." : "Accept Invite"}
         </button>
@@ -192,11 +205,7 @@ export function InviteActions({
           type="button"
           disabled={loading !== null}
           onClick={() => handleRespond("decline")}
-          className={buttonClassName({
-            variant: "secondary",
-            size: "md",
-            className: "min-h-9 w-full px-3 text-xs",
-          })}
+          className={secondaryActionClass}
         >
           {loading === "decline" ? "Declining..." : "Decline Invite"}
         </button>
@@ -206,36 +215,18 @@ export function InviteActions({
 
   if (invite.status === "ACCEPTED") {
     return (
-      <div className="flex w-[168px] shrink-0 flex-col justify-center gap-2">
-        <ShiftDetailLink
-          shiftId={invite.shift.id}
-          className={buttonClassName({
-            variant: "secondary",
-            size: "md",
-            className:
-              "min-h-9 w-full border-blue-500/30 px-3 text-center text-xs text-blue-100 hover:bg-blue-500/10",
-          })}
-        >
+      <div className={actionColumnClass}>
+        <ShiftDetailLink shiftId={invite.shift.id} className={viewShiftClass}>
           View Shift Details
         </ShiftDetailLink>
-        <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/10 px-3 py-2 text-center text-[11px] font-semibold text-emerald-200">
-          Added to Accepted Shifts
-        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex w-[148px] shrink-0 flex-col justify-center gap-2">
-      <ShiftDetailLink
-        shiftId={invite.shift.id}
-        className={buttonClassName({
-          variant: "secondary",
-          size: "md",
-          className: "min-h-9 w-full px-3 text-center text-xs",
-        })}
-      >
-        View Shift
+    <div className={actionColumnClass}>
+      <ShiftDetailLink shiftId={invite.shift.id} className={viewShiftClass}>
+        View Shift Details
       </ShiftDetailLink>
       <DeleteInviteButton
         inviteId={invite.id}
@@ -244,8 +235,10 @@ export function InviteActions({
         className={buttonClassName({
           variant: "secondary",
           size: "md",
-          className:
-            "min-h-9 w-full border-red-500/35 px-3 text-xs text-red-300 hover:border-red-500/50 hover:bg-red-500/10",
+          className: cn(
+            desktop ? "min-h-10 w-full px-3 text-sm" : "min-h-9 w-full px-3 text-xs",
+            "border-red-500/35 text-red-300 hover:border-red-500/50 hover:bg-red-500/10"
+          ),
         })}
       />
     </div>
@@ -254,7 +247,6 @@ export function InviteActions({
 
 type InviteCardProps = {
   invite: OfficerInviteData;
-  viewMode: "list" | "grid";
   onRespond: () => void;
   onDeleted?: (inviteId: string) => void;
 };
@@ -345,7 +337,6 @@ function InviteCardMobile({
 
 export function InviteCard({
   invite,
-  viewMode,
   onRespond,
   onDeleted,
 }: InviteCardProps) {
@@ -354,136 +345,74 @@ export function InviteCard({
   const hourlyRateLabel = formatInviteHourlyRate(invite);
   const invitedLabel = formatInvitedTimeAgo(invite.invitedAt);
 
-  if (viewMode === "grid") {
-    return (
-      <div className="contents">
-        <InviteCardMobile
-          invite={invite}
-          onRespond={onRespond}
-          onDeleted={onDeleted}
-        />
-
-        <article className="fo-glass-card hidden h-full min-h-[220px] flex-col rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:flex">
-        <div className="flex items-start gap-3">
-          <ProfileAvatar
-            name={invite.company.companyName}
-            src={invite.company.logoUrl}
-            size="md"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-fo-text">
-              {invite.company.companyName}
-            </p>
-            <p className="truncate text-sm font-medium text-blue-100">
-              {invite.shift.title}
-            </p>
-            <span
-              className={cn(
-                "mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-                statusBadgeClasses[invite.status]
-              )}
-            >
-              {INVITE_STATUS_LABELS[invite.status]}
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-3 space-y-1.5 text-xs text-fo-text-muted">
-          <p className="flex items-center gap-1.5">
-            <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span className="truncate">{locationLabel}</span>
-          </p>
-          <p className="flex items-center gap-1.5">
-            <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span>
-              {schedule.weekday} {schedule.monthDay}
-            </span>
-          </p>
-          <p className="flex items-center gap-1.5">
-            <ClockIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span>{schedule.timeRange}</span>
-          </p>
-          <p className="flex items-center gap-1.5">
-            <DollarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-            <span>{hourlyRateLabel}/hr</span>
-          </p>
-        </div>
-
-        <p className="mt-3 text-[11px] text-fo-text-subtle">{invitedLabel}</p>
-
-        <div className="mt-4">
-          <InviteActions
-            invite={invite}
-            onRespond={onRespond}
-            onDeleted={onDeleted}
-          />
-        </div>
-      </article>
-      </div>
-    );
-  }
-
   return (
-    <div className="contents">
+    <>
       <InviteCardMobile
         invite={invite}
         onRespond={onRespond}
         onDeleted={onDeleted}
       />
 
-      <article className="fo-glass-card hidden min-h-[132px] grid-cols-1 gap-4 rounded-xl border border-white/10 p-4 transition hover:border-white/15 hover:bg-white/[0.04] lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_auto] lg:items-center">
-      <div className="flex items-start gap-3">
-        <ProfileAvatar
-          name={invite.company.companyName}
-          src={invite.company.logoUrl}
-          size="md"
-        />
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-fo-text">
-            {invite.company.companyName}
-          </p>
-          <p className="truncate text-sm font-medium text-blue-100">
-            {invite.shift.title}
-          </p>
-          <span
-            className={cn(
-              "mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold",
-              statusBadgeClasses[invite.status]
-            )}
-          >
-            {INVITE_STATUS_LABELS[invite.status]}
-          </span>
-          <p className="mt-2 text-[11px] text-fo-text-subtle">{invitedLabel}</p>
+      <article className="fo-glass-card fo-glass-card-hover hidden min-h-[150px] rounded-xl border border-white/10 transition lg:block">
+        <div className="grid h-full min-h-[150px] grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_minmax(0,1.4fr)] gap-5 p-5">
+          <div className="flex min-w-0 flex-col justify-center gap-3 border-r border-white/[0.06] pr-5">
+            <div className="flex items-start gap-3">
+              <ProfileAvatar
+                name={invite.company.companyName}
+                src={invite.company.logoUrl}
+                size="md"
+                className="shrink-0"
+              />
+              <div className="min-w-0 space-y-2">
+                <p className="text-base font-semibold leading-snug text-fo-text">
+                  {invite.company.companyName}
+                </p>
+                <span
+                  className={cn(
+                    "inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold",
+                    statusBadgeClasses[invite.status]
+                  )}
+                >
+                  {INVITE_STATUS_LABELS[invite.status]}
+                </span>
+                <p className="text-xs text-fo-text-subtle">{invitedLabel}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-col justify-center gap-2 border-r border-white/[0.06] px-1 pr-5">
+            <h2 className="text-lg font-bold leading-snug text-fo-text">{invite.shift.title}</h2>
+            <p className="flex items-start gap-2 text-sm leading-snug text-fo-text-muted">
+              <LocationIcon className="mt-0.5 h-4 w-4 shrink-0 text-red-400" />
+              <span className="min-w-0">{locationLabel}</span>
+            </p>
+            <p className="flex items-center gap-2 text-sm text-fo-text">
+              <CalendarIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
+              <span>
+                {schedule.weekday}, {schedule.monthDay}
+              </span>
+            </p>
+            <p className="flex items-center gap-2 text-sm text-fo-text-muted">
+              <ClockIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
+              <span>{schedule.timeRange}</span>
+            </p>
+            <p className="flex items-center gap-2 text-sm text-fo-primary-bright">
+              <DollarIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
+              <span className="text-base font-bold">
+                {hourlyRateLabel}
+                <span className="ml-0.5 text-sm font-semibold text-fo-text-muted">/hr</span>
+              </span>
+            </p>
+          </div>
+
+          <InviteActions
+            invite={invite}
+            onRespond={onRespond}
+            onDeleted={onDeleted}
+            layout="desktop"
+          />
         </div>
-      </div>
-
-      <div className="grid min-w-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-          <LocationIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-          <span className="truncate">{locationLabel}</span>
-        </p>
-        <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-          <CalendarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-          <span>
-            {schedule.weekday} {schedule.monthDay}
-          </span>
-        </p>
-        <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-          <ClockIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-          <span>{schedule.timeRange}</span>
-        </p>
-        <p className="flex items-center gap-1.5 text-xs text-fo-text-muted">
-          <DollarIcon className="h-3.5 w-3.5 shrink-0 text-fo-text-subtle" />
-          <span>{hourlyRateLabel}/hr</span>
-        </p>
-      </div>
-
-      <InviteActions
-        invite={invite}
-        onRespond={onRespond}
-        onDeleted={onDeleted}
-      />
-    </article>
-    </div>
+      </article>
+    </>
   );
 }
