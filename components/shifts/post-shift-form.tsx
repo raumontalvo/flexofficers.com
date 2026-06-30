@@ -13,6 +13,12 @@ import { cn } from "@/lib/cn";
 const fieldClassName =
   "min-h-11 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
+const dateTimeFieldClassName =
+  "box-border min-h-11 w-full max-w-full min-w-0 rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
+
+const dateTimeFieldWrapperClassName =
+  "box-border w-full max-w-full min-w-0 space-y-2";
+
 function RequiredLabel({
   children,
   htmlFor,
@@ -48,13 +54,20 @@ function SectionCard({
   number,
   title,
   children,
+  className,
 }: {
   number: number;
   title: string;
   children: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <section className="fo-glass-card rounded-xl border border-white/10 p-4 sm:p-5">
+    <section
+      className={cn(
+        "fo-glass-card rounded-xl border border-white/10 p-4 sm:p-5",
+        className
+      )}
+    >
       <div className="mb-4 flex items-center gap-3">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-xs font-bold text-blue-200">
           {number}
@@ -139,36 +152,40 @@ export function PostShiftForm({
         </p>
       </SectionCard>
 
-      <SectionCard number={2} title="Date & Time">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="space-y-2">
+      <SectionCard
+        number={2}
+        title="Date & Time"
+        className="fo-shift-datetime-section overflow-hidden"
+      >
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className={dateTimeFieldWrapperClassName}>
             <RequiredLabel htmlFor="startDate">Start Date</RequiredLabel>
             <input
               id="startDate"
               type="date"
               value={form.startDate}
               onChange={(event) => updateField("startDate", event.target.value)}
-              className={fieldClassName}
+              className={dateTimeFieldClassName}
             />
           </div>
-          <div className="space-y-2">
+          <div className={dateTimeFieldWrapperClassName}>
             <RequiredLabel htmlFor="startTime">Start Time</RequiredLabel>
             <input
               id="startTime"
               type="time"
               value={form.startTime}
               onChange={(event) => updateField("startTime", event.target.value)}
-              className={fieldClassName}
+              className={dateTimeFieldClassName}
             />
           </div>
-          <div className="space-y-2">
+          <div className={dateTimeFieldWrapperClassName}>
             <RequiredLabel htmlFor="endTime">End Time</RequiredLabel>
             <input
               id="endTime"
               type="time"
               value={form.endTime}
               onChange={(event) => updateField("endTime", event.target.value)}
-              className={fieldClassName}
+              className={dateTimeFieldClassName}
             />
           </div>
         </div>

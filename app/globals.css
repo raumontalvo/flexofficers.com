@@ -472,6 +472,29 @@ html {
   }
 }
 
+/* Shift form — Date & Time section only (mobile date/time input overflow) */
+.fo-shift-datetime-section input[type="date"],
+.fo-shift-datetime-section input[type="time"] {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.fo-shift-datetime-section input[type="date"]::-webkit-datetime-edit,
+.fo-shift-datetime-section input[type="time"]::-webkit-datetime-edit {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.fo-shift-datetime-section input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.fo-shift-datetime-section input[type="time"]::-webkit-datetime-edit-fields-wrapper {
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* Mobile dashboard utilities — desktop unchanged above md */
 @media (max-width: 767px) {
   .fo-mobile-nav-scroll-padding {
