@@ -272,10 +272,10 @@ export function PostShiftForm({
       <SectionCard
         number={2}
         title="Date & Time"
-        className="fo-shift-datetime-section"
+        className="fo-shift-datetime-section min-w-0"
         contentClassName="w-full max-w-full min-w-0"
       >
-        <div className="grid w-full max-w-full min-w-0 grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3">
           <div className="w-full max-w-full min-w-0 space-y-2">
             <RequiredLabel htmlFor="startDate">Start Date</RequiredLabel>
             <ShiftDateTimeField
