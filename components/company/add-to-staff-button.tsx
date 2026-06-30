@@ -13,6 +13,20 @@ type AddToStaffButtonProps = {
   size?: "md" | "mobile";
 };
 
+function TrashIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden className={className}>
+      <path
+        d="M3.5 5.5h9M6 5.5V4.5h4v1M5 5.5l.5 7h5l.5-7"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function AddToStaffButton({
   officerId,
   isOnStaff,
@@ -58,6 +72,29 @@ export function AddToStaffButton({
   }
 
   if (onStaff) {
+    if (size === "mobile") {
+      return (
+        <button
+          type="button"
+          disabled={loading}
+          onClick={handleClick}
+          className={cn(
+            buttonClassName({
+              variant: "danger",
+              size: "md",
+              fullWidth: true,
+              className:
+                "min-h-11 gap-2 rounded-xl border border-red-400 bg-red-600 text-sm font-semibold text-white hover:bg-red-500",
+            }),
+            className
+          )}
+        >
+          <TrashIcon className="h-4 w-4 shrink-0" />
+          {loading ? "Removing..." : "Remove Staff"}
+        </button>
+      );
+    }
+
     return (
       <button
         type="button"
@@ -68,8 +105,7 @@ export function AddToStaffButton({
             variant: "secondary",
             size: "md",
             className: cn(
-              "border-red-500/30 text-red-100 hover:bg-red-500/10",
-              size === "mobile" ? "!min-h-11 !text-sm" : "min-h-10 text-sm",
+              "min-h-10 border-red-500/30 text-sm text-red-100 hover:bg-red-500/10",
               className
             ),
           })

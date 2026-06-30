@@ -238,7 +238,7 @@ export function OfficerProfilePanel({
                   officerId={officer.id}
                   isOnStaff={isOnStaff}
                   size="mobile"
-                  className="w-full !min-h-9 !text-xs lg:hidden"
+                  className="mb-2 w-full lg:hidden"
                   onAdded={() => onStaffChange(true)}
                   onRemoved={() => onStaffChange(false)}
                 />
