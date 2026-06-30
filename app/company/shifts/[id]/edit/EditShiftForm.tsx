@@ -69,19 +69,23 @@ export default function EditShiftForm({
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <PostShiftForm
-        form={form}
-        onChange={setForm}
-        otherRequirementsPlaceholder="2+ years experience, customer service, professional appearance"
-      />
-      <EditShiftSummaryPanel
+    <div className="grid w-full min-w-0 max-w-full gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="min-w-0 w-full max-w-full">
+        <PostShiftForm
+          form={form}
+          onChange={setForm}
+          otherRequirementsPlaceholder="2+ years experience, customer service, professional appearance"
+        />
+      </div>
+      <div className="min-w-0 w-full max-w-full">
+        <EditShiftSummaryPanel
         shiftId={shiftId}
         form={form}
         isSubmitting={isSubmitting}
         errorMessage={errorMessage}
         onSubmit={handleSubmit}
       />
+      </div>
     </div>
   );
 }

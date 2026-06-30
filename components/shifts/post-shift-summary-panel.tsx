@@ -72,8 +72,8 @@ export function PostShiftSummaryPanel({
   const summary = getShiftSummaryFields(form);
 
   return (
-    <div className="space-y-4 lg:sticky lg:top-6">
-      <section className="fo-glass-card rounded-xl border border-white/10 p-4">
+    <div className="min-w-0 space-y-4 lg:sticky lg:top-6">
+      <section className="fo-glass-card w-full max-w-full overflow-hidden rounded-xl border border-white/10 p-4 sm:p-6">
         <h2 className="text-base font-bold text-fo-text">Shift Summary</h2>
 
         <dl className="mt-4 space-y-3">
@@ -179,7 +179,7 @@ export function PostShiftSummaryPanel({
         ) : null}
       </section>
 
-      <section className="fo-glass-card rounded-xl border border-white/10 p-4">
+      <section className="fo-glass-card w-full max-w-full overflow-hidden rounded-xl border border-white/10 p-4 sm:p-6">
         <h3 className="text-sm font-bold text-fo-text">
           Tips for a Successful Post
         </h3>

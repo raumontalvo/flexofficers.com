@@ -475,7 +475,19 @@ html {
 /* Mobile dashboard utilities — desktop unchanged above md */
 @media (max-width: 767px) {
   .fo-mobile-nav-scroll-padding {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(7rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .fo-shift-form input[type="date"],
+  .fo-shift-form input[type="time"],
+  .fo-shift-form input[type="datetime-local"],
+  .fo-shift-form select,
+  .fo-shift-form textarea {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .fo-scrollbar-hide {

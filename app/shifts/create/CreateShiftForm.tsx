@@ -60,17 +60,21 @@ export default function CreateShiftForm() {
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <PostShiftForm form={form} onChange={setForm} />
-      <PostShiftSummaryPanel
-        form={form}
-        isSubmitting={isSubmitting}
-        errorMessage={errorMessage}
-        onSubmit={handleSubmit}
-        onVisibilityChange={(visibility) =>
-          setForm((current) => ({ ...current, visibility }))
-        }
-      />
+    <div className="grid w-full min-w-0 max-w-full gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="min-w-0 w-full max-w-full">
+        <PostShiftForm form={form} onChange={setForm} />
+      </div>
+      <div className="min-w-0 w-full max-w-full">
+        <PostShiftSummaryPanel
+          form={form}
+          isSubmitting={isSubmitting}
+          errorMessage={errorMessage}
+          onSubmit={handleSubmit}
+          onVisibilityChange={(visibility) =>
+            setForm((current) => ({ ...current, visibility }))
+          }
+        />
+      </div>
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { RequirementsMultiSelectPicker } from "@/components/shifts/requirements-
 import { cn } from "@/lib/cn";
 
 const fieldClassName =
-  "min-h-11 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
+  "box-border min-h-11 w-full max-w-full min-w-0 rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
 function RequiredLabel({
   children,
@@ -54,14 +54,14 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="fo-glass-card rounded-xl border border-white/10 p-4 sm:p-5">
-      <div className="mb-4 flex items-center gap-3">
+    <section className="fo-glass-card w-full max-w-full overflow-hidden rounded-xl border border-white/10 p-4 sm:p-6">
+      <div className="mb-4 flex min-w-0 items-center gap-3">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-xs font-bold text-blue-200">
           {number}
         </span>
-        <h2 className="text-base font-semibold text-fo-text">{title}</h2>
+        <h2 className="min-w-0 text-base font-semibold text-fo-text">{title}</h2>
       </div>
-      <div className="space-y-4">{children}</div>
+      <div className="min-w-0 space-y-4">{children}</div>
     </section>
   );
 }
@@ -92,9 +92,9 @@ export function PostShiftForm({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="fo-shift-form w-full max-w-full min-w-0 space-y-4">
       <SectionCard number={1} title="Shift Details">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <RequiredLabel htmlFor="title">Shift Title</RequiredLabel>
           <input
             id="title"
@@ -105,7 +105,7 @@ export function PostShiftForm({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <RequiredLabel htmlFor="workType">Type of Post</RequiredLabel>
           <select
             id="workType"
@@ -122,7 +122,7 @@ export function PostShiftForm({
           </select>
         </div>
 
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <OptionalLabel htmlFor="description">Description</OptionalLabel>
           <textarea
             id="description"
@@ -140,8 +140,8 @@ export function PostShiftForm({
       </SectionCard>
 
       <SectionCard number={2} title="Date & Time">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="startDate">Start Date</RequiredLabel>
             <input
               id="startDate"
@@ -151,7 +151,7 @@ export function PostShiftForm({
               className={fieldClassName}
             />
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="startTime">Start Time</RequiredLabel>
             <input
               id="startTime"
@@ -161,7 +161,7 @@ export function PostShiftForm({
               className={fieldClassName}
             />
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="endTime">End Time</RequiredLabel>
             <input
               id="endTime"
@@ -189,7 +189,7 @@ export function PostShiftForm({
       </SectionCard>
 
       <SectionCard number={3} title="Location">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <RequiredLabel htmlFor="locationName">Location Name</RequiredLabel>
           <input
             id="locationName"
@@ -200,7 +200,7 @@ export function PostShiftForm({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <RequiredLabel htmlFor="address">Address</RequiredLabel>
           <input
             id="address"
@@ -211,8 +211,8 @@ export function PostShiftForm({
           />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="city">City</RequiredLabel>
             <input
               id="city"
@@ -222,7 +222,7 @@ export function PostShiftForm({
               placeholder="City"
             />
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="state">State</RequiredLabel>
             <select
               id="state"
@@ -238,7 +238,7 @@ export function PostShiftForm({
               ))}
             </select>
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="zipCode">Zip Code</RequiredLabel>
             <input
               id="zipCode"
@@ -252,8 +252,8 @@ export function PostShiftForm({
       </SectionCard>
 
       <SectionCard number={4} title="Pay & Requirements">
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="hourlyRate">Pay Rate</RequiredLabel>
             <input
               id="hourlyRate"
@@ -266,7 +266,7 @@ export function PostShiftForm({
               placeholder="0.00"
             />
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="currency">Currency</RequiredLabel>
             <select
               id="currency"
@@ -277,9 +277,9 @@ export function PostShiftForm({
               <option value="USD">USD</option>
             </select>
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel>Open Positions</RequiredLabel>
-            <div className="inline-flex min-h-11 w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-2">
+            <div className="box-border flex min-h-11 w-full max-w-full min-w-0 items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-2">
               <button
                 type="button"
                 onClick={() => adjustPositions(-1)}
@@ -303,8 +303,8 @@ export function PostShiftForm({
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="min-w-0 space-y-2">
             <RequiredLabel htmlFor="licenseRequirements">
               License Requirements
             </RequiredLabel>
@@ -319,7 +319,7 @@ export function PostShiftForm({
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <OptionalLabel htmlFor="certificationRequirements">
               Certifications
             </OptionalLabel>
@@ -339,7 +339,7 @@ export function PostShiftForm({
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <OptionalLabel htmlFor="otherRequirements">Other Requirements</OptionalLabel>
           <textarea
             id="otherRequirements"

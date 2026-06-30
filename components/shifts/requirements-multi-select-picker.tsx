@@ -59,7 +59,7 @@ export function RequirementsMultiSelectPicker<T extends string>({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       {selected.length > 0 ? (
         <div className="flex flex-wrap gap-2">
           {selected.map((option) => (
@@ -81,7 +81,7 @@ export function RequirementsMultiSelectPicker<T extends string>({
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-white/10 bg-white/[0.03] p-2">
+      <div className="w-full max-w-full overflow-hidden rounded-lg border border-white/10 bg-white/[0.03] p-2">
         <div className="grid gap-1">
           {options.map((option) => {
             const isSelected = selected.includes(option);
@@ -118,7 +118,7 @@ export function RequirementsMultiSelectPicker<T extends string>({
             </p>
           ) : null}
           <p className="text-xs font-medium text-fo-text-muted">{customLabel}</p>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
             <input
               value={customValue}
               onChange={(event) => setCustomValue(event.target.value)}
@@ -130,7 +130,7 @@ export function RequirementsMultiSelectPicker<T extends string>({
               }}
               placeholder={customPlaceholder}
               maxLength={CUSTOM_ITEM_MAX_LENGTH}
-              className="min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
+              className="box-border min-h-10 w-full max-w-full min-w-0 rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
             />
             <button
               type="button"
