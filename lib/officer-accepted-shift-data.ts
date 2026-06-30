@@ -1,4 +1,5 @@
 import type { ShiftStatus, ShiftTimeType } from "@/app/generated/prisma/enums";
+import type { Prisma } from "@/app/generated/prisma/client";
 
 export type AcceptedShiftTab = "upcoming" | "completed" | "cancelled";
 
@@ -27,6 +28,86 @@ export type OfficerAcceptedShiftData = {
     email: string;
   };
 };
+
+/** Explicit select for officer accepted/upcoming shift lists. */
+export const officerAcceptedShiftListSelect = {
+  id: true,
+  shift: {
+    select: {
+      id: true,
+      title: true,
+      hourlyRate: true,
+      location: true,
+      city: true,
+      state: true,
+      startTime: true,
+      endTime: true,
+      shiftTimeType: true,
+      requirements: true,
+      otherRequirements: true,
+      specialRequirements: true,
+      status: true,
+      reportingInstructions: true,
+      company: {
+        select: {
+          companyName: true,
+          contactName: true,
+          phone: true,
+          email: true,
+          user: {
+            select: {
+              email: true,
+            },
+          },
+        },
+      },
+    },
+  },
+} satisfies Prisma.ApplicationSelect;
+
+export type OfficerAcceptedShiftApplicationRecord = Prisma.ApplicationGetPayload<{
+  select: typeof officerAcceptedShiftListSelect;
+}>;
+
+function displayCompanyEmail(
+  companyEmail: string | null | undefined,
+  userEmail: string
+) {
+  return companyEmail || userEmail;
+}
+
+export function mapOfficerAcceptedShiftApplication(
+  application: OfficerAcceptedShiftApplicationRecord
+): OfficerAcceptedShiftData {
+  return {
+    id: application.id,
+    shift: {
+      id: application.shift.id,
+      title: application.shift.title,
+      hourlyRate: application.shift.hourlyRate.toString(),
+      location: application.shift.location,
+      city: application.shift.city,
+      state: application.shift.state,
+      startTime: application.shift.startTime.toISOString(),
+      endTime: application.shift.endTime.toISOString(),
+      shiftTimeType: application.shift.shiftTimeType,
+      requirements: application.shift.requirements,
+      otherRequirements: application.shift.otherRequirements,
+      specialRequirements: application.shift.specialRequirements,
+      status: application.shift.status,
+      reportingInstructions: application.shift.reportingInstructions,
+    },
+    company: {
+      companyName: application.shift.company.companyName,
+      contactName: application.shift.company.contactName,
+      phone: application.shift.company.phone,
+      email: displayCompanyEmail(
+        application.shift.company.email,
+        application.shift.company.user.email
+      ),
+    },
+  };
+}
 
 export const ACCEPTED_SHIFT_TABS: {
   value: AcceptedShiftTab;

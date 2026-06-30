@@ -37,25 +37,29 @@ export async function syncOfficerProfilePhotoFromClerk(input: {
   profilePhotoUrl: string | null | undefined;
   clerkImageUrl: string | null | undefined;
 }) {
-  const { prisma } = await import("@/lib/prisma");
-  const nextUrl = resolveSyncedPhotoUrl(
-    input.profilePhotoUrl,
-    input.clerkImageUrl
-  );
-  const currentUrl = normalizePhotoUrl(input.profilePhotoUrl);
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const nextUrl = resolveSyncedPhotoUrl(
+      input.profilePhotoUrl,
+      input.clerkImageUrl
+    );
+    const currentUrl = normalizePhotoUrl(input.profilePhotoUrl);
 
-  if (nextUrl && nextUrl !== currentUrl) {
-    await prisma.officer.update({
-      where: {
-        id: input.officerId,
-      },
-      data: {
-        profilePhotoUrl: nextUrl,
-      },
-    });
+    if (nextUrl && nextUrl !== currentUrl) {
+      await prisma.officer.update({
+        where: {
+          id: input.officerId,
+        },
+        data: {
+          profilePhotoUrl: nextUrl,
+        },
+      });
+    }
+
+    return nextUrl;
+  } catch {
+    return normalizePhotoUrl(input.profilePhotoUrl);
   }
-
-  return nextUrl;
 }
 
 export async function syncCompanyLogoFromClerk(input: {
@@ -63,20 +67,24 @@ export async function syncCompanyLogoFromClerk(input: {
   logoUrl: string | null | undefined;
   clerkImageUrl: string | null | undefined;
 }) {
-  const { prisma } = await import("@/lib/prisma");
-  const nextUrl = resolveSyncedPhotoUrl(input.logoUrl, input.clerkImageUrl);
-  const currentUrl = normalizePhotoUrl(input.logoUrl);
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const nextUrl = resolveSyncedPhotoUrl(input.logoUrl, input.clerkImageUrl);
+    const currentUrl = normalizePhotoUrl(input.logoUrl);
 
-  if (nextUrl && nextUrl !== currentUrl) {
-    await prisma.company.update({
-      where: {
-        id: input.companyId,
-      },
-      data: {
-        logoUrl: nextUrl,
-      },
-    });
+    if (nextUrl && nextUrl !== currentUrl) {
+      await prisma.company.update({
+        where: {
+          id: input.companyId,
+        },
+        data: {
+          logoUrl: nextUrl,
+        },
+      });
+    }
+
+    return nextUrl;
+  } catch {
+    return normalizePhotoUrl(input.logoUrl);
   }
-
-  return nextUrl;
 }
