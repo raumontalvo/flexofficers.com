@@ -196,12 +196,12 @@ export default function OnboardingRoleChoice({
 
   return (
     <>
-      <div className="-mt-6 mb-3 flex justify-center sm:-mt-8">
+      <div className="mb-4 flex justify-center">
         <FlexOfficersLogoLink
           href="/"
           height={120}
           priority
-          imageClassName="!h-auto !w-[180px] !max-w-[180px] md:!w-[240px] md:!max-w-[240px]"
+          imageClassName="!h-auto !w-[180px] !max-w-[180px] md:!w-[220px] md:!max-w-[220px]"
         />
       </div>
 
