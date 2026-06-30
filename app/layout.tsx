@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
-import { BRAND_BADGE_PNG } from "@/components/brand/brand-assets";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,14 +17,6 @@ export const metadata: Metadata = {
   title: "FlexOfficers",
   description:
     "A marketplace connecting security companies with licensed security officers.",
-  icons: {
-    icon: [
-      { url: BRAND_BADGE_PNG, sizes: "32x32", type: "image/png" },
-      { url: BRAND_BADGE_PNG, sizes: "192x192", type: "image/png" },
-    ],
-    shortcut: BRAND_BADGE_PNG,
-    apple: BRAND_BADGE_PNG,
-  },
 };
 
 export default function RootLayout({
