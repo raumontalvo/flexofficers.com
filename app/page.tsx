@@ -307,12 +307,14 @@ export default function Home() {
               <CardTitle className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
                 FlexOfficers Company Plan
               </CardTitle>
-              <p className="mt-10 text-8xl font-bold tracking-tighter text-fo-primary-bright sm:text-9xl">
-                $599
-                <span className="ml-1 text-3xl font-semibold tracking-tight text-fo-text-muted sm:text-4xl">
+              <div className="mt-10 flex max-w-full min-w-0 flex-wrap items-end justify-center gap-2 overflow-hidden">
+                <span className="text-[72px] font-bold leading-none tracking-tighter text-fo-primary-bright min-[390px]:text-[88px] sm:text-8xl md:text-9xl">
+                  $599
+                </span>
+                <span className="mb-2 text-3xl font-semibold leading-none tracking-tight text-fo-text-muted min-[390px]:text-4xl sm:text-5xl">
                   /year
                 </span>
-              </p>
+              </div>
               <p className="mt-5 inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-fo-primary-hover sm:text-base">
                 {COMPANY_TRIAL_COPY.pricingBadge}
               </p>
