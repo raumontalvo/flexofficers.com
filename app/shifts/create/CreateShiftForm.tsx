@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   buildShiftApiPayload,
   emptyPostShiftForm,
@@ -12,6 +13,8 @@ import { PostShiftSummaryPanel } from "@/components/shifts/post-shift-summary-pa
 
 export default function CreateShiftForm() {
   const router = useRouter();
+  const { t } = useLandingLanguage();
+  const actions = t.shiftForm.actions;
   const [form, setForm] = useState<PostShiftFormValues>(emptyPostShiftForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -44,7 +47,7 @@ export default function CreateShiftForm() {
         } | null;
         const details = data?.details?.join(", ");
         throw new Error(
-          details || data?.error || "Failed to create shift. Check required fields."
+          details || data?.error || actions.createFailedFields
         );
       }
 
@@ -52,7 +55,7 @@ export default function CreateShiftForm() {
       router.refresh();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Failed to create shift."
+        error instanceof Error ? error.message : actions.createFailed
       );
     } finally {
       setIsSubmitting(false);

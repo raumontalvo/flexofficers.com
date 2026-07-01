@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
 import {
@@ -15,10 +16,12 @@ import {
   formatInviteHourlyRate,
   formatInviteLocation,
   formatInviteSchedule,
-  formatInvitedTimeAgo,
-  INVITE_STATUS_LABELS,
   type OfficerInviteData,
 } from "@/lib/officer-invite-data";
+import {
+  formatInvitedTimeAgo,
+  getInviteStatusLabel,
+} from "@/lib/i18n/ui-labels";
 import { shiftDetailHref } from "@/lib/shift-detail-navigation";
 import { DeleteInviteButton } from "./DeleteInviteButton";
 
@@ -36,7 +39,11 @@ type InviteActionsProps = {
   layout?: "compact" | "desktop";
 };
 
-async function respondToInvite(inviteId: string, response: "accept" | "decline") {
+async function respondToInvite(
+  inviteId: string,
+  response: "accept" | "decline",
+  updateFailedMessage: string
+) {
   const responseResult = await fetch("/api/invites/respond", {
     method: "POST",
     headers: {
@@ -54,7 +61,7 @@ async function respondToInvite(inviteId: string, response: "accept" | "decline")
     error?: string;
   } | null;
 
-  alert(data?.error || "Failed to update invite.");
+  alert(data?.error || updateFailedMessage);
 }
 
 function LocationIcon({ className }: { className?: string }) {
@@ -99,6 +106,8 @@ export function InviteActions({
   stacked = false,
   layout = "compact",
 }: InviteActionsProps) {
+  const { t } = useLandingLanguage();
+  const card = t.browse.invites.card;
   const [loading, setLoading] = useState<"accept" | "decline" | null>(null);
   const pathname = usePathname();
   const shiftHref = shiftDetailHref(invite.shift.id, pathname);
@@ -131,7 +140,7 @@ export function InviteActions({
   async function handleRespond(response: "accept" | "decline") {
     setLoading(response);
     try {
-      await respondToInvite(invite.id, response);
+      await respondToInvite(invite.id, response, card.updateFailed);
       onRespond();
     } finally {
       setLoading(null);
@@ -146,15 +155,15 @@ export function InviteActions({
           disabled={loading !== null}
           loading={loading === "accept"}
         >
-          Accept Invite
+          {card.acceptInvite}
         </MobilePrimaryButton>
-        <MobileSettingsRow label="View Shift" href={shiftHref} />
+        <MobileSettingsRow label={card.viewShift} href={shiftHref} />
         <MobileSecondaryButton
           onClick={() => handleRespond("decline")}
           disabled={loading !== null}
           loading={loading === "decline"}
         >
-          Decline Invite
+          {card.declineInvite}
         </MobileSecondaryButton>
       </MobileListCardActions>
     );
@@ -163,7 +172,7 @@ export function InviteActions({
   if (stacked && invite.status === "ACCEPTED") {
     return (
       <MobileListCardActions>
-        <MobileSettingsRow label="View Shift Details" href={shiftHref} />
+        <MobileSettingsRow label={card.viewShiftDetails} href={shiftHref} />
       </MobileListCardActions>
     );
   }
@@ -171,11 +180,11 @@ export function InviteActions({
   if (stacked && invite.status === "DECLINED") {
     return (
       <MobileListCardActions>
-        <MobileSettingsRow label="View Shift" href={shiftHref} />
+        <MobileSettingsRow label={card.viewShift} href={shiftHref} />
         <DeleteInviteButton
           inviteId={invite.id}
           onDeleted={onDeleted}
-          label="Delete"
+          label={t.browse.notifications.actions.delete}
           className={buttonClassName({
             variant: "secondary",
             size: "md",
@@ -191,7 +200,7 @@ export function InviteActions({
     return (
       <div className={actionColumnClass}>
         <ShiftDetailLink shiftId={invite.shift.id} className={viewShiftClass}>
-          View Shift Details
+          {card.viewShiftDetails}
         </ShiftDetailLink>
         <button
           type="button"
@@ -199,7 +208,7 @@ export function InviteActions({
           onClick={() => handleRespond("accept")}
           className={primaryActionClass}
         >
-          {loading === "accept" ? "Accepting..." : "Accept Invite"}
+          {loading === "accept" ? card.accepting : card.acceptInvite}
         </button>
         <button
           type="button"
@@ -207,7 +216,7 @@ export function InviteActions({
           onClick={() => handleRespond("decline")}
           className={secondaryActionClass}
         >
-          {loading === "decline" ? "Declining..." : "Decline Invite"}
+          {loading === "decline" ? card.declining : card.declineInvite}
         </button>
       </div>
     );
@@ -217,7 +226,7 @@ export function InviteActions({
     return (
       <div className={actionColumnClass}>
         <ShiftDetailLink shiftId={invite.shift.id} className={viewShiftClass}>
-          View Shift Details
+          {card.viewShiftDetails}
         </ShiftDetailLink>
       </div>
     );
@@ -226,12 +235,12 @@ export function InviteActions({
   return (
     <div className={actionColumnClass}>
       <ShiftDetailLink shiftId={invite.shift.id} className={viewShiftClass}>
-        View Shift Details
+        {card.viewShiftDetails}
       </ShiftDetailLink>
       <DeleteInviteButton
         inviteId={invite.id}
         onDeleted={onDeleted}
-        label="Delete"
+        label={t.browse.notifications.actions.delete}
         className={buttonClassName({
           variant: "secondary",
           size: "md",
@@ -260,10 +269,12 @@ function InviteCardMobile({
   onRespond: () => void;
   onDeleted?: (inviteId: string) => void;
 }) {
+  const { t } = useLandingLanguage();
   const schedule = formatInviteSchedule(invite);
   const locationLabel = formatInviteLocation(invite);
   const hourlyRateLabel = formatInviteHourlyRate(invite);
-  const invitedLabel = formatInvitedTimeAgo(invite.invitedAt);
+  const invitedLabel = formatInvitedTimeAgo(t, invite.invitedAt);
+  const card = t.browse.invites.card;
 
   return (
     <article className="fo-glass-card overflow-hidden rounded-2xl border border-white/10 lg:hidden">
@@ -285,7 +296,7 @@ function InviteCardMobile({
                   statusBadgeClasses[invite.status]
                 )}
               >
-                {INVITE_STATUS_LABELS[invite.status]}
+                {getInviteStatusLabel(t, invite.status)}
               </span>
             </div>
             <h2 className="mt-1 text-base font-bold leading-snug text-fo-text">
@@ -302,7 +313,7 @@ function InviteCardMobile({
 
         <p className="text-2xl font-bold leading-none text-fo-primary-bright">
           {hourlyRateLabel}
-          <span className="text-sm font-semibold text-fo-text-muted">/hr</span>
+          <span className="text-sm font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
         </p>
 
         <div className="flex items-center gap-3 border-t border-white/[0.06] pt-3 text-xs text-fo-text-muted">
@@ -320,7 +331,7 @@ function InviteCardMobile({
 
         {invite.status === "PENDING" ? (
           <p className="rounded-lg border border-blue-500/25 bg-blue-500/10 px-3 py-2 text-xs leading-relaxed text-blue-100">
-            Once you accept an invite, it will move to your Accepted Shifts.
+            {card.pendingHint}
           </p>
         ) : null}
 
@@ -340,10 +351,11 @@ export function InviteCard({
   onRespond,
   onDeleted,
 }: InviteCardProps) {
+  const { t } = useLandingLanguage();
   const schedule = formatInviteSchedule(invite);
   const locationLabel = formatInviteLocation(invite);
   const hourlyRateLabel = formatInviteHourlyRate(invite);
-  const invitedLabel = formatInvitedTimeAgo(invite.invitedAt);
+  const invitedLabel = formatInvitedTimeAgo(t, invite.invitedAt);
 
   return (
     <>
@@ -373,7 +385,7 @@ export function InviteCard({
                     statusBadgeClasses[invite.status]
                   )}
                 >
-                  {INVITE_STATUS_LABELS[invite.status]}
+                  {getInviteStatusLabel(t, invite.status)}
                 </span>
                 <p className="text-xs text-fo-text-subtle">{invitedLabel}</p>
               </div>
@@ -400,7 +412,7 @@ export function InviteCard({
               <DollarIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
               <span className="text-base font-bold">
                 {hourlyRateLabel}
-                <span className="ml-0.5 text-sm font-semibold text-fo-text-muted">/hr</span>
+                <span className="ml-0.5 text-sm font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
               </span>
             </p>
           </div>

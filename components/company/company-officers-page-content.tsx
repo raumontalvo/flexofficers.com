@@ -8,6 +8,7 @@ import { OfficerProfilePanel } from "@/components/company/officer-profile-panel"
 import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
 import { InviteOfficerModal } from "@/components/company/invite-officer-modal";
 import type { CompanyOpenShiftOption } from "@/components/company/invite-officer-to-shift";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   getOfficerInviteButtonState,
   type CompanyOfficerInviteRecord,
@@ -24,6 +25,7 @@ import {
   type SerializedOfficerSearchResult,
 } from "@/lib/company-officers-page";
 import type { OfficerSearchFilters } from "@/lib/officer-search";
+import { interpolate } from "@/lib/app-i18n";
 import {
   buildOfficerSearchQuery,
   countAdvancedOfficerFilters,
@@ -168,6 +170,8 @@ export function CompanyOfficersPageContent({
   acceptedAssignments,
   staffOfficerIds: initialStaffOfficerIds,
 }: CompanyOfficersPageContentProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.officers;
   const router = useRouter();
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(
     Boolean(
@@ -268,7 +272,7 @@ export function CompanyOfficersPageContent({
     <div className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
       {showInviteSentToast ? (
         <StatusToast
-          message="Invite sent"
+          message={copy.inviteSent}
           onClose={() => setShowInviteSentToast(false)}
         />
       ) : null}
@@ -282,7 +286,7 @@ export function CompanyOfficersPageContent({
             <input
               name="search"
               defaultValue={getOfficerQuickSearchDisplay(filters)}
-              placeholder="Search by name or city"
+              placeholder={copy.searchByNameOrCity}
               className={mobileSearchFieldClassName}
             />
           </div>
@@ -291,7 +295,7 @@ export function CompanyOfficersPageContent({
             onClick={() => setFiltersSheetOpen(true)}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm font-semibold text-fo-text"
           >
-            Filters
+            {copy.filters}
             {advancedFilterCount > 0 ? (
               <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-fo-primary-bright/20 px-1.5 text-[10px] font-bold text-fo-primary-hover">
                 {advancedFilterCount}
@@ -306,50 +310,50 @@ export function CompanyOfficersPageContent({
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
             <div className="space-y-1.5">
               <label htmlFor="firstName" className="text-xs font-medium text-fo-text-muted">
-                First name
+                {copy.firstName}
               </label>
               <input
                 id="firstName"
                 name="firstName"
                 defaultValue={filters.firstName ?? ""}
-                placeholder="First name"
+                placeholder={copy.firstName}
                 className={fieldClassName}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="lastName" className="text-xs font-medium text-fo-text-muted">
-                Last name
+                {copy.lastName}
               </label>
               <input
                 id="lastName"
                 name="lastName"
                 defaultValue={filters.lastName ?? ""}
-                placeholder="Last name"
+                placeholder={copy.lastName}
                 className={fieldClassName}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="city" className="text-xs font-medium text-fo-text-muted">
-                City
+                {copy.city}
               </label>
               <input
                 id="city"
                 name="city"
                 defaultValue={filters.city ?? ""}
-                placeholder="City"
+                placeholder={copy.city}
                 className={fieldClassName}
               />
             </div>
             <div className="space-y-1.5">
               <label htmlFor="state" className="text-xs font-medium text-fo-text-muted">
-                State
+                {copy.state}
               </label>
               <input
                 id="state"
                 name="state"
                 list="officer-state-options"
                 defaultValue={filters.state ?? ""}
-                placeholder="State"
+                placeholder={copy.state}
                 className={fieldClassName}
               />
               <datalist id="officer-state-options">
@@ -370,7 +374,7 @@ export function CompanyOfficersPageContent({
                   className: "min-h-12 sm:min-h-10 sm:flex-1",
                 })}
               >
-                Search
+                {copy.search}
               </button>
               <Link
                 href="/company/officers"
@@ -381,7 +385,7 @@ export function CompanyOfficersPageContent({
                   className: "min-h-12 text-center sm:min-h-10 sm:flex-1",
                 })}
               >
-                Clear Filters
+                {copy.clearFilters}
               </Link>
             </div>
           </div>
@@ -392,14 +396,14 @@ export function CompanyOfficersPageContent({
               onClick={() => setMoreFiltersOpen((open) => !open)}
               className="flex w-full items-center justify-between text-sm font-semibold text-fo-text"
             >
-              <span>{moreFiltersOpen ? "▲" : "▼"} More Filters</span>
+              <span>{moreFiltersOpen ? "▲" : "▼"} {copy.moreFilters}</span>
             </button>
 
             {moreFiltersOpen ? (
               <div className="mt-4 space-y-4">
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fo-text-muted">
-                    Background
+                    {copy.background}
                   </p>
                   <FilterCheckboxGroup
                     name="background"
@@ -409,7 +413,7 @@ export function CompanyOfficersPageContent({
                 </div>
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fo-text-muted">
-                    License Types
+                    {copy.licenseTypes}
                   </p>
                   <FilterCheckboxGroup
                     name="licenseType"
@@ -419,7 +423,7 @@ export function CompanyOfficersPageContent({
                 </div>
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fo-text-muted">
-                    Certifications
+                    {copy.certifications}
                   </p>
                   <FilterCheckboxGroup
                     name="certification"
@@ -429,7 +433,7 @@ export function CompanyOfficersPageContent({
                 </div>
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-fo-text-muted">
-                    Availability
+                    {copy.availability}
                   </p>
                   <FilterCheckboxGroup
                     name="availability"
@@ -445,9 +449,9 @@ export function CompanyOfficersPageContent({
 
       {sortedOfficers.length === 0 ? (
         <section className="fo-glass-card rounded-xl border border-white/10 px-4 py-12 text-center">
-          <h2 className="text-lg font-semibold text-fo-text">No officers found.</h2>
+          <h2 className="text-lg font-semibold text-fo-text">{copy.noOfficersFound}</h2>
           <p className="mt-2 text-sm text-fo-text-muted">
-            Try another city or adjust your filters.
+            {copy.tryAnotherCity}
           </p>
           <Link
             href="/company/officers"
@@ -456,20 +460,24 @@ export function CompanyOfficersPageContent({
               className: "mt-5 inline-flex",
             })}
           >
-            Clear Filters
+            {copy.clearFilters}
           </Link>
         </section>
       ) : (
         <>
           <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between lg:gap-3">
             <p className="text-sm font-medium text-fo-text">
-              {sortedOfficers.length} officer{sortedOfficers.length === 1 ? "" : "s"} found
+              {sortedOfficers.length === 1
+                ? copy.officersFoundOne
+                : interpolate(copy.officersFoundMany, {
+                    count: String(sortedOfficers.length),
+                  })}
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
               <label className="flex items-center gap-2 text-xs text-fo-text-muted">
-                <span className="lg:hidden">Sort:</span>
-                <span className="hidden lg:inline">Sort By</span>
+                <span className="lg:hidden">{copy.sort}</span>
+                <span className="hidden lg:inline">{copy.sortBy}</span>
                 <select
                   value={sort}
                   onChange={(event) =>
@@ -477,9 +485,9 @@ export function CompanyOfficersPageContent({
                   }
                   className="min-h-9 rounded-lg border border-fo-border bg-fo-bg/80 px-2 py-1.5 text-sm text-fo-text"
                 >
-                  <option value="alphabetical">Alphabetical</option>
-                  <option value="experience">Most Experience</option>
-                  <option value="newest">Newest</option>
+                  <option value="alphabetical">{copy.alphabetical}</option>
+                  <option value="experience">{copy.mostExperience}</option>
+                  <option value="newest">{copy.newest}</option>
                 </select>
               </label>
             </div>
@@ -548,7 +556,7 @@ export function CompanyOfficersPageContent({
                 inviteOfficer.firstName,
                 inviteOfficer.lastName
               )
-            : "Officer"
+            : copy.officerFallback
         }
         openShifts={openShifts}
         invites={invites}

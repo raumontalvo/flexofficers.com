@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, ProfileAvatar, StatusBadge } from "@/components/ui";
 import { MobileSecondaryButton } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
@@ -9,7 +10,8 @@ import {
   getShiftApplicantOverview,
   type SerializedCompanyApplicant,
 } from "@/lib/company-applications-page";
-import { LICENSE_DISPLAY_DISCLAIMER } from "@/lib/officer-licenses";
+import { getShiftStatusLabel, translateProfileOptionLabel } from "@/lib/i18n/ui-labels";
+import type { AppTranslations } from "@/lib/app-i18n";
 
 type ApplicationReviewPanelProps = {
   application: SerializedCompanyApplicant | null;
@@ -20,16 +22,18 @@ type ApplicationReviewPanelProps = {
 function DetailField({
   label,
   value,
+  notProvided,
 }: {
   label: string;
   value: string | null | undefined;
+  notProvided: string;
 }) {
   return (
     <div>
       <dt className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
         {label}
       </dt>
-      <dd className="mt-1 text-sm text-fo-text">{value?.trim() || "Not provided"}</dd>
+      <dd className="mt-1 text-sm text-fo-text">{value?.trim() || notProvided}</dd>
     </div>
   );
 }
@@ -37,9 +41,13 @@ function DetailField({
 function TagList({
   label,
   values,
+  notProvided,
+  translateValue,
 }: {
   label: string;
   values: readonly string[];
+  notProvided: string;
+  translateValue?: (value: string) => string;
 }) {
   return (
     <div>
@@ -53,18 +61,24 @@ function TagList({
               key={value}
               className="inline-flex rounded-full border border-blue-500/25 bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-100"
             >
-              {value}
+              {translateValue ? translateValue(value) : value}
             </span>
           ))}
         </div>
       ) : (
-        <p className="mt-1 text-sm text-fo-text-muted">Not provided</p>
+        <p className="mt-1 text-sm text-fo-text-muted">{notProvided}</p>
       )}
     </div>
   );
 }
 
-function ShiftStatusBadge({ status }: { status: ShiftStatus }) {
+function ShiftStatusBadge({
+  status,
+  t,
+}: {
+  status: ShiftStatus;
+  t: AppTranslations;
+}) {
   const variant =
     status === ShiftStatus.OPEN
       ? "success"
@@ -74,7 +88,9 @@ function ShiftStatusBadge({ status }: { status: ShiftStatus }) {
           ? "rejected"
           : "neutral";
 
-  return <StatusBadge variant={variant}>{status}</StatusBadge>;
+  return (
+    <StatusBadge variant={variant}>{getShiftStatusLabel(t, status)}</StatusBadge>
+  );
 }
 
 function CompactInfoRow({
@@ -130,50 +146,55 @@ function OverviewStatCard({
 function MobileShiftDetailsSection({
   application,
   overview,
+  t,
 }: {
   application: SerializedCompanyApplicant;
   overview: ReturnType<typeof getShiftApplicantOverview>;
+  t: AppTranslations;
 }) {
+  const copy = t.company.review;
+  const shared = t.company.shared;
+
   return (
     <div className="space-y-3 lg:hidden">
       <section className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
-        <h3 className="text-sm font-bold text-fo-text">Shift Details</h3>
+        <h3 className="text-sm font-bold text-fo-text">{copy.shiftDetails}</h3>
         <div className="mt-2 divide-y divide-white/[0.06]">
           <CompactInfoRow
             icon="📅"
-            label="Date"
+            label={shared.date}
             value={application.appliedShift.dateLabel}
           />
           <CompactInfoRow
             icon="🕒"
-            label="Time"
+            label={shared.time}
             value={application.appliedShift.timeLabel}
           />
           <CompactInfoRow
             icon="📍"
-            label="Location"
+            label={shared.location}
             value={application.appliedShift.locationLabel}
           />
           <CompactInfoRow
             icon="💵"
-            label="Pay"
+            label={shared.pay}
             value={application.appliedShift.payRateLabel}
           />
           <CompactInfoRow
             icon="👥"
-            label="Open Positions"
+            label={shared.openPositions}
             value={String(application.appliedShift.openPositions)}
           />
         </div>
       </section>
 
       <section className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5">
-        <h3 className="text-sm font-bold text-fo-text">Applicants Overview</h3>
+        <h3 className="text-sm font-bold text-fo-text">{copy.applicantsOverview}</h3>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <OverviewStatCard label="Total" value={overview.total} tone="default" />
-          <OverviewStatCard label="Pending" value={overview.pending} tone="amber" />
-          <OverviewStatCard label="Accepted" value={overview.accepted} tone="green" />
-          <OverviewStatCard label="Rejected" value={overview.rejected} tone="red" />
+          <OverviewStatCard label={shared.total} value={overview.total} tone="default" />
+          <OverviewStatCard label={shared.pending} value={overview.pending} tone="amber" />
+          <OverviewStatCard label={shared.accepted} value={overview.accepted} tone="green" />
+          <OverviewStatCard label={shared.rejected} value={overview.rejected} tone="red" />
         </div>
       </section>
     </div>
@@ -185,6 +206,11 @@ export function ApplicationReviewPanel({
   allApplications = [],
   onClose,
 }: ApplicationReviewPanelProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.review;
+  const shared = t.company.shared;
+  const notProvided = t.commonExtras.notProvided;
+  const translateTag = (value: string) => translateProfileOptionLabel(t, value);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -233,7 +259,7 @@ export function ApplicationReviewPanel({
         error?: string;
       } | null;
 
-      alert(data?.error || "Failed to update applicant");
+      alert(data?.error || copy.updateFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -252,7 +278,7 @@ export function ApplicationReviewPanel({
     <>
       <button
         type="button"
-        aria-label="Close applicant review panel"
+        aria-label={copy.closeAria}
         className={cn(
           "fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] transition-opacity lg:block",
           application ? "opacity-100" : "pointer-events-none opacity-0",
@@ -274,7 +300,7 @@ export function ApplicationReviewPanel({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="text-lg font-bold text-fo-text">
-                    Applicant Review
+                    {copy.title}
                   </h2>
                   <p className="mt-1 truncate text-sm text-fo-text-muted">
                     {application.officerProfile.name} · {application.appliedShift.title}
@@ -285,7 +311,7 @@ export function ApplicationReviewPanel({
                   onClick={onClose}
                   className="shrink-0 rounded-lg border border-white/10 px-2.5 py-1.5 text-sm text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
                 >
-                  Close
+                  {shared.close}
                 </button>
               </div>
             </div>
@@ -295,6 +321,7 @@ export function ApplicationReviewPanel({
                 <MobileShiftDetailsSection
                   application={application}
                   overview={shiftOverview}
+                  t={t}
                 />
               ) : null}
 
@@ -307,50 +334,67 @@ export function ApplicationReviewPanel({
                   />
                   <div>
                     <h3 className="text-base font-semibold text-fo-text">
-                      Officer Profile
+                      {copy.officerProfile}
                     </h3>
                     <p className="mt-0.5 text-xs text-fo-text-muted">
-                      Self-reported information submitted by the officer.
+                      {copy.officerProfileHint}
                     </p>
                   </div>
                 </div>
 
                 <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <DetailField label="Name" value={application.officerProfile.name} />
-                  <DetailField label="Email" value={application.officerProfile.email} />
-                  <DetailField label="Phone" value={application.officerProfile.phone} />
                   <DetailField
-                    label="City, State"
+                    label={copy.name}
+                    value={application.officerProfile.name}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.email}
+                    value={application.officerProfile.email}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.phone}
+                    value={application.officerProfile.phone}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.cityState}
                     value={application.officerProfile.cityStateLabel}
+                    notProvided={notProvided}
                   />
                   <DetailField
-                    label="Years of Experience"
+                    label={copy.yearsOfExperience}
                     value={application.officerProfile.experienceYearsLabel}
+                    notProvided={notProvided}
                   />
                   <DetailField
-                    label="Armed / Unarmed"
+                    label={copy.armedUnarmed}
                     value={application.officerProfile.armedStatusLabel}
+                    notProvided={notProvided}
                   />
                 </dl>
 
                 <div className="mt-4 space-y-4">
                   <TagList
-                    label="Experience Categories"
+                    label={copy.experienceCategories}
                     values={application.officerProfile.experienceCategories}
+                    notProvided={notProvided}
+                    translateValue={translateTag}
                   />
 
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
-                      Introduction
+                      {copy.introduction}
                     </p>
                     <p className="mt-1 text-sm leading-relaxed text-fo-text">
-                      {application.officerProfile.introduction || "Not provided"}
+                      {application.officerProfile.introduction || notProvided}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
-                      Licenses Submitted
+                      {copy.licensesSubmitted}
                     </p>
                     {application.officerProfile.licenses.length > 0 ? (
                       <div className="mt-2 space-y-2">
@@ -365,7 +409,7 @@ export function ApplicationReviewPanel({
                             <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
                               <div>
                                 <dt className="text-[11px] uppercase tracking-wide text-fo-text-muted">
-                                  License Number
+                                  {copy.licenseNumber}
                                 </dt>
                                 <dd className="mt-0.5 text-fo-text">
                                   {license.licenseNumber}
@@ -373,7 +417,7 @@ export function ApplicationReviewPanel({
                               </div>
                               <div>
                                 <dt className="text-[11px] uppercase tracking-wide text-fo-text-muted">
-                                  Issuing State
+                                  {copy.issuingState}
                                 </dt>
                                 <dd className="mt-0.5 text-fo-text">
                                   {license.issuingState}
@@ -381,7 +425,7 @@ export function ApplicationReviewPanel({
                               </div>
                               <div className="sm:col-span-2">
                                 <dt className="text-[11px] uppercase tracking-wide text-fo-text-muted">
-                                  Expiration Date
+                                  {copy.expirationDate}
                                 </dt>
                                 <dd className="mt-0.5 text-fo-text">
                                   {license.expirationDateLabel}
@@ -392,69 +436,98 @@ export function ApplicationReviewPanel({
                         ))}
                       </div>
                     ) : (
-                      <p className="mt-1 text-sm text-fo-text-muted">Not provided</p>
+                      <p className="mt-1 text-sm text-fo-text-muted">{notProvided}</p>
                     )}
                     <p className="mt-2 text-xs leading-relaxed text-fo-text-muted">
-                      {LICENSE_DISPLAY_DISCLAIMER}
+                      {shared.licenseDisclaimer}
                     </p>
                   </div>
 
                   <TagList
-                    label="Certifications"
+                    label={copy.certifications}
                     values={application.officerProfile.certifications}
+                    notProvided={notProvided}
+                    translateValue={translateTag}
                   />
                   <TagList
-                    label="Availability"
+                    label={copy.availability}
                     values={application.officerProfile.availability}
+                    notProvided={notProvided}
+                    translateValue={translateTag}
                   />
                 </div>
               </section>
 
               <section className="hidden rounded-xl border border-white/10 bg-white/[0.03] p-4 lg:block">
-                <h3 className="text-base font-semibold text-fo-text">Applied Shift</h3>
+                <h3 className="text-base font-semibold text-fo-text">{copy.appliedShift}</h3>
 
                 <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <DetailField label="Shift Title" value={application.appliedShift.title} />
+                  <DetailField
+                    label={copy.shiftTitle}
+                    value={application.appliedShift.title}
+                    notProvided={notProvided}
+                  />
                   <div>
                     <dt className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
-                      Shift Status
+                      {copy.shiftStatus}
                     </dt>
                     <dd className="mt-2">
-                      <ShiftStatusBadge status={application.appliedShift.status} />
+                      <ShiftStatusBadge
+                        status={application.appliedShift.status}
+                        t={t}
+                      />
                     </dd>
                   </div>
-                  <DetailField label="Date" value={application.appliedShift.dateLabel} />
-                  <DetailField label="Time" value={application.appliedShift.timeLabel} />
                   <DetailField
-                    label="Location"
+                    label={shared.date}
+                    value={application.appliedShift.dateLabel}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={shared.time}
+                    value={application.appliedShift.timeLabel}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={shared.location}
                     value={application.appliedShift.locationLabel}
+                    notProvided={notProvided}
                   />
-                  <DetailField label="Pay Rate" value={application.appliedShift.payRateLabel} />
                   <DetailField
-                    label="Work Type"
+                    label={copy.payRate}
+                    value={application.appliedShift.payRateLabel}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.workType}
                     value={application.appliedShift.workTypeLabel}
+                    notProvided={notProvided}
                   />
                   <DetailField
-                    label="Open Positions"
+                    label={shared.openPositions}
                     value={String(application.appliedShift.openPositions)}
+                    notProvided={notProvided}
                   />
                 </dl>
 
                 <div className="mt-4 space-y-4">
                   <TagList
-                    label="Required Licenses"
+                    label={copy.requiredLicenses}
                     values={application.appliedShift.requiredLicenses}
+                    notProvided={notProvided}
                   />
                   <TagList
-                    label="Required Certifications"
+                    label={copy.requiredCertifications}
                     values={application.appliedShift.requiredCertifications}
+                    notProvided={notProvided}
+                    translateValue={translateTag}
                   />
                   <div>
                     <p className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
-                      Other Requirements
+                      {copy.otherRequirements}
                     </p>
                     <p className="mt-1 text-sm leading-relaxed text-fo-text">
-                      {application.appliedShift.otherRequirements || "Not provided"}
+                      {application.appliedShift.otherRequirements || notProvided}
                     </p>
                   </div>
                 </div>
@@ -470,7 +543,7 @@ export function ApplicationReviewPanel({
                       disabled={isSubmitting}
                       onClick={() => updateStatus("ACCEPTED")}
                     >
-                      {isSubmitting ? "Updating..." : "Accept Applicant"}
+                      {isSubmitting ? copy.updating : copy.acceptApplicant}
                     </Button>
                     <Button
                       type="button"
@@ -480,7 +553,7 @@ export function ApplicationReviewPanel({
                       disabled={isSubmitting}
                       onClick={() => updateStatus("REJECTED")}
                     >
-                      Reject Applicant
+                      {copy.rejectApplicant}
                     </Button>
                   </>
                 ) : null}
@@ -488,7 +561,7 @@ export function ApplicationReviewPanel({
                   href="/company/shifts"
                   className="min-h-10 text-sm"
                 >
-                  Back to My Shifts
+                  {copy.backToShifts}
                 </MobileSecondaryButton>
               </div>
             </div>
@@ -504,7 +577,7 @@ export function ApplicationReviewPanel({
                       disabled={isSubmitting}
                       onClick={() => updateStatus("ACCEPTED")}
                     >
-                      {isSubmitting ? "Updating..." : "Accept Applicant"}
+                      {isSubmitting ? copy.updating : copy.acceptApplicant}
                     </Button>
                     <Button
                       type="button"
@@ -514,7 +587,7 @@ export function ApplicationReviewPanel({
                       disabled={isSubmitting}
                       onClick={() => updateStatus("REJECTED")}
                     >
-                      Reject Applicant
+                      {copy.rejectApplicant}
                     </Button>
                   </>
                 ) : null}
@@ -526,7 +599,7 @@ export function ApplicationReviewPanel({
                   disabled={isSubmitting}
                   onClick={onClose}
                 >
-                  Close
+                  {shared.close}
                 </Button>
               </div>
             </div>

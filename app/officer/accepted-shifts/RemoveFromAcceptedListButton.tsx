@@ -1,5 +1,6 @@
 "use client";
 
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
 const STORAGE_KEY = "flexofficers-hidden-accepted-shifts";
@@ -41,10 +42,11 @@ export function RemoveFromAcceptedListButton({
   onRemoved,
   className,
 }: RemoveFromAcceptedListButtonProps) {
+  const { t } = useLandingLanguage();
+  const card = t.acceptedShifts.card;
+
   function handleRemove() {
-    const confirmed = window.confirm(
-      "Remove this assignment from your list? This only hides it from your view."
-    );
+    const confirmed = window.confirm(card.removeConfirm);
 
     if (!confirmed) {
       return;
@@ -63,7 +65,7 @@ export function RemoveFromAcceptedListButton({
         className
       )}
     >
-      Remove from List
+      {card.removeFromList}
     </button>
   );
 }

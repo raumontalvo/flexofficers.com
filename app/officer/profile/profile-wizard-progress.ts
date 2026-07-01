@@ -83,7 +83,7 @@ export function getWizardSectionProgress(form: WizardFormSnapshot) {
   return {
     completedCount,
     totalCount: PROFILE_WIZARD_STEPS.length,
-    nextStepLabel: nextStep?.nextStepLabel ?? null,
+    nextStepId: nextStep?.id ?? null,
     allComplete: completedCount === PROFILE_WIZARD_STEPS.length,
   };
 }

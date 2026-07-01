@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 
 function CheckIcon({ className }: { className?: string }) {
   return (
@@ -21,6 +22,9 @@ type StepRequiredBadgeProps = {
 };
 
 export function StepRequiredBadge({ required }: StepRequiredBadgeProps) {
+  const { t } = useLandingLanguage();
+  const badge = t.profileWizard.badge;
+
   return (
     <span
       className={cn(
@@ -30,7 +34,7 @@ export function StepRequiredBadge({ required }: StepRequiredBadgeProps) {
           : "border border-slate-600/50 bg-slate-800/60 text-slate-400"
       )}
     >
-      {required ? "Required" : "Optional"}
+      {required ? badge.required : badge.optional}
     </span>
   );
 }

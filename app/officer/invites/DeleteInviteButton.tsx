@@ -1,5 +1,6 @@
 "use client";
 
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 import type { ReactNode } from "react";
 
@@ -15,11 +16,15 @@ export function DeleteInviteButton({
   inviteId,
   onDeleted,
   className,
-  label = "Delete",
+  label,
   icon,
 }: DeleteInviteButtonProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.forms.deleteInvite;
+  const buttonLabel = label ?? t.browse.notifications.actions.delete;
+
   async function deleteInvite() {
-    const confirmed = window.confirm("Delete this declined invite from your list?");
+    const confirmed = window.confirm(copy.confirm);
 
     if (!confirmed) {
       return;
@@ -42,7 +47,7 @@ export function DeleteInviteButton({
       return;
     }
 
-    alert(data?.error || "Failed to delete invite");
+    alert(data?.error || copy.failed);
   }
 
   return (
@@ -56,7 +61,7 @@ export function DeleteInviteButton({
       )}
     >
       {icon}
-      {label}
+      {buttonLabel}
     </button>
   );
 }

@@ -35,7 +35,7 @@ describe("profile wizard progress", () => {
     const progress = getWizardSectionProgress(partialForm);
     expect(progress.completedCount).toBe(2);
     expect(progress.totalCount).toBe(5);
-    expect(progress.nextStepLabel).toBe("Professional Licenses");
+    expect(progress.nextStepId).toBe("licenses");
   });
 
   it("marks optional sections complete when selections exist", () => {

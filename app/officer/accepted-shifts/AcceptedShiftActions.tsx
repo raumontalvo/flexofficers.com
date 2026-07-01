@@ -1,6 +1,7 @@
 "use client";
 
 import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { cn } from "@/lib/cn";
 import type { AcceptedShiftTab } from "@/lib/officer-accepted-shift-data";
@@ -26,6 +27,8 @@ export function AcceptedShiftActions({
   onListChange,
   layout = "compact",
 }: AcceptedShiftActionsProps) {
+  const { t } = useLandingLanguage();
+  const card = t.acceptedShifts.card;
   const desktop = layout === "desktop";
   const mobileRow = layout === "mobile-row";
 
@@ -54,20 +57,20 @@ export function AcceptedShiftActions({
       <div className="space-y-1.5">
         {tab === "completed" ? (
           <p className="text-[10px] font-medium text-fo-text-muted">
-            Completed on{" "}
+            {card.completedOn}{" "}
             <span className="font-semibold text-fo-success">{completedDateLabel}</span>
           </p>
         ) : null}
 
         <div className="flex flex-wrap gap-2">
           <ShiftDetailLink shiftId={shiftId} className={viewShiftClassName}>
-            View Shift
+            {card.viewShift}
           </ShiftDetailLink>
 
           {tab === "upcoming" ? (
             <CancelAssignmentButton
               applicationId={applicationId}
-              label="Cancel"
+              label={card.cancel}
               className={cancelClassName}
             />
           ) : null}
@@ -87,14 +90,11 @@ export function AcceptedShiftActions({
   return (
     <div className={cn("flex flex-col items-stretch", desktop ? "gap-2" : "gap-1.5")}>
       <ShiftDetailLink shiftId={shiftId} className={viewShiftClassName}>
-        View Shift
+        {card.viewShift}
       </ShiftDetailLink>
 
       {tab === "upcoming" ? (
-        <CancelAssignmentButton
-          applicationId={applicationId}
-          className={cancelClassName}
-        />
+        <CancelAssignmentButton applicationId={applicationId} className={cancelClassName} />
       ) : null}
 
       {tab === "completed" ? (
@@ -105,7 +105,7 @@ export function AcceptedShiftActions({
           )}
         >
           <p className="font-medium uppercase tracking-wide text-fo-text-subtle">
-            Completed on
+            {card.completedOn}
           </p>
           <p className="mt-0.5 font-semibold text-fo-success">{completedDateLabel}</p>
         </div>

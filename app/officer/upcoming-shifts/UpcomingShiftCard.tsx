@@ -1,9 +1,11 @@
 "use client";
 
 import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { StatusBadge, ProfileAvatar, buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { interpolate } from "@/lib/app-i18n";
 import {
   formatEstimatedShiftPay,
   formatHourlyRate,
@@ -13,10 +15,13 @@ import {
 import { fromShiftTimeType } from "@/lib/shift-form-options";
 import { hasCompanyContact, type OfficerAcceptedShiftData } from "@/lib/officer-accepted-shift-data";
 import {
-  formatStartsInLabel,
   getDaysUntilStart,
   getUpcomingUrgencyTone,
 } from "@/lib/officer-upcoming-shift-data";
+import {
+  formatStartsInLabel,
+  translateShiftFormLabel,
+} from "@/lib/i18n/ui-labels";
 
 const urgencyToneClasses = {
   urgent: "border-red-500/40 bg-red-500/10 text-red-200",
@@ -67,6 +72,8 @@ function formatUrgencyBadgeLabel(label: string) {
 }
 
 export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
+  const { t } = useLandingLanguage();
+  const card = t.browse.upcomingShifts.card;
   const { shift, company } = application;
   const startTime = new Date(shift.startTime);
   const endTime = new Date(shift.endTime);
@@ -74,10 +81,10 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
   const schedule = formatShiftScheduleParts(startTime, endTime);
   const estimatedPay = formatEstimatedShiftPay(hourlyRate, startTime, endTime);
   const locationLabel = formatShiftCityState(shift);
-  const shiftTimeLabel = fromShiftTimeType(shift.shiftTimeType);
+  const shiftTimeLabel = translateShiftFormLabel(t, fromShiftTimeType(shift.shiftTimeType));
   const contactAvailable = hasCompanyContact(company);
   const daysUntilStart = getDaysUntilStart(shift.startTime);
-  const urgencyLabel = formatUrgencyBadgeLabel(formatStartsInLabel(daysUntilStart));
+  const urgencyLabel = formatUrgencyBadgeLabel(formatStartsInLabel(t, daysUntilStart));
   const urgencyTone = getUpcomingUrgencyTone(daysUntilStart);
   const contactName = company.contactName?.trim() || company.companyName;
 
@@ -98,7 +105,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
               variant="success"
               className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
             >
-              CONFIRMED
+              {card.confirmed}
             </StatusBadge>
           </div>
 
@@ -132,10 +139,12 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
           <div>
             <p className="text-xl font-bold leading-none text-fo-primary-bright">
               {formatHourlyRate(hourlyRate)}
-              <span className="text-sm font-semibold text-fo-text-muted">/hr</span>
+              <span className="text-sm font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
             </p>
             {estimatedPay ? (
-              <p className="mt-0.5 text-xs text-fo-text-muted">Est. {estimatedPay}</p>
+              <p className="mt-0.5 text-xs text-fo-text-muted">
+                {interpolate(card.estAbbrev, { pay: estimatedPay })}
+              </p>
             ) : null}
           </div>
 
@@ -148,7 +157,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
                 "mt-1 w-full border-fo-primary-bright/40 text-fo-primary-bright hover:border-fo-primary-bright hover:bg-fo-primary/10",
             })}
           >
-            View Details
+            {card.viewDetails}
           </ShiftDetailLink>
         </div>
       </article>
@@ -169,7 +178,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
                 variant="success"
                 className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
               >
-                CONFIRMED
+                {card.confirmed}
               </StatusBadge>
             </div>
 
@@ -204,19 +213,21 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
           <div className="flex min-w-0 flex-col justify-center gap-2 border-r border-white/[0.06] px-1 pr-5">
             <p className="text-3xl font-bold leading-none text-fo-primary-bright">
               {formatHourlyRate(hourlyRate)}
-              <span className="ml-1 text-base font-semibold text-fo-text-muted">/hr</span>
+              <span className="ml-1 text-base font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
             </p>
             {estimatedPay ? (
-              <p className="text-sm text-fo-text-muted">Est. earnings {estimatedPay}</p>
+              <p className="text-sm text-fo-text-muted">
+                {interpolate(card.estEarnings, { pay: estimatedPay })}
+              </p>
             ) : (
-              <p className="text-sm text-fo-text-subtle">Estimated earnings unavailable</p>
+              <p className="text-sm text-fo-text-subtle">{card.estEarningsUnavailable}</p>
             )}
           </div>
 
           <div className="flex min-w-0 flex-col justify-between gap-4">
             <div className="space-y-3">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted">
-                Company contact
+                {card.companyContact}
               </p>
               <div className="flex items-start gap-3">
                 <ProfileAvatar
@@ -236,7 +247,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
                       </a>
                     </p>
                   ) : (
-                    <p className="text-xs text-fo-text-subtle">Phone not provided</p>
+                    <p className="text-xs text-fo-text-subtle">{card.phoneNotProvided}</p>
                   )}
                   {contactAvailable && company.email ? (
                     <p className="truncate text-xs text-fo-text-muted">
@@ -248,7 +259,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
                       </a>
                     </p>
                   ) : (
-                    <p className="text-xs text-fo-text-subtle">Email not provided</p>
+                    <p className="text-xs text-fo-text-subtle">{card.emailNotProvided}</p>
                   )}
                 </div>
               </div>
@@ -264,7 +275,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
                     "w-full border-fo-primary-bright/40 text-fo-primary-bright hover:border-fo-primary-bright hover:bg-fo-primary/10",
                 })}
               >
-                View Details
+                {card.viewDetails}
               </ShiftDetailLink>
               <CancelAssignmentButton applicationId={application.id} />
             </div>

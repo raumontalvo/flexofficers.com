@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -35,6 +36,8 @@ export function AddToStaffButton({
   className,
   size = "md",
 }: AddToStaffButtonProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.addToStaff;
   const [onStaff, setOnStaff] = useState(isOnStaff);
   const [loading, setLoading] = useState(false);
 
@@ -55,7 +58,7 @@ export function AddToStaffButton({
       } | null;
 
       if (!response.ok) {
-        alert(data?.error || "Failed to update staff.");
+        alert(data?.error || copy.updateFailed);
         return;
       }
 
@@ -90,7 +93,7 @@ export function AddToStaffButton({
           )}
         >
           <TrashIcon className="h-4 w-4 shrink-0" />
-          {loading ? "Removing..." : "Remove Staff"}
+          {loading ? copy.removing : copy.remove}
         </button>
       );
     }
@@ -111,7 +114,7 @@ export function AddToStaffButton({
           })
         )}
       >
-        {loading ? "Removing..." : "Remove Staff"}
+        {loading ? copy.removing : copy.remove}
       </button>
     );
   }
@@ -132,7 +135,7 @@ export function AddToStaffButton({
         })
       )}
     >
-      {loading ? "Adding..." : "Add to Staff"}
+      {loading ? copy.adding : copy.add}
     </button>
   );
 }

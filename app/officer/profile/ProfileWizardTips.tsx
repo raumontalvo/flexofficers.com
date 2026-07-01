@@ -1,5 +1,8 @@
+"use client";
+
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
-import { PROFILE_WIZARD_TIPS, PROFILE_APPLY_TIP } from "./profile-wizard-tips";
+import { getProfileWizardTips } from "@/lib/i18n/ui-labels";
 import type { ProfileWizardStepId } from "./profile-wizard-steps";
 
 type ProfileWizardTipsProps = {
@@ -13,8 +16,10 @@ export function ProfileWizardTips({
   className,
   showApplyTip = false,
 }: ProfileWizardTipsProps) {
-  const tips = PROFILE_WIZARD_TIPS[stepId];
-  const items = showApplyTip ? [PROFILE_APPLY_TIP, ...tips.items] : tips.items;
+  const { t } = useLandingLanguage();
+  const tips = t.profileWizard.tips;
+  const stepTips = getProfileWizardTips(t, stepId);
+  const items = showApplyTip ? [tips.applyTip, ...stepTips] : stepTips;
 
   return (
     <aside

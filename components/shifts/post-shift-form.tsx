@@ -1,12 +1,16 @@
 "use client";
 
 import { useRef } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   POST_SHIFT_CERTIFICATION_OPTIONS,
   type PostShiftFormValues,
 } from "@/lib/shift-create-form";
 import { US_STATES } from "@/lib/license-options";
-import { SHIFT_WORK_TYPE_OPTIONS } from "@/lib/shift-form-options";
+import {
+  getDateLocale,
+  getShiftWorkTypeSelectOptions,
+} from "@/lib/i18n/ui-labels";
 import { LicenseRequirementsPicker } from "@/components/shifts/license-requirements-picker";
 import { RequirementsMultiSelectPicker } from "@/components/shifts/requirements-multi-select-picker";
 import { cn } from "@/lib/cn";
@@ -49,7 +53,7 @@ function ClockIcon({ className }: { className?: string }) {
   );
 }
 
-function formatShiftFormDate(value: string) {
+function formatShiftFormDate(value: string, locale: string) {
   if (!value) {
     return "";
   }
@@ -60,14 +64,14 @@ function formatShiftFormDate(value: string) {
     return "";
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
   }).format(new Date(year, month - 1, day));
 }
 
-function formatShiftFormTime(value: string) {
+function formatShiftFormTime(value: string, locale: string) {
   if (!value) {
     return "";
   }
@@ -81,7 +85,7 @@ function formatShiftFormTime(value: string) {
   const date = new Date();
   date.setHours(hours, minutes, 0, 0);
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
@@ -94,6 +98,7 @@ function ShiftDateTimeField({
   onChange,
   placeholder,
   icon,
+  locale,
 }: {
   id: string;
   type: "date" | "time";
@@ -101,10 +106,13 @@ function ShiftDateTimeField({
   onChange: (value: string) => void;
   placeholder: string;
   icon: "calendar" | "clock";
+  locale: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const display =
-    type === "date" ? formatShiftFormDate(value) : formatShiftFormTime(value);
+    type === "date"
+      ? formatShiftFormDate(value, locale)
+      : formatShiftFormTime(value, locale);
   const Icon = icon === "calendar" ? CalendarIcon : ClockIcon;
 
   function openPicker() {
@@ -228,8 +236,15 @@ type PostShiftFormProps = {
 export function PostShiftForm({
   form,
   onChange,
-  otherRequirementsPlaceholder = "e.g. 2+ years experience, customer service, etc.",
+  otherRequirementsPlaceholder,
 }: PostShiftFormProps) {
+  const { t, language } = useLandingLanguage();
+  const sf = t.shiftForm;
+  const locale = getDateLocale(language);
+  const workTypeOptions = getShiftWorkTypeSelectOptions(t);
+  const resolvedOtherRequirementsPlaceholder =
+    otherRequirementsPlaceholder ?? sf.placeholders.otherRequirementsPost;
+
   function updateField<K extends keyof PostShiftFormValues>(
     key: K,
     value: PostShiftFormValues[K]
@@ -246,28 +261,28 @@ export function PostShiftForm({
 
   return (
     <div className="space-y-4">
-      <SectionCard number={1} title="Shift Details">
+      <SectionCard number={1} title={sf.sections.shiftDetails}>
         <div className="space-y-2">
-          <RequiredLabel htmlFor="title">Shift Title</RequiredLabel>
+          <RequiredLabel htmlFor="title">{sf.fields.shiftTitle}</RequiredLabel>
           <input
             id="title"
             value={form.title}
             onChange={(event) => updateField("title", event.target.value)}
             className={fieldClassName}
-            placeholder="e.g. Mall Security Officer"
+            placeholder={sf.placeholders.shiftTitleExample}
           />
         </div>
 
         <div className="space-y-2">
-          <RequiredLabel htmlFor="workType">Type of Post</RequiredLabel>
+          <RequiredLabel htmlFor="workType">{sf.fields.typeOfPost}</RequiredLabel>
           <select
             id="workType"
             value={form.workType}
             onChange={(event) => updateField("workType", event.target.value)}
             className={fieldClassName}
           >
-            <option value="">Select type of post</option>
-            {SHIFT_WORK_TYPE_OPTIONS.map((option) => (
+            <option value="">{sf.placeholders.selectPostType}</option>
+            {workTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
@@ -276,60 +291,62 @@ export function PostShiftForm({
         </div>
 
         <div className="space-y-2">
-          <OptionalLabel htmlFor="description">Description</OptionalLabel>
+          <OptionalLabel htmlFor="description">{sf.fields.description}</OptionalLabel>
           <textarea
             id="description"
             value={form.description}
             onChange={(event) => updateField("description", event.target.value)}
             className={cn(fieldClassName, "min-h-28 resize-y")}
-            placeholder="Add any important details about the shift, duties, or requirements..."
+            placeholder={sf.placeholders.descriptionLong}
           />
         </div>
 
         <p className="text-xs leading-relaxed text-fo-text-muted">
-          A clear title helps officers know what to expect. Include parking
-          info, dress code, specific instructions, etc.
+          {sf.hints.shiftDetails}
         </p>
       </SectionCard>
 
       <SectionCard
         number={2}
-        title="Date & Time"
+        title={sf.sections.dateTime}
         className="fo-shift-datetime-section min-w-0"
         contentClassName="w-full max-w-full min-w-0"
       >
         <div className="grid w-full min-w-0 max-w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3">
           <div className="w-full max-w-full min-w-0 space-y-2">
-            <RequiredLabel htmlFor="startDate">Start Date</RequiredLabel>
+            <RequiredLabel htmlFor="startDate">{sf.fields.startDate}</RequiredLabel>
             <ShiftDateTimeField
               id="startDate"
               type="date"
               value={form.startDate}
               onChange={(startDate) => updateField("startDate", startDate)}
-              placeholder="Select date"
+              placeholder={sf.placeholders.selectDate}
               icon="calendar"
+              locale={locale}
             />
           </div>
           <div className="w-full max-w-full min-w-0 space-y-2">
-            <RequiredLabel htmlFor="startTime">Start Time</RequiredLabel>
+            <RequiredLabel htmlFor="startTime">{sf.fields.startTime}</RequiredLabel>
             <ShiftDateTimeField
               id="startTime"
               type="time"
               value={form.startTime}
               onChange={(startTime) => updateField("startTime", startTime)}
-              placeholder="Select time"
+              placeholder={sf.placeholders.selectTime}
               icon="clock"
+              locale={locale}
             />
           </div>
           <div className="w-full max-w-full min-w-0 space-y-2">
-            <RequiredLabel htmlFor="endTime">End Time</RequiredLabel>
+            <RequiredLabel htmlFor="endTime">{sf.fields.endTime}</RequiredLabel>
             <ShiftDateTimeField
               id="endTime"
               type="time"
               value={form.endTime}
               onChange={(endTime) => updateField("endTime", endTime)}
-              placeholder="Select time"
+              placeholder={sf.placeholders.selectTime}
               icon="clock"
+              locale={locale}
             />
           </div>
         </div>
@@ -339,59 +356,59 @@ export function PostShiftForm({
             <input type="checkbox" disabled className="mt-1 rounded border-fo-border" />
             <span>
               <span className="block text-sm font-medium text-fo-text">
-                Recurring Shift
+                {sf.recurring.title}
               </span>
               <span className="mt-0.5 block text-xs text-fo-text-muted">
-                This shift repeats on specific days. Coming soon.
+                {sf.recurring.description}
               </span>
             </span>
           </label>
         </div>
       </SectionCard>
 
-      <SectionCard number={3} title="Location">
+      <SectionCard number={3} title={sf.sections.location}>
         <div className="space-y-2">
-          <RequiredLabel htmlFor="locationName">Location Name</RequiredLabel>
+          <RequiredLabel htmlFor="locationName">{sf.fields.locationName}</RequiredLabel>
           <input
             id="locationName"
             value={form.locationName}
             onChange={(event) => updateField("locationName", event.target.value)}
             className={fieldClassName}
-            placeholder="e.g. Gulf Coast Town Center"
+            placeholder={sf.placeholders.locationName}
           />
         </div>
 
         <div className="space-y-2">
-          <RequiredLabel htmlFor="address">Address</RequiredLabel>
+          <RequiredLabel htmlFor="address">{sf.fields.address}</RequiredLabel>
           <input
             id="address"
             value={form.address}
             onChange={(event) => updateField("address", event.target.value)}
             className={fieldClassName}
-            placeholder="Street address"
+            placeholder={sf.placeholders.address}
           />
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="city">City</RequiredLabel>
+            <RequiredLabel htmlFor="city">{sf.fields.city}</RequiredLabel>
             <input
               id="city"
               value={form.city}
               onChange={(event) => updateField("city", event.target.value)}
               className={fieldClassName}
-              placeholder="City"
+              placeholder={sf.placeholders.city}
             />
           </div>
           <div className="space-y-2">
-            <RequiredLabel htmlFor="state">State</RequiredLabel>
+            <RequiredLabel htmlFor="state">{sf.fields.state}</RequiredLabel>
             <select
               id="state"
               value={form.state}
               onChange={(event) => updateField("state", event.target.value)}
               className={fieldClassName}
             >
-              <option value="">Select state</option>
+              <option value="">{sf.placeholders.selectState}</option>
               {US_STATES.map((state) => (
                 <option key={state.code} value={state.code}>
                   {state.name}
@@ -400,22 +417,22 @@ export function PostShiftForm({
             </select>
           </div>
           <div className="space-y-2">
-            <RequiredLabel htmlFor="zipCode">Zip Code</RequiredLabel>
+            <RequiredLabel htmlFor="zipCode">{sf.fields.zipCode}</RequiredLabel>
             <input
               id="zipCode"
               value={form.zipCode}
               onChange={(event) => updateField("zipCode", event.target.value)}
               className={fieldClassName}
-              placeholder="Zip code"
+              placeholder={sf.placeholders.zipCode}
             />
           </div>
         </div>
       </SectionCard>
 
-      <SectionCard number={4} title="Pay & Requirements">
+      <SectionCard number={4} title={sf.sections.payRequirements}>
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <RequiredLabel htmlFor="hourlyRate">Pay Rate</RequiredLabel>
+            <RequiredLabel htmlFor="hourlyRate">{sf.fields.payRate}</RequiredLabel>
             <input
               id="hourlyRate"
               type="number"
@@ -428,7 +445,7 @@ export function PostShiftForm({
             />
           </div>
           <div className="space-y-2">
-            <RequiredLabel htmlFor="currency">Currency</RequiredLabel>
+            <RequiredLabel htmlFor="currency">{sf.fields.currency}</RequiredLabel>
             <select
               id="currency"
               value={form.currency}
@@ -439,13 +456,13 @@ export function PostShiftForm({
             </select>
           </div>
           <div className="space-y-2">
-            <RequiredLabel>Open Positions</RequiredLabel>
+            <RequiredLabel>{sf.fields.openPositions}</RequiredLabel>
             <div className="inline-flex min-h-11 w-full items-center gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-2">
               <button
                 type="button"
                 onClick={() => adjustPositions(-1)}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 text-lg font-semibold text-fo-text transition hover:bg-white/[0.06]"
-                aria-label="Decrease open positions"
+                aria-label={sf.actions.decreasePositions}
               >
                 −
               </button>
@@ -456,7 +473,7 @@ export function PostShiftForm({
                 type="button"
                 onClick={() => adjustPositions(1)}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 text-lg font-semibold text-fo-text transition hover:bg-white/[0.06]"
-                aria-label="Increase open positions"
+                aria-label={sf.actions.increasePositions}
               >
                 +
               </button>
@@ -467,10 +484,10 @@ export function PostShiftForm({
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <RequiredLabel htmlFor="licenseRequirements">
-              License Requirements
+              {sf.fields.licenseRequirements}
             </RequiredLabel>
             <p className="text-xs leading-relaxed text-fo-text-muted">
-              Select one or more license types required for this shift.
+              {sf.hints.licenseRequirements}
             </p>
             <LicenseRequirementsPicker
               selected={form.licenseRequirements}
@@ -482,10 +499,10 @@ export function PostShiftForm({
 
           <div className="space-y-2">
             <OptionalLabel htmlFor="certificationRequirements">
-              Certifications
+              {sf.fields.certifications}
             </OptionalLabel>
             <p className="text-xs leading-relaxed text-fo-text-muted">
-              Select one or more certifications required for this shift.
+              {sf.hints.certificationRequirements}
             </p>
             <RequirementsMultiSelectPicker
               options={POST_SHIFT_CERTIFICATION_OPTIONS}
@@ -494,14 +511,14 @@ export function PostShiftForm({
                 updateField("certificationRequirements", certificationRequirements)
               }
               allowCustom
-              customLabel="Add a custom certification"
-              customPlaceholder="e.g. De-escalation Training"
+              customLabel={sf.placeholders.customCertification}
+              customPlaceholder={sf.placeholders.customCertificationPlaceholder}
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <OptionalLabel htmlFor="otherRequirements">Other Requirements</OptionalLabel>
+          <OptionalLabel htmlFor="otherRequirements">{sf.fields.otherRequirements}</OptionalLabel>
           <textarea
             id="otherRequirements"
             value={form.otherRequirements}
@@ -509,7 +526,7 @@ export function PostShiftForm({
               updateField("otherRequirements", event.target.value)
             }
             className={cn(fieldClassName, "min-h-24 resize-y")}
-            placeholder={otherRequirementsPlaceholder}
+            placeholder={resolvedOtherRequirementsPlaceholder}
           />
         </div>
       </SectionCard>

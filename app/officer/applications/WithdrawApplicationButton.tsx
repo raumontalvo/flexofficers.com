@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 import type { ReactNode } from "react";
 
@@ -8,7 +9,7 @@ export default function WithdrawApplicationButton({
   applicationId,
   compact = false,
   className,
-  label = "Withdraw Application",
+  label,
   icon,
 }: {
   applicationId: string;
@@ -17,10 +18,12 @@ export default function WithdrawApplicationButton({
   label?: string;
   icon?: ReactNode;
 }) {
+  const { t } = useLandingLanguage();
+  const copy = t.forms.withdrawApplication;
+  const buttonLabel = label ?? copy.label;
+
   async function withdrawApplication() {
-    const confirmed = window.confirm(
-      "Withdraw this application? You will no longer be considered for this shift."
-    );
+    const confirmed = window.confirm(copy.confirm);
 
     if (!confirmed) {
       return;
@@ -37,12 +40,12 @@ export default function WithdrawApplicationButton({
     const data = await response.json();
 
     if (response.ok) {
-      alert("Application withdrawn.");
+      alert(copy.success);
       window.location.reload();
       return;
     }
 
-    alert(data?.error || "Failed to withdraw application");
+    alert(data?.error || copy.failed);
   }
 
   if (compact) {
@@ -56,7 +59,7 @@ export default function WithdrawApplicationButton({
         )}
       >
         {icon}
-        {label}
+        {buttonLabel}
       </button>
     );
   }
@@ -69,7 +72,7 @@ export default function WithdrawApplicationButton({
       className="w-full border-yellow-500/30 text-fo-pending hover:bg-fo-pending-bg"
       onClick={withdrawApplication}
     >
-      {label}
+      {buttonLabel}
     </Button>
   );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName } from "@/components/ui";
 import {
   formatApplicantShiftSchedule,
@@ -9,6 +10,7 @@ import {
   type SerializedCompanyApplicant,
 } from "@/lib/company-applications-page";
 import { formatHourlyRate } from "@/lib/format-shift";
+import { getShiftStatusLabel } from "@/lib/i18n/ui-labels";
 import { cn } from "@/lib/cn";
 
 type ApplicantsShiftSummaryPanelProps = {
@@ -56,7 +58,13 @@ function OverviewStat({
   );
 }
 
-function ShiftStatusBadge({ status }: { status: ShiftStatus }) {
+function ShiftStatusBadge({
+  status,
+  label,
+}: {
+  status: ShiftStatus;
+  label: string;
+}) {
   const styles = {
     [ShiftStatus.OPEN]: "border-green-500/25 bg-green-500/10 text-green-200",
     [ShiftStatus.INVITED]: "border-amber-500/25 bg-amber-500/10 text-amber-200",
@@ -74,7 +82,7 @@ function ShiftStatusBadge({ status }: { status: ShiftStatus }) {
         styles[status] ?? styles[ShiftStatus.COMPLETED]
       )}
     >
-      {status.replaceAll("_", " ")}
+      {label}
     </span>
   );
 }
@@ -83,12 +91,17 @@ export function ApplicantsShiftSummaryPanel({
   applications,
   selectedApplication,
 }: ApplicantsShiftSummaryPanelProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.applicantsSummary;
+  const shared = t.company.shared;
+  const actions = t.browse.companyApplicants.actions;
+
   if (!selectedApplication) {
     return (
       <div className="lg:sticky lg:top-6">
         <section className="fo-glass-card rounded-lg border border-white/10 p-2.5">
           <p className="text-[11px] leading-snug text-fo-text-muted">
-            Select an applicant to view shift details.
+            {copy.selectHint}
           </p>
         </section>
       </div>
@@ -110,38 +123,41 @@ export function ApplicantsShiftSummaryPanel({
   return (
     <div className="space-y-2.5 lg:sticky lg:top-6">
       <section className="fo-glass-card rounded-lg border border-white/10 p-2.5">
-        <h2 className="text-xs font-semibold text-fo-text">Shift Details</h2>
+        <h2 className="text-xs font-semibold text-fo-text">{copy.shiftDetails}</h2>
 
         <dl className="mt-2 space-y-1.5">
-          <SummaryRow label="Shift" value={selectedApplication.shiftTitle} />
+          <SummaryRow label={shared.shift} value={selectedApplication.shiftTitle} />
           <div className="grid grid-cols-[72px_minmax(0,1fr)] items-center gap-x-2 text-[11px]">
-            <dt className="text-fo-text-muted">Status</dt>
+            <dt className="text-fo-text-muted">{shared.status}</dt>
             <dd>
-              <ShiftStatusBadge status={selectedApplication.shiftStatus} />
+              <ShiftStatusBadge
+                status={selectedApplication.shiftStatus}
+                label={getShiftStatusLabel(t, selectedApplication.shiftStatus)}
+              />
             </dd>
           </div>
-          <SummaryRow label="Date" value={schedule.dateLabel} />
-          <SummaryRow label="Time" value={schedule.timeLabel} />
-          <SummaryRow label="Location" value={locationLabel} />
+          <SummaryRow label={shared.date} value={schedule.dateLabel} />
+          <SummaryRow label={shared.time} value={schedule.timeLabel} />
+          <SummaryRow label={shared.location} value={locationLabel} />
           <SummaryRow
-            label="Pay"
+            label={shared.pay}
             value={`${formatHourlyRate(selectedApplication.shiftHourlyRate)}/hr`}
           />
           <SummaryRow
-            label="Open"
+            label={shared.openPositions}
             value={String(selectedApplication.shiftPositionsNeeded)}
           />
         </dl>
       </section>
 
       <section className="fo-glass-card rounded-lg border border-white/10 p-2.5">
-        <h3 className="text-xs font-semibold text-fo-text">Applicants Overview</h3>
+        <h3 className="text-xs font-semibold text-fo-text">{copy.applicantsOverview}</h3>
 
         <div className="mt-2 space-y-1.5">
-          <OverviewStat label="Total" value={overview.total} tone="default" />
-          <OverviewStat label="Pending" value={overview.pending} tone="amber" />
-          <OverviewStat label="Accepted" value={overview.accepted} tone="green" />
-          <OverviewStat label="Rejected" value={overview.rejected} tone="red" />
+          <OverviewStat label={shared.total} value={overview.total} tone="default" />
+          <OverviewStat label={shared.pending} value={overview.pending} tone="amber" />
+          <OverviewStat label={shared.accepted} value={overview.accepted} tone="green" />
+          <OverviewStat label={shared.rejected} value={overview.rejected} tone="red" />
         </div>
 
         <Link
@@ -153,7 +169,7 @@ export function ApplicantsShiftSummaryPanel({
             className: "mt-2.5 min-h-8 w-full text-[11px]",
           })}
         >
-          Back to My Shifts
+          {actions.backToShifts}
         </Link>
       </section>
     </div>

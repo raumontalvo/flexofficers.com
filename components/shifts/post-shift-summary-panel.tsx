@@ -1,19 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import {
   getShiftSummaryFields,
   type PostShiftFormValues,
   type ShiftPostVisibility,
 } from "@/lib/shift-create-form";
 import { cn } from "@/lib/cn";
-
-const TIPS = [
-  "Be specific in your description",
-  "Include parking and entry instructions",
-  "Set a competitive pay rate",
-  "Post early for better visibility",
-] as const;
 
 type PostShiftSummaryPanelProps = {
   form: PostShiftFormValues;
@@ -35,16 +30,18 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 function ChipSummaryRow<T extends string>({
   label,
   labels,
+  notSetLabel,
 }: {
   label: string;
   labels: readonly T[];
+  notSetLabel: string;
 }) {
   return (
     <div className="flex items-start justify-between gap-3 text-sm">
       <dt className="text-fo-text-muted">{label}</dt>
       <dd className="max-w-[60%] text-right">
         {labels.length === 0 ? (
-          <span className="font-medium text-fo-text">Not set</span>
+          <span className="font-medium text-fo-text">{notSetLabel}</span>
         ) : (
           <div className="flex flex-wrap justify-end gap-1.5">
             {labels.map((entry) => (
@@ -69,32 +66,37 @@ export function PostShiftSummaryPanel({
   onSubmit,
   onVisibilityChange,
 }: PostShiftSummaryPanelProps) {
+  const { t } = useLandingLanguage();
+  const summaryCopy = t.shiftForm.summary;
+  const actions = t.shiftForm.actions;
   const summary = getShiftSummaryFields(form);
 
   return (
     <div className="space-y-4 lg:sticky lg:top-6">
       <section className="fo-glass-card rounded-xl border border-white/10 p-4">
-        <h2 className="text-base font-bold text-fo-text">Shift Summary</h2>
+        <h2 className="text-base font-bold text-fo-text">{summaryCopy.title}</h2>
 
         <dl className="mt-4 space-y-3">
-          <SummaryRow label="Type of Post" value={summary.typeOfPost} />
-          <SummaryRow label="Date & Time" value={summary.dateTime} />
-          <SummaryRow label="Location" value={summary.location} />
-          <SummaryRow label="Pay Rate" value={summary.payRate} />
+          <SummaryRow label={summaryCopy.typeOfPost} value={summary.typeOfPost} />
+          <SummaryRow label={summaryCopy.dateTime} value={summary.dateTime} />
+          <SummaryRow label={summaryCopy.location} value={summary.location} />
+          <SummaryRow label={summaryCopy.payRate} value={summary.payRate} />
           <ChipSummaryRow
-            label="License Required"
+            label={summaryCopy.licenseRequired}
             labels={summary.licenseRequirements}
+            notSetLabel={summaryCopy.notSet}
           />
           <ChipSummaryRow
-            label="Certification Required"
+            label={summaryCopy.certificationRequired}
             labels={summary.certificationRequirements}
+            notSetLabel={summaryCopy.notSet}
           />
-          <SummaryRow label="Open Positions" value={summary.openPositions} />
-          <SummaryRow label="Description" value={summary.description} />
+          <SummaryRow label={summaryCopy.openPositions} value={summary.openPositions} />
+          <SummaryRow label={summaryCopy.description} value={summary.description} />
         </dl>
 
         <div className="mt-4 border-t border-white/[0.06] pt-4">
-          <p className="text-sm font-medium text-fo-text">Who can see this shift?</p>
+          <p className="text-sm font-medium text-fo-text">{summaryCopy.visibilityQuestion}</p>
           <div className="mt-3 grid gap-2">
             <label
               className={cn(
@@ -114,10 +116,10 @@ export function PostShiftSummaryPanel({
               />
               <span>
                 <span className="block text-sm font-semibold text-fo-text">
-                  Public post shift
+                  {summaryCopy.publicTitle}
                 </span>
                 <span className="mt-0.5 block text-xs leading-relaxed text-fo-text-muted">
-                  Listed in Browse Shifts for all security officers.
+                  {summaryCopy.publicDescription}
                 </span>
               </span>
             </label>
@@ -139,16 +141,16 @@ export function PostShiftSummaryPanel({
               />
               <span>
                 <span className="block text-sm font-semibold text-fo-text">
-                  Private post for staff
+                  {summaryCopy.privateTitle}
                 </span>
                 <span className="mt-0.5 block text-xs leading-relaxed text-fo-text-muted">
-                  Hidden from public browse. Invite officers from your Staff roster.
+                  {summaryCopy.privateDescription}
                 </span>
               </span>
             </label>
           </div>
           <p className="mt-3 text-xs text-fo-text-subtle">
-            Selected: {summary.visibility}
+            {interpolate(summaryCopy.selected, { value: summary.visibility })}
           </p>
         </div>
 
@@ -160,7 +162,7 @@ export function PostShiftSummaryPanel({
             disabled={isSubmitting}
             onClick={onSubmit}
           >
-            {isSubmitting ? "Posting..." : "Post Shift"}
+            {isSubmitting ? actions.posting : actions.postShift}
           </Button>
         </div>
 
@@ -170,11 +172,9 @@ export function PostShiftSummaryPanel({
       </section>
 
       <section className="fo-glass-card rounded-xl border border-white/10 p-4">
-        <h3 className="text-sm font-bold text-fo-text">
-          Tips for a Successful Post
-        </h3>
+        <h3 className="text-sm font-bold text-fo-text">{summaryCopy.tipsTitle}</h3>
         <ul className="mt-3 space-y-2">
-          {TIPS.map((tip) => (
+          {summaryCopy.tips.map((tip) => (
             <li
               key={tip}
               className="flex items-start gap-2 text-xs leading-relaxed text-fo-text-muted"

@@ -1,3 +1,9 @@
+import {
+  profileShiftEn,
+  profileShiftEs,
+  type ProfileShiftTranslations,
+} from "@/lib/i18n/profile-shift-translations";
+
 export type UiTranslations = {
   browse: {
     pagination: {
@@ -54,6 +60,16 @@ export type UiTranslations = {
       startsTomorrow: string;
       startsInDays: string;
       actions: { browseOpenShifts: string };
+      card: {
+        confirmed: string;
+        viewDetails: string;
+        companyContact: string;
+        phoneNotProvided: string;
+        emailNotProvided: string;
+        estAbbrev: string;
+        estEarnings: string;
+        estEarningsUnavailable: string;
+      };
     };
     notifications: {
       markAllRead: string;
@@ -68,10 +84,46 @@ export type UiTranslations = {
         daysAgo: string;
         weeksAgo: string;
       };
+      kinds: {
+        application_accepted: string;
+        application_rejected: string;
+        application_viewed: string;
+        application_withdrawn: string;
+        application_status_updated: string;
+        upcoming_shift_reminder: string;
+        shift_starts_tomorrow: string;
+        shift_starts_soon: string;
+        shift_schedule_changed: string;
+        shift_cancelled: string;
+        new_shift_match: string;
+        system_update: string;
+        system_maintenance: string;
+        system_security: string;
+        system_coming_soon: string;
+        system_welcome: string;
+        system_profile_reminder: string;
+        general: string;
+      };
     };
     companyNotifications: {
       empty: { none: string; noneDescription: string; noMatch: string };
-      actions: { viewApplicants: string; viewShifts: string };
+      actions: {
+        viewApplicants: string;
+        viewShifts: string;
+        viewDetails: string;
+        delete: string;
+        unread: string;
+      };
+      kinds: {
+        invite_accepted: string;
+        invite_declined: string;
+        new_application: string;
+        application_withdrawn: string;
+        shift_update: string;
+        shift_cancelled: string;
+        system_update: string;
+        general: string;
+      };
     };
     shifts: {
       searchTitle: string;
@@ -122,6 +174,32 @@ export type UiTranslations = {
       };
       sort: { label: string; newest: string; oldest: string };
       count: string;
+      statuses: { PENDING: string; ACCEPTED: string; DECLINED: string };
+      card: {
+        acceptInvite: string;
+        declineInvite: string;
+        accepting: string;
+        declining: string;
+        viewShift: string;
+        viewShiftDetails: string;
+        pendingHint: string;
+        updateFailed: string;
+        deleteConfirm: string;
+        deleteFailed: string;
+        invitedPrefix: string;
+      };
+      howItWorks: {
+        title: string;
+        step1Title: string;
+        step1Description: string;
+        step2Title: string;
+        step2Description: string;
+        step3Title: string;
+        step3Description: string;
+        step4Title: string;
+        step4Description: string;
+      };
+      footer: { howItWorks: string; otherUpdates: string; viewAll: string };
     };
   };
   status: {
@@ -346,6 +424,16 @@ export type UiTranslations = {
       confirm: string;
       failed: string;
     };
+    withdrawApplication: {
+      label: string;
+      confirm: string;
+      success: string;
+      failed: string;
+    };
+    deleteInvite: {
+      confirm: string;
+      failed: string;
+    };
   };
   commonExtras: {
     notProvided: string;
@@ -355,7 +443,7 @@ export type UiTranslations = {
     noMessagesYet: string;
     messagesEmptyDescription: string;
   };
-};
+} & ProfileShiftTranslations;
 
 export const uiEn: UiTranslations = {
   browse: {
@@ -425,8 +513,18 @@ export const uiEn: UiTranslations = {
       },
       startsToday: "Starts today",
       startsTomorrow: "Starts tomorrow",
-      startsInDays: "Starts in {days} days",
+      startsInDays: "Starts in {count} days",
       actions: { browseOpenShifts: "Browse Open Shifts" },
+      card: {
+        confirmed: "CONFIRMED",
+        viewDetails: "View Details",
+        companyContact: "Company contact",
+        phoneNotProvided: "Phone not provided",
+        emailNotProvided: "Email not provided",
+        estAbbrev: "Est. {pay}",
+        estEarnings: "Est. earnings {pay}",
+        estEarningsUnavailable: "Estimated earnings unavailable",
+      },
     },
     notifications: {
       markAllRead: "Mark all as read",
@@ -457,6 +555,26 @@ export const uiEn: UiTranslations = {
         daysAgo: "{count} day(s) ago",
         weeksAgo: "{count} week(s) ago",
       },
+      kinds: {
+        application_accepted: "APPLICATION ACCEPTED",
+        application_rejected: "APPLICATION REJECTED",
+        application_viewed: "APPLICATION VIEWED",
+        application_withdrawn: "APPLICATION WITHDRAWN",
+        application_status_updated: "APPLICATION UPDATE",
+        upcoming_shift_reminder: "SHIFT REMINDER",
+        shift_starts_tomorrow: "SHIFT REMINDER",
+        shift_starts_soon: "SHIFT REMINDER",
+        shift_schedule_changed: "SCHEDULE CHANGED",
+        shift_cancelled: "SHIFT CANCELLED",
+        new_shift_match: "NEW SHIFT MATCH",
+        system_update: "SYSTEM UPDATE",
+        system_maintenance: "SYSTEM UPDATE",
+        system_security: "SYSTEM UPDATE",
+        system_coming_soon: "SYSTEM UPDATE",
+        system_welcome: "SYSTEM UPDATE",
+        system_profile_reminder: "SYSTEM UPDATE",
+        general: "SYSTEM UPDATE",
+      },
     },
     companyNotifications: {
       empty: {
@@ -465,7 +583,23 @@ export const uiEn: UiTranslations = {
           "Notifications will appear here when officers respond to invites, apply to shifts, or shift updates occur.",
         noMatch: "No notifications in this tab.",
       },
-      actions: { viewApplicants: "View Applicants", viewShifts: "View Shifts" },
+      actions: {
+        viewApplicants: "View Applicants",
+        viewShifts: "View Shifts",
+        viewDetails: "View Details",
+        delete: "Delete",
+        unread: "Unread",
+      },
+      kinds: {
+        invite_accepted: "INVITE ACCEPTED",
+        invite_declined: "INVITE DECLINED",
+        new_application: "NEW APPLICATION",
+        application_withdrawn: "APPLICATION WITHDRAWN",
+        shift_update: "SHIFT UPDATE",
+        shift_cancelled: "SHIFT CANCELLED",
+        system_update: "SYSTEM UPDATE",
+        general: "SYSTEM UPDATE",
+      },
     },
     shifts: {
       searchTitle: "Search Shifts",
@@ -552,6 +686,39 @@ export const uiEn: UiTranslations = {
       },
       sort: { label: "Sort By", newest: "Newest", oldest: "Oldest" },
       count: "{count} invite(s)",
+      statuses: { PENDING: "Pending", ACCEPTED: "Accepted", DECLINED: "Declined" },
+      card: {
+        acceptInvite: "Accept Invite",
+        declineInvite: "Decline Invite",
+        accepting: "Accepting...",
+        declining: "Declining...",
+        viewShift: "View Shift",
+        viewShiftDetails: "View Shift Details",
+        pendingHint:
+          "Once you accept an invite, it will move to your Accepted Shifts.",
+        updateFailed: "Failed to update invite.",
+        deleteConfirm: "Delete this declined invite from your list?",
+        deleteFailed: "Failed to delete invite",
+        invitedPrefix: "Invited {time}",
+      },
+      howItWorks: {
+        title: "How Invites Work",
+        step1Title: "Company invites you",
+        step1Description: "A company finds your profile and invites you to a shift.",
+        step2Title: "You review the shift",
+        step2Description: "Check the details and decide if it's a good fit.",
+        step3Title: "Accept invite",
+        step3Description:
+          "If you accept, the shift is automatically added to your Accepted Shifts.",
+        step4Title: "Show up & get paid",
+        step4Description:
+          "Work the shift and get paid directly by the security company. The company is in charge of paying you—not through FlexOfficers.",
+      },
+      footer: {
+        howItWorks: "How invites work",
+        otherUpdates: "Other Updates",
+        viewAll: "View All",
+      },
     },
   },
   status: {
@@ -796,8 +963,20 @@ export const uiEn: UiTranslations = {
     },
     cancelAssignment: {
       title: "Cancel Assignment",
-      confirm: "Are you sure you want to cancel this assignment?",
+      confirm:
+        "Cancel this assignment? The company will be notified and the shift opening may become available again.",
       failed: "Failed to cancel assignment",
+    },
+    withdrawApplication: {
+      label: "Withdraw Application",
+      confirm:
+        "Withdraw this application? You will no longer be considered for this shift.",
+      success: "Application withdrawn.",
+      failed: "Failed to withdraw application",
+    },
+    deleteInvite: {
+      confirm: "Delete this declined invite from your list?",
+      failed: "Failed to delete invite",
     },
   },
   commonExtras: {
@@ -806,8 +985,9 @@ export const uiEn: UiTranslations = {
     browseOpenShifts: "Browse Open Shifts",
     important: "Important",
     noMessagesYet: "No messages yet.",
-    messagesEmptyDescription: "Direct messaging with companies will be available in a future release.",
+    messagesEmptyDescription: "Company messaging is not active in Version 1.0.",
   },
+  ...profileShiftEn,
 };
 
 export const uiEs: UiTranslations = {
@@ -884,8 +1064,18 @@ export const uiEs: UiTranslations = {
       },
       startsToday: "Comienza hoy",
       startsTomorrow: "Comienza mañana",
-      startsInDays: "Comienza en {days} días",
+      startsInDays: "Comienza en {count} días",
       actions: { browseOpenShifts: "Explorar Turnos Abiertos" },
+      card: {
+        confirmed: "CONFIRMADO",
+        viewDetails: "Ver Detalles",
+        companyContact: "Contacto de la empresa",
+        phoneNotProvided: "Teléfono no proporcionado",
+        emailNotProvided: "Correo no proporcionado",
+        estAbbrev: "Est. {pay}",
+        estEarnings: "Ganancias est. {pay}",
+        estEarningsUnavailable: "Ganancias estimadas no disponibles",
+      },
     },
     notifications: {
       markAllRead: "Marcar todo como leído",
@@ -916,6 +1106,26 @@ export const uiEs: UiTranslations = {
         daysAgo: "hace {count} día(s)",
         weeksAgo: "hace {count} semana(s)",
       },
+      kinds: {
+        application_accepted: "SOLICITUD ACEPTADA",
+        application_rejected: "SOLICITUD RECHAZADA",
+        application_viewed: "SOLICITUD VISTA",
+        application_withdrawn: "SOLICITUD RETIRADA",
+        application_status_updated: "ACTUALIZACIÓN DE SOLICITUD",
+        upcoming_shift_reminder: "RECORDATORIO DE TURNO",
+        shift_starts_tomorrow: "RECORDATORIO DE TURNO",
+        shift_starts_soon: "RECORDATORIO DE TURNO",
+        shift_schedule_changed: "HORARIO CAMBIADO",
+        shift_cancelled: "TURNO CANCELADO",
+        new_shift_match: "NUEVO TURNO COINCIDENTE",
+        system_update: "ACTUALIZACIÓN DEL SISTEMA",
+        system_maintenance: "ACTUALIZACIÓN DEL SISTEMA",
+        system_security: "ACTUALIZACIÓN DEL SISTEMA",
+        system_coming_soon: "ACTUALIZACIÓN DEL SISTEMA",
+        system_welcome: "ACTUALIZACIÓN DEL SISTEMA",
+        system_profile_reminder: "ACTUALIZACIÓN DEL SISTEMA",
+        general: "ACTUALIZACIÓN DEL SISTEMA",
+      },
     },
     companyNotifications: {
       empty: {
@@ -924,7 +1134,23 @@ export const uiEs: UiTranslations = {
           "Las notificaciones aparecerán aquí cuando los oficiales respondan a invitaciones, soliciten turnos o haya actualizaciones.",
         noMatch: "No hay notificaciones en esta pestaña.",
       },
-      actions: { viewApplicants: "Ver Solicitantes", viewShifts: "Ver Turnos" },
+      actions: {
+        viewApplicants: "Ver Solicitantes",
+        viewShifts: "Ver Turnos",
+        viewDetails: "Ver Detalles",
+        delete: "Eliminar",
+        unread: "No leído",
+      },
+      kinds: {
+        invite_accepted: "INVITACIÓN ACEPTADA",
+        invite_declined: "INVITACIÓN RECHAZADA",
+        new_application: "NUEVA SOLICITUD",
+        application_withdrawn: "SOLICITUD RETIRADA",
+        shift_update: "ACTUALIZACIÓN DE TURNO",
+        shift_cancelled: "TURNO CANCELADO",
+        system_update: "ACTUALIZACIÓN DEL SISTEMA",
+        general: "ACTUALIZACIÓN DEL SISTEMA",
+      },
     },
     shifts: {
       searchTitle: "Buscar Turnos",
@@ -1011,6 +1237,39 @@ export const uiEs: UiTranslations = {
       },
       sort: { label: "Ordenar por", newest: "Más reciente", oldest: "Más antiguo" },
       count: "{count} invitación(es)",
+      statuses: { PENDING: "Pendiente", ACCEPTED: "Aceptado", DECLINED: "Declinado" },
+      card: {
+        acceptInvite: "Aceptar Invitación",
+        declineInvite: "Rechazar Invitación",
+        accepting: "Aceptando...",
+        declining: "Rechazando...",
+        viewShift: "Ver Turno",
+        viewShiftDetails: "Ver Detalles del Turno",
+        pendingHint:
+          "Cuando aceptes una invitación, se moverá a tus Turnos Aceptados.",
+        updateFailed: "No se pudo actualizar la invitación.",
+        deleteConfirm: "¿Eliminar esta invitación rechazada de tu lista?",
+        deleteFailed: "No se pudo eliminar la invitación",
+        invitedPrefix: "Invitado {time}",
+      },
+      howItWorks: {
+        title: "Cómo Funcionan las Invitaciones",
+        step1Title: "La empresa te invita",
+        step1Description: "Una empresa encuentra tu perfil y te invita a un turno.",
+        step2Title: "Revisas el turno",
+        step2Description: "Revisa los detalles y decide si es adecuado para ti.",
+        step3Title: "Acepta la invitación",
+        step3Description:
+          "Si aceptas, el turno se agrega automáticamente a tus Turnos Aceptados.",
+        step4Title: "Asiste y cobra",
+        step4Description:
+          "Trabaja el turno y recibe el pago directamente de la empresa de seguridad. La empresa es responsable de pagarte—no a través de FlexOfficers.",
+      },
+      footer: {
+        howItWorks: "Cómo funcionan las invitaciones",
+        otherUpdates: "Otras Actualizaciones",
+        viewAll: "Ver Todo",
+      },
     },
   },
   status: {
@@ -1264,8 +1523,20 @@ export const uiEs: UiTranslations = {
     },
     cancelAssignment: {
       title: "Cancelar Asignación",
-      confirm: "¿Estás seguro de que deseas cancelar esta asignación?",
+      confirm:
+        "¿Cancelar esta asignación? La empresa será notificada y la vacante del turno puede volver a estar disponible.",
       failed: "No se pudo cancelar la asignación",
+    },
+    withdrawApplication: {
+      label: "Retirar Solicitud",
+      confirm:
+        "¿Retirar esta solicitud? Ya no serás considerado para este turno.",
+      success: "Solicitud retirada.",
+      failed: "No se pudo retirar la solicitud",
+    },
+    deleteInvite: {
+      confirm: "¿Eliminar esta invitación rechazada de tu lista?",
+      failed: "No se pudo eliminar la invitación",
     },
   },
   commonExtras: {
@@ -1275,6 +1546,7 @@ export const uiEs: UiTranslations = {
     important: "Importante",
     noMessagesYet: "Aún no hay mensajes.",
     messagesEmptyDescription:
-      "La mensajería directa con empresas estará disponible en una futura versión.",
+      "La mensajería con empresas no está activa en la Versión 1.0.",
   },
+  ...profileShiftEs,
 };

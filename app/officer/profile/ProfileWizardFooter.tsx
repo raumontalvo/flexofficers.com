@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
 type ProfileWizardFooterProps = {
@@ -22,7 +23,10 @@ export function ProfileWizardFooter({
   onContinue,
   className,
 }: ProfileWizardFooterProps) {
+  const { t } = useLandingLanguage();
+  const footer = t.profileWizard.footer;
   const isBusy = isSaving || isUploading;
+
   return (
     <div
       className={cn(
@@ -40,7 +44,7 @@ export function ProfileWizardFooter({
             disabled={isBusy}
             className="w-full sm:w-auto"
           >
-            Back
+            {footer.back}
           </Button>
         ) : null}
 
@@ -56,12 +60,12 @@ export function ProfileWizardFooter({
           )}
         >
           {isUploading
-            ? "Uploading..."
+            ? footer.uploading
             : isSaving
-              ? "Saving..."
+              ? footer.saving
               : isLastStep
-                ? "Save Profile"
-                : "Save & Continue"}
+                ? footer.saveProfile
+                : footer.saveContinue}
         </Button>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { RequirementsMultiSelectPicker } from "@/components/shifts/requirements-multi-select-picker";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   Button,
   Card,
@@ -14,20 +15,21 @@ import {
   LICENSE_TYPE_OPTIONS,
   US_STATES,
 } from "@/lib/license-options";
-import {
-  LICENSE_CERTIFICATION_COMPANY_HELPER,
-  LICENSE_CERTIFICATION_LABEL,
-  OFFICER_LICENSE_HELPER_TEXT,
-} from "@/lib/officer-licenses";
 import { getProfileCompletionFromForm } from "@/lib/officer-profile-form";
 import {
   ARMED_STATUS_OPTIONS,
   AVAILABILITY_OPTIONS,
   CERTIFICATION_OPTIONS,
   EXPERIENCE_CATEGORIES,
-  formatArmedStatusLabel,
   type ArmedStatusOption,
 } from "@/lib/profile-options";
+import {
+  getProfileWizardDescription,
+  getProfileWizardSteps,
+  translateArmedStatusLabel,
+  translateProfileOptionLabel,
+  validateWizardStepTranslated,
+} from "@/lib/i18n/ui-labels";
 import {
   formatLicenseExpiration,
   getLicenseDisplayMeta,
@@ -40,9 +42,8 @@ import { ProfileWizardHeader } from "./ProfileWizardHeader";
 import { ProfileWizardTips } from "./ProfileWizardTips";
 import {
   getWizardSectionProgress,
-  validateWizardStep,
 } from "./profile-wizard-progress";
-import { PROFILE_WIZARD_STEPS } from "./profile-wizard-steps";
+import type { ProfileWizardStepId } from "./profile-wizard-steps";
 import { StepRequiredBadge } from "./profile-wizard-ui";
 
 type LicenseFormEntry = {
@@ -154,12 +155,14 @@ function TagToggleGroup({
   options,
   selected,
   onChange,
+  formatOption,
 }: {
   label: string;
   description?: string;
   options: readonly string[];
   selected: string[];
   onChange: (next: string[]) => void;
+  formatOption?: (value: string) => string;
 }) {
   return (
     <div className="space-y-2.5">
@@ -173,6 +176,7 @@ function TagToggleGroup({
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const isSelected = selected.includes(option);
+          const display = formatOption ? formatOption(option) : option;
 
           return (
             <button
@@ -187,7 +191,7 @@ function TagToggleGroup({
                   : "border-fo-border bg-fo-bg-elevated text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text"
               )}
             >
-              {option}
+              {display}
             </button>
           );
         })}
@@ -199,6 +203,9 @@ function TagToggleGroup({
 export default function OfficerProfileForm({
   initialForm,
 }: OfficerProfileFormProps) {
+  const { t } = useLandingLanguage();
+  const pw = t.profileWizard.form;
+  const wizardSteps = useMemo(() => getProfileWizardSteps(t), [t]);
   const [form, setForm] = useState(initialForm);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepError, setStepError] = useState<string | null>(null);
@@ -206,9 +213,9 @@ export default function OfficerProfileForm({
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const currentStep = PROFILE_WIZARD_STEPS[currentStepIndex];
+  const currentStep = wizardSteps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
-  const isLastStep = currentStepIndex === PROFILE_WIZARD_STEPS.length - 1;
+  const isLastStep = currentStepIndex === wizardSteps.length - 1;
   const displayName = `${form.firstName} ${form.lastName}`.trim();
 
   const completionPercent = useMemo(
@@ -304,7 +311,7 @@ export default function OfficerProfileForm({
         return false;
       }
 
-      alert(payload?.error ?? "Failed to save officer profile");
+      alert(payload?.error ?? pw.saveFailed);
       return false;
     } finally {
       setIsSaving(false);
@@ -312,7 +319,7 @@ export default function OfficerProfileForm({
   }
 
   async function handleContinue() {
-    const error = validateWizardStep(currentStep.id, form);
+    const error = validateWizardStepTranslated(t, currentStep.id, form);
     if (error) {
       setStepError(error);
       return;
@@ -333,7 +340,7 @@ export default function OfficerProfileForm({
       <div className="space-y-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <p className="max-w-2xl text-sm leading-relaxed text-fo-text-muted">
-            {OFFICER_LICENSE_HELPER_TEXT}
+            {pw.licenseHelper}
           </p>
           <Button
             type="button"
@@ -342,7 +349,7 @@ export default function OfficerProfileForm({
             onClick={addLicense}
             className="w-full shrink-0 sm:w-auto"
           >
-            Add Another License
+            {pw.addLicense}
           </Button>
         </div>
 
@@ -364,11 +371,11 @@ export default function OfficerProfileForm({
                       <LicenseTypeBadge licenseType={license.licenseType} />
                     ) : (
                       <span className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-slate-600 px-2.5 py-1.5 text-xs text-slate-500">
-                        {meta.icon} Select type
+                        {meta.icon} {pw.selectType}
                       </span>
                     )}
                     <select
-                      aria-label="License type"
+                      aria-label={pw.licenseType}
                       value={getLicenseTypeSelectValue(license.licenseType)}
                       onChange={(e) => {
                         const nextType = e.target.value;
@@ -379,7 +386,7 @@ export default function OfficerProfileForm({
                       }}
                       className={compactFieldClassName}
                     >
-                      <option value="">License type</option>
+                      <option value="">{pw.licenseType}</option>
                       {LICENSE_TYPE_OPTIONS.map((option) => (
                         <option key={option} value={option}>
                           {option}
@@ -388,14 +395,14 @@ export default function OfficerProfileForm({
                     </select>
                     {getLicenseTypeSelectValue(license.licenseType) === "Other" ? (
                       <input
-                        aria-label="Custom license type"
+                        aria-label={pw.customLicenseType}
                         value={getCustomLicenseTypeValue(license.licenseType)}
                         onChange={(e) =>
                           updateLicense(license.clientId, {
                             licenseType: e.target.value.trim() || "Other",
                           })
                         }
-                        placeholder="Enter your license type"
+                        placeholder={pw.customLicensePlaceholder}
                         className={cn(compactFieldClassName, "mt-1.5")}
                       />
                     ) : null}
@@ -403,13 +410,13 @@ export default function OfficerProfileForm({
 
                   <div className="space-y-1">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
-                      State
+                      {pw.state}
                     </p>
                     <p className="hidden min-h-5 text-sm font-medium text-fo-text sm:block">
                       {stateName}
                     </p>
                     <select
-                      aria-label="Issuing state"
+                      aria-label={pw.state}
                       value={license.issuingState}
                       onChange={(e) =>
                         updateLicense(license.clientId, {
@@ -418,7 +425,7 @@ export default function OfficerProfileForm({
                       }
                       className={compactFieldClassName}
                     >
-                      <option value="">State</option>
+                      <option value="">{pw.state}</option>
                       {US_STATES.map((state) => (
                         <option key={state.code} value={state.code}>
                           {state.name}
@@ -429,10 +436,10 @@ export default function OfficerProfileForm({
 
                   <div className="space-y-1">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
-                      Number
+                      {pw.number}
                     </p>
                     <input
-                      aria-label="License number"
+                      aria-label={pw.number}
                       value={license.licenseNumber}
                       onChange={(e) =>
                         updateLicense(license.clientId, {
@@ -440,13 +447,13 @@ export default function OfficerProfileForm({
                         })
                       }
                       className={compactFieldClassName}
-                      placeholder="License number"
+                      placeholder={pw.licenseNumberPlaceholder}
                     />
                   </div>
 
                   <div className="space-y-1">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
-                      Expiration
+                      {pw.expiration}
                     </p>
                     {license.expirationDate ? (
                       <p className="hidden text-sm font-medium text-fo-text sm:block">
@@ -454,7 +461,7 @@ export default function OfficerProfileForm({
                       </p>
                     ) : null}
                     <input
-                      aria-label="Expiration date"
+                      aria-label={pw.expiration}
                       type="date"
                       value={license.expirationDate}
                       onChange={(e) =>
@@ -473,7 +480,7 @@ export default function OfficerProfileForm({
                         onClick={() => removeLicense(license.clientId)}
                         className="text-xs font-medium text-fo-rejected transition hover:text-red-400"
                       >
-                        Remove
+                        {pw.remove}
                       </button>
                     ) : (
                       <span className="text-xs text-fo-text-subtle">—</span>
@@ -499,11 +506,11 @@ export default function OfficerProfileForm({
               className="mt-0.5 h-4 w-4 shrink-0 rounded border-fo-border bg-fo-bg-elevated text-fo-primary-bright focus:ring-fo-primary-bright/30"
             />
             <span className="text-sm leading-relaxed text-fo-text">
-              {LICENSE_CERTIFICATION_LABEL}
+              {pw.certLabel}
             </span>
           </label>
           <p className="text-xs leading-relaxed text-fo-text-muted">
-            {LICENSE_CERTIFICATION_COMPANY_HELPER}
+            {pw.certHelper}
           </p>
         </div>
       </div>
@@ -530,7 +537,7 @@ export default function OfficerProfileForm({
                 });
 
                 if (!response.ok) {
-                  throw new Error("Failed to save profile photo");
+                  throw new Error(pw.savePhotoFailed);
                 }
               }}
               previewName={displayName}
@@ -540,7 +547,7 @@ export default function OfficerProfileForm({
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <FieldLabel htmlFor="firstName">First name</FieldLabel>
+                <FieldLabel htmlFor="firstName">{pw.firstName}</FieldLabel>
                 <input
                   id="firstName"
                   value={form.firstName}
@@ -548,48 +555,48 @@ export default function OfficerProfileForm({
                     setForm({ ...form, firstName: e.target.value })
                   }
                   className={fieldClassName}
-                  placeholder="First name"
+                  placeholder={pw.firstName}
                 />
               </div>
               <div className="space-y-1.5">
-                <FieldLabel htmlFor="lastName">Last name</FieldLabel>
+                <FieldLabel htmlFor="lastName">{pw.lastName}</FieldLabel>
                 <input
                   id="lastName"
                   value={form.lastName}
                   onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                   className={fieldClassName}
-                  placeholder="Last name"
+                  placeholder={pw.lastName}
                 />
               </div>
               <div className="space-y-1.5">
-                <FieldLabel htmlFor="phone">Phone</FieldLabel>
+                <FieldLabel htmlFor="phone">{pw.phone}</FieldLabel>
                 <input
                   id="phone"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   className={fieldClassName}
-                  placeholder="Phone number"
+                  placeholder={pw.phone}
                 />
               </div>
               <div className="space-y-1.5">
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">{pw.email}</FieldLabel>
                 <input
                   id="email"
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className={fieldClassName}
-                  placeholder="Email"
+                  placeholder={pw.email}
                 />
               </div>
               <div className="space-y-1.5 sm:col-span-2">
-                <FieldLabel htmlFor="city">City</FieldLabel>
+                <FieldLabel htmlFor="city">{pw.city}</FieldLabel>
                 <input
                   id="city"
                   value={form.city}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
                   className={fieldClassName}
-                  placeholder="City"
+                  placeholder={pw.city}
                 />
               </div>
             </div>
@@ -600,22 +607,23 @@ export default function OfficerProfileForm({
         return (
           <div className="space-y-4">
             <TagToggleGroup
-              label="Armed status"
-              description="Select all that apply. Choose both if you can work armed and unarmed assignments."
-              options={ARMED_STATUS_OPTIONS.map(formatArmedStatusLabel)}
-              selected={form.armedStatuses.map(formatArmedStatusLabel)}
-              onChange={(labels) =>
+              label={pw.armedStatus}
+              description={pw.armedDescription}
+              options={ARMED_STATUS_OPTIONS}
+              selected={form.armedStatuses}
+              formatOption={(status) =>
+                translateArmedStatusLabel(t, status as ArmedStatusOption)
+              }
+              onChange={(statuses) =>
                 setForm({
                   ...form,
-                  armedStatuses: labels.map((label) =>
-                    label === "Armed" ? "ARMED" : "UNARMED"
-                  ) as ArmedStatusOption[],
+                  armedStatuses: statuses as ArmedStatusOption[],
                 })
               }
             />
 
             <div className="max-w-xs space-y-1.5">
-              <FieldLabel htmlFor="experienceYears">Years of experience</FieldLabel>
+              <FieldLabel htmlFor="experienceYears">{pw.experienceYears}</FieldLabel>
               <input
                 id="experienceYears"
                 type="number"
@@ -630,17 +638,18 @@ export default function OfficerProfileForm({
             </div>
 
             <TagToggleGroup
-              label="Experience categories"
-              description="Highlight the types of sites and assignments you know best."
+              label={pw.experienceCategories}
+              description={pw.experienceCategoriesDescription}
               options={EXPERIENCE_CATEGORIES}
               selected={form.experienceCategories}
+              formatOption={(value) => translateProfileOptionLabel(t, value)}
               onChange={(experienceCategories) =>
                 setForm({ ...form, experienceCategories })
               }
             />
 
             <div className="space-y-1.5">
-              <FieldLabel htmlFor="introduction">Short introduction</FieldLabel>
+              <FieldLabel htmlFor="introduction">{pw.introduction}</FieldLabel>
               <textarea
                 id="introduction"
                 value={form.introduction}
@@ -649,7 +658,7 @@ export default function OfficerProfileForm({
                   setForm({ ...form, introduction: e.target.value })
                 }
                 className={cn(fieldClassName, "min-h-24 resize-y py-2.5")}
-                placeholder="Tell companies about your experience, reliability, and the shifts you prefer."
+                placeholder={pw.introductionPlaceholder}
               />
               <p
                 className={cn(
@@ -672,9 +681,9 @@ export default function OfficerProfileForm({
         return (
           <div className="space-y-2.5">
             <div>
-              <p className="text-sm font-semibold text-fo-text">Your certifications</p>
+              <p className="text-sm font-semibold text-fo-text">{pw.certificationsTitle}</p>
               <p className="mt-0.5 text-sm text-fo-text-muted">
-                Select any certifications you currently hold, or add your own.
+                {pw.certificationsDescription}
               </p>
             </div>
             <RequirementsMultiSelectPicker
@@ -682,8 +691,8 @@ export default function OfficerProfileForm({
               selected={form.certifications}
               onChange={(certifications) => setForm({ ...form, certifications })}
               allowCustom
-              customLabel="Add your own certification"
-              customPlaceholder="e.g. De-escalation Training"
+              customLabel={pw.customCertification}
+              customPlaceholder={pw.customCertificationPlaceholder}
             />
           </div>
         );
@@ -692,16 +701,17 @@ export default function OfficerProfileForm({
         return (
           <div className="space-y-4">
             <TagToggleGroup
-              label="When can you work?"
-              description="Tap the times and schedules that fit you."
+              label={pw.availabilityLabel}
+              description={pw.availabilityDescription}
               options={AVAILABILITY_OPTIONS}
               selected={form.availability}
+              formatOption={(value) => translateProfileOptionLabel(t, value)}
               onChange={(availability) => setForm({ ...form, availability })}
             />
 
             <div className="rounded-xl border border-fo-border bg-fo-bg-elevated/40 p-3.5">
               <p className="text-sm font-semibold text-fo-text">
-                Availability summary
+                {pw.availabilitySummary}
               </p>
               {form.availability.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -710,13 +720,13 @@ export default function OfficerProfileForm({
                       key={item}
                       className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300"
                     >
-                      {item}
+                      {translateProfileOptionLabel(t, item)}
                     </span>
                   ))}
                 </div>
               ) : (
                 <p className="mt-1.5 text-sm text-fo-text-muted">
-                  No availability selected yet. Choose the schedules that fit you.
+                  {pw.availabilityEmpty}
                 </p>
               )}
             </div>
@@ -743,7 +753,7 @@ export default function OfficerProfileForm({
         completionPercent={completionPercent}
         completedSections={sectionProgress.completedCount}
         totalSections={sectionProgress.totalCount}
-        nextStepLabel={sectionProgress.nextStepLabel}
+        nextStepId={sectionProgress.nextStepId}
         allSectionsComplete={sectionProgress.allComplete}
         form={form}
         onStepSelect={goToStep}
@@ -760,16 +770,7 @@ export default function OfficerProfileForm({
               <StepRequiredBadge required={currentStep.required} />
             </div>
             <CardDescription className="text-sm">
-              {currentStep.id === "basic" &&
-                "Add a photo and contact details companies may review."}
-              {currentStep.id === "experience" &&
-                "Help companies understand your background and credentials."}
-              {currentStep.id === "licenses" &&
-                "At least one license is required to complete your profile."}
-              {currentStep.id === "certifications" &&
-                "Select any certifications you currently hold."}
-              {currentStep.id === "availability" &&
-                "Choose the schedules that fit you best."}
+              {getProfileWizardDescription(t, currentStep.id)}
             </CardDescription>
           </CardHeader>
 

@@ -1,12 +1,14 @@
 "use client";
 
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import { cn } from "@/lib/cn";
+import { getProfileWizardSteps } from "@/lib/i18n/ui-labels";
 import {
   isWizardStepComplete,
   type WizardFormSnapshot,
 } from "./profile-wizard-progress";
-import { PROFILE_WIZARD_STEPS } from "./profile-wizard-steps";
+import type { ProfileWizardStepId } from "./profile-wizard-steps";
 import { CheckIcon } from "./profile-wizard-ui";
 
 type ProfileWizardHeaderProps = {
@@ -14,7 +16,7 @@ type ProfileWizardHeaderProps = {
   completionPercent: number;
   completedSections: number;
   totalSections: number;
-  nextStepLabel: string | null;
+  nextStepId: ProfileWizardStepId | null;
   allSectionsComplete: boolean;
   form: WizardFormSnapshot;
   onStepSelect: (index: number) => void;
@@ -25,13 +27,18 @@ export function ProfileWizardHeader({
   completionPercent,
   completedSections,
   totalSections,
-  nextStepLabel,
+  nextStepId,
   allSectionsComplete,
   form,
   onStepSelect,
 }: ProfileWizardHeaderProps) {
   const { t } = useLandingLanguage();
   const copy = t.dashboard.officer;
+  const header = t.profileWizard.header;
+  const steps = getProfileWizardSteps(t);
+  const nextStepLabel = nextStepId
+    ? t.profileWizard.steps[nextStepId].nextStepLabel
+    : null;
 
   return (
     <header className="space-y-4">
@@ -53,18 +60,21 @@ export function ProfileWizardHeader({
             {completionPercent}%
           </p>
           <p className="mt-1 text-sm text-fo-text-muted">
-            {completedSections} of {totalSections} sections completed
+            {interpolate(header.sectionsCompleted, {
+              completed: completedSections,
+              total: totalSections,
+            })}
           </p>
           {!allSectionsComplete && nextStepLabel ? (
             <p className="mt-1 text-sm text-fo-text">
-              <span className="text-fo-text-muted">Next step: </span>
+              <span className="text-fo-text-muted">{header.nextStep} </span>
               <span className="font-medium text-fo-primary-bright">
                 {nextStepLabel}
               </span>
             </p>
           ) : allSectionsComplete ? (
             <p className="mt-1 text-sm font-medium text-emerald-400">
-              All sections complete
+              {header.allSectionsComplete}
             </p>
           ) : null}
           <div
@@ -73,7 +83,7 @@ export function ProfileWizardHeader({
             aria-valuenow={completionPercent}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="Profile completion"
+            aria-label={header.profileCompletionAria}
           >
             <div
               className="h-full rounded-full bg-gradient-to-r from-fo-primary via-fo-primary-bright to-sky-400 transition-all duration-500"
@@ -83,9 +93,9 @@ export function ProfileWizardHeader({
         </div>
       </div>
 
-      <nav aria-label="Profile steps" className="w-full">
+      <nav aria-label={header.stepsNavAria} className="w-full">
         <ol className="flex items-center">
-          {PROFILE_WIZARD_STEPS.map((step, index) => {
+          {steps.map((step, index) => {
             const isActive = index === currentStepIndex;
             const isComplete = isWizardStepComplete(step.id, form);
             const isFuture = !isActive && !isComplete;
@@ -129,7 +139,7 @@ export function ProfileWizardHeader({
                   </span>
                 </button>
 
-                {index < PROFILE_WIZARD_STEPS.length - 1 ? (
+                {index < steps.length - 1 ? (
                   <div
                     className={cn(
                       "mx-0.5 h-0.5 flex-1 rounded-full sm:mx-1",

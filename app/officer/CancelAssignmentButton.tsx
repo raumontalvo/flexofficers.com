@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
 type CancelAssignmentButtonProps = {
@@ -12,14 +13,15 @@ type CancelAssignmentButtonProps = {
 export function CancelAssignmentButton({
   applicationId,
   className,
-  label = "Cancel Assignment",
+  label,
 }: CancelAssignmentButtonProps) {
   const router = useRouter();
+  const { t } = useLandingLanguage();
+  const copy = t.forms.cancelAssignment;
+  const buttonLabel = label ?? copy.title;
 
   async function cancelAssignment() {
-    const confirmed = window.confirm(
-      "Cancel this assignment? The company will be notified and the shift opening may become available again."
-    );
+    const confirmed = window.confirm(copy.confirm);
 
     if (!confirmed) {
       return;
@@ -40,7 +42,7 @@ export function CancelAssignmentButton({
       return;
     }
 
-    alert(data?.error || "Failed to cancel assignment");
+    alert(data?.error || copy.failed);
   }
 
   return (
@@ -52,7 +54,7 @@ export function CancelAssignmentButton({
         className
       )}
     >
-      {label}
+      {buttonLabel}
     </button>
   );
 }

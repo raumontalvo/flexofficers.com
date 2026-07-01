@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { AddToStaffButton } from "@/components/company/add-to-staff-button";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, ProfileAvatar } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { SerializedOfficerSearchResult } from "@/lib/company-officers-page";
@@ -9,7 +10,7 @@ import {
   OfficerProfileName,
   officerProfileNameLabel,
 } from "@/components/company/officer-profile-name";
-import { LICENSE_DISPLAY_DISCLAIMER } from "@/lib/officer-licenses";
+import { translateProfileOptionLabel } from "@/lib/i18n/ui-labels";
 
 type OfficerProfilePanelProps = {
   officer: SerializedOfficerSearchResult | null;
@@ -21,16 +22,18 @@ type OfficerProfilePanelProps = {
 function DetailField({
   label,
   value,
+  notProvided,
 }: {
   label: string;
   value: string | null | undefined;
+  notProvided: string;
 }) {
   return (
     <div>
       <dt className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
         {label}
       </dt>
-      <dd className="mt-1 text-sm text-fo-text">{value?.trim() || "Not provided"}</dd>
+      <dd className="mt-1 text-sm text-fo-text">{value?.trim() || notProvided}</dd>
     </div>
   );
 }
@@ -38,9 +41,13 @@ function DetailField({
 function TagList({
   label,
   values,
+  notProvided,
+  translateValue,
 }: {
   label: string;
   values: readonly string[];
+  notProvided: string;
+  translateValue?: (value: string) => string;
 }) {
   return (
     <div>
@@ -54,12 +61,12 @@ function TagList({
               key={value}
               className="inline-flex rounded-full border border-blue-500/25 bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-100"
             >
-              {value}
+              {translateValue ? translateValue(value) : value}
             </span>
           ))}
         </div>
       ) : (
-        <p className="mt-1 text-sm text-fo-text-muted">Not provided</p>
+        <p className="mt-1 text-sm text-fo-text-muted">{notProvided}</p>
       )}
     </div>
   );
@@ -71,6 +78,12 @@ export function OfficerProfilePanel({
   isOnStaff = false,
   onStaffChange,
 }: OfficerProfilePanelProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.review;
+  const shared = t.company.shared;
+  const notProvided = t.commonExtras.notProvided;
+  const translateTag = (value: string) => translateProfileOptionLabel(t, value);
+
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -95,7 +108,7 @@ export function OfficerProfilePanel({
     <>
       <button
         type="button"
-        aria-label="Close officer profile panel"
+        aria-label={copy.closeOfficerProfileAria}
         className={cn(
           "fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] transition-opacity",
           officer ? "opacity-100" : "pointer-events-none opacity-0"
@@ -139,7 +152,7 @@ export function OfficerProfilePanel({
                   onClick={onClose}
                   className="rounded-lg border border-white/10 px-2.5 py-1.5 text-sm text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
                 >
-                  Close
+                  {shared.close}
                 </button>
               </div>
             </div>
@@ -152,31 +165,58 @@ export function OfficerProfilePanel({
             >
               <section className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                 <h3 className="text-base font-semibold text-fo-text">
-                  Basic Information
+                  {copy.basicInformation}
                 </h3>
                 <dl className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <DetailField label="First name" value={officer.firstName} />
-                  <DetailField label="Last name" value={officer.lastName} />
-                  <DetailField label="Email" value={officer.email} />
-                  <DetailField label="Phone" value={officer.phone} />
-                  <DetailField label="City, State" value={officer.cityStateLabel} />
                   <DetailField
-                    label="Years of Experience"
-                    value={officer.experienceYearsLabel}
+                    label={t.profileWizard.form.firstName}
+                    value={officer.firstName}
+                    notProvided={notProvided}
                   />
                   <DetailField
-                    label="Armed / Unarmed"
+                    label={t.profileWizard.form.lastName}
+                    value={officer.lastName}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.email}
+                    value={officer.email}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.phone}
+                    value={officer.phone}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.cityState}
+                    value={officer.cityStateLabel}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.yearsOfExperience}
+                    value={officer.experienceYearsLabel}
+                    notProvided={notProvided}
+                  />
+                  <DetailField
+                    label={copy.armedUnarmed}
                     value={officer.armedStatusLabel}
+                    notProvided={notProvided}
                   />
                 </dl>
               </section>
 
               <section className="rounded-xl border border-white/10 bg-white/[0.03] p-4 space-y-4">
-                <TagList label="Experience" values={officer.experienceCategories} />
+                <TagList
+                  label={copy.experience}
+                  values={officer.experienceCategories}
+                  notProvided={notProvided}
+                  translateValue={translateTag}
+                />
 
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
-                    Licenses
+                    {copy.licenses}
                   </p>
                   {officer.licenses.length > 0 ? (
                     <div className="mt-2 space-y-2">
@@ -191,7 +231,7 @@ export function OfficerProfilePanel({
                           <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
                             <div>
                               <dt className="text-[11px] uppercase tracking-wide text-fo-text-muted">
-                                License Number
+                                {copy.licenseNumber}
                               </dt>
                               <dd className="mt-0.5 text-fo-text">
                                 {license.licenseNumber}
@@ -199,7 +239,7 @@ export function OfficerProfilePanel({
                             </div>
                             <div>
                               <dt className="text-[11px] uppercase tracking-wide text-fo-text-muted">
-                                Issuing State
+                                {copy.issuingState}
                               </dt>
                               <dd className="mt-0.5 text-fo-text">
                                 {license.issuingState}
@@ -207,7 +247,7 @@ export function OfficerProfilePanel({
                             </div>
                             <div className="sm:col-span-2">
                               <dt className="text-[11px] uppercase tracking-wide text-fo-text-muted">
-                                Expiration Date
+                                {copy.expirationDate}
                               </dt>
                               <dd className="mt-0.5 text-fo-text">
                                 {license.expirationDateLabel}
@@ -218,22 +258,32 @@ export function OfficerProfilePanel({
                       ))}
                     </div>
                   ) : (
-                    <p className="mt-1 text-sm text-fo-text-muted">Not provided</p>
+                    <p className="mt-1 text-sm text-fo-text-muted">{notProvided}</p>
                   )}
                   <p className="mt-2 text-xs leading-relaxed text-fo-text-muted">
-                    {LICENSE_DISPLAY_DISCLAIMER}
+                    {shared.licenseDisclaimer}
                   </p>
                 </div>
 
-                <TagList label="Certifications" values={officer.certifications} />
-                <TagList label="Availability" values={officer.availabilityLabels} />
+                <TagList
+                  label={copy.certifications}
+                  values={officer.certifications}
+                  notProvided={notProvided}
+                  translateValue={translateTag}
+                />
+                <TagList
+                  label={copy.availability}
+                  values={officer.availabilityLabels}
+                  notProvided={notProvided}
+                  translateValue={translateTag}
+                />
 
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
-                    Introduction
+                    {copy.introduction}
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-fo-text">
-                    {officer.introduction || "Not provided"}
+                    {officer.introduction || notProvided}
                   </p>
                 </div>
               </section>
@@ -265,7 +315,7 @@ export function OfficerProfilePanel({
                 className="w-full"
                 onClick={onClose}
               >
-                Close
+                {shared.close}
               </Button>
             </div>
           </>

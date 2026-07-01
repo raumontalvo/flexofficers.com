@@ -1,5 +1,6 @@
 "use client";
 
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button } from "@/components/ui";
 
 export default function ApplicationStatusButtons({
@@ -9,6 +10,9 @@ export default function ApplicationStatusButtons({
   applicationId: string;
   status: string;
 }) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.statusButtons;
+
   if (status !== "PENDING") {
     return null;
   }
@@ -23,10 +27,10 @@ export default function ApplicationStatusButtons({
     });
 
     if (response.ok) {
-      alert(`Applicant ${nextStatus.toLowerCase()}!`);
+      alert(nextStatus === "ACCEPTED" ? copy.acceptedAlert : copy.rejectedAlert);
       window.location.reload();
     } else {
-      alert("Failed to update applicant");
+      alert(copy.updateFailed);
     }
   }
 
@@ -38,7 +42,7 @@ export default function ApplicationStatusButtons({
         className="w-full bg-fo-success hover:bg-green-500"
         onClick={() => updateStatus("ACCEPTED")}
       >
-        Accept
+        {copy.accept}
       </Button>
 
       <Button
@@ -48,7 +52,7 @@ export default function ApplicationStatusButtons({
         className="w-full"
         onClick={() => updateStatus("REJECTED")}
       >
-        Reject
+        {copy.reject}
       </Button>
     </div>
   );

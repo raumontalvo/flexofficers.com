@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, buttonClassName } from "@/components/ui";
 import {
   getShiftSummaryFields,
@@ -29,16 +30,18 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 function ChipSummaryRow<T extends string>({
   label,
   labels,
+  notSetLabel,
 }: {
   label: string;
   labels: readonly T[];
+  notSetLabel: string;
 }) {
   return (
     <div className="flex items-start justify-between gap-3 text-sm">
       <dt className="text-fo-text-muted">{label}</dt>
       <dd className="max-w-[60%] text-right">
         {labels.length === 0 ? (
-          <span className="font-medium text-fo-text">Not set</span>
+          <span className="font-medium text-fo-text">{notSetLabel}</span>
         ) : (
           <div className="flex flex-wrap justify-end gap-1.5">
             {labels.map((entry) => (
@@ -64,13 +67,14 @@ export function EditShiftSummaryPanel({
   onSubmit,
 }: EditShiftSummaryPanelProps) {
   const router = useRouter();
+  const { t } = useLandingLanguage();
+  const summaryCopy = t.shiftForm.summary;
+  const actions = t.shiftForm.actions;
   const [isDeleting, setIsDeleting] = useState(false);
   const summary = getShiftSummaryFields(form);
 
   async function handleDelete() {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this shift? This cannot be undone."
-    );
+    const confirmed = window.confirm(actions.deleteConfirm);
 
     if (!confirmed) {
       return;
@@ -93,7 +97,7 @@ export function EditShiftSummaryPanel({
         return;
       }
 
-      alert("Failed to delete shift");
+      alert(actions.deleteFailed);
     } finally {
       setIsDeleting(false);
     }
@@ -102,24 +106,26 @@ export function EditShiftSummaryPanel({
   return (
     <div className="lg:sticky lg:top-6">
       <section className="fo-glass-card rounded-xl border border-white/10 p-4">
-        <h2 className="text-base font-bold text-fo-text">Shift Summary</h2>
+        <h2 className="text-base font-bold text-fo-text">{summaryCopy.title}</h2>
 
         <dl className="mt-4 space-y-3">
-          <SummaryRow label="Type of Post" value={summary.typeOfPost} />
-          <SummaryRow label="Date & Time" value={summary.dateTime} />
-          <SummaryRow label="Location" value={summary.location} />
-          <SummaryRow label="Pay Rate" value={summary.payRate} />
-          <SummaryRow label="Open Positions" value={summary.openPositions} />
+          <SummaryRow label={summaryCopy.typeOfPost} value={summary.typeOfPost} />
+          <SummaryRow label={summaryCopy.dateTime} value={summary.dateTime} />
+          <SummaryRow label={summaryCopy.location} value={summary.location} />
+          <SummaryRow label={summaryCopy.payRate} value={summary.payRate} />
+          <SummaryRow label={summaryCopy.openPositions} value={summary.openPositions} />
           <ChipSummaryRow
-            label="License Required"
+            label={summaryCopy.licenseRequired}
             labels={summary.licenseRequirements}
+            notSetLabel={summaryCopy.notSet}
           />
           <ChipSummaryRow
-            label="Certifications"
+            label={summaryCopy.certifications}
             labels={summary.certificationRequirements}
+            notSetLabel={summaryCopy.notSet}
           />
-          <SummaryRow label="Description" value={summary.description} />
-          <SummaryRow label="Visibility" value={summary.visibility} />
+          <SummaryRow label={summaryCopy.description} value={summary.description} />
+          <SummaryRow label={summaryCopy.visibility} value={summary.visibility} />
         </dl>
 
         <div className="mt-4 space-y-2">
@@ -130,7 +136,7 @@ export function EditShiftSummaryPanel({
             disabled={isSubmitting || isDeleting}
             onClick={onSubmit}
           >
-            {isSubmitting ? "Updating..." : "Update Shift"}
+            {isSubmitting ? actions.updating : actions.updateShift}
           </Button>
 
           <Link
@@ -142,7 +148,7 @@ export function EditShiftSummaryPanel({
                 "w-full border-amber-500/30 text-amber-100 hover:bg-amber-500/10",
             })}
           >
-            Preview Shift
+            {t.company.editShift.previewShift}
           </Link>
 
           <Button
@@ -153,7 +159,7 @@ export function EditShiftSummaryPanel({
             disabled={isSubmitting || isDeleting}
             onClick={handleDelete}
           >
-            {isDeleting ? "Deleting..." : "Delete Shift"}
+            {isDeleting ? actions.deleting : actions.deleteShift}
           </Button>
         </div>
 

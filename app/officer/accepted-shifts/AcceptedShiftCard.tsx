@@ -1,6 +1,8 @@
 "use client";
 
 import { StatusBadge, ProfileAvatar } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import {
   formatEstimatedShiftPay,
   formatHourlyRate,
@@ -14,6 +16,11 @@ import {
   type AcceptedShiftTab,
   type OfficerAcceptedShiftData,
 } from "@/lib/officer-accepted-shift-data";
+import type { AppTranslations } from "@/lib/app-i18n";
+import {
+  getAcceptedShiftTabBadge,
+  translateShiftFormLabel,
+} from "@/lib/i18n/ui-labels";
 import { AcceptedShiftActions } from "./AcceptedShiftActions";
 
 type AcceptedShiftCardProps = {
@@ -53,50 +60,26 @@ function LocationIcon({ className }: { className?: string }) {
   );
 }
 
-function statusBadgeForTab(tab: AcceptedShiftTab) {
-  switch (tab) {
-    case "completed":
-      return (
-        <StatusBadge variant="success" className="!min-h-5 !px-1.5 !py-0 !text-[9px] !leading-5">
-          COMPLETED
-        </StatusBadge>
-      );
-    case "cancelled":
-      return (
-        <StatusBadge variant="neutral" className="!min-h-5 !px-1.5 !py-0 !text-[9px] !leading-5">
-          CANCELLED
-        </StatusBadge>
-      );
-    default:
-      return (
-        <StatusBadge variant="success" className="!min-h-5 !px-1.5 !py-0 !text-[9px] !leading-5">
-          CONFIRMED
-        </StatusBadge>
-      );
-  }
+function statusBadgeForTab(t: AppTranslations, tab: AcceptedShiftTab) {
+  const label = getAcceptedShiftTabBadge(t, tab);
+  const variant = tab === "cancelled" ? "neutral" : "success";
+
+  return (
+    <StatusBadge variant={variant} className="!min-h-5 !px-1.5 !py-0 !text-[9px] !leading-5">
+      {label}
+    </StatusBadge>
+  );
 }
 
-function desktopStatusBadgeForTab(tab: AcceptedShiftTab) {
-  switch (tab) {
-    case "completed":
-      return (
-        <StatusBadge variant="success" className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]">
-          COMPLETED
-        </StatusBadge>
-      );
-    case "cancelled":
-      return (
-        <StatusBadge variant="neutral" className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]">
-          CANCELLED
-        </StatusBadge>
-      );
-    default:
-      return (
-        <StatusBadge variant="success" className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]">
-          CONFIRMED
-        </StatusBadge>
-      );
-  }
+function desktopStatusBadgeForTab(t: AppTranslations, tab: AcceptedShiftTab) {
+  const label = getAcceptedShiftTabBadge(t, tab);
+  const variant = tab === "cancelled" ? "neutral" : "success";
+
+  return (
+    <StatusBadge variant={variant} className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]">
+      {label}
+    </StatusBadge>
+  );
 }
 
 export function AcceptedShiftCard({
@@ -104,6 +87,8 @@ export function AcceptedShiftCard({
   tab,
   onListChange,
 }: AcceptedShiftCardProps) {
+  const { t } = useLandingLanguage();
+  const card = t.acceptedShifts.card;
   const { shift, company } = application;
   const startTime = new Date(shift.startTime);
   const endTime = new Date(shift.endTime);
@@ -111,7 +96,7 @@ export function AcceptedShiftCard({
   const schedule = formatShiftScheduleParts(startTime, endTime);
   const estimatedPay = formatEstimatedShiftPay(hourlyRate, startTime, endTime);
   const locationLabel = formatShiftCityState(shift);
-  const shiftTimeLabel = fromShiftTimeType(shift.shiftTimeType);
+  const shiftTimeLabel = translateShiftFormLabel(t, fromShiftTimeType(shift.shiftTimeType));
   const completedDateLabel = formatCompletedDate(shift.endTime);
   const contactAvailable = hasCompanyContact(company);
   const contactName = company.contactName?.trim() || company.companyName;
@@ -122,15 +107,15 @@ export function AcceptedShiftCard({
       <article className="fo-glass-card fo-glass-card-hover overflow-hidden rounded-xl border border-white/10 transition lg:hidden">
         <div className="space-y-2 p-3">
           <div className="flex items-start justify-between gap-3">
-            {statusBadgeForTab(tab)}
+            {statusBadgeForTab(t, tab)}
             <div className="shrink-0 text-right">
               <p className="text-lg font-bold leading-none text-fo-primary-bright">
                 {formatHourlyRate(hourlyRate)}
-                <span className="text-[11px] font-semibold text-fo-text-muted">/hr</span>
+                <span className="text-[11px] font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
               </p>
               {estimatedPay ? (
                 <p className="mt-0.5 text-[10px] leading-tight text-fo-text-muted">
-                  Est. {estimatedPay}
+                  {interpolate(card.estAbbrev, { pay: estimatedPay })}
                 </p>
               ) : null}
             </div>
@@ -169,7 +154,7 @@ export function AcceptedShiftCard({
       <article className="fo-glass-card fo-glass-card-hover hidden min-h-[150px] rounded-xl border border-white/10 lg:block">
         <div className="grid h-full min-h-[150px] grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-5 p-5">
           <div className="flex min-w-0 flex-col justify-center gap-3 border-r border-white/[0.06] pr-5">
-            <div>{desktopStatusBadgeForTab(tab)}</div>
+            <div>{desktopStatusBadgeForTab(t, tab)}</div>
 
             <div className="space-y-1.5">
               <h2 className="text-lg font-bold leading-tight text-fo-text">{shift.title}</h2>
@@ -201,12 +186,14 @@ export function AcceptedShiftCard({
             <div className="mt-1 border-t border-white/[0.06] pt-2.5">
               <p className="text-2xl font-bold leading-none text-fo-primary-bright">
                 {formatHourlyRate(hourlyRate)}
-                <span className="ml-1 text-sm font-semibold text-fo-text-muted">/hr</span>
+                <span className="ml-1 text-sm font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
               </p>
               {estimatedPay ? (
-                <p className="mt-1 text-sm text-fo-text-muted">Est. earnings {estimatedPay}</p>
+                <p className="mt-1 text-sm text-fo-text-muted">
+                  {interpolate(card.estEarnings, { pay: estimatedPay })}
+                </p>
               ) : (
-                <p className="mt-1 text-sm text-fo-text-subtle">Estimated earnings unavailable</p>
+                <p className="mt-1 text-sm text-fo-text-subtle">{card.estEarningsUnavailable}</p>
               )}
             </div>
           </div>
@@ -214,7 +201,7 @@ export function AcceptedShiftCard({
           <div className="flex min-w-0 flex-col justify-between gap-4">
             <div className="space-y-2.5">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted">
-                Company contact
+                {card.companyContact}
               </p>
               <div className="flex items-start gap-3">
                 <ProfileAvatar
@@ -234,7 +221,7 @@ export function AcceptedShiftCard({
                       </a>
                     </p>
                   ) : (
-                    <p className="text-xs text-fo-text-subtle">Phone not provided</p>
+                    <p className="text-xs text-fo-text-subtle">{card.phoneNotProvided}</p>
                   )}
                   {contactAvailable && company.email ? (
                     <p className="truncate text-xs text-fo-text-muted">
@@ -246,7 +233,7 @@ export function AcceptedShiftCard({
                       </a>
                     </p>
                   ) : (
-                    <p className="text-xs text-fo-text-subtle">Email not provided</p>
+                    <p className="text-xs text-fo-text-subtle">{card.emailNotProvided}</p>
                   )}
                 </div>
               </div>

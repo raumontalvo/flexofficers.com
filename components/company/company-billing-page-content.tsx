@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  BILLING_SUPPORT_HOURS,
   BILLING_SUPPORT_PHONE,
   BILLING_SUPPORT_PHONE_HREF,
   COMPANY_TRIAL_COPY,
@@ -20,6 +19,7 @@ import {
 } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import {
   StripeBillingAction,
   StripeBillingLink,
@@ -222,7 +222,7 @@ function CompanyBillingMobileContent({
             <p className="mt-1 text-2xl font-bold text-fo-primary-bright">
               {billing.planPriceDisplay}
               <span className="ml-1 text-sm font-semibold text-fo-text-muted">
-                / year
+                {b.labels.perYear}
               </span>
             </p>
           </div>
@@ -251,13 +251,16 @@ function CompanyBillingMobileContent({
             </p>
             {billing.trialDaysRemaining !== null ? (
               <p className="mt-1.5 text-sm font-medium text-fo-text">
-                {billing.trialDaysRemaining}{" "}
-                {billing.trialDaysRemaining === 1 ? "Day" : "Days"} Remaining
+                {billing.trialDaysRemaining === 1
+                  ? interpolate(b.labels.dayRemaining, { count: billing.trialDaysRemaining })
+                  : interpolate(b.labels.daysRemainingPlural, {
+                      count: billing.trialDaysRemaining,
+                    })}
               </p>
             ) : null}
             {billing.trialEndsAt ? (
               <div className="mt-2 flex items-center justify-between gap-3 text-sm">
-                <span className="text-fo-text-muted">Trial Ends</span>
+                <span className="text-fo-text-muted">{b.labels.trialEnds}</span>
                 <span className="font-medium text-fo-text">{billing.trialEndsAt}</span>
               </div>
             ) : null}
@@ -270,36 +273,36 @@ function CompanyBillingMobileContent({
         <MobilePrimarySubscriptionCta billing={billing} />
       </MobileSectionCard>
 
-      <MobileSectionCard title="Subscription Management">
+      <MobileSectionCard title={b.sections.subscriptionManagement}>
         <MobileSettingsRowGroup>
           <StripeBillingSettingRow
             action="portal"
-            label="Manage Subscription"
+            label={b.actions.manageSubscription}
             disabled={!canManageStripeBilling}
           />
           <StripeBillingSettingRow
             action="payment-method"
-            label="Update Payment Method"
+            label={b.actions.updatePaymentMethod}
             disabled={!canManageStripeBilling}
           />
           <BillingHistoryScrollRow />
         </MobileSettingsRowGroup>
       </MobileSectionCard>
 
-      <MobileSectionCard title="Billing Summary">
+      <MobileSectionCard title={b.sections.billingSummary}>
         <dl>
-          <MobileDetailRow label="Plan" value={billing.planName} />
-          <MobileDetailRow label="Billing Cycle" value={billing.billingCycle} />
-          <MobileDetailRow label="Status" value={billing.statusLabel} />
+          <MobileDetailRow label={b.labels.plan} value={billing.planName} />
+          <MobileDetailRow label={b.labels.billingCycle} value={billing.billingCycle} />
+          <MobileDetailRow label={b.labels.status} value={billing.statusLabel} />
           <MobileDetailRow
-            label="Next Renewal"
-            value={billing.nextRenewal ?? "Not scheduled"}
+            label={b.labels.nextRenewal}
+            value={billing.nextRenewal ?? b.labels.notScheduled}
           />
-          <MobileDetailRow label="Next Charge" value={billing.nextCharge} />
+          <MobileDetailRow label={b.labels.nextCharge} value={billing.nextCharge} />
         </dl>
       </MobileSectionCard>
 
-      <MobileSectionCard title="Payment Method">
+      <MobileSectionCard title={b.sections.paymentMethod}>
         {billing.paymentMethod ? (
           <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
             <div className="flex items-start justify-between gap-3">
@@ -311,25 +314,25 @@ function CompanyBillingMobileContent({
                   •••• {billing.paymentMethod.last4}
                 </p>
                 <p className="mt-1.5 text-xs text-fo-text-muted">
-                  Expires {billing.paymentMethod.expiration}
+                  {b.labels.expires} {billing.paymentMethod.expiration}
                 </p>
               </div>
-              <StatusBadge variant="success">Default</StatusBadge>
+              <StatusBadge variant="success">{b.labels.default}</StatusBadge>
             </div>
           </div>
         ) : (
           <p className="text-sm text-fo-text-muted">
             {billing.hasValidStripeCustomer
-              ? "No payment method on file."
+              ? b.emptyStates.noPaymentMethod
               : billing.stripeConnected
-                ? "Start a subscription to add a payment method."
-                : "Payment method details will appear here once Stripe is connected."}
+                ? b.emptyStates.subscribeToAddPayment
+                : b.emptyStates.stripePaymentPending}
           </p>
         )}
       </MobileSectionCard>
 
       <MobileSectionCard
-        title="Billing History"
+        title={b.sections.billingHistory}
         className="scroll-mt-24"
         id="billing-history"
       >
@@ -352,7 +355,7 @@ function CompanyBillingMobileContent({
                       rel="noreferrer"
                       className="ml-auto text-xs font-semibold text-fo-primary-bright hover:text-fo-primary-hover"
                     >
-                      Download
+                      {b.actions.download}
                     </a>
                   ) : (
                     <span className="ml-auto text-xs text-fo-text-muted">—</span>
@@ -364,13 +367,13 @@ function CompanyBillingMobileContent({
         ) : (
           <p className="text-sm text-fo-text-muted">
             {billing.stripeConnected
-              ? "No billing history yet."
-              : "Billing history will appear here once Stripe is connected."}
+              ? b.emptyStates.noBillingHistory
+              : b.emptyStates.stripeHistoryPending}
           </p>
         )}
       </MobileSectionCard>
 
-      <MobileSectionCard title="Billing Support">
+      <MobileSectionCard title={b.sections.billingSupport}>
         <a
           href={BILLING_SUPPORT_PHONE_HREF}
           className="inline-flex items-center gap-2 text-sm font-semibold text-fo-primary-bright hover:text-fo-primary-hover"
@@ -379,15 +382,15 @@ function CompanyBillingMobileContent({
           {BILLING_SUPPORT_PHONE}
         </a>
         <div className="mt-2 text-xs leading-relaxed text-fo-text-muted">
-          <p className="font-medium text-fo-text-muted">Business Hours</p>
-          <p className="whitespace-pre-line">{BILLING_SUPPORT_HOURS}</p>
+          <p className="font-medium text-fo-text-muted">{b.labels.businessHours}</p>
+          <p className="whitespace-pre-line">{b.support.hours}</p>
         </div>
       </MobileSectionCard>
 
       {billing.status === "expired" ? (
         <section className="fo-glass-card rounded-xl border border-red-500/20 bg-red-500/5 p-3">
           <p className="text-sm font-semibold text-fo-rejected">
-            Your trial has expired.
+            {b.emptyStates.trialExpired}
           </p>
           <p className="mt-1.5 text-xs text-fo-text-muted">
             {COMPANY_TRIAL_COPY.expiredNote}
@@ -401,7 +404,7 @@ function CompanyBillingMobileContent({
               className: "mt-3",
             })}
           >
-            Manage Shifts
+            {b.actions.manageShifts}
           </Link>
         </section>
       ) : null}
@@ -527,7 +530,7 @@ export function CompanyBillingPageContent({
                     />
                     <StripeBillingAction
                       action="payment-method"
-                      label="Update Payment Method"
+                      label={b.actions.updatePaymentMethod}
                       variant="secondary"
                       fullWidth
                     />
@@ -542,7 +545,7 @@ export function CompanyBillingPageContent({
                     />
                     <StripeBillingAction
                       action="payment-method"
-                      label="Update Payment Method"
+                      label={b.actions.updatePaymentMethod}
                       variant="secondary"
                       fullWidth
                       disabled
@@ -564,17 +567,17 @@ export function CompanyBillingPageContent({
               ) : null}
             </BillingSectionCard>
 
-            <BillingSectionCard title="Billing History">
+            <BillingSectionCard title={b.sections.billingHistory}>
               {billing.invoices.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-left text-sm">
                     <thead>
                       <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-fo-text-muted">
-                        <th className="px-2 py-3 font-semibold">Date</th>
-                        <th className="px-2 py-3 font-semibold">Description</th>
-                        <th className="px-2 py-3 font-semibold">Status</th>
-                        <th className="px-2 py-3 font-semibold">Amount</th>
-                        <th className="px-2 py-3 font-semibold">Invoice</th>
+                        <th className="px-2 py-3 font-semibold">{b.table.date}</th>
+                        <th className="px-2 py-3 font-semibold">{b.table.description}</th>
+                        <th className="px-2 py-3 font-semibold">{b.table.status}</th>
+                        <th className="px-2 py-3 font-semibold">{b.table.amount}</th>
+                        <th className="px-2 py-3 font-semibold">{b.table.invoice}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -605,7 +608,7 @@ export function CompanyBillingPageContent({
                                 rel="noreferrer"
                                 className="text-sm font-semibold text-fo-primary-bright hover:text-fo-primary-hover"
                               >
-                                Download
+                                {b.actions.download}
                               </a>
                             ) : (
                               <span className="text-sm text-fo-text-muted">—</span>
@@ -619,77 +622,76 @@ export function CompanyBillingPageContent({
               ) : (
                 <p className="text-sm text-fo-text-muted">
                   {billing.stripeConnected
-                    ? "No billing history yet."
-                    : "Billing history will appear here once Stripe is connected."}
+                    ? b.emptyStates.noBillingHistory
+                    : b.emptyStates.stripeHistoryPending}
                 </p>
               )}
             </BillingSectionCard>
           </div>
 
           <div className="space-y-6">
-            <BillingSectionCard title="Billing Summary">
+            <BillingSectionCard title={b.sections.billingSummary}>
               <dl>
-                <BillingDetailRow label="Plan" value={billing.planName} />
+                <BillingDetailRow label={b.labels.plan} value={billing.planName} />
                 <BillingDetailRow
                   label={b.labels.billingCycle}
                   value={billing.billingCycle}
                 />
-                <BillingDetailRow label="Status" value={billing.statusLabel} />
+                <BillingDetailRow label={b.labels.status} value={billing.statusLabel} />
                 <BillingDetailRow
-                  label="Next Renewal"
-                  value={billing.nextRenewal ?? "Not scheduled"}
+                  label={b.labels.nextRenewal}
+                  value={billing.nextRenewal ?? b.labels.notScheduled}
                 />
                 <BillingDetailRow
-                  label="Next Charge"
+                  label={b.labels.nextCharge}
                   value={billing.nextCharge}
                 />
               </dl>
             </BillingSectionCard>
 
-            <BillingSectionCard title="Payment Method">
+            <BillingSectionCard title={b.sections.paymentMethod}>
               {billing.paymentMethod ? (
                 <div className="space-y-4">
                   <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-sm font-semibold text-fo-text">
-                          {billing.paymentMethod.brand} ending in{" "}
-                          {billing.paymentMethod.last4}
+                          {billing.paymentMethod.brand} •••• {billing.paymentMethod.last4}
                         </p>
                         <p className="mt-1 text-sm text-fo-text-muted">
-                          Expires {billing.paymentMethod.expiration}
+                          {b.labels.expires} {billing.paymentMethod.expiration}
                         </p>
                       </div>
-                      <StatusBadge variant="success">Default</StatusBadge>
+                      <StatusBadge variant="success">{b.labels.default}</StatusBadge>
                     </div>
                   </div>
                   {canManageStripeBilling ? (
-                    <StripeBillingLink label="Update Payment Method" />
+                    <StripeBillingLink label={b.actions.updatePaymentMethod} />
                   ) : (
-                    <StripeBillingLink label="Update Payment Method" disabled />
+                    <StripeBillingLink label={b.actions.updatePaymentMethod} disabled />
                   )}
                 </div>
               ) : (
                 <div className="space-y-4">
                   <p className="text-sm text-fo-text-muted">
                     {billing.hasValidStripeCustomer
-                      ? "No payment method on file."
+                      ? b.emptyStates.noPaymentMethod
                       : billing.stripeConnected
-                        ? "Start a subscription to add a payment method."
-                        : "Payment method details will appear here once Stripe is connected."}
+                        ? b.emptyStates.subscribeToAddPayment
+                        : b.emptyStates.stripePaymentPending}
                   </p>
                   {canManageStripeBilling ? (
-                    <StripeBillingLink label="Update Payment Method" />
+                    <StripeBillingLink label={b.actions.updatePaymentMethod} />
                   ) : (
-                    <StripeBillingLink label="Update Payment Method" disabled />
+                    <StripeBillingLink label={b.actions.updatePaymentMethod} disabled />
                   )}
                 </div>
               )}
             </BillingSectionCard>
 
-            <BillingSectionCard title="Billing Support">
+            <BillingSectionCard title={b.sections.billingSupport}>
               <p className="text-sm text-fo-text-muted">
-                Questions about your subscription?
+                {b.labels.subscriptionQuestions}
               </p>
               <a
                 href={BILLING_SUPPORT_PHONE_HREF}
@@ -698,9 +700,9 @@ export function CompanyBillingPageContent({
                 {BILLING_SUPPORT_PHONE}
               </a>
               <p className="mt-4 whitespace-pre-line text-sm text-fo-text-muted">
-                Business Hours:
+                {b.labels.businessHours}
                 {"\n"}
-                {BILLING_SUPPORT_HOURS}
+                {b.support.hours}
               </p>
             </BillingSectionCard>
           </div>
@@ -709,7 +711,7 @@ export function CompanyBillingPageContent({
         {billing.status === "expired" ? (
           <section className="fo-glass-card rounded-xl border border-red-500/20 bg-red-500/5 p-4 sm:p-5">
             <p className="text-sm font-semibold text-fo-rejected">
-              Your trial has expired.
+              {b.emptyStates.trialExpired}
             </p>
             <p className="mt-2 text-sm text-fo-text-muted">
               {COMPANY_TRIAL_COPY.expiredNote}
@@ -718,12 +720,12 @@ export function CompanyBillingPageContent({
               {billing.stripeBillingReady ? (
                 <StripeBillingAction
                   action="checkout"
-                  label="Start Subscription Now"
+                  label={b.actions.startSubscriptionNow}
                 />
               ) : (
                 <StripeBillingAction
                   action="checkout"
-                  label="Start Subscription Now"
+                  label={b.actions.startSubscriptionNow}
                   disabled
                 />
               )}
@@ -734,7 +736,7 @@ export function CompanyBillingPageContent({
                   size: "md",
                 })}
               >
-                Manage Shifts
+                {b.actions.manageShifts}
               </Link>
             </div>
           </section>

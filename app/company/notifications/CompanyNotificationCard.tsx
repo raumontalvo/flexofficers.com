@@ -3,14 +3,19 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useTransition } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 import { MobileListCard } from "@/components/ui/mobile";
 import {
-  formatNotificationTimeAgo,
   notificationToneClasses,
   type CompanyNotificationData,
   type NotificationIconVariant,
 } from "@/lib/company-notification-data";
+import {
+  formatRelativeTimeAgo,
+  getCompanyNotificationActionLabel,
+  getCompanyNotificationKindLabel,
+} from "@/lib/i18n/ui-labels";
 import { deleteCompanyNotification } from "./actions";
 import { hideCompanyNotificationFromList } from "./hidden-notifications";
 import { notifyNotificationsChanged } from "@/lib/notifications-changed";
@@ -124,6 +129,7 @@ export function CompanyNotificationCard({
   notification,
   onDeleted,
 }: CompanyNotificationCardProps) {
+  const { t } = useLandingLanguage();
   const toneClasses = notificationToneClasses[notification.tone];
   const [isPending, startTransition] = useTransition();
 
@@ -162,7 +168,7 @@ export function CompanyNotificationCard({
               toneClasses.badge
             )}
           >
-            {notification.typeLabel}
+            {getCompanyNotificationKindLabel(t, notification.kind)}
           </span>
           <h2 className="truncate text-sm font-bold text-fo-text">
             {notification.title}
@@ -174,12 +180,12 @@ export function CompanyNotificationCard({
 
         <div className="flex items-center justify-between gap-2 md:flex-col md:items-end md:justify-center">
           <p className="text-[11px] text-fo-text-subtle">
-            {formatNotificationTimeAgo(notification.createdAt)}
+            {formatRelativeTimeAgo(t, notification.createdAt)}
           </p>
           {!notification.read ? (
             <span
               className="h-2 w-2 rounded-full bg-fo-primary-bright"
-              aria-label="Unread"
+              aria-label={t.browse.companyNotifications.actions.unread}
             />
           ) : (
             <span className="hidden h-2 w-2 md:block" aria-hidden />
@@ -191,7 +197,7 @@ export function CompanyNotificationCard({
             href={notification.primaryAction.href}
             className="inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10"
           >
-            {notification.primaryAction.label}
+            {getCompanyNotificationActionLabel(t, notification.primaryAction.label)}
           </Link>
           <button
             type="button"
@@ -199,7 +205,7 @@ export function CompanyNotificationCard({
             disabled={isPending}
             className="inline-flex min-h-8 items-center justify-center rounded-lg border border-red-500/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-red-300 transition hover:border-red-400 hover:bg-red-500/10 disabled:opacity-50"
           >
-            Delete
+            {t.browse.companyNotifications.actions.delete}
           </button>
         </div>
       </div>
