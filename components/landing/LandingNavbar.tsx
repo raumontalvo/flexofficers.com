@@ -98,10 +98,10 @@ export function LandingNavbar() {
                 {link.label}
               </a>
             ))}
+            <LanguageToggle className="ml-5 mr-5 shrink-0" />
           </div>
 
           <div className="relative z-10 flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
-            <LanguageToggle className="hidden lg:inline-flex" />
             <Link
               href="/onboarding?force=1"
               className={buttonClassName({
@@ -179,7 +179,7 @@ export function LandingNavbar() {
                 </button>
               </div>
 
-              <LanguageToggle className="mb-4 w-full justify-center lg:hidden" />
+              <LanguageToggle className="mb-4" />
 
               <nav className="flex flex-col gap-1">
                 {sectionLinks.map((link) => (

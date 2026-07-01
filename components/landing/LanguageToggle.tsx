@@ -18,17 +18,14 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
 
   return (
     <div
-      className={cn(
-        "inline-flex shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-fo-bg-elevated p-1 text-xs font-semibold lg:text-sm",
-        className
-      )}
+      className={cn("inline-flex shrink-0 items-center gap-2 text-sm", className)}
       role="group"
       aria-label="Language"
     >
       {options.map((option, index) => (
-        <span key={option.code} className="inline-flex items-center gap-1">
+        <span key={option.code} className="inline-flex items-center gap-2">
           {index > 0 ? (
-            <span className="px-0.5 text-fo-text-subtle" aria-hidden>
+            <span className="text-gray-600" aria-hidden>
               |
             </span>
           ) : null}
@@ -36,10 +33,10 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
             type="button"
             onClick={() => setLanguage(option.code)}
             className={cn(
-              "min-h-8 rounded-md px-2.5 py-1 transition",
+              "p-0 font-normal leading-none transition",
               language === option.code
-                ? "bg-fo-primary/15 text-fo-primary-hover"
-                : "text-fo-text-muted hover:text-fo-text"
+                ? "font-semibold text-blue-500"
+                : "text-gray-400 hover:text-white"
             )}
             aria-pressed={language === option.code}
           >
