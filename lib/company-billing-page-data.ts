@@ -26,6 +26,7 @@ export type CompanyBillingPageData = {
   nextRenewal: string | null;
   nextCharge: string;
   isOnTrial: boolean;
+  trialPending: boolean;
   trialDaysRemaining: number | null;
   trialEndsAt: string | null;
   paymentMethod: SerializedStripePaymentMethod | null;
@@ -38,6 +39,7 @@ export type CompanyBillingPageData = {
 
 export type CompanyBillingSource = {
   accessStatus: CompanyAccessStatus;
+  trialStartedAt: Date | null;
   trialEndsAt: Date | null;
   subscriptionStatus: Parameters<typeof isCompanySubscriptionActive>[0]["subscriptionStatus"];
   subscriptionCurrentPeriodEnd: Date | null;
@@ -98,6 +100,9 @@ export function serializeCompanyBillingPageData(input: {
   const now = input.now ?? new Date();
   const status = getCompanyBillingStatus(input.company, now);
   const accessSummary = getCompanyAccessSummary(input.company, now);
+  const trialPending =
+    !input.company.trialStartedAt &&
+    !isCompanySubscriptionActive(input.company, now);
   const nextRenewal = formatBillingDate(
     input.company.subscriptionCurrentPeriodEnd
   );
@@ -113,6 +118,7 @@ export function serializeCompanyBillingPageData(input: {
     nextRenewal,
     nextCharge: COMPANY_ANNUAL_PLAN.priceAnnualDisplay,
     isOnTrial: status === "trial",
+    trialPending,
     trialDaysRemaining: accessSummary.daysRemaining,
     trialEndsAt: formatBillingDate(input.company.trialEndsAt),
     paymentMethod: input.paymentMethod ?? null,

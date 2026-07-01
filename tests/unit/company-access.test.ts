@@ -9,7 +9,9 @@ import {
   buildTrialExtensionUpdate,
   calculateExtendedTrialEnd,
   getDefaultTrialFields,
+  getPreTrialFields,
   getTrialDaysRemaining,
+  getTrialStartUpdateIfEligible,
 } from "@/lib/company-trial";
 
 describe("company trial helpers", () => {
@@ -21,6 +23,26 @@ describe("company trial helpers", () => {
     expect(defaults.accessStatus).toBe(CompanyAccessStatus.TRIAL);
     expect(defaults.trialStartedAt).toEqual(now);
     expect(defaults.trialEndsAt).toEqual(new Date("2026-07-02T12:00:00.000Z"));
+  });
+
+  it("returns pre-trial fields before profile completion", () => {
+    expect(getPreTrialFields()).toEqual({
+      trialStartedAt: null,
+      trialEndsAt: null,
+      accessStatus: CompanyAccessStatus.EXPIRED,
+    });
+  });
+
+  it("starts the trial only when profile is complete and trial has not started", () => {
+    expect(
+      getTrialStartUpdateIfEligible(null, false, now)
+    ).toEqual({});
+    expect(
+      getTrialStartUpdateIfEligible({ trialStartedAt: now }, true, now)
+    ).toEqual({});
+    expect(getTrialStartUpdateIfEligible(null, true, now)).toEqual(
+      getDefaultTrialFields(now)
+    );
   });
 
   it("extends from the current trial end when still active", () => {
@@ -116,6 +138,18 @@ describe("company access rules", () => {
     const company = {
       accessStatus: CompanyAccessStatus.EXPIRED,
       trialEndsAt: new Date("2026-07-01T12:00:00.000Z"),
+      subscriptionStatus: CompanySubscriptionStatus.INACTIVE,
+      subscriptionCurrentPeriodEnd: null,
+    };
+
+    expect(canCompanyPostNewShifts(company, now)).toBe(false);
+  });
+
+  it("blocks posting before the trial starts", () => {
+    const company = {
+      accessStatus: CompanyAccessStatus.EXPIRED,
+      trialStartedAt: null,
+      trialEndsAt: null,
       subscriptionStatus: CompanySubscriptionStatus.INACTIVE,
       subscriptionCurrentPeriodEnd: null,
     };

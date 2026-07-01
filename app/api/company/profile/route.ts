@@ -1,7 +1,12 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { getDefaultTrialFields } from "@/lib/company-trial";
+import { getCompanyProfileCompletion } from "@/lib/company-profile-completion";
+import {
+  getDefaultTrialFields,
+  getPreTrialFields,
+  getTrialStartUpdateIfEligible,
+} from "@/lib/company-trial";
 import { embedCompanyProfileMeta } from "@/lib/company-profile-meta";
 import { normalizePhotoUrl, resolveSyncedPhotoUrl } from "@/lib/clerk-photo-sync";
 import { prisma } from "@/lib/prisma";
@@ -101,7 +106,34 @@ export async function POST(req: Request) {
         },
       });
 
-  const trialDefaults = getDefaultTrialFields();
+  const profileCompletion = getCompanyProfileCompletion(
+    {
+      companyName: parsed.data.companyName,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      address: parsed.data.address,
+      city: parsed.data.city,
+      state: parsed.data.state,
+    },
+    parsed.data.email
+  );
+
+  const existingCompany = await prisma.company.findUnique({
+    where: {
+      userId: user.id,
+    },
+    select: {
+      trialStartedAt: true,
+    },
+  });
+
+  const trialStartUpdate = getTrialStartUpdateIfEligible(
+    existingCompany,
+    profileCompletion.isComplete
+  );
+  const createTrialFields = profileCompletion.isComplete
+    ? getDefaultTrialFields()
+    : getPreTrialFields();
   const logoUrl =
     resolveSyncedPhotoUrl(parsed.data.logoUrl, clerkUser.imageUrl) ??
     normalizePhotoUrl(parsed.data.logoUrl);
@@ -135,6 +167,7 @@ export async function POST(req: Request) {
       licenseType: parsed.data.licenseType,
       licenseNumber: parsed.data.licenseNumber,
       licenseState: parsed.data.licenseState,
+      ...trialStartUpdate,
     },
     create: {
       userId: user.id,
@@ -151,9 +184,9 @@ export async function POST(req: Request) {
       licenseType: parsed.data.licenseType,
       licenseNumber: parsed.data.licenseNumber,
       licenseState: parsed.data.licenseState,
-      trialStartedAt: trialDefaults.trialStartedAt,
-      trialEndsAt: trialDefaults.trialEndsAt,
-      accessStatus: trialDefaults.accessStatus,
+      trialStartedAt: createTrialFields.trialStartedAt,
+      trialEndsAt: createTrialFields.trialEndsAt,
+      accessStatus: createTrialFields.accessStatus,
     },
   });
 

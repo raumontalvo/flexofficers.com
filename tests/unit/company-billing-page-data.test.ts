@@ -15,6 +15,7 @@ describe("company billing page data", () => {
   it("returns trial status for active trials", () => {
     const company = {
       accessStatus: CompanyAccessStatus.TRIAL,
+      trialStartedAt: new Date("2026-06-18T12:00:00.000Z"),
       trialEndsAt: new Date("2026-07-01T12:00:00.000Z"),
       subscriptionStatus: CompanySubscriptionStatus.INACTIVE,
       subscriptionCurrentPeriodEnd: null,
@@ -35,11 +36,36 @@ describe("company billing page data", () => {
 
     expect(billing.status).toBe("trial");
     expect(billing.isOnTrial).toBe(true);
+    expect(billing.trialPending).toBe(false);
     expect(billing.trialDaysRemaining).toBe(6);
     expect(billing.trialEndsAt).toBe("July 1, 2026");
     expect(billing.planName).toBe("FlexOfficers Annual");
     expect(billing.planAnnualAmount).toBe("$599.00");
     expect(billing.autoRenewalEnabled).toBe(false);
+  });
+
+  it("returns trial pending before profile completion starts the trial", () => {
+    const company = {
+      accessStatus: CompanyAccessStatus.EXPIRED,
+      trialStartedAt: null,
+      trialEndsAt: null,
+      subscriptionStatus: CompanySubscriptionStatus.INACTIVE,
+      subscriptionCurrentPeriodEnd: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+    };
+
+    const billing = serializeCompanyBillingPageData({
+      company,
+      stripeConnected: false,
+      stripeBillingReady: false,
+      hasValidStripeCustomer: false,
+      now,
+    });
+
+    expect(billing.status).toBe("expired");
+    expect(billing.isOnTrial).toBe(false);
+    expect(billing.trialPending).toBe(true);
   });
 
   it("returns active status for active subscriptions", () => {

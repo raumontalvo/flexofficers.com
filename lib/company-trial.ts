@@ -2,6 +2,8 @@ import { CompanyAccessStatus } from "@/app/generated/prisma/enums";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+export const COMPANY_TRIAL_DAYS = 7;
+
 export function addDays(date: Date, days: number) {
   const result = new Date(date);
   result.setUTCDate(result.getUTCDate() + days);
@@ -11,9 +13,29 @@ export function addDays(date: Date, days: number) {
 export function getDefaultTrialFields(now: Date = new Date()) {
   return {
     trialStartedAt: now,
-    trialEndsAt: addDays(now, 7),
+    trialEndsAt: addDays(now, COMPANY_TRIAL_DAYS),
     accessStatus: CompanyAccessStatus.TRIAL,
   };
+}
+
+export function getPreTrialFields() {
+  return {
+    trialStartedAt: null,
+    trialEndsAt: null,
+    accessStatus: CompanyAccessStatus.EXPIRED,
+  };
+}
+
+export function getTrialStartUpdateIfEligible(
+  company: { trialStartedAt: Date | null } | null | undefined,
+  isProfileComplete: boolean,
+  now: Date = new Date()
+) {
+  if (!isProfileComplete || company?.trialStartedAt) {
+    return {};
+  }
+
+  return getDefaultTrialFields(now);
 }
 
 export function calculateExtendedTrialEnd(

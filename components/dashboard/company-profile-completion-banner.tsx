@@ -38,6 +38,10 @@ export function CompanyProfileCompletionBanner({
               </li>
             ))}
           </ul>
+          <p className="mt-3 text-xs leading-relaxed text-fo-text-muted">
+            Complete your profile (company name, email, phone, address, city, state,
+            etc.) to start your 7-day free trial on the FlexOfficers Annual plan.
+          </p>
         </div>
 
         <Link

@@ -3,6 +3,7 @@ import {
   BILLING_SUPPORT_HOURS,
   BILLING_SUPPORT_PHONE,
   BILLING_SUPPORT_PHONE_HREF,
+  COMPANY_TRIAL_COPY,
 } from "@/lib/company-billing-plan";
 import type { CompanyBillingPageData } from "@/lib/company-billing-page-data";
 import { buttonClassName, StatusBadge } from "@/components/ui";
@@ -220,10 +221,21 @@ function CompanyBillingMobileContent({
 
         <FeatureList features={billing.features} compact title="Included" />
 
+        {billing.trialPending ? (
+          <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
+            <p className="text-sm font-semibold text-amber-100">
+              {COMPANY_TRIAL_COPY.durationLabel}
+            </p>
+            <p className="mt-1.5 text-sm leading-relaxed text-fo-text-muted">
+              {COMPANY_TRIAL_COPY.profileStartNote} {COMPANY_TRIAL_COPY.activeNote}
+            </p>
+          </div>
+        ) : null}
+
         {billing.isOnTrial ? (
           <div className="mt-3 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3">
             <p className="text-sm font-semibold text-fo-primary-hover">
-              7-Day Free Trial
+              {COMPANY_TRIAL_COPY.durationLabel}
             </p>
             {billing.trialDaysRemaining !== null ? (
               <p className="mt-1.5 text-sm font-medium text-fo-text">
@@ -238,8 +250,7 @@ function CompanyBillingMobileContent({
               </div>
             ) : null}
             <p className="mt-2 text-xs leading-relaxed text-fo-text-muted">
-              After your trial ends, you will not be able to use the features
-              until you start a subscription.
+              {COMPANY_TRIAL_COPY.activeNote}
             </p>
           </div>
         ) : null}
@@ -367,8 +378,7 @@ function CompanyBillingMobileContent({
             Your trial has expired.
           </p>
           <p className="mt-1.5 text-xs text-fo-text-muted">
-            Subscribe to continue posting new shifts and managing your hiring
-            workflow.
+            {COMPANY_TRIAL_COPY.expiredNote}
           </p>
           <Link
             href="/company/shifts"
@@ -441,10 +451,21 @@ export function CompanyBillingPageContent({
 
               <FeatureList features={billing.features} />
 
+              {billing.trialPending ? (
+                <div className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+                  <p className="text-sm font-semibold text-amber-100">
+                    {COMPANY_TRIAL_COPY.durationLabel}
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-fo-text-muted">
+                    {COMPANY_TRIAL_COPY.profileStartNote} {COMPANY_TRIAL_COPY.activeNote}
+                  </p>
+                </div>
+              ) : null}
+
               {billing.isOnTrial ? (
                 <div className="mt-6 rounded-xl border border-blue-500/20 bg-blue-500/10 p-4">
                   <p className="text-sm font-semibold text-fo-primary-hover">
-                    7-Day Free Trial
+                    {COMPANY_TRIAL_COPY.durationLabel}
                   </p>
                   {billing.trialDaysRemaining !== null ? (
                     <p className="mt-2 text-sm text-fo-text">
@@ -458,8 +479,7 @@ export function CompanyBillingPageContent({
                     </p>
                   ) : null}
                   <p className="mt-3 text-sm leading-relaxed text-fo-text-muted">
-                    After your trial ends, you will not be able to use the
-                    features until you start a subscription.
+                    {COMPANY_TRIAL_COPY.activeNote}
                   </p>
                   <div className="mt-4">
                     {billing.stripeBillingReady ? (
@@ -678,8 +698,7 @@ export function CompanyBillingPageContent({
               Your trial has expired.
             </p>
             <p className="mt-2 text-sm text-fo-text-muted">
-              Subscribe to continue posting new shifts and managing your hiring
-              workflow.
+              {COMPANY_TRIAL_COPY.expiredNote}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               {billing.stripeBillingReady ? (
