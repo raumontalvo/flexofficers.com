@@ -32,6 +32,7 @@ import {
 import { LandingEyebrow, LandingHeading } from "@/components/landing/LandingHeading";
 import { PhoneFrame } from "@/components/landing/PhoneFrame";
 import { buttonClassName, Card, CardDescription, CardTitle } from "@/components/ui";
+import { COMPANY_TRIAL_COPY } from "@/lib/company-billing-plan";
 import { cn } from "@/lib/cn";
 
 const companyFeatures = [
@@ -62,7 +63,8 @@ const companyFeatures = [
   },
   {
     title: "Annual Subscription",
-    description: "One simple plan for unlimited platform usage.",
+    description:
+      "7-day free trial, then $599/year for unlimited platform usage. No charge when your trial ends.",
     icon: IconCard,
   },
 ];
@@ -260,6 +262,15 @@ export default function Home() {
           {companyFeatures.map((feature) => (
             <FeatureCard key={feature.title} {...feature} />
           ))}
+        </div>
+
+        <div className="mt-10 rounded-2xl border border-blue-500/25 bg-blue-500/10 px-6 py-6 text-center sm:px-8 sm:py-8">
+          <p className="text-lg font-semibold text-fo-primary-hover">
+            {COMPANY_TRIAL_COPY.durationLabel}
+          </p>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-fo-text-muted sm:text-base">
+            {COMPANY_TRIAL_COPY.profileStartNote} {COMPANY_TRIAL_COPY.activeNote}
+          </p>
         </div>
       </section>
 
