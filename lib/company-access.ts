@@ -80,7 +80,7 @@ export function getCompanyPostingBlockMessage(
       return "Complete your company profile (company name, email, phone, address, city, state, etc.) to start your 7-day free trial.";
     }
 
-    return "Your free trial has ended. Subscribe to unlock posting, officer search, and applicant management.";
+    return "Your free trial has ended. Subscribe to re-unlock posting, officer search, and applicant management.";
   }
 
   return "An active subscription or trial is required to post new shifts.";

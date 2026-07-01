@@ -182,17 +182,8 @@ html {
 
 .landing-hero-glow {
   background:
-    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(37, 99, 235, 0.18), transparent 65%),
-    radial-gradient(ellipse 50% 40% at 20% 60%, rgba(59, 130, 246, 0.08), transparent 70%);
-}
-
-/* Hero — stack copy above app previews on mobile/tablet */
-@media (max-width: 1023px) {
-  .landing-hero-showcase {
-    margin-top: 0;
-    scroll-margin-top: calc(var(--landing-header-h) + 1rem);
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
-  }
+    radial-gradient(ellipse 75% 55% at 20% 42%, rgba(37, 99, 235, 0.2), transparent 68%),
+    radial-gradient(ellipse 50% 45% at 80% 55%, rgba(59, 130, 246, 0.08), transparent 70%);
 }
 
 /* Landing header — premium sticky bar on mobile/tablet */

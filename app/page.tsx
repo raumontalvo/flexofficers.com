@@ -2,12 +2,7 @@ import { HeroBadge } from "@/components/landing/HeroBadge";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FlexOfficersLogoLink } from "@/components/brand";
 import Link from "next/link";
-import { HeroRolePhone } from "@/components/landing/HeroRolePhone";
 import { FeatureCard } from "@/components/landing/FeatureCard";
-import {
-  COMPANY_LANDING_SCREENSHOTS,
-  OFFICER_LANDING_SCREENSHOTS,
-} from "@/lib/landing-phone-screenshots";
 import {
   IconCalendar,
   IconCard,
@@ -174,60 +169,42 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-x-hidden">
         <div className="landing-hero-glow absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-5 pb-24 max-lg:pt-[calc(var(--landing-header-h)+2rem)] sm:px-8 sm:pb-32 sm:max-lg:pt-[calc(var(--landing-header-h)+2.5rem)] lg:px-8 lg:pb-40 lg:pt-44">
-          <div className="flex flex-col max-lg:gap-16 lg:grid lg:grid-cols-2 lg:items-start lg:gap-20 xl:gap-28">
-            <div className="landing-fade-up relative z-10 max-w-xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] max-lg:order-1 lg:pb-0">
-              <HeroBadge />
-              <LandingEyebrow>Security staffing marketplace</LandingEyebrow>
-              <h1 className="mt-6 text-5xl font-bold leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl xl:text-[4.75rem]">
-                The Modern Workforce Platform for Security Companies & Security
-                Officers
-              </h1>
-              <p className="mt-8 max-w-lg text-xl leading-8 text-fo-text-muted/90 sm:text-2xl sm:leading-9">
-                Post shifts, discover qualified security officers, and fill open
-                positions faster—all from one platform.
-              </p>
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-                <Link
-                  href="/onboarding?force=1"
-                  className={buttonClassName({
-                    size: "lg",
-                    fullWidth: true,
-                    className: "sm:w-auto sm:min-w-[200px] shadow-[0_20px_40px_-16px_rgba(37,99,235,0.55)] transition hover:shadow-[0_24px_48px_-14px_rgba(37,99,235,0.65)]",
-                  })}
-                >
-                  Get Started
-                </Link>
-                <Link
-                  href="/sign-in"
-                  className={buttonClassName({
-                    variant: "secondary",
-                    size: "lg",
-                    fullWidth: true,
-                    className: "sm:w-auto border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]",
-                  })}
-                >
-                  Sign In
-                </Link>
-              </div>
-            </div>
-
-            <div
-              className="landing-hero-showcase landing-fade-up relative z-0 w-full min-w-0 max-lg:order-2 max-lg:pt-4 sm:max-lg:pt-6 lg:pt-10"
-              style={{ animationDelay: "120ms" }}
-            >
-              <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-8 lg:gap-10 xl:gap-12">
-                <HeroRolePhone
-                  roleLabel="Security Officer"
-                  screenshots={OFFICER_LANDING_SCREENSHOTS}
-                  style={{ animationDelay: "180ms" }}
-                />
-                <HeroRolePhone
-                  roleLabel="Security Company"
-                  screenshots={COMPANY_LANDING_SCREENSHOTS}
-                  style={{ animationDelay: "260ms" }}
-                />
-              </div>
+        <div className="relative mx-auto max-w-7xl px-5 pb-28 max-lg:pt-[calc(var(--landing-header-h)+1.75rem)] sm:px-8 sm:pb-36 sm:max-lg:pt-[calc(var(--landing-header-h)+2rem)] lg:px-8 lg:py-36 xl:py-44">
+          <div className="landing-fade-up relative z-10 mx-auto w-full max-w-4xl lg:max-w-5xl">
+            <HeroBadge />
+            <LandingEyebrow>Security staffing marketplace</LandingEyebrow>
+            <h1 className="mt-6 text-[2.75rem] font-bold leading-[1.04] tracking-tight sm:text-6xl sm:leading-[1.02] lg:text-7xl lg:leading-[1.02] xl:text-[4.5rem]">
+              The Modern Workforce Platform for Security Companies & Security
+              Officers
+            </h1>
+            <p className="mt-8 max-w-2xl text-lg leading-8 text-fo-text-muted/90 sm:mt-9 sm:text-xl sm:leading-9 lg:mt-10 lg:max-w-3xl lg:text-2xl lg:leading-10">
+              Post shifts, discover qualified security officers, and fill open
+              positions faster—all from one platform.
+            </p>
+            <div className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row sm:items-center lg:mt-14">
+              <Link
+                href="/onboarding?force=1"
+                className={buttonClassName({
+                  size: "lg",
+                  fullWidth: true,
+                  className:
+                    "sm:w-auto sm:min-w-[220px] shadow-[0_20px_40px_-16px_rgba(37,99,235,0.55)] transition hover:shadow-[0_24px_48px_-14px_rgba(37,99,235,0.65)]",
+                })}
+              >
+                Get Started
+              </Link>
+              <Link
+                href="/sign-in"
+                className={buttonClassName({
+                  variant: "secondary",
+                  size: "lg",
+                  fullWidth: true,
+                  className:
+                    "sm:w-auto sm:min-w-[200px] border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]",
+                })}
+              >
+                Sign In
+              </Link>
             </div>
           </div>
         </div>

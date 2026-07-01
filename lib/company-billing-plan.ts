@@ -21,13 +21,13 @@ export const COMPANY_TRIAL_COPY = {
   profileStartNote:
     "Your free trial starts automatically when you complete your company profile (company name, email, phone, address, city, state, etc.).",
   activeNote:
-    "You won't be charged when your trial ends. Subscribe anytime to unlock features.",
+    "You won't be charged when your trial ends. Subscribe anytime to re-unlock features.",
   expiredNote:
-    "Your free trial has ended. Subscribe to unlock posting, officer search, and applicant management.",
+    "Your free trial has ended. Subscribe to re-unlock posting, officer search, and applicant management.",
   pricingBadge: "7-day free trial",
   pricingStartNote:
     "Your trial starts after your company profile is complete. You won't be charged when the trial ends.",
-  pricingSubscribeNote: "Subscribe when ready to unlock company features.",
+  pricingSubscribeNote: "Subscribe when ready to re-unlock company features.",
 } as const;
 
 export const BILLING_SUPPORT_PHONE = "(239) 900-5653";
