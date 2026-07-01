@@ -471,22 +471,36 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="mx-auto max-w-5xl px-5 py-32 text-center sm:px-8 sm:py-44">
-        <h2 className="text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-          Start Filling Shifts Today
-        </h2>
-        <Link
-          href="/onboarding?force=1"
-          className={buttonClassName({
-            size: "lg",
-            className: cn(
-              "mt-12 inline-flex min-w-[240px] px-10",
-              "shadow-[0_24px_48px_-16px_rgba(37,99,235,0.6)] transition hover:shadow-[0_28px_56px_-14px_rgba(37,99,235,0.7)]"
-            ),
-          })}
-        >
-          Get Started
-        </Link>
+      <section className="relative border-t border-white/[0.06] px-5 py-24 sm:px-8 sm:py-32 lg:py-40">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(37,99,235,0.12),transparent_70%)]"
+          aria-hidden="true"
+        />
+        <div className="relative mx-auto max-w-3xl text-center">
+          <LandingEyebrow>Ready to get started?</LandingEyebrow>
+          <h2 className="mt-6 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
+            Start Covering Shifts Faster
+          </h2>
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-fo-text-muted sm:text-xl">
+            Post shifts, review licensed officers, and build your security staff in
+            one place.
+          </p>
+          <p className="mt-5 text-sm font-semibold tracking-wide text-fo-primary-hover sm:text-base">
+            7-day free trial • $599/year • No commission fees
+          </p>
+          <Link
+            href="/onboarding?force=1"
+            className={buttonClassName({
+              size: "lg",
+              className: cn(
+                "mt-10 inline-flex min-w-[240px] px-10",
+                "shadow-[0_24px_48px_-16px_rgba(37,99,235,0.6)] transition hover:shadow-[0_28px_56px_-14px_rgba(37,99,235,0.7)]"
+              ),
+            })}
+          >
+            Get Started
+          </Link>
+        </div>
       </section>
 
       {/* Footer */}

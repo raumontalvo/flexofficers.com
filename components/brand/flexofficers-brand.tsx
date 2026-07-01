@@ -32,18 +32,10 @@ export function FlexOfficersLogo({
       alt="FlexOfficers"
       width={width}
       height={height}
-      sizes={
-        className?.includes("landing-nav-logo-image")
-          ? "(max-width: 389px) 117px, (max-width: 767px) 133px, (max-width: 1023px) 150px, 280px"
-          : "(max-width: 767px) 200px, (max-width: 1023px) 240px, 280px"
-      }
+      sizes="(max-width: 767px) 200px, (max-width: 1023px) 240px, 280px"
       quality={100}
       className={cn("block h-auto w-auto max-w-full object-contain", className)}
-      style={
-        className?.includes("landing-nav-logo-image")
-          ? undefined
-          : { height, width: "auto", maxHeight: height }
-      }
+      style={{ height, width: "auto", maxHeight: height }}
       priority={priority}
     />
   );
