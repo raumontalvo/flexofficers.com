@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useId, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { FlexOfficersLogoLink } from "@/components/brand";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -67,14 +67,21 @@ export function LandingNavbar() {
     <>
       <header className="landing-header sticky top-0 z-[100] border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
         <nav className="relative z-[110] mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-4 lg:px-8 lg:py-5">
-          <div className="flex min-w-0 shrink-0 max-w-[130px] items-center overflow-hidden sm:max-w-none">
-            <FlexOfficersLogoLink
+          <div className="flex max-w-[130px] min-w-fit shrink-0 items-center overflow-visible sm:max-w-[150px] lg:max-w-none">
+            <Link
               href="/"
-              height={320}
-              priority
-              className="landing-nav-logo-clip"
-              imageClassName="landing-nav-logo-image"
-            />
+              className="flex min-w-fit shrink-0 items-center overflow-visible"
+            >
+              <Image
+                src="/branding/concepts/flexofficers-logo-concept.png"
+                alt="FlexOfficers"
+                width={320}
+                height={80}
+                priority
+                sizes="(max-width: 1023px) 150px, 320px"
+                className="h-20 w-auto object-contain"
+              />
+            </Link>
           </div>
 
           <div className="hidden items-center justify-center gap-8 whitespace-nowrap text-sm text-fo-text-muted lg:flex lg:gap-10 xl:gap-12">
