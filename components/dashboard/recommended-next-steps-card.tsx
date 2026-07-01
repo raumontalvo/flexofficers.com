@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { ComponentType, SVGProps } from "react";
 import type { ArmedStatus } from "@/app/generated/prisma/enums";
@@ -9,6 +11,7 @@ import {
 } from "@/components/nav/icons";
 import { buttonClassName, Card, CardDescription, CardTitle } from "@/components/ui";
 import { getOfficerProfileCompletionFields } from "@/lib/officer-profile-completion";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
 type RecommendedNextStepsCardProps = {
@@ -55,6 +58,8 @@ export function RecommendedNextStepsCard({
   officer,
   className,
 }: RecommendedNextStepsCardProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.dashboard.officer;
   const incompleteFields = getOfficerProfileCompletionFields(officer).filter(
     (field) => !field.complete
   );
@@ -70,9 +75,9 @@ export function RecommendedNextStepsCard({
       className={cn("fo-glass-card fo-glass-card-hover space-y-3 p-3.5", className)}
     >
       <div>
-        <CardTitle className="text-sm font-semibold">Recommended Next Steps</CardTitle>
+        <CardTitle className="text-sm font-semibold">{copy.recommendedSteps}</CardTitle>
         <CardDescription className="mt-0.5 text-xs">
-          Complete these before you can apply to shifts.
+          {copy.recommendedStepsSubtitle}
         </CardDescription>
       </div>
 
@@ -80,6 +85,9 @@ export function RecommendedNextStepsCard({
         {incompleteFields.map((field) => {
           const meta = fieldMeta[field.id];
           const Icon = meta?.icon ?? ProfileIcon;
+          const label =
+            copy.profileFields[field.id as keyof typeof copy.profileFields] ??
+            field.label;
 
           return (
             <li
@@ -95,7 +103,7 @@ export function RecommendedNextStepsCard({
                 <Icon className="h-4 w-4" />
               </div>
               <p className="min-w-0 flex-1 text-xs font-medium text-fo-text sm:text-sm">
-                {field.label}
+                {label}
               </p>
               <Link
                 href="/officer/profile"
@@ -105,7 +113,7 @@ export function RecommendedNextStepsCard({
                   className: "!min-h-8 shrink-0 !px-3 !py-1.5 !text-xs",
                 })}
               >
-                Add Now
+                {t.common.addNow}
               </Link>
             </li>
           );

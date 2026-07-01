@@ -1,17 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   MobileBottomSheet,
   MobilePrimaryButton,
 } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
+import {
+  getDateLocale,
+  getShiftWorkTypeOptions,
+} from "@/lib/i18n/ui-labels";
 import { US_STATES } from "@/lib/license-options";
 import {
   emptyShiftBrowseFilters,
   hasMoreShiftFilters,
   type ShiftBrowseFilters,
-  WORK_TYPE_OPTIONS,
 } from "@/lib/shift-browse-filters";
 
 const mobileFieldClassName =
@@ -64,6 +68,10 @@ export function ShiftSearchSheet({
   onClose,
   onApply,
 }: ShiftSearchSheetProps) {
+  const { t, language } = useLandingLanguage();
+  const shiftFilters = t.filters.shifts;
+  const shiftOptions = t.filters.shiftOptions;
+  const workTypeOptions = getShiftWorkTypeOptions(t);
   const [draft, setDraft] = useState<ShiftBrowseFilters>(filters);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
@@ -94,29 +102,29 @@ export function ShiftSearchSheet({
   }
 
   return (
-    <MobileBottomSheet open={open} onClose={onClose} title="Search Shifts">
+    <MobileBottomSheet open={open} onClose={onClose} title={t.browse.shifts.searchTitle}>
       <div className="space-y-2.5">
         <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2">
           <div className="space-y-1">
-            <FilterLabel htmlFor="shift-sheet-city">City</FilterLabel>
+            <FilterLabel htmlFor="shift-sheet-city">{shiftFilters.city}</FilterLabel>
             <input
               id="shift-sheet-city"
               value={draft.city}
               onChange={(e) => updateDraft("city", e.target.value)}
               className={mobileFieldClassName}
-              placeholder="Enter city"
+              placeholder={shiftFilters.enterCity}
             />
           </div>
           <div className="space-y-1">
-            <FilterLabel htmlFor="shift-sheet-state">State</FilterLabel>
+            <FilterLabel htmlFor="shift-sheet-state">{shiftFilters.state}</FilterLabel>
             <select
               id="shift-sheet-state"
               value={draft.state}
               onChange={(e) => updateDraft("state", e.target.value)}
               className={mobileFieldClassName}
-              aria-label="State"
+              aria-label={shiftFilters.state}
             >
-              <option value="">All States</option>
+              <option value="">{shiftFilters.allStates}</option>
               {US_STATES.map((state) => (
                 <option key={state.code} value={state.code}>
                   {state.name}
@@ -127,18 +135,19 @@ export function ShiftSearchSheet({
         </div>
 
         <div className="space-y-1">
-          <FilterLabel htmlFor="shift-sheet-date">Date</FilterLabel>
+          <FilterLabel htmlFor="shift-sheet-date">{shiftFilters.date}</FilterLabel>
           <input
             id="shift-sheet-date"
             type="date"
             value={draft.date}
             onChange={(e) => updateDraft("date", e.target.value)}
             className={mobileFieldClassName}
+            lang={getDateLocale(language)}
           />
         </div>
 
         <div className="space-y-1">
-          <FilterLabel htmlFor="shift-sheet-rate">Min Pay</FilterLabel>
+          <FilterLabel htmlFor="shift-sheet-rate">{shiftFilters.minPay}</FilterLabel>
           <input
             id="shift-sheet-rate"
             type="number"
@@ -147,12 +156,12 @@ export function ShiftSearchSheet({
             value={draft.minHourlyRate}
             onChange={(e) => updateDraft("minHourlyRate", e.target.value)}
             className={mobileFieldClassName}
-            placeholder="Min $/hr"
+            placeholder={shiftFilters.minPay}
           />
         </div>
 
         <div className="space-y-1">
-          <FilterLabel htmlFor="shift-sheet-work-type">Work Type</FilterLabel>
+          <FilterLabel htmlFor="shift-sheet-work-type">{shiftFilters.workType}</FilterLabel>
           <select
             id="shift-sheet-work-type"
             value={draft.workType}
@@ -161,7 +170,7 @@ export function ShiftSearchSheet({
             }
             className={mobileFieldClassName}
           >
-            {WORK_TYPE_OPTIONS.map((option) => (
+            {workTypeOptions.map((option) => (
               <option key={option.value || "all"} value={option.value}>
                 {option.label}
               </option>
@@ -174,7 +183,7 @@ export function ShiftSearchSheet({
           onClick={() => setShowMoreFilters((open) => !open)}
           className="flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left transition hover:bg-white/[0.05]"
         >
-          <span className="text-sm font-medium text-fo-text">More Filters</span>
+          <span className="text-sm font-medium text-fo-text">{shiftFilters.moreFilters}</span>
           <span className="text-sm text-fo-text-subtle" aria-hidden="true">
             {showMoreFilters ? "▼" : "→"}
           </span>
@@ -183,27 +192,27 @@ export function ShiftSearchSheet({
         {showMoreFilters ? (
           <div className="space-y-1.5 rounded-xl border border-white/10 bg-white/[0.02] p-2">
             <MoreFilterToggle
-              label="Armed"
+              label={shiftOptions.armed}
               checked={draft.armed}
               onChange={(armed) => updateDraft("armed", armed)}
             />
             <MoreFilterToggle
-              label="Unarmed"
+              label={shiftOptions.unarmed}
               checked={draft.unarmed}
               onChange={(unarmed) => updateDraft("unarmed", unarmed)}
             />
             <MoreFilterToggle
-              label="Day Shift"
+              label={shiftOptions.dayShift}
               checked={draft.dayShift}
               onChange={(dayShift) => updateDraft("dayShift", dayShift)}
             />
             <MoreFilterToggle
-              label="Night Shift"
+              label={shiftOptions.nightShift}
               checked={draft.nightShift}
               onChange={(nightShift) => updateDraft("nightShift", nightShift)}
             />
             <MoreFilterToggle
-              label="Overnight"
+              label={shiftOptions.overnight}
               checked={draft.overnight}
               onChange={(overnight) => updateDraft("overnight", overnight)}
             />
@@ -211,13 +220,15 @@ export function ShiftSearchSheet({
         ) : null}
 
         <div className="space-y-2 border-t border-white/[0.06] pt-4">
-          <MobilePrimaryButton onClick={handleApply}>Apply Search</MobilePrimaryButton>
+          <MobilePrimaryButton onClick={handleApply}>
+            {shiftFilters.applySearch}
+          </MobilePrimaryButton>
           <button
             type="button"
             onClick={handleClear}
             className="flex w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-medium text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
           >
-            Clear Filters
+            {shiftFilters.clearFilters}
           </button>
         </div>
       </div>

@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { SectionHeading, buttonClassName } from "@/components/ui";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { buttonClassName } from "@/components/ui";
+import { interpolate } from "@/lib/app-i18n";
 import { cn } from "@/lib/cn";
+import { getInviteTabs } from "@/lib/i18n/ui-labels";
 import {
   filterInvitesByTab,
   getInviteTabCounts,
-  INVITE_TABS,
   sortOfficerInvites,
   type InviteSortOption,
   type InviteTab,
@@ -55,6 +58,9 @@ export function InvitesBrowseList({
   invites,
   inviteNotifications,
 }: InvitesBrowseListProps) {
+  const { t } = useLandingLanguage();
+  const inviteCopy = t.browse.invites;
+  const inviteTabs = getInviteTabs(t);
   const [tab, setTab] = useState<InviteTab>("all");
   const [sort, setSort] = useState<InviteSortOption>("newest");
   const [removedInviteIds, setRemovedInviteIds] = useState<string[]>([]);
@@ -79,15 +85,12 @@ export function InvitesBrowseList({
 
   return (
     <div className="space-y-4">
-      <SectionHeading
-        title="Company Invites"
-        subtitle="Companies interested in working with you."
-      />
+      <TranslatedSectionHeading page="officerInvites" />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-2 border-b border-white/[0.06] pb-3 sm:grid-cols-4 lg:hidden">
-            {INVITE_TABS.map((item) => {
+            {inviteTabs.map((item) => {
               const isActive = tab === item.value;
               const styles = MOBILE_INVITE_TAB_STYLES[item.value];
 
@@ -112,7 +115,7 @@ export function InvitesBrowseList({
           </div>
 
           <div className="hidden flex-wrap gap-2 border-b border-white/[0.06] pb-3 lg:flex">
-            {INVITE_TABS.map((item) => (
+            {inviteTabs.map((item) => (
               <button
                 key={item.value}
                 type="button"
@@ -135,12 +138,12 @@ export function InvitesBrowseList({
           {visibleInvites.length === 0 ? (
             <section className="fo-glass-card rounded-xl border border-white/10 px-4 py-12 text-center">
               <h2 className="text-lg font-semibold text-fo-text">
-                {activeInvites.length === 0 ? "No invites found." : "No invites in this tab."}
+                {activeInvites.length === 0 ? inviteCopy.empty.none : inviteCopy.empty.noTab}
               </h2>
               <p className="mt-2 text-sm text-fo-text-muted">
                 {activeInvites.length === 0
-                  ? "When a company invites you to a shift, it will appear here."
-                  : "Try another tab or adjust your filters."}
+                  ? inviteCopy.empty.noneDescription
+                  : inviteCopy.empty.noTabDescription}
               </p>
               {tab !== "all" ? (
                 <button
@@ -151,7 +154,7 @@ export function InvitesBrowseList({
                     className: "mt-5 inline-flex",
                   })}
                 >
-                  Clear Filters
+                  {t.browse.shifts.actions.clearFilters}
                 </button>
               ) : null}
             </section>
@@ -159,12 +162,11 @@ export function InvitesBrowseList({
             <>
               <div className="hidden flex-col gap-3 sm:flex sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm font-medium text-fo-text">
-                  {visibleInvites.length} invite
-                  {visibleInvites.length === 1 ? "" : "s"}
+                  {interpolate(inviteCopy.count, { count: visibleInvites.length })}
                 </p>
 
                 <label className="flex items-center gap-2 text-xs text-fo-text-muted">
-                  <span>Sort By</span>
+                  <span>{inviteCopy.sort.label}</span>
                   <select
                     value={sort}
                     onChange={(event) =>
@@ -172,8 +174,8 @@ export function InvitesBrowseList({
                     }
                     className="min-h-9 rounded-lg border border-fo-border bg-fo-bg/80 px-2 py-1.5 text-sm text-fo-text"
                   >
-                    <option value="newest">Newest</option>
-                    <option value="oldest">Oldest</option>
+                    <option value="newest">{inviteCopy.sort.newest}</option>
+                    <option value="oldest">{inviteCopy.sort.oldest}</option>
                   </select>
                 </label>
               </div>

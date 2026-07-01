@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import type { ArmedStatus } from "@/app/generated/prisma/enums";
 import {
@@ -10,6 +12,8 @@ import {
   getOfficerProfileCompletionFields,
   getProfileCompletionPercent,
 } from "@/lib/officer-profile-completion";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import { cn } from "@/lib/cn";
 
 type ProfileCompletionCardProps = {
@@ -35,6 +39,8 @@ export function ProfileCompletionCard({
   className,
   compact = false,
 }: ProfileCompletionCardProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.dashboard.officer;
   const fields = getOfficerProfileCompletionFields(officer);
   const incompleteFields = fields.filter((field) => !field.complete);
   const completionPercent = getProfileCompletionPercent(officer);
@@ -52,7 +58,7 @@ export function ProfileCompletionCard({
     >
       <div className="space-y-2.5">
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-sm font-semibold">Profile Completion</CardTitle>
+          <CardTitle className="text-sm font-semibold">{copy.profileCompletion}</CardTitle>
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-fo-primary-bright/30 bg-fo-primary/10">
             <span className="text-xs font-bold text-fo-primary-bright">
               {completionPercent}%
@@ -61,9 +67,7 @@ export function ProfileCompletionCard({
         </div>
 
         <CardDescription className="text-[11px] leading-snug">
-          {isComplete
-            ? "Ready to apply to shifts and be reviewed by companies."
-            : "Complete your profile before you can apply to shifts."}
+          {isComplete ? copy.profileReady : copy.profileIncomplete}
         </CardDescription>
 
         <div className="space-y-1 pt-1 md:pt-0">
@@ -73,7 +77,7 @@ export function ProfileCompletionCard({
             aria-valuenow={completionPercent}
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-label="Profile completion"
+            aria-label={copy.profileAria}
           >
             <div
               className={cn(
@@ -87,8 +91,10 @@ export function ProfileCompletionCard({
           </div>
           <p className="text-[10px] text-fo-text-subtle">
             {isComplete
-              ? "All fields complete"
-              : `${incompleteFields.length} field${incompleteFields.length === 1 ? "" : "s"} left`}
+              ? copy.allFieldsComplete
+              : incompleteFields.length === 1
+                ? copy.fieldsLeftOne
+                : interpolate(copy.fieldsLeft, { count: incompleteFields.length })}
           </p>
         </div>
       </div>
@@ -102,7 +108,7 @@ export function ProfileCompletionCard({
           className: cn("!min-h-9 !py-2 !text-xs", compact && "w-full"),
         })}
       >
-        {isComplete ? "Edit Profile" : "Complete Profile"}
+        {isComplete ? t.common.editProfile : t.common.completeProfile}
       </Link>
     </Card>
   );

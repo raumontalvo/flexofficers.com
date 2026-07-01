@@ -1,3 +1,6 @@
+"use client";
+
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button } from "@/components/ui";
 import {
   MobilePrimaryButton,
@@ -15,21 +18,27 @@ export function ShiftsNoResults({
   onClearFilters,
   onViewAllOpenShifts,
 }: ShiftsNoResultsProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.browse.shifts;
+
   return (
     <>
       <MobileSectionCard className="py-6 text-center md:hidden">
         <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-500/10 text-blue-300">
           <ShiftsIcon className="h-5 w-5" />
         </div>
-        <h2 className="text-base font-bold text-fo-text">No Matching Shifts</h2>
+        <h2 className="text-base font-bold text-fo-text">{copy.noMatch.title}</h2>
         <p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-fo-text-muted">
-          We couldn&apos;t find any open shifts matching your search.
+          {copy.noMatch.description}
         </p>
         <div className="mt-4 space-y-2">
           <MobilePrimaryButton onClick={onViewAllOpenShifts}>
-            View Open Shifts
+            {copy.actions.viewOpenShifts}
           </MobilePrimaryButton>
-          <MobileSettingsRow label="Clear Filters" onClick={onClearFilters} />
+          <MobileSettingsRow
+            label={copy.actions.clearFilters}
+            onClick={onClearFilters}
+          />
         </div>
       </MobileSectionCard>
 
@@ -38,9 +47,9 @@ export function ShiftsNoResults({
           <ShiftsIcon className="h-6 w-6" />
         </div>
 
-        <h2 className="text-lg font-bold text-fo-text">No Matching Shifts</h2>
+        <h2 className="text-lg font-bold text-fo-text">{copy.noMatch.title}</h2>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-fo-text-muted">
-          We couldn&apos;t find any open shifts matching your search.
+          {copy.noMatch.description}
         </p>
 
         <div className="mt-6 flex flex-col justify-center gap-2.5 sm:flex-row">
@@ -51,7 +60,7 @@ export function ShiftsNoResults({
             onClick={onClearFilters}
             className="w-full sm:w-auto"
           >
-            Clear Filters
+            {copy.actions.clearFilters}
           </Button>
           <Button
             type="button"
@@ -59,7 +68,7 @@ export function ShiftsNoResults({
             onClick={onViewAllOpenShifts}
             className="w-full sm:w-auto"
           >
-            View All Open Shifts
+            {copy.actions.viewAllOpen}
           </Button>
         </div>
       </div>

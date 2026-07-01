@@ -1,10 +1,11 @@
 "use client";
 
 import type { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
+import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 import { canOfficerDeleteApplication } from "@/lib/officer-application-delete";
-import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
 import WithdrawApplicationButton from "./WithdrawApplicationButton";
 
@@ -79,6 +80,10 @@ export function ApplicationActions({
   onDeleted,
   layout = "compact",
 }: ApplicationActionsProps) {
+  const { t } = useLandingLanguage();
+  const actions = t.browse.applications.actions;
+  const deleteLabel = t.browse.notifications.actions.delete;
+  const cancelLabel = t.settings.deleteDialog.cancel;
   const mobileRow = layout === "mobile-row";
   const desktop = layout === "desktop";
   const showDelete = canOfficerDeleteApplication({
@@ -115,14 +120,14 @@ export function ApplicationActions({
           )}
         >
           <EyeIcon className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">View Shift</span>
+          <span className="truncate">{actions.viewShift}</span>
         </ShiftDetailLink>
 
         {status === "PENDING" ? (
           <WithdrawApplicationButton
             applicationId={applicationId}
             compact
-            label="Withdraw"
+            label={actions.withdraw}
             className={cn(
               mobileActionClass,
               "border-amber-500/40 text-fo-pending hover:border-amber-500/60 hover:bg-fo-pending-bg"
@@ -134,7 +139,7 @@ export function ApplicationActions({
         {status === "ACCEPTED" && !showDelete ? (
           <CancelAssignmentButton
             applicationId={applicationId}
-            label="Cancel"
+            label={cancelLabel}
             className={cn(mobileActionClass, deleteButtonClass)}
           />
         ) : null}
@@ -143,7 +148,7 @@ export function ApplicationActions({
           <DeleteApplicationButton
             applicationId={applicationId}
             onDeleted={handleDeleted}
-            label="Delete"
+            label={deleteLabel}
             className={cn(mobileActionClass, deleteButtonClass)}
             icon={<TrashIcon className="h-3.5 w-3.5 shrink-0" />}
           />
@@ -155,7 +160,7 @@ export function ApplicationActions({
   return (
     <div className={cn("flex flex-col items-stretch", desktop ? "gap-2" : "gap-1.5")}>
       <ShiftDetailLink shiftId={shiftId} className={viewShiftClassName}>
-        View Shift
+        {actions.viewShift}
       </ShiftDetailLink>
 
       {status === "PENDING" ? (

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   AcceptedIcon,
@@ -6,53 +8,57 @@ import {
   UpcomingIcon,
 } from "@/components/nav/icons";
 import { Card, CardDescription, CardTitle } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
-const quickActions = [
+const quickActionConfig = [
   {
     href: "/shifts",
-    title: "Browse Shifts",
-    description: "Explore open assignments.",
+    titleKey: "browseShifts" as const,
+    descKey: "browseShiftsDesc" as const,
     icon: BrowseIcon,
     iconClassName: "bg-blue-500/20 text-blue-300",
   },
   {
     href: "/officer/applications",
-    title: "Applications",
-    description: "Track your applications.",
+    titleKey: "applications" as const,
+    descKey: "applicationsDesc" as const,
     icon: ShiftsIcon,
     iconClassName: "bg-violet-500/20 text-violet-300",
   },
   {
     href: "/officer/accepted-shifts",
-    title: "Accepted Shifts",
-    description: "View confirmed assignments.",
+    titleKey: "acceptedShifts" as const,
+    descKey: "acceptedShiftsDesc" as const,
     icon: AcceptedIcon,
     iconClassName: "bg-emerald-500/20 text-emerald-300",
   },
   {
     href: "/officer/upcoming-shifts",
-    title: "Upcoming Shifts",
-    description: "See shifts starting soon.",
+    titleKey: "upcomingShifts" as const,
+    descKey: "upcomingShiftsDesc" as const,
     icon: UpcomingIcon,
     iconClassName: "bg-amber-500/20 text-amber-300",
   },
-] as const;
+];
 
 type QuickActionsRowProps = {
   className?: string;
 };
 
 export function QuickActionsRow({ className }: QuickActionsRowProps) {
+  const { t } = useLandingLanguage();
+  const actions = t.dashboard.officer.quickActions;
+
   return (
     <section className={cn("space-y-2.5", className)}>
       <div>
-        <h2 className="text-base font-bold text-fo-text">Quick Actions</h2>
-        <p className="text-xs text-fo-text-muted">Jump to the tools you use most.</p>
+        <h2 className="text-base font-bold text-fo-text">{t.common.quickActions}</h2>
+        <p className="text-xs text-fo-text-muted">{t.common.quickActionsSubtitle}</p>
       </div>
 
       <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
-        {quickActions.map((action) => {
+        {quickActionConfig.map((action) => {
           const Icon = action.icon;
 
           return (
@@ -79,9 +85,9 @@ export function QuickActionsRow({ className }: QuickActionsRowProps) {
                   </span>
                 </div>
                 <div className="space-y-0.5">
-                  <CardTitle className="text-sm">{action.title}</CardTitle>
+                  <CardTitle className="text-sm">{actions[action.titleKey]}</CardTitle>
                   <CardDescription className="text-xs leading-snug">
-                    {action.description}
+                    {actions[action.descKey]}
                   </CardDescription>
                 </div>
               </Card>

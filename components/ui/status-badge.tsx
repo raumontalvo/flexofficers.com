@@ -1,3 +1,10 @@
+"use client";
+
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import {
+  getApplicationStatusLabel,
+  getShiftStatusLabel,
+} from "@/lib/i18n/ui-labels";
 import { cn } from "@/lib/cn";
 
 export type StatusBadgeVariant =
@@ -59,9 +66,11 @@ export function ApplicationStatusBadge({
   status: string;
   className?: string;
 }) {
+  const { t } = useLandingLanguage();
+
   return (
     <StatusBadge variant={applicationStatusVariant(status)} className={className}>
-      {status.replaceAll("_", " ")}
+      {getApplicationStatusLabel(t, status)}
     </StatusBadge>
   );
 }
@@ -86,9 +95,11 @@ export function ShiftStatusBadge({
   status: string;
   className?: string;
 }) {
+  const { t } = useLandingLanguage();
+
   return (
     <StatusBadge variant={shiftStatusVariant(status)} className={className}>
-      {status.replaceAll("_", " ")}
+      {getShiftStatusLabel(t, status)}
     </StatusBadge>
   );
 }

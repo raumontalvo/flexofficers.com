@@ -7,8 +7,17 @@ export type CompanyProfileCompletionFields = {
   state: string | null;
 };
 
+export type CompanyProfileFieldId =
+  | "companyName"
+  | "contactEmail"
+  | "phone"
+  | "address"
+  | "city"
+  | "state";
+
 export type CompanyProfileCompletion = {
   missingItems: string[];
+  missingFieldIds: CompanyProfileFieldId[];
   completionPercent: number;
   isComplete: boolean;
 };
@@ -24,14 +33,42 @@ export function getCompanyProfileCompletion(
   userEmail: string
 ): CompanyProfileCompletion {
   const contactEmail = company?.email?.trim() || userEmail.trim();
-  const missingItems = [
-    !hasValue(company?.companyName) ? "Company name" : null,
-    !contactEmail ? "Contact email" : null,
-    !hasValue(company?.phone) ? "Phone number" : null,
-    !hasValue(company?.address) ? "Address" : null,
-    !hasValue(company?.city) ? "City" : null,
-    !hasValue(company?.state) ? "State" : null,
-  ].filter((item): item is string => Boolean(item));
+  const fieldChecks: Array<{ id: CompanyProfileFieldId; label: string; missing: boolean }> =
+    [
+      {
+        id: "companyName",
+        label: "Company name",
+        missing: !hasValue(company?.companyName),
+      },
+      {
+        id: "contactEmail",
+        label: "Contact email",
+        missing: !contactEmail,
+      },
+      {
+        id: "phone",
+        label: "Phone number",
+        missing: !hasValue(company?.phone),
+      },
+      {
+        id: "address",
+        label: "Address",
+        missing: !hasValue(company?.address),
+      },
+      {
+        id: "city",
+        label: "City",
+        missing: !hasValue(company?.city),
+      },
+      {
+        id: "state",
+        label: "State",
+        missing: !hasValue(company?.state),
+      },
+    ];
+  const missingFields = fieldChecks.filter((field) => field.missing);
+  const missingItems = missingFields.map((field) => field.label);
+  const missingFieldIds = missingFields.map((field) => field.id);
 
   const completionPercent = Math.round(
     ((REQUIRED_FIELD_COUNT - missingItems.length) / REQUIRED_FIELD_COUNT) * 100
@@ -39,6 +76,7 @@ export function getCompanyProfileCompletion(
 
   return {
     missingItems,
+    missingFieldIds,
     completionPercent,
     isComplete: missingItems.length === 0,
   };

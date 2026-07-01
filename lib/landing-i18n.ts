@@ -1,3 +1,5 @@
+import { getAppTranslations, type AppTranslations } from "@/lib/app-i18n";
+
 export const LANDING_LANGUAGE_STORAGE_KEY = "flexofficers-landing-language";
 
 export const LANDING_LANGUAGES = ["en", "es"] as const;
@@ -131,9 +133,11 @@ export type LandingTranslations = {
       description: string;
     };
   };
-};
+} & AppTranslations;
 
-const en: LandingTranslations = {
+type LandingContent = Omit<LandingTranslations, keyof AppTranslations>;
+
+const en: LandingContent = {
   nav: {
     introduction: "Introduction",
     howItWorks: "How It Works",
@@ -314,8 +318,7 @@ const en: LandingTranslations = {
     },
     language: {
       title: "Language Preference",
-      description:
-        "Choose the language used across FlexOfficers. More dashboard translations coming soon.",
+      description: "Choose the language used across FlexOfficers.",
     },
     privacy: {
       title: "Privacy & Safety",
@@ -373,7 +376,7 @@ const en: LandingTranslations = {
   },
 };
 
-const es: LandingTranslations = {
+const es: LandingContent = {
   nav: {
     introduction: "Introducción",
     howItWorks: "Cómo Funciona",
@@ -556,8 +559,7 @@ const es: LandingTranslations = {
     },
     language: {
       title: "Preferencia de Idioma",
-      description:
-        "Elige el idioma usado en FlexOfficers. Más traducciones del panel próximamente.",
+      description: "Elige el idioma usado en FlexOfficers.",
     },
     privacy: {
       title: "Privacidad y Seguridad",
@@ -615,7 +617,7 @@ const es: LandingTranslations = {
   },
 };
 
-const translations: Partial<Record<LandingLanguage, LandingTranslations>> = {
+const translations: Partial<Record<LandingLanguage, LandingContent>> = {
   en,
   es,
 };
@@ -625,5 +627,6 @@ export function isLandingLanguage(value: string | null | undefined): value is La
 }
 
 export function getLandingTranslations(language: LandingLanguage): LandingTranslations {
-  return translations[language] ?? en;
+  const landing = translations[language] ?? en;
+  return { ...landing, ...getAppTranslations(language) };
 }

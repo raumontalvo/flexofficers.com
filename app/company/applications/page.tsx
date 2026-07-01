@@ -1,6 +1,7 @@
 import { UserRole } from "@/app/generated/prisma/enums";
 import { CompanyApplicantsPageContent } from "@/components/company/company-applicants-page-content";
-import { PageShell, SectionHeading } from "@/components/ui";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
+import { PageShell } from "@/components/ui";
 import { serializeCompanyApplicant, companyApplicationListSelect } from "@/lib/company-applications-page";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
@@ -30,10 +31,7 @@ export default async function CompanyApplicationsPage() {
 
   return (
     <PageShell nav="company" maxWidth="full" sidebar>
-      <SectionHeading
-        title="Applicants"
-        subtitle="Manage applicants who have applied to your shifts."
-      />
+      <TranslatedSectionHeading page="companyApplications" />
 
       <div className="min-w-0 overflow-x-hidden">
         <CompanyApplicantsPageContent applications={serializedApplications} />

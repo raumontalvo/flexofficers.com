@@ -128,7 +128,7 @@ export default async function CompanyDashboard({
         {!profileCompletion.isComplete ? (
           <CompanyProfileCompletionBanner
             completionPercent={profileCompletion.completionPercent}
-            missingItems={profileCompletion.missingItems}
+            missingFieldIds={profileCompletion.missingFieldIds}
           />
         ) : null}
 

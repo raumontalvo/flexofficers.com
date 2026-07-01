@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -15,6 +16,9 @@ export default function ApplyButton({
   initialHasApplied = false,
   className,
 }: ApplyButtonProps) {
+  const { t } = useLandingLanguage();
+  const actions = t.shiftDetail.actions;
+  const toast = t.shiftDetail.toast;
   const [hasApplied, setHasApplied] = useState(initialHasApplied);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,9 +39,9 @@ export default function ApplyButton({
 
     if (response.ok) {
       setHasApplied(true);
-      alert("Application submitted!");
+      alert(toast.applySuccess);
     } else {
-      alert(data.error || "Failed to apply to shift");
+      alert(data.error || toast.applyFailed);
     }
   }
 
@@ -49,10 +53,10 @@ export default function ApplyButton({
       className={cn("w-full", className)}
     >
       {hasApplied
-        ? "Applied"
+        ? actions.applied
         : isLoading
-          ? "Applying..."
-          : "Apply to Shift"}
+          ? actions.applying
+          : actions.apply}
     </Button>
   );
 }

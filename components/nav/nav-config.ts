@@ -1,231 +1,29 @@
-import type { ComponentType, SVGProps } from "react";
+export type { NavItem } from "@/lib/nav-items";
+export {
+  getCompanyNavItems,
+  getCompanySidebarItems,
+  getOfficerNavItems,
+  getOfficerSidebarItems,
+} from "@/lib/nav-items";
+
+import { getAppTranslations } from "@/lib/app-i18n";
 import {
-  AcceptedIcon,
-  ApplicantsIcon,
-  BillingIcon,
-  BrowseIcon,
-  DashboardIcon,
-  InvitesIcon,
-  NotificationsIcon,
-  ProfileIcon,
-  SearchIcon,
-  SettingsIcon,
-  ShiftsIcon,
-  StaffIcon,
-  UpcomingIcon,
-} from "./icons";
+  getCompanyNavItems,
+  getCompanySidebarItems,
+  getOfficerNavItems,
+  getOfficerSidebarItems,
+} from "@/lib/nav-items";
 
-export type NavItem = {
-  href: string;
-  label: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
-  match?: (pathname: string) => boolean;
-};
+const defaultAppNav = getAppTranslations("en").appNav;
 
-export const officerNavItems: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Home",
-    icon: DashboardIcon,
-    match: (pathname) => pathname === "/dashboard",
-  },
-  {
-    href: "/shifts",
-    label: "Browse",
-    icon: BrowseIcon,
-    match: (pathname) =>
-      pathname === "/shifts" || pathname.startsWith("/shifts/"),
-  },
-  {
-    href: "/officer/invites",
-    label: "Invites",
-    icon: InvitesIcon,
-    match: (pathname) => pathname.startsWith("/officer/invites"),
-  },
-  {
-    href: "/officer/applications",
-    label: "Applications",
-    icon: ShiftsIcon,
-    match: (pathname) => pathname.startsWith("/officer/applications"),
-  },
-  {
-    href: "/officer/profile",
-    label: "Profile",
-    icon: ProfileIcon,
-    match: (pathname) => pathname.startsWith("/officer/profile"),
-  },
-  {
-    href: "/officer/settings",
-    label: "Settings",
-    icon: SettingsIcon,
-    match: (pathname) => pathname.startsWith("/officer/settings"),
-  },
-];
+/** @deprecated Use getOfficerNavItems(t.appNav.officerMobile) with translations */
+export const officerNavItems = getOfficerNavItems(defaultAppNav.officerMobile);
 
-export const officerSidebarItems: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: DashboardIcon,
-    match: (pathname) => pathname === "/dashboard",
-  },
-  {
-    href: "/shifts",
-    label: "Browse Shifts",
-    icon: BrowseIcon,
-    match: (pathname) =>
-      pathname === "/shifts" || pathname.startsWith("/shifts/"),
-  },
-  {
-    href: "/officer/invites",
-    label: "Company Invites",
-    icon: InvitesIcon,
-    match: (pathname) => pathname.startsWith("/officer/invites"),
-  },
-  {
-    href: "/officer/applications",
-    label: "Applications",
-    icon: ShiftsIcon,
-    match: (pathname) => pathname.startsWith("/officer/applications"),
-  },
-  {
-    href: "/officer/accepted-shifts",
-    label: "Accepted Shifts",
-    icon: AcceptedIcon,
-    match: (pathname) => pathname.startsWith("/officer/accepted-shifts"),
-  },
-  {
-    href: "/officer/upcoming-shifts",
-    label: "Upcoming Shifts",
-    icon: UpcomingIcon,
-    match: (pathname) => pathname.startsWith("/officer/upcoming-shifts"),
-  },
-  {
-    href: "/officer/notifications",
-    label: "Notifications",
-    icon: NotificationsIcon,
-    match: (pathname) => pathname.startsWith("/officer/notifications"),
-  },
-  {
-    href: "/officer/profile",
-    label: "My Profile",
-    icon: ProfileIcon,
-    match: (pathname) => pathname.startsWith("/officer/profile"),
-  },
-  {
-    href: "/officer/settings",
-    label: "Settings",
-    icon: SettingsIcon,
-    match: (pathname) => pathname.startsWith("/officer/settings"),
-  },
-];
+/** @deprecated Use getOfficerSidebarItems(t.appNav.officerSidebar) with translations */
+export const officerSidebarItems = getOfficerSidebarItems(defaultAppNav.officerSidebar);
 
-export const companySidebarItems: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Home",
-    icon: DashboardIcon,
-    match: (pathname) => pathname === "/dashboard",
-  },
-  {
-    href: "/shifts/create",
-    label: "Post a Shift",
-    icon: ShiftsIcon,
-    match: (pathname) => pathname === "/shifts/create",
-  },
-  {
-    href: "/company/shifts",
-    label: "My Shifts",
-    icon: UpcomingIcon,
-    match: (pathname) => pathname.startsWith("/company/shifts"),
-  },
-  {
-    href: "/company/applications",
-    label: "Applicants",
-    icon: ApplicantsIcon,
-    match: (pathname) => pathname.startsWith("/company/applications"),
-  },
-  {
-    href: "/company/notifications",
-    label: "Notifications",
-    icon: NotificationsIcon,
-    match: (pathname) => pathname.startsWith("/company/notifications"),
-  },
-  {
-    href: "/company/officers",
-    label: "Search Officers",
-    icon: SearchIcon,
-    match: (pathname) => pathname.startsWith("/company/officers"),
-  },
-  {
-    href: "/company/staff",
-    label: "Staff",
-    icon: StaffIcon,
-    match: (pathname) => pathname.startsWith("/company/staff"),
-  },
-  {
-    href: "/company/profile",
-    label: "Company Profile",
-    icon: ProfileIcon,
-    match: (pathname) => pathname.startsWith("/company/profile"),
-  },
-  {
-    href: "/company/billing",
-    label: "Billing & Plan",
-    icon: BillingIcon,
-    match: (pathname) => pathname.startsWith("/company/billing"),
-  },
-  {
-    href: "/company/settings",
-    label: "Settings",
-    icon: SettingsIcon,
-    match: (pathname) => pathname.startsWith("/company/settings"),
-  },
-];
+/** @deprecated Use getCompanyNavItems(t.appNav.companyMobile) with translations */
+export const companyNavItems = getCompanyNavItems(defaultAppNav.companyMobile);
 
-export const companyNavItems: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Home",
-    icon: DashboardIcon,
-    match: (pathname) => pathname === "/dashboard",
-  },
-  {
-    href: "/company/shifts",
-    label: "Shifts",
-    icon: ShiftsIcon,
-    match: (pathname) => pathname.startsWith("/company/shifts"),
-  },
-  {
-    href: "/company/applications",
-    label: "Applicants",
-    icon: ApplicantsIcon,
-    match: (pathname) => pathname.startsWith("/company/applications"),
-  },
-  {
-    href: "/company/officers",
-    label: "Officers",
-    icon: SearchIcon,
-    match: (pathname) => pathname.startsWith("/company/officers"),
-  },
-  {
-    href: "/company/staff",
-    label: "Staff",
-    icon: StaffIcon,
-    match: (pathname) => pathname.startsWith("/company/staff"),
-  },
-  {
-    href: "/company/profile",
-    label: "Profile",
-    icon: ProfileIcon,
-    match: (pathname) => pathname.startsWith("/company/profile"),
-  },
-  {
-    href: "/company/settings",
-    label: "Settings",
-    icon: SettingsIcon,
-    match: (pathname) =>
-      pathname.startsWith("/company/settings") ||
-      pathname.startsWith("/company/billing"),
-  },
-];
+/** @deprecated Use getCompanySidebarItems(t.appNav.companySidebar) with translations */
+export const companySidebarItems = getCompanySidebarItems(defaultAppNav.companySidebar);

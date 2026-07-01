@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   BILLING_SUPPORT_HOURS,
@@ -17,6 +19,7 @@ import {
   MobileStack,
 } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   StripeBillingAction,
   StripeBillingLink,
@@ -122,25 +125,23 @@ function FeatureList({
 }
 
 function StripeUnavailableNote() {
+  const { t } = useLandingLanguage();
+
   return (
-    <p className="text-sm text-fo-text-muted">
-      Stripe billing is not configured yet. Subscription management will be
-      available once Stripe is connected.
-    </p>
+    <p className="text-sm text-fo-text-muted">{t.billing.stripe.notConfigured}</p>
   );
 }
 
 function StripeConnectPrompt() {
+  const { t } = useLandingLanguage();
+
   return (
     <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 p-4">
-      <p className="text-sm text-fo-text">
-        No Stripe billing account is connected yet. Start a subscription to set
-        up billing in this environment.
-      </p>
+      <p className="text-sm text-fo-text">{t.billing.stripe.noAccount}</p>
       <div className="mt-4">
         <StripeBillingAction
           action="checkout"
-          label="Start Subscription Now"
+          label={t.billing.actions.startSubscriptionNow}
           fullWidth
         />
       </div>
@@ -149,7 +150,14 @@ function StripeConnectPrompt() {
 }
 
 function BillingHistoryScrollRow() {
-  return <MobileSettingsRow label="Billing History" href="#billing-history" />;
+  const { t } = useLandingLanguage();
+
+  return (
+    <MobileSettingsRow
+      label={t.billing.sections.billingHistory}
+      href="#billing-history"
+    />
+  );
 }
 
 function MobilePrimarySubscriptionCta({
@@ -157,6 +165,8 @@ function MobilePrimarySubscriptionCta({
 }: {
   billing: CompanyBillingPageData;
 }) {
+  const { t } = useLandingLanguage();
+  const b = t.billing;
   const showPrimary =
     billing.isOnTrial ||
     billing.status === "expired" ||
@@ -171,7 +181,7 @@ function MobilePrimarySubscriptionCta({
       {billing.stripeBillingReady ? (
         <StripeBillingAction
           action="checkout"
-          label="Start Subscription"
+          label={b.actions.startSubscription}
           fullWidth
           className="[&_button]:min-h-[52px] [&_button]:text-base"
         />
@@ -179,7 +189,7 @@ function MobilePrimarySubscriptionCta({
         <>
           <StripeBillingAction
             action="checkout"
-            label="Start Subscription"
+            label={b.actions.startSubscription}
             fullWidth
             disabled
             className="[&_button]:min-h-[52px] [&_button]:text-base"
@@ -198,12 +208,14 @@ function CompanyBillingMobileContent({
 }: {
   billing: CompanyBillingPageData;
 }) {
+  const { t } = useLandingLanguage();
+  const b = t.billing;
   const canManageStripeBilling =
     billing.stripeBillingReady && billing.hasValidStripeCustomer;
 
   return (
     <MobileStack>
-      <MobileSectionCard title="Current Plan">
+      <MobileSectionCard title={b.sections.currentPlan}>
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xl font-bold text-fo-text">{billing.planName}</p>
@@ -219,7 +231,7 @@ function CompanyBillingMobileContent({
           </StatusBadge>
         </div>
 
-        <FeatureList features={billing.features} compact title="Included" />
+        <FeatureList features={billing.features} compact title={b.labels.included} />
 
         {billing.trialPending ? (
           <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
@@ -400,6 +412,8 @@ function CompanyBillingMobileContent({
 export function CompanyBillingPageContent({
   billing,
 }: CompanyBillingPageContentProps) {
+  const { t } = useLandingLanguage();
+  const b = t.billing;
   const showRenewal = Boolean(billing.nextRenewal);
   const canManageStripeBilling =
     billing.stripeBillingReady && billing.hasValidStripeCustomer;
@@ -415,14 +429,14 @@ export function CompanyBillingPageContent({
       <div className="hidden space-y-6 md:block">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <div className="space-y-6">
-            <BillingSectionCard title="Current Plan">
+            <BillingSectionCard title={b.sections.currentPlan}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-2xl font-bold text-fo-text">{billing.planName}</p>
                   <p className="mt-2 text-3xl font-bold text-fo-primary-bright">
                     {billing.planPriceDisplay}
                     <span className="ml-1 text-lg font-semibold text-fo-text-muted">
-                      / year
+                      {b.plan.yearly}
                     </span>
                   </p>
                 </div>
@@ -433,20 +447,20 @@ export function CompanyBillingPageContent({
 
               <dl className="mt-5 space-y-0">
                 <BillingDetailRow
-                  label="Billing Cycle"
+                  label={b.labels.billingCycle}
                   value={billing.billingCycle}
                 />
                 <BillingDetailRow
-                  label="Auto Renewal"
-                  value={billing.autoRenewalEnabled ? "Enabled" : "Not enabled"}
+                  label={b.labels.autoRenewal}
+                  value={billing.autoRenewalEnabled ? b.labels.enabled : b.labels.notEnabled}
                 />
                 {showRenewal ? (
                   <BillingDetailRow
-                    label="Next Renewal"
+                    label={b.labels.nextRenewal}
                     value={billing.nextRenewal}
                   />
                 ) : null}
-                <BillingDetailRow label="Amount" value={billing.planAnnualAmount} />
+                <BillingDetailRow label={b.labels.amount} value={billing.planAnnualAmount} />
               </dl>
 
               <FeatureList features={billing.features} />
@@ -485,14 +499,14 @@ export function CompanyBillingPageContent({
                     {billing.stripeBillingReady ? (
                       <StripeBillingAction
                         action="checkout"
-                        label="Start Subscription Now"
+                        label={b.actions.startSubscriptionNow}
                         fullWidth
                       />
                     ) : (
                       <>
                         <StripeBillingAction
                           action="checkout"
-                          label="Start Subscription Now"
+                          label={b.actions.startSubscriptionNow}
                           fullWidth
                           disabled
                         />
@@ -508,7 +522,7 @@ export function CompanyBillingPageContent({
                   <>
                     <StripeBillingAction
                       action="portal"
-                      label="Manage Subscription"
+                      label={b.actions.manageSubscription}
                       fullWidth
                     />
                     <StripeBillingAction
@@ -522,7 +536,7 @@ export function CompanyBillingPageContent({
                   <>
                     <StripeBillingAction
                       action="portal"
-                      label="Manage Subscription"
+                      label={b.actions.manageSubscription}
                       fullWidth
                       disabled
                     />
@@ -617,7 +631,7 @@ export function CompanyBillingPageContent({
               <dl>
                 <BillingDetailRow label="Plan" value={billing.planName} />
                 <BillingDetailRow
-                  label="Billing Cycle"
+                  label={b.labels.billingCycle}
                   value={billing.billingCycle}
                 />
                 <BillingDetailRow label="Status" value={billing.statusLabel} />

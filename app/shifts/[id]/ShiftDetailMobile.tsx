@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { ShiftDetailActions } from "@/components/shifts/shift-detail-actions";
 import { ShiftDetailBackLink } from "@/components/shifts/shift-detail-back-link";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ShiftStatusBadge, StatusBadge } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { ArmedStatus } from "@/app/generated/prisma/enums";
@@ -16,6 +19,10 @@ import {
   parseLicenseRequirementsFromShift,
 } from "@/lib/shift-create-form";
 import type { ShiftStatus } from "@/app/generated/prisma/enums";
+import {
+  formatShiftEstimatedEarnings,
+  formatShiftPositionsOpen,
+} from "@/lib/i18n/ui-labels";
 
 type ShiftDetailMobileProps = {
   shift: {
@@ -160,6 +167,8 @@ export function ShiftDetailMobile({
   shiftAcceptingApplications,
   isAcceptedOfficer,
 }: ShiftDetailMobileProps) {
+  const { t } = useLandingLanguage();
+  const detail = t.shiftDetail;
   const schedule = formatShiftScheduleParts(shift.startTime, shift.endTime);
   const licenseRequirements = parseLicenseRequirementsFromShift({
     requirements: shift.requirements,
@@ -200,7 +209,7 @@ export function ShiftDetailMobile({
         <div className="flex flex-wrap items-center gap-2">
           <ShiftStatusBadge status={shift.status} />
           <StatusBadge variant="info" className="uppercase tracking-wide">
-            {openPositions} of {shift.positionsNeeded} open
+            {formatShiftPositionsOpen(t, openPositions, shift.positionsNeeded, "open")}
           </StatusBadge>
         </div>
 
@@ -228,7 +237,9 @@ export function ShiftDetailMobile({
           </p>
 
           {estimatedPay ? (
-            <p className="text-sm text-fo-text-muted">Estimated earnings {estimatedPay}</p>
+            <p className="text-sm text-fo-text-muted">
+              {formatShiftEstimatedEarnings(t, estimatedPay)}
+            </p>
           ) : null}
 
           <div className="space-y-1.5 border-t border-white/[0.06] pt-2.5 text-sm text-fo-text-muted">
@@ -259,55 +270,55 @@ export function ShiftDetailMobile({
 
       {showShiftInformation ? (
         <article className="fo-glass-card space-y-3 rounded-2xl border border-white/10 p-4">
-          <h2 className="text-sm font-semibold text-fo-text">Shift Information</h2>
+          <h2 className="text-sm font-semibold text-fo-text">{detail.sections.shiftInformation}</h2>
 
           {workTypeLabel ? (
-            <InfoRow icon="💼" label="Work Type">
+            <InfoRow icon="💼" label={detail.fields.workType}>
               <p>{workTypeLabel}</p>
             </InfoRow>
           ) : null}
 
           {shiftTimeLabel ? (
-            <InfoRow icon={shiftTimeIcon(shiftTimeLabel)} label="Shift Time">
+            <InfoRow icon={shiftTimeIcon(shiftTimeLabel)} label={detail.fields.shiftTime}>
               <p>{shiftTimeLabel}</p>
             </InfoRow>
           ) : null}
 
           {armedLabel ? (
-            <InfoRow icon="🛡" label="Armed Requirement">
+            <InfoRow icon="🛡" label={detail.fields.armedRequirement}>
               <p>{armedLabel}</p>
             </InfoRow>
           ) : null}
 
-          <InfoRow icon="👥" label="Open Positions">
+          <InfoRow icon="👥" label={detail.fields.openPositions}>
             <p>
-              {openPositions} of {shift.positionsNeeded} available
+              {formatShiftPositionsOpen(t, openPositions, shift.positionsNeeded, "available")}
             </p>
           </InfoRow>
         </article>
       ) : null}
 
       <article className="fo-glass-card rounded-2xl border border-white/10 p-4">
-        <h2 className="text-sm font-semibold text-fo-text">About this Shift</h2>
+        <h2 className="text-sm font-semibold text-fo-text">{detail.sections.about}</h2>
         <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-fo-text-muted">
-          {shift.description?.trim() || "No description provided."}
+          {shift.description?.trim() || detail.sections.noDescription}
         </p>
       </article>
 
       {showRequirementsCard ? (
         <article className="fo-glass-card space-y-3 rounded-2xl border border-white/10 p-4">
-          <h2 className="text-sm font-semibold text-fo-text">Requirements</h2>
+          <h2 className="text-sm font-semibold text-fo-text">{detail.sections.requirements}</h2>
           <RequirementChipGroup
-            title="License Requirements"
+            title={detail.requirements.license}
             chips={licenseRequirements}
           />
           <RequirementChipGroup
-            title="Certification Requirements"
+            title={detail.requirements.certification}
             chips={certificationRequirements}
           />
-          <RequirementChipGroup title="Other Requirements" chips={otherChips} />
+          <RequirementChipGroup title={detail.requirements.other} chips={otherChips} />
           <RequirementChipGroup
-            title="Additional Requirements"
+            title={detail.requirements.additional}
             chips={fallbackRequirementChips}
           />
         </article>
@@ -315,7 +326,9 @@ export function ShiftDetailMobile({
 
       {isAcceptedOfficer && shift.reportingInstructions?.trim() ? (
         <article className="fo-glass-card rounded-2xl border border-white/10 p-4">
-          <h2 className="text-sm font-semibold text-fo-text">Reporting Instructions</h2>
+          <h2 className="text-sm font-semibold text-fo-text">
+            {detail.sections.reportingInstructions}
+          </h2>
           <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-fo-text-muted">
             {shift.reportingInstructions}
           </p>
@@ -323,7 +336,7 @@ export function ShiftDetailMobile({
       ) : null}
 
       <article className="fo-glass-card space-y-2.5 rounded-2xl border border-white/10 p-4">
-        <h2 className="text-sm font-semibold text-fo-text">Company</h2>
+        <h2 className="text-sm font-semibold text-fo-text">{detail.sections.company}</h2>
         <p className="text-base font-semibold text-fo-text">{displayCompanyName}</p>
         {company.description ? (
           <p className="text-sm leading-relaxed text-fo-text-muted">
@@ -331,7 +344,7 @@ export function ShiftDetailMobile({
           </p>
         ) : null}
         <p className="text-xs leading-relaxed text-fo-text-muted">
-          Company contact information is shared after your application is accepted.
+          {detail.company.contactLocked}
         </p>
         {hasPublicProfile ? (
           <Link
@@ -341,7 +354,7 @@ export function ShiftDetailMobile({
               "text-sm font-semibold text-fo-text transition hover:bg-white/[0.04]"
             )}
           >
-            View Company Profile
+            {detail.actions.viewCompanyProfile}
           </Link>
         ) : null}
       </article>

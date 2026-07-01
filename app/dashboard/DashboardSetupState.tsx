@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   buttonClassName,
@@ -7,6 +9,8 @@ import {
   PageShell,
   SectionHeading,
 } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import DashboardSignOutButton from "./SignOutButton";
 
 type DashboardSetupStateProps = {
@@ -14,28 +18,19 @@ type DashboardSetupStateProps = {
   variant: "onboarding" | "officer-profile" | "company-profile";
 };
 
-const copy = {
+const variantConfig = {
   onboarding: {
-    title: "Complete onboarding",
-    description:
-      "Choose whether you are joining as an officer or a company before using the dashboard.",
-    actionLabel: "Go to Onboarding",
+    copyKey: "onboarding" as const,
     actionHref: "/onboarding",
     nav: "none" as const,
   },
   "officer-profile": {
-    title: "Set up your officer profile",
-    description:
-      "Your account is registered as an officer. Complete your profile to browse shifts and apply.",
-    actionLabel: "Complete Officer Profile",
+    copyKey: "officerProfile" as const,
     actionHref: "/officer/profile",
     nav: "officer" as const,
   },
   "company-profile": {
-    title: "Set up your company profile",
-    description:
-      "Your account is registered as a company. Add your company details to post shifts and review applicants.",
-    actionLabel: "Complete Company Profile",
+    copyKey: "companyProfile" as const,
     actionHref: "/company/profile",
     nav: "company" as const,
   },
@@ -45,19 +40,24 @@ export function DashboardSetupState({
   firstName,
   variant,
 }: DashboardSetupStateProps) {
-  const content = copy[variant];
+  const { t } = useLandingLanguage();
+  const config = variantConfig[variant];
+  const content = t.dashboard.setup[config.copyKey];
   const welcomeName = firstName?.trim();
+  const title = welcomeName
+    ? interpolate(t.common.welcomeName, { name: welcomeName })
+    : t.common.welcome;
 
   return (
     <PageShell
-      nav={content.nav}
+      nav={config.nav}
       maxWidth="2xl"
-      sidebar={content.nav !== "none"}
+      sidebar={config.nav !== "none"}
     >
       <div className="flex items-start justify-between gap-4">
         <SectionHeading
-          title={`Welcome${welcomeName ? `, ${welcomeName}` : ""}`}
-          subtitle="Finish setup to start using FlexOfficers."
+          title={title}
+          subtitle={t.common.finishSetup}
           className="flex-1"
         />
         <DashboardSignOutButton />
@@ -72,14 +72,14 @@ export function DashboardSetupState({
           {content.description}
         </CardDescription>
         <Link
-          href={content.actionHref}
+          href={config.actionHref}
           className={buttonClassName({
             variant: "secondary",
             size: "md",
             className: "mt-5 border-yellow-500/30 text-fo-pending hover:bg-yellow-500/10",
           })}
         >
-          {content.actionLabel}
+          {content.action}
         </Link>
       </Card>
     </PageShell>

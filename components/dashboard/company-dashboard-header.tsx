@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { NotificationsIcon } from "@/components/nav/icons";
 import { MobilePrimaryButton, buttonClassName } from "@/components/ui";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
+import type { LandingTranslations } from "@/lib/landing-i18n";
 import { cn } from "@/lib/cn";
-import { getTimeOfDayGreeting } from "@/lib/time-of-day-greeting";
 
 type CompanyDashboardHeaderProps = {
   displayName: string;
@@ -13,6 +17,20 @@ type CompanyDashboardHeaderProps = {
   className?: string;
 };
 
+function getTimeOfDayGreeting(t: LandingTranslations) {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return t.common.goodMorning;
+  }
+
+  if (hour < 17) {
+    return t.common.goodAfternoon;
+  }
+
+  return t.common.goodEvening;
+}
+
 export function CompanyDashboardHeader({
   displayName,
   logoUrl,
@@ -20,8 +38,11 @@ export function CompanyDashboardHeader({
   unreadNotificationCount = 0,
   className,
 }: CompanyDashboardHeaderProps) {
+  const { t } = useLandingLanguage();
+  const nav = t.appNav;
+  const copy = t.dashboard.company;
   const postShiftHref = canPostShifts ? "/shifts/create" : "/company/billing";
-  const greeting = getTimeOfDayGreeting();
+  const greeting = getTimeOfDayGreeting(t);
 
   return (
     <>
@@ -38,7 +59,7 @@ export function CompanyDashboardHeader({
               {displayName}
             </h1>
             <p className="mt-1.5 text-xs leading-relaxed text-fo-text-muted">
-              Here&apos;s what&apos;s happening with your security operations today.
+              {copy.headerSubtitle}
             </p>
           </div>
 
@@ -55,7 +76,7 @@ export function CompanyDashboardHeader({
         </div>
 
         <MobilePrimaryButton href={postShiftHref} className="mt-4">
-          Post a New Shift
+          {t.common.postNewShift}
         </MobilePrimaryButton>
       </header>
 
@@ -67,19 +88,17 @@ export function CompanyDashboardHeader({
       >
         <div className="min-w-0">
           <h1 className="text-xl font-bold tracking-tight text-fo-text sm:text-2xl">
-            Welcome back, {displayName}!{" "}
+            {interpolate(t.common.welcomeBackName, { name: displayName })}{" "}
             <span aria-hidden="true">👋</span>
           </h1>
-          <p className="mt-1 text-sm text-fo-text-muted">
-            Here&apos;s what&apos;s happening with your security operations today.
-          </p>
+          <p className="mt-1 text-sm text-fo-text-muted">{copy.headerSubtitle}</p>
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
           <Link
             href="/company/notifications"
             className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-[#070f1c]/60 text-fo-text-muted transition hover:border-fo-primary-bright/35 hover:text-fo-primary-hover"
-            aria-label="Notifications"
+            aria-label={nav.aria.notifications}
           >
             <NotificationsIcon className="h-4 w-4" />
             {unreadNotificationCount > 0 ? (
@@ -96,7 +115,7 @@ export function CompanyDashboardHeader({
               className: "min-h-10 whitespace-nowrap px-4",
             })}
           >
-            Post a New Shift
+            {t.common.postNewShift}
           </Link>
         </div>
       </header>

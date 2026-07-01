@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { CompanyBillingPageContent } from "@/components/company/company-billing-page-content";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
 import {
   buttonClassName,
   Card,
   CardDescription,
   CardTitle,
   PageShell,
-  SectionHeading,
 } from "@/components/ui";
 import { serializeCompanyBillingPageData } from "@/lib/company-billing-page-data";
 import { resolveCompanyStripeCustomer } from "@/lib/company-billing-customer";
@@ -39,10 +39,7 @@ export default async function CompanyBillingPage() {
     if (!company) {
       return (
         <PageShell nav="company" maxWidth="full" sidebar>
-          <SectionHeading
-            title="Billing & Subscription"
-            subtitle="Manage your FlexOfficers subscription and payment method."
-          />
+          <TranslatedSectionHeading page="companyBilling" />
 
           <Card
             variant="muted"
@@ -91,10 +88,7 @@ export default async function CompanyBillingPage() {
 
     return (
       <PageShell nav="company" maxWidth="full" sidebar>
-        <SectionHeading
-          title="Billing & Subscription"
-          subtitle="Manage your FlexOfficers subscription and payment method."
-        />
+        <TranslatedSectionHeading page="companyBilling" />
 
         <div className="mt-4 md:mt-8">
           <CompanyBillingPageContent billing={billing} />
@@ -106,10 +100,7 @@ export default async function CompanyBillingPage() {
 
     return (
       <PageShell nav="company" maxWidth="full" sidebar>
-        <SectionHeading
-          title="Billing & Subscription"
-          subtitle="Manage your FlexOfficers subscription and payment method."
-        />
+        <TranslatedSectionHeading page="companyBilling" />
 
         <Card
           variant="muted"

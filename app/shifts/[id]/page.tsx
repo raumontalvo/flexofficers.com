@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import {
@@ -7,14 +6,8 @@ import {
   ShiftVisibility,
   UserRole,
 } from "@/app/generated/prisma/enums";
-import { ShiftDetailActions } from "@/components/shifts/shift-detail-actions";
-import { ShiftDetailBackLink } from "@/components/shifts/shift-detail-back-link";
-import {
-  Card,
-  PageShell,
-  ShiftStatusBadge,
-  StatusBadge,
-} from "@/components/ui";
+import { ShiftDetailDesktop } from "@/components/shifts/shift-detail-desktop";
+import { PageShell } from "@/components/ui";
 import {
   formatDisplayPhone,
   companyHasPublicProfile,
@@ -23,9 +16,7 @@ import {
 } from "@/lib/company-profile-page-data";
 import {
   formatEstimatedShiftPay,
-  formatHourlyRate,
   formatShiftCityState,
-  formatShiftDateTime,
 } from "@/lib/format-shift";
 import { prisma } from "@/lib/prisma";
 import {
@@ -246,221 +237,41 @@ export default async function ShiftDetailPage({
         isAcceptedOfficer={isAcceptedOfficer}
       />
 
-      <div className="hidden md:block">
-      <ShiftDetailBackLink />
-
-      <div className="mt-6 space-y-4">
-        <Card variant="elevated" className="space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <ShiftStatusBadge status={shift.status} />
-            <StatusBadge variant="info">
-              {openPositions} of {shift.positionsNeeded} open
-            </StatusBadge>
-          </div>
-
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fo-primary-hover">
-              Shift details
-            </p>
-
-            <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
-              {shift.title}
-            </h1>
-
-            <p className="text-4xl font-bold text-fo-primary-bright sm:text-5xl">
-              {formatHourlyRate(shift.hourlyRate)}
-              <span className="ml-1 text-xl font-semibold text-fo-text-muted">
-                /hr
-              </span>
-            </p>
-
-            <p className="text-sm font-medium text-fo-text-muted">
-              Estimated pay: {estimatedPay}
-            </p>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                Location
-              </p>
-              <p className="mt-2 text-base font-medium text-fo-text">
-                {shift.location}
-              </p>
-              {locationLabel ? (
-                <p className="mt-1 text-sm text-fo-text-muted">{locationLabel}</p>
-              ) : null}
-            </div>
-
-            <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                Positions
-              </p>
-              <p className="mt-2 text-base font-medium text-fo-text">
-                {openPositions} of {shift.positionsNeeded} still open
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                Start
-              </p>
-              <p className="mt-2 text-base font-medium text-fo-text">
-                {formatShiftDateTime(shift.startTime)}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                End
-              </p>
-              <p className="mt-2 text-base font-medium text-fo-text">
-                {formatShiftDateTime(shift.endTime)}
-              </p>
-            </div>
-
-            {workTypeLabel ? (
-              <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                  Work type
-                </p>
-                <p className="mt-2 text-base font-medium text-fo-text">
-                  {workTypeLabel}
-                </p>
-              </div>
-            ) : null}
-
-            {shiftTimeLabel ? (
-              <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                  Shift time
-                </p>
-                <p className="mt-2 text-base font-medium text-fo-text">
-                  {shiftTimeLabel}
-                </p>
-              </div>
-            ) : null}
-
-            {armedLabel ? (
-              <div className="rounded-2xl border border-fo-border bg-fo-bg-elevated p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-                  Armed requirement
-                </p>
-                <p className="mt-2 text-base font-medium text-fo-text">
-                  {armedLabel}
-                </p>
-              </div>
-            ) : null}
-          </div>
-        </Card>
-
-        <Card className="space-y-3">
-          <h2 className="text-lg font-semibold text-fo-text">Description</h2>
-          <p className="whitespace-pre-wrap text-base leading-relaxed text-fo-text-muted">
-            {shift.description?.trim() || "No description provided."}
-          </p>
-        </Card>
-
-        {requirementChips.length > 0 ? (
-          <Card variant="muted" className="space-y-3">
-            <h2 className="text-lg font-semibold text-fo-text">Requirements</h2>
-            <ul className="flex flex-wrap gap-2">
-              {requirementChips.map((chip) => (
-                <li
-                  key={chip}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-fo-text"
-                >
-                  {chip}
-                </li>
-              ))}
-            </ul>
-          </Card>
-        ) : null}
-
-        {shift.specialRequirements?.trim() &&
-        requirementChips.length === 0 ? (
-          <Card variant="muted" className="space-y-3">
-            <h2 className="text-lg font-semibold text-fo-text">
-              Special requirements
-            </h2>
-            <p className="whitespace-pre-wrap text-base leading-relaxed text-fo-text">
-              {shift.specialRequirements}
-            </p>
-          </Card>
-        ) : null}
-
-        {isAcceptedOfficer && shift.reportingInstructions?.trim() ? (
-          <Card className="space-y-3">
-            <h2 className="text-lg font-semibold text-fo-text">
-              Reporting instructions
-            </h2>
-            <p className="whitespace-pre-wrap text-base leading-relaxed text-fo-text-muted">
-              {shift.reportingInstructions}
-            </p>
-          </Card>
-        ) : null}
-
-        <Card className="space-y-3">
-          <h2 className="text-lg font-semibold text-fo-text">Company</h2>
-          {hasPublicProfile ? (
-            <Link
-              href={`/companies/${shift.companyId}`}
-              className="text-base font-medium text-fo-primary-bright hover:text-fo-primary-hover"
-            >
-              {displayCompanyName}
-            </Link>
-          ) : (
-            <p className="text-base font-medium text-fo-text">{displayCompanyName}</p>
-          )}
-          {isAcceptedOfficer ? (
-            <dl className="space-y-2 text-sm text-fo-text-muted">
-              {companyContactName ? (
-                <div>
-                  <dt className="font-semibold text-fo-text">Contact</dt>
-                  <dd>{companyContactName}</dd>
-                </div>
-              ) : null}
-              {companyContactPhone ? (
-                <div>
-                  <dt className="font-semibold text-fo-text">Phone</dt>
-                  <dd>{companyContactPhone}</dd>
-                </div>
-              ) : null}
-              {companyContactEmail ? (
-                <div>
-                  <dt className="font-semibold text-fo-text">Email</dt>
-                  <dd>
-                    <a
-                      href={`mailto:${companyContactEmail}`}
-                      className="text-fo-primary-bright hover:text-fo-primary-hover"
-                    >
-                      {companyContactEmail}
-                    </a>
-                  </dd>
-                </div>
-              ) : null}
-            </dl>
-          ) : (
-            <p className="text-sm leading-relaxed text-fo-text-muted">
-              Company contact details are shared after your application is
-              accepted.
-            </p>
-          )}
-        </Card>
-
-        <ShiftDetailActions
-          shiftId={shift.id}
-          companyId={shift.companyId}
-          hasPublicProfile={hasPublicProfile}
-          canApply={canApply}
-          profileIncomplete={profileIncomplete}
-          officer={user?.officer ?? null}
-          applicationStatus={applicationStatus}
-          isSignedIn={Boolean(clerkUser)}
-          shiftAcceptingApplications={shiftAcceptingApplications}
-        />
-      </div>
-      </div>
+      <ShiftDetailDesktop
+        shift={{
+          id: shift.id,
+          companyId: shift.companyId,
+          title: shift.title,
+          description: shift.description,
+          location: shift.location,
+          hourlyRate: shift.hourlyRate,
+          startTime: shift.startTime,
+          endTime: shift.endTime,
+          positionsNeeded: shift.positionsNeeded,
+          status: shift.status,
+          specialRequirements: shift.specialRequirements,
+          reportingInstructions: shift.reportingInstructions,
+        }}
+        displayCompanyName={displayCompanyName}
+        hasPublicProfile={hasPublicProfile}
+        openPositions={openPositions}
+        locationLabel={locationLabel}
+        estimatedPay={estimatedPay}
+        workTypeLabel={workTypeLabel}
+        shiftTimeLabel={shiftTimeLabel}
+        armedLabel={armedLabel}
+        requirementChips={requirementChips}
+        isAcceptedOfficer={isAcceptedOfficer}
+        companyContactName={companyContactName}
+        companyContactPhone={companyContactPhone}
+        companyContactEmail={companyContactEmail}
+        canApply={canApply}
+        profileIncomplete={profileIncomplete}
+        officer={user?.officer ?? null}
+        applicationStatus={applicationStatus}
+        isSignedIn={Boolean(clerkUser)}
+        shiftAcceptingApplications={shiftAcceptingApplications}
+      />
     </PageShell>
   );
 }

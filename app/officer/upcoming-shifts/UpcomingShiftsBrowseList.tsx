@@ -2,8 +2,14 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { TranslatedPageHeader } from "@/components/i18n/translated-page-header";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, Card, StatCard, MobileStatGrid } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import {
+  getUpcomingShiftFilterOptions,
+  getUpcomingShiftSortOptions,
+} from "@/lib/i18n/ui-labels";
 import type { OfficerAcceptedShiftData } from "@/lib/officer-accepted-shift-data";
 import {
   buildUpcomingShiftSummary,
@@ -23,17 +29,6 @@ const desktopFieldClassName =
 const mobileSortClassName =
   "max-w-[5.5rem] cursor-pointer border-0 bg-transparent py-0.5 text-[11px] font-semibold text-fo-text focus:outline-none";
 
-const filterOptions: { value: UpcomingShiftFilter; label: string }[] = [
-  { value: "", label: "All Upcoming" },
-  { value: "next7", label: "Next 7 Days" },
-  { value: "thisMonth", label: "This Month" },
-];
-
-const sortOptions: { value: UpcomingShiftSort; label: string }[] = [
-  { value: "soonest", label: "Soonest" },
-  { value: "latest", label: "Latest" },
-];
-
 const compactStatCardClassName =
   "!gap-2 !p-3 [&>div>p:nth-child(2)]:text-lg [&>div>p:nth-child(2)]:sm:text-lg";
 
@@ -44,6 +39,10 @@ type UpcomingShiftsBrowseListProps = {
 export function UpcomingShiftsBrowseList({
   applications,
 }: UpcomingShiftsBrowseListProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.browse.upcomingShifts;
+  const filterOptions = getUpcomingShiftFilterOptions(t);
+  const sortOptions = getUpcomingShiftSortOptions(t);
   const [shiftFilter, setShiftFilter] = useState<UpcomingShiftFilter>("");
   const [sort, setSort] = useState<UpcomingShiftSort>("soonest");
 
@@ -64,36 +63,34 @@ export function UpcomingShiftsBrowseList({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1 lg:space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight text-fo-text lg:text-4xl">
-          Upcoming Shifts
-        </h1>
-        <p className="max-w-2xl text-sm text-fo-text-muted lg:text-lg">
-          Accepted assignments with future start dates.
-        </p>
-      </div>
+      <TranslatedPageHeader
+        page="officerUpcomingShifts"
+        className="lg:space-y-2"
+        titleClassName="text-2xl lg:text-4xl"
+        subtitleClassName="text-sm lg:text-lg"
+      />
 
       <MobileStatGrid className="gap-2 lg:hidden">
         <StatCard
-          label="Upcoming Shifts"
+          label={copy.stats.upcoming}
           value={summary.count}
           tone="blue"
           className={compactStatCardClassName}
         />
         <StatCard
-          label="Expected Earnings"
+          label={copy.stats.expectedEarnings}
           value={formatExpectedEarnings(summary.expectedEarnings)}
           tone="green"
           className={compactStatCardClassName}
         />
         <StatCard
-          label="Scheduled Hours"
+          label={copy.stats.scheduledHours}
           value={formatScheduledHours(summary.scheduledHours)}
           tone="purple"
           className={compactStatCardClassName}
         />
         <StatCard
-          label="Next Shift"
+          label={copy.stats.nextShift}
           value={summary.nextShiftDate ?? "—"}
           hint={summary.nextShiftStartsIn ?? undefined}
           tone="amber"
@@ -107,17 +104,17 @@ export function UpcomingShiftsBrowseList({
       <MobileStatGrid className="hidden lg:grid">
         <StatCard label="Upcoming Shifts" value={summary.count} tone="blue" />
         <StatCard
-          label="Expected Earnings"
+          label={copy.stats.expectedEarnings}
           value={formatExpectedEarnings(summary.expectedEarnings)}
           tone="green"
         />
         <StatCard
-          label="Scheduled Hours"
+          label={copy.stats.scheduledHours}
           value={formatScheduledHours(summary.scheduledHours)}
           tone="purple"
         />
         <StatCard
-          label="Next Shift"
+          label={copy.stats.nextShift}
           value={summary.nextShiftDate ?? "—"}
           hint={summary.nextShiftStartsIn ?? undefined}
           tone="amber"
@@ -147,13 +144,13 @@ export function UpcomingShiftsBrowseList({
 
         <label className="flex shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5">
           <span className="whitespace-nowrap text-[10px] font-medium text-fo-text-muted">
-            Sort:
+            {copy.sort.label}
           </span>
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as UpcomingShiftSort)}
             className={mobileSortClassName}
-            aria-label="Sort upcoming shifts"
+            aria-label={copy.sort.aria}
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -189,7 +186,7 @@ export function UpcomingShiftsBrowseList({
 
         <div className="space-y-1">
           <label htmlFor="upcoming-shift-sort" className="text-xs text-fo-text-muted">
-            Sort
+            {copy.sort.label}
           </label>
           <select
             id="upcoming-shift-sort"
@@ -211,15 +208,14 @@ export function UpcomingShiftsBrowseList({
       {upcomingApplications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-10 text-center">
           <p className="text-lg font-semibold text-fo-text">
-            No upcoming shifts yet.
+            {copy.empty.none}
           </p>
           <p className="mt-2 text-sm text-fo-text-muted">
-            New confirmed shifts will appear here when companies accept your
-            applications.
+            {copy.empty.noneDescription}
           </p>
           <Link href="/shifts" className="mt-6 inline-block">
             <Button type="button" size="md">
-              Browse Open Shifts
+              {copy.actions.browseOpenShifts}
             </Button>
           </Link>
         </Card>
@@ -228,7 +224,7 @@ export function UpcomingShiftsBrowseList({
       {upcomingApplications.length > 0 && filteredApplications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-8 text-center">
           <p className="text-base font-medium text-fo-text">
-            No shifts match your filters.
+            {copy.empty.noMatch}
           </p>
         </Card>
       ) : null}

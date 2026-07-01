@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { NavItem } from "@/components/nav/nav-config";
-import { companyNavItems, officerNavItems } from "@/components/nav/nav-config";
+import type { NavItem } from "@/lib/nav-items";
+import { getCompanyNavItems, getOfficerNavItems } from "@/lib/nav-items";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
 export type MobileBottomNavRole = "officer" | "company";
@@ -28,12 +29,19 @@ export function MobileBottomNav({
   className,
 }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const { t } = useLandingLanguage();
+  const nav = t.appNav;
   const navItems =
-    items ?? (role === "officer" ? officerNavItems : companyNavItems);
+    items ??
+    (role === "officer"
+      ? getOfficerNavItems(nav.officerMobile)
+      : getCompanyNavItems(nav.companyMobile));
 
   return (
     <nav
-      aria-label={role === "officer" ? "Officer navigation" : "Company navigation"}
+      aria-label={
+        role === "officer" ? nav.aria.officerNav : nav.aria.companyNav
+      }
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 border-t border-fo-border bg-fo-bg-elevated/95 backdrop-blur-md md:hidden",
         className

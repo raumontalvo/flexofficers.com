@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
+import { TranslatedPageHeader } from "@/components/i18n/translated-page-header";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, Card, buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
-  ACCEPTED_SHIFT_TABS,
-  formatAcceptedShiftsPaginationRange,
+  formatAcceptedShiftsPagination,
+  getAcceptedShiftTabs,
+} from "@/lib/i18n/ui-labels";
+import {
   getAcceptedShiftTab,
   type AcceptedShiftTab,
   type OfficerAcceptedShiftData,
@@ -15,19 +20,6 @@ import { AcceptedShiftCard } from "./AcceptedShiftCard";
 import { getHiddenAcceptedShiftIds } from "./RemoveFromAcceptedListButton";
 
 const PAGE_SIZE = 10;
-
-function buildPageNumbers(currentPage: number, totalPages: number) {
-  if (totalPages <= 5) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  }
-
-  const pages = new Set<number>([1, totalPages, currentPage]);
-
-  if (currentPage > 1) pages.add(currentPage - 1);
-  if (currentPage < totalPages) pages.add(currentPage + 1);
-
-  return [...pages].sort((a, b) => a - b);
-}
 
 function countByTab(
   applications: OfficerAcceptedShiftData[],
@@ -40,22 +32,6 @@ function countByTab(
   ).length;
 }
 
-const emptyStateCopy: Record<
-  AcceptedShiftTab,
-  { title: string; description?: string; showBrowse?: boolean }
-> = {
-  upcoming: {
-    title: "You do not have any accepted shifts yet.",
-    showBrowse: true,
-  },
-  completed: {
-    title: "You have not completed any shifts yet.",
-  },
-  cancelled: {
-    title: "You have no cancelled assignments.",
-  },
-};
-
 type AcceptedShiftsBrowseListProps = {
   applications: OfficerAcceptedShiftData[];
 };
@@ -63,6 +39,7 @@ type AcceptedShiftsBrowseListProps = {
 export function AcceptedShiftsBrowseList({
   applications,
 }: AcceptedShiftsBrowseListProps) {
+  const { t } = useLandingLanguage();
   const listTopRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<AcceptedShiftTab>("upcoming");
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,13 +75,19 @@ export function AcceptedShiftsBrowseList({
   const rangeStart =
     filteredApplications.length === 0 ? 0 : pageStart + 1;
   const rangeEnd = Math.min(pageStart + PAGE_SIZE, filteredApplications.length);
-  const pageNumbers = buildPageNumbers(safePage, totalPages);
-  const paginationLabel = formatAcceptedShiftsPaginationRange(
+  const paginationLabel = formatAcceptedShiftsPagination(
+    t,
     rangeStart,
     rangeEnd,
     filteredApplications.length
   );
-  const emptyState = emptyStateCopy[activeTab];
+  const acceptedTabs = getAcceptedShiftTabs(t);
+  const copy = t.browse.acceptedShifts;
+  const emptyTitles: Record<AcceptedShiftTab, string> = {
+    upcoming: copy.empty.upcoming,
+    completed: copy.empty.completed,
+    cancelled: copy.empty.cancelled,
+  };
 
   function scrollToListTop() {
     listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -129,26 +112,23 @@ export function AcceptedShiftsBrowseList({
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
-            Accepted Shifts
-          </h1>
-          <p className="max-w-2xl text-base text-fo-text-muted sm:text-lg">
-            Company contact details unlock after acceptance.
-          </p>
-        </div>
+        <TranslatedPageHeader
+          page="officerAcceptedShifts"
+          titleClassName="text-3xl sm:text-4xl"
+          subtitleClassName="text-base sm:text-lg"
+        />
 
         <Link
           href="/officer/applications"
           className={buttonClassName({ variant: "secondary", size: "md" })}
         >
-          My Shifts
+          {t.browse.applications.actions.myShifts}
         </Link>
       </div>
 
       <div className="border-b border-white/[0.06]">
         <div className="flex gap-1 overflow-x-auto pb-px">
-          {ACCEPTED_SHIFT_TABS.map((tab) => {
+          {acceptedTabs.map((tab) => {
             const isActive = activeTab === tab.value;
             const count = countByTab(visibleApplications, tab.value);
 
@@ -174,16 +154,11 @@ export function AcceptedShiftsBrowseList({
       <div ref={listTopRef} className="scroll-mt-4 space-y-2">
         {filteredApplications.length === 0 ? (
           <Card variant="muted" className="py-10 text-center">
-            <p className="text-lg font-semibold text-fo-text">{emptyState.title}</p>
-            {emptyState.description ? (
-              <p className="mx-auto mt-2 max-w-md text-sm text-fo-text-muted">
-                {emptyState.description}
-              </p>
-            ) : null}
-            {emptyState.showBrowse ? (
+            <p className="text-lg font-semibold text-fo-text">{emptyTitles[activeTab]}</p>
+            {activeTab === "upcoming" ? (
               <Link href="/shifts" className="mt-6 inline-block">
                 <Button type="button" size="md">
-                  Browse Open Shifts
+                  {copy.actions.browseOpenShifts}
                 </Button>
               </Link>
             ) : null}
@@ -203,63 +178,12 @@ export function AcceptedShiftsBrowseList({
       </div>
 
       {filteredApplications.length > PAGE_SIZE ? (
-        <div className="fo-glass-card flex flex-col gap-3 rounded-lg border border-white/10 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-fo-text-muted">{paginationLabel}</p>
-
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => goToPage(safePage - 1)}
-              disabled={safePage <= 1}
-              className={cn(
-                "rounded-md border border-fo-border px-2.5 py-1 text-xs font-medium text-fo-text-muted transition",
-                safePage > 1 && "hover:border-fo-border-strong hover:text-fo-text",
-                safePage <= 1 && "cursor-not-allowed opacity-40"
-              )}
-            >
-              Previous
-            </button>
-
-            {pageNumbers.map((page, index) => {
-              const prev = pageNumbers[index - 1];
-              const showEllipsis = prev !== undefined && page - prev > 1;
-
-              return (
-                <span key={page} className="flex items-center gap-1.5">
-                  {showEllipsis ? (
-                    <span className="px-1 text-xs text-fo-text-subtle">…</span>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => goToPage(page)}
-                    className={cn(
-                      "min-w-8 rounded-md border px-2 py-1 text-xs font-medium transition",
-                      page === safePage
-                        ? "border-fo-primary-bright bg-fo-primary/15 text-fo-primary-bright"
-                        : "border-fo-border text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text"
-                    )}
-                  >
-                    {page}
-                  </button>
-                </span>
-              );
-            })}
-
-            <button
-              type="button"
-              onClick={() => goToPage(safePage + 1)}
-              disabled={safePage >= totalPages}
-              className={cn(
-                "rounded-md border border-fo-border px-2.5 py-1 text-xs font-medium text-fo-text-muted transition",
-                safePage < totalPages &&
-                  "hover:border-fo-border-strong hover:text-fo-text",
-                safePage >= totalPages && "cursor-not-allowed opacity-40"
-              )}
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        <BrowseListPagination
+          currentPage={safePage}
+          totalPages={totalPages}
+          label={paginationLabel}
+          onPageChange={goToPage}
+        />
       ) : filteredApplications.length > 0 ? (
         <p className="px-0.5 text-xs text-fo-text-muted">{paginationLabel}</p>
       ) : null}

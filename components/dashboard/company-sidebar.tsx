@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { FlexOfficersBadge } from "@/components/brand";
-import { companySidebarItems } from "@/components/nav/nav-config";
+import { getCompanySidebarItems } from "@/lib/nav-items";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { useUnreadNotificationCount } from "@/components/dashboard/use-unread-notification-count";
 import { cn } from "@/lib/cn";
@@ -20,12 +21,15 @@ function isActive(pathname: string, href: string, match?: (pathname: string) => 
 export function CompanySidebar() {
   const pathname = usePathname();
   const { user } = useUser();
+  const { t } = useLandingLanguage();
   const unreadNotificationCount = useUnreadNotificationCount();
+  const nav = t.appNav;
+  const sidebarItems = getCompanySidebarItems(nav.companySidebar);
 
   const displayName =
     user?.fullName?.trim() ||
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-    "Company";
+    nav.companyFallback;
   const email = user?.primaryEmailAddress?.emailAddress ?? "";
   const imageUrl = user?.imageUrl ?? null;
 
@@ -47,10 +51,10 @@ export function CompanySidebar() {
       </div>
 
       <nav
-        aria-label="Company dashboard"
+        aria-label={nav.aria.companyDashboard}
         className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3"
       >
-        {companySidebarItems.map((item) => {
+        {sidebarItems.map((item) => {
           const active = isActive(pathname, item.href, item.match);
           const Icon = item.icon;
           const hasUnreadNotifications =
@@ -61,7 +65,9 @@ export function CompanySidebar() {
               key={item.href}
               href={item.href}
               aria-label={
-                hasUnreadNotifications ? `${item.label}, unread` : item.label
+                hasUnreadNotifications
+                  ? `${item.label}, ${nav.aria.unread}`
+                  : item.label
               }
               className={cn(
                 "flex min-h-9 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors",
@@ -101,7 +107,7 @@ export function CompanySidebar() {
             type="button"
             className="flex min-h-9 w-full items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium text-slate-400 transition hover:bg-white/[0.04] hover:text-slate-200"
           >
-            Sign Out
+            {nav.signOut}
           </button>
         </SignOutButton>
       </div>

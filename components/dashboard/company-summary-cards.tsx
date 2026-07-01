@@ -1,9 +1,13 @@
+"use client";
+
 import {
   ApplicantsIcon,
   ShiftsIcon,
   UpcomingIcon,
 } from "@/components/nav/icons";
 import { StatCard, MobileStatGrid } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 
 function AcceptedShiftsIcon({ className }: { className?: string }) {
   return (
@@ -52,29 +56,32 @@ export function CompanySummaryCards({
   filledThisMonth,
   upcomingConfirmedCount,
 }: CompanySummaryCardsProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.dashboard.company;
+
   return (
     <>
       <MobileStatGrid className="gap-3.5 lg:hidden">
         <StatCard
-          label="Total Shifts"
+          label={copy.statTotalShifts}
           value={shiftStats.total}
           tone="blue"
           icon={<ShiftsIcon className="h-5 w-5" />}
         />
         <StatCard
-          label="Applicants"
+          label={copy.statApplicants}
           value={applicationsSummary.total}
           tone="purple"
           icon={<ApplicantsIcon className="h-5 w-5" />}
         />
         <StatCard
-          label="Filled Shifts"
+          label={copy.statFilledShifts}
           value={filledThisMonth}
           tone="green"
           icon={<AcceptedShiftsIcon className="h-5 w-5" />}
         />
         <StatCard
-          label="Upcoming Shifts"
+          label={copy.statUpcomingShifts}
           value={upcomingConfirmedCount}
           tone="amber"
           icon={<UpcomingIcon className="h-5 w-5" />}
@@ -83,28 +90,36 @@ export function CompanySummaryCards({
 
       <MobileStatGrid className="hidden lg:grid">
         <StatCard
-          label="Total Shifts"
+          label={copy.statTotalShifts}
           value={shiftStats.total}
           tone="blue"
-          hint={`Open ${shiftStats.open} · Filled ${shiftStats.filled} · Past ${shiftStats.past}`}
+          hint={interpolate(copy.statOpenFilledPast, {
+            open: shiftStats.open,
+            filled: shiftStats.filled,
+            past: shiftStats.past,
+          })}
         />
         <StatCard
-          label="Applicants"
+          label={copy.statApplicants}
           value={applicationsSummary.total}
           tone="purple"
-          hint={`${applicationsSummary.pending} Pending · ${applicationsSummary.invited} Invited · ${applicationsSummary.accepted} Accepted`}
+          hint={interpolate(copy.statApplicantBreakdown, {
+            pending: applicationsSummary.pending,
+            invited: applicationsSummary.invited,
+            accepted: applicationsSummary.accepted,
+          })}
         />
         <StatCard
-          label="Filled Shifts"
+          label={copy.statFilledShifts}
           value={filledThisMonth}
           tone="green"
-          hint="Filled this month"
+          hint={copy.statFilledThisMonth}
         />
         <StatCard
-          label="Upcoming Shifts"
+          label={copy.statUpcomingShifts}
           value={upcomingConfirmedCount}
           tone="amber"
-          hint="Confirmed in the next 7 days"
+          hint={copy.statConfirmedNext7}
         />
       </MobileStatGrid>
     </>

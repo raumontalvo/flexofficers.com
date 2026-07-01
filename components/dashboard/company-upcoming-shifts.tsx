@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import {
   formatShiftCityState,
   formatShiftTimeBadgeParts,
 } from "@/lib/format-shift";
 import { Card } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import { cn } from "@/lib/cn";
 
 export type SerializedUpcomingShift = {
@@ -17,29 +21,22 @@ export type SerializedUpcomingShift = {
   openPositions: number;
 };
 
-function formatUpcomingDate(value: string) {
-  return new Date(value).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatDateBadge(value: string) {
-  const date = new Date(value);
-
-  return {
-    weekday: date
-      .toLocaleDateString("en-US", { weekday: "short" })
-      .toUpperCase(),
-    monthDay: date
-      .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      .toUpperCase(),
-  };
+function useDateLocale() {
+  const { language } = useLandingLanguage();
+  return language === "es" ? "es-US" : "en-US";
 }
 
 function UpcomingShiftMobileCard({ shift }: { shift: SerializedUpcomingShift }) {
-  const badge = formatDateBadge(shift.startTime);
+  const { t } = useLandingLanguage();
+  const locale = useDateLocale();
+  const copy = t.dashboard.company;
+  const date = new Date(shift.startTime);
+  const badge = {
+    weekday: date.toLocaleDateString(locale, { weekday: "short" }).toUpperCase(),
+    monthDay: date
+      .toLocaleDateString(locale, { month: "short", day: "numeric" })
+      .toUpperCase(),
+  };
   const location = formatShiftCityState(shift);
   const timeBadge = formatShiftTimeBadgeParts(
     new Date(shift.startTime),
@@ -64,8 +61,9 @@ function UpcomingShiftMobileCard({ shift }: { shift: SerializedUpcomingShift }) 
         <p className="truncate text-sm font-semibold text-fo-text">{shift.title}</p>
         <p className="mt-0.5 truncate text-xs text-fo-text-muted">{location}</p>
         <p className="mt-1.5 text-xs text-fo-text-muted">
-          {shift.openPositions} open position
-          {shift.openPositions === 1 ? "" : "s"} remaining
+          {shift.openPositions === 1
+            ? copy.openPositionsOne
+            : interpolate(copy.openPositions, { count: shift.openPositions })}
         </p>
       </div>
 
@@ -74,7 +72,7 @@ function UpcomingShiftMobileCard({ shift }: { shift: SerializedUpcomingShift }) 
           {timeBadge.start}
         </span>
         <span className="my-0.5 text-[9px] font-medium uppercase tracking-wide text-fo-text-subtle">
-          to
+          {t.common.to}
         </span>
         <span className="text-[10px] font-bold leading-tight text-fo-text">
           {timeBadge.end}
@@ -93,7 +91,18 @@ export function CompanyUpcomingShifts({
   shifts,
   mobileShifts,
 }: CompanyUpcomingShiftsProps) {
+  const { t } = useLandingLanguage();
+  const locale = useDateLocale();
+  const copy = t.dashboard.company;
   const mobilePreviewShifts = mobileShifts ?? shifts.slice(0, 2);
+
+  function formatUpcomingDate(value: string) {
+    return new Date(value).toLocaleDateString(locale, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  }
 
   return (
     <>
@@ -103,20 +112,18 @@ export function CompanyUpcomingShifts({
         className="fo-glass-card border border-white/10 p-4 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)] lg:hidden"
       >
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-base font-bold text-fo-text">Upcoming Shifts</h2>
+          <h2 className="text-base font-bold text-fo-text">{copy.upcomingShifts}</h2>
           <Link
             href="/company/accepted-officers"
             className="text-xs font-semibold text-fo-primary-hover hover:underline"
           >
-            View All
+            {t.common.viewAll}
           </Link>
         </div>
 
         <div className="mt-3.5 space-y-2.5">
           {mobilePreviewShifts.length === 0 ? (
-            <p className="text-sm text-fo-text-muted">
-              No confirmed shifts starting soon.
-            </p>
+            <p className="text-sm text-fo-text-muted">{copy.noConfirmedSoon}</p>
           ) : (
             mobilePreviewShifts.map((shift) => (
               <UpcomingShiftMobileCard key={shift.id} shift={shift} />
@@ -133,26 +140,24 @@ export function CompanyUpcomingShifts({
         )}
       >
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-base font-bold text-fo-text">Upcoming Shifts</h2>
+          <h2 className="text-base font-bold text-fo-text">{copy.upcomingShifts}</h2>
           <Link
             href="/company/accepted-officers"
             className="text-xs font-semibold text-fo-primary-hover hover:underline"
           >
-            View All
+            {t.common.viewAll}
           </Link>
         </div>
 
         {shifts.length === 0 ? (
-          <p className="mt-4 text-sm text-fo-text-muted">
-            No confirmed shifts in the next 7 days.
-          </p>
+          <p className="mt-4 text-sm text-fo-text-muted">{copy.noConfirmed7Days}</p>
         ) : (
           <div className="mt-4">
             <div className="grid grid-cols-[7.5rem_minmax(0,1.2fr)_minmax(0,1fr)_6.5rem] gap-x-4 border-b border-white/[0.06] px-3 pb-2 text-[11px] font-semibold uppercase tracking-wide text-fo-text-muted">
-              <div>Date</div>
-              <div>Shift</div>
-              <div>Location</div>
-              <div className="text-right">Open</div>
+              <div>{copy.tableDate}</div>
+              <div>{copy.tableShift}</div>
+              <div>{copy.tableLocation}</div>
+              <div className="text-right">{copy.tableOpen}</div>
             </div>
 
             <div className="divide-y divide-white/[0.04]">
@@ -172,7 +177,7 @@ export function CompanyUpcomingShifts({
                     {formatShiftCityState(shift)}
                   </p>
                   <p className="text-right text-xs font-medium text-fo-text-muted">
-                    {shift.openPositions} open
+                    {interpolate(copy.openCount, { count: shift.openPositions })}
                   </p>
                 </Link>
               ))}

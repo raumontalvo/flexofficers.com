@@ -1,12 +1,11 @@
 "use client";
 
 import type { ComponentType, SVGProps } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { AcceptedIcon, BrowseIcon } from "@/components/nav/icons";
 import { cn } from "@/lib/cn";
-import {
-  APPLICATION_STATUS_TABS,
-  type ApplicationStatusFilter,
-} from "@/lib/officer-application-data";
+import { getApplicationStatusTabs } from "@/lib/i18n/ui-labels";
+import { type ApplicationStatusFilter } from "@/lib/officer-application-data";
 
 const TOP_ROW: ApplicationStatusFilter[] = ["", "PENDING", "ACCEPTED"];
 const BOTTOM_ROW: ApplicationStatusFilter[] = ["REJECTED", "WITHDRAWN"];
@@ -87,8 +86,11 @@ function WithdrawnStatusIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-function getTabLabel(value: ApplicationStatusFilter) {
-  return APPLICATION_STATUS_TABS.find((tab) => tab.value === value)?.label ?? "";
+function getTabLabel(
+  value: ApplicationStatusFilter,
+  tabs: ReturnType<typeof getApplicationStatusTabs>
+) {
+  return tabs.find((tab) => tab.value === value)?.label ?? "";
 }
 
 function StatusCell({
@@ -96,13 +98,15 @@ function StatusCell({
   count,
   isActive,
   onSelect,
+  tabs,
 }: {
   value: ApplicationStatusFilter;
   count: number;
   isActive: boolean;
   onSelect: (filter: ApplicationStatusFilter) => void;
+  tabs: ReturnType<typeof getApplicationStatusTabs>;
 }) {
-  const label = getTabLabel(value);
+  const label = getTabLabel(value, tabs);
   const { Icon, accentClass } = STATUS_TILE_STYLES[value];
 
   return (
@@ -142,6 +146,9 @@ export function ApplicationStatusSummaryCard({
   counts,
   onSelect,
 }: ApplicationStatusSummaryCardProps) {
+  const { t } = useLandingLanguage();
+  const tabs = getApplicationStatusTabs(t);
+
   return (
     <div className="fo-glass-card overflow-hidden rounded-2xl border border-white/10 md:hidden">
       <div className="grid grid-cols-3 divide-x divide-white/[0.06] border-b border-white/[0.06]">
@@ -152,6 +159,7 @@ export function ApplicationStatusSummaryCard({
             count={counts[value]}
             isActive={activeFilter === value}
             onSelect={onSelect}
+            tabs={tabs}
           />
         ))}
       </div>
@@ -163,6 +171,7 @@ export function ApplicationStatusSummaryCard({
             count={counts[value]}
             isActive={activeFilter === value}
             onSelect={onSelect}
+            tabs={tabs}
           />
         ))}
       </div>

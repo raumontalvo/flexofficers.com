@@ -7,9 +7,11 @@ import { ApplicantMobileCard } from "@/components/company/applicant-mobile-card"
 import { ApplicationReviewPanel } from "@/components/company/application-review-panel";
 import { ApplicantsShiftSummaryPanel } from "@/components/company/applicants-shift-summary-panel";
 import { getHiddenCompanyApplicantIds } from "@/components/company/remove-company-applicant-button";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
 import { MobileSecondaryButton } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
+import { getApplicationStatusLabel, getCompanyApplicantsTabs } from "@/lib/i18n/ui-labels";
 import {
   filterCompanyApplicantsByShift,
   filterCompanyApplicantsByTab,
@@ -20,13 +22,6 @@ import {
   type CompanyApplicantsTab,
   type SerializedCompanyApplicant,
 } from "@/lib/company-applications-page";
-
-const TABS: { id: CompanyApplicantsTab; label: string; mobileLabel?: string }[] = [
-  { id: "all", label: "All Applicants", mobileLabel: "Applicants" },
-  { id: "pending", label: "Pending" },
-  { id: "accepted", label: "Accepted" },
-  { id: "rejected", label: "Rejected" },
-];
 
 const MOBILE_TAB_STYLES: Record<
   CompanyApplicantsTab,
@@ -54,7 +49,8 @@ const DESKTOP_CARD_GRID = "grid grid-cols-[260px_minmax(0,1fr)_180px] items-cent
 
 async function updateApplicationStatus(
   applicationId: string,
-  nextStatus: "ACCEPTED" | "REJECTED"
+  nextStatus: "ACCEPTED" | "REJECTED",
+  errorFallback: string
 ) {
   const response = await fetch("/api/applications/status", {
     method: "POST",
@@ -73,7 +69,7 @@ async function updateApplicationStatus(
     error?: string;
   } | null;
 
-  alert(data?.error || "Failed to update applicant");
+  alert(data?.error || errorFallback);
 }
 
 function ApplicantDesktopRow({
@@ -81,11 +77,13 @@ function ApplicantDesktopRow({
   isSelected,
   onSelect,
   onView,
+  updateErrorMessage,
 }: {
   application: SerializedCompanyApplicant;
   isSelected: boolean;
   onSelect: () => void;
   onView: () => void;
+  updateErrorMessage: string;
 }) {
   const schedule = formatApplicantShiftSchedule(
     application.shiftStartTime,
@@ -162,13 +160,18 @@ function ApplicantDesktopRow({
           </p>
         </div>
         <ApplicantStatusBadge status={application.status} />
-        <ApplicantRowActions application={application} onView={onView} />
+        <ApplicantRowActions
+          application={application}
+          onView={onView}
+          updateErrorMessage={updateErrorMessage}
+        />
       </div>
     </div>
   );
 }
 
 function ApplicantStatusBadge({ status }: { status: ApplicationStatus }) {
+  const { t } = useLandingLanguage();
   const styles = {
     [ApplicationStatus.PENDING]: "border-amber-500/25 bg-amber-500/10 text-amber-100",
     [ApplicationStatus.ACCEPTED]: "border-green-500/25 bg-green-500/10 text-green-100",
@@ -183,7 +186,7 @@ function ApplicantStatusBadge({ status }: { status: ApplicationStatus }) {
         styles[status]
       )}
     >
-      {status}
+      {getApplicationStatusLabel(t, status)}
     </span>
   );
 }
@@ -191,10 +194,14 @@ function ApplicantStatusBadge({ status }: { status: ApplicationStatus }) {
 function ApplicantRowActions({
   application,
   onView,
+  updateErrorMessage,
 }: {
   application: SerializedCompanyApplicant;
   onView: () => void;
+  updateErrorMessage: string;
 }) {
+  const { t } = useLandingLanguage();
+  const actions = t.browse.companyApplicants.actions;
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const isPending = application.status === ApplicationStatus.PENDING;
@@ -225,7 +232,7 @@ function ApplicantRowActions({
           className: "min-h-9 shrink-0 px-3 text-xs",
         })}
       >
-        View
+        {actions.view}
       </button>
 
       {isPending ? (
@@ -234,7 +241,7 @@ function ApplicantRowActions({
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 text-sm font-semibold text-fo-text transition hover:bg-white/[0.06]"
-            aria-label="Accept or reject applicant"
+            aria-label={`${actions.accept} / ${actions.reject}`}
             aria-expanded={menuOpen}
           >
             ⋮
@@ -246,21 +253,29 @@ function ApplicantRowActions({
                 type="button"
                 onClick={() => {
                   setMenuOpen(false);
-                  void updateApplicationStatus(application.id, "ACCEPTED");
+                  void updateApplicationStatus(
+                    application.id,
+                    "ACCEPTED",
+                    updateErrorMessage
+                  );
                 }}
                 className="block w-full px-3 py-2 text-left text-xs font-semibold text-green-100 transition hover:bg-green-500/10"
               >
-                Accept
+                {actions.accept}
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setMenuOpen(false);
-                  void updateApplicationStatus(application.id, "REJECTED");
+                  void updateApplicationStatus(
+                    application.id,
+                    "REJECTED",
+                    updateErrorMessage
+                  );
                 }}
                 className="block w-full px-3 py-2 text-left text-xs font-semibold text-red-200 transition hover:bg-red-500/10"
               >
-                Reject
+                {actions.reject}
               </button>
             </div>
           ) : null}
@@ -316,13 +331,16 @@ function ApplicantFilters({
   shiftOptions: ReturnType<typeof getUniqueApplicantShifts>;
   compact?: boolean;
 }) {
+  const { t } = useLandingLanguage();
+  const copy = t.browse.companyApplicants;
+  const tabs = getCompanyApplicantsTabs(t);
   const [filterOpen, setFilterOpen] = useState(false);
 
   return (
     <div className={cn("space-y-2.5", compact && "space-y-2")}>
       {compact ? (
         <div className="grid w-full min-w-0 grid-cols-4 gap-1.5">
-          {TABS.map((tab) => {
+          {tabs.map((tab) => {
             const count = tabCounts[tab.id];
             const isActive = activeTab === tab.id;
             const styles = MOBILE_TAB_STYLES[tab.id];
@@ -351,7 +369,7 @@ function ApplicantFilters({
       ) : (
         <div className="overflow-x-auto">
           <div className="flex min-w-max flex-nowrap gap-1.5">
-            {TABS.map((tab) => {
+            {tabs.map((tab) => {
               const count = tabCounts[tab.id];
 
               return (
@@ -379,12 +397,12 @@ function ApplicantFilters({
 
       <div className="flex min-w-0 items-center gap-2">
         <label className="relative min-w-0 flex-1">
-          <span className="sr-only">Search applicants</span>
+          <span className="sr-only">{copy.searchPlaceholder}</span>
           <input
             type="search"
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search applicants..."
+            placeholder={copy.searchPlaceholder}
             className={cn(
               "w-full rounded-xl border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20",
               compact ? "min-h-9" : "min-h-9 lg:min-h-10"
@@ -404,7 +422,7 @@ function ApplicantFilters({
                 : "border-white/10 text-fo-text-muted hover:bg-white/[0.04] hover:text-fo-text"
             )}
           >
-            Filter
+            {copy.filter}
           </button>
 
           {filterOpen ? (
@@ -455,6 +473,9 @@ type CompanyApplicantsPageContentProps = {
 export function CompanyApplicantsPageContent({
   applications,
 }: CompanyApplicantsPageContentProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.browse.companyApplicants;
+  const tabs = getCompanyApplicantsTabs(t);
   const [activeTab, setActiveTab] = useState<CompanyApplicantsTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [shiftFilter, setShiftFilter] = useState<string | null>(null);
@@ -525,15 +546,13 @@ export function CompanyApplicantsPageContent({
   if (applications.length === 0) {
     return (
       <section className="fo-glass-card mt-4 rounded-xl border border-white/10 px-4 py-12 text-center lg:mt-6">
-        <h2 className="text-lg font-semibold text-fo-text">No applicants yet.</h2>
-        <p className="mt-2 text-sm text-fo-text-muted">
-          Once officers apply to your shifts, they&apos;ll appear here for review.
-        </p>
+        <h2 className="text-lg font-semibold text-fo-text">{copy.empty.none}</h2>
+        <p className="mt-2 text-sm text-fo-text-muted">{copy.empty.noneDescription}</p>
         <MobileSecondaryButton
           href="/company/shifts"
           className="mx-auto mt-5 min-h-10 max-w-xs text-sm lg:hidden"
         >
-          Back to My Shifts
+          {copy.actions.backToShifts}
         </MobileSecondaryButton>
         <Link
           href="/company/shifts"
@@ -567,7 +586,7 @@ export function CompanyApplicantsPageContent({
 
         {mobileVisibleApplications.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-10 text-center text-sm text-fo-text-muted">
-            No applicants match this filter.
+            {copy.empty.noMatch}
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -600,7 +619,7 @@ export function CompanyApplicantsPageContent({
 
           {filteredApplications.length === 0 ? (
             <div className="px-4 py-10 text-center text-sm text-fo-text-muted">
-              No applicants match this filter.
+              {copy.empty.noMatch}
             </div>
           ) : (
             <div>
@@ -611,6 +630,7 @@ export function CompanyApplicantsPageContent({
                   isSelected={selectedApplication?.id === application.id}
                   onSelect={() => setSelectedApplicationId(application.id)}
                   onView={() => setReviewApplicationId(application.id)}
+                  updateErrorMessage={copy.errors.updateFailed}
                 />
               ))}
             </div>

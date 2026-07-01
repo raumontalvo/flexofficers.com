@@ -1,21 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, Card } from "@/components/ui";
 import { MobileStack } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
+import {
+  formatOpenShiftCount,
+  formatOpenShiftsPagination,
+  formatShiftFilterChipsSummary,
+  getDateLocale,
+  getShiftSortOptions,
+  getShiftWorkTypeOptions,
+} from "@/lib/i18n/ui-labels";
 import { US_STATES } from "@/lib/license-options";
 import {
   clearPrimaryShiftFilters,
   emptyShiftBrowseFilters,
   filterBrowseShifts,
-  formatOpenShiftCount,
-  formatPaginationRange,
-  formatShiftFilterChipsSummary,
   hasMoreShiftFilters,
   sortBrowseShifts,
-  SORT_OPTIONS,
-  WORK_TYPE_OPTIONS,
   type ShiftBrowseFilters,
   type ShiftSortOption,
 } from "@/lib/shift-browse-filters";
@@ -138,6 +142,12 @@ export function ShiftsBrowseList({
   showProfileApplyNotice = false,
   officer = null,
 }: ShiftsBrowseListProps) {
+  const { t, language } = useLandingLanguage();
+  const shiftFilters = t.filters.shifts;
+  const shiftOptions = t.filters.shiftOptions;
+  const shiftsCopy = t.browse.shifts;
+  const workTypeOptions = getShiftWorkTypeOptions(t);
+  const sortOptions = getShiftSortOptions(t);
   const listTopRef = useRef<HTMLDivElement>(null);
   const moreFiltersRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<ShiftBrowseFilters>(emptyShiftBrowseFilters);
@@ -176,13 +186,14 @@ export function ShiftsBrowseList({
   const rangeStart = filteredShifts.length === 0 ? 0 : pageStart + 1;
   const rangeEnd = Math.min(pageStart + PAGE_SIZE, filteredShifts.length);
   const pageNumbers = buildPageNumbers(safePage, totalPages);
-  const resultsHeader = formatOpenShiftCount(filteredShifts.length);
-  const paginationLabel = formatPaginationRange(
+  const resultsHeader = formatOpenShiftCount(t, filteredShifts.length);
+  const paginationLabel = formatOpenShiftsPagination(
+    t,
     rangeStart,
     rangeEnd,
     filteredShifts.length
   );
-  const filterChipsSummary = formatShiftFilterChipsSummary(filters);
+  const filterChipsSummary = formatShiftFilterChipsSummary(t, filters, getDateLocale(language));
   const hasNoDatabaseShifts = shifts.length === 0;
   const hasNoMatchingShifts = !hasNoDatabaseShifts && filteredShifts.length === 0;
   const moreFiltersActive = hasMoreShiftFilters(filters);
@@ -237,7 +248,7 @@ export function ShiftsBrowseList({
         "min-h-9 w-auto min-w-[120px] py-1.5 md:min-w-[148px]"
       )}
     >
-      {SORT_OPTIONS.map((option) => (
+      {sortOptions.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
         </option>
@@ -263,11 +274,11 @@ export function ShiftsBrowseList({
 
           <span className="min-w-0 flex-1">
             <span className="flex items-center justify-between gap-2">
-              <span className="text-sm font-semibold text-fo-text">Search Shifts</span>
+              <span className="text-sm font-semibold text-fo-text">{shiftsCopy.searchTitle}</span>
               <ChevronRightIcon className="h-4 w-4 shrink-0 text-fo-text-subtle" />
             </span>
             <span className="mt-0.5 block text-xs leading-snug text-fo-text-muted">
-              Set your filters to find the perfect shift.
+              {shiftsCopy.searchSubtitle}
             </span>
           </span>
         </div>
@@ -289,23 +300,23 @@ export function ShiftsBrowseList({
       <div className="fo-glass-card hidden rounded-lg border border-white/10 p-3 md:block">
         <div className="grid gap-3 md:grid-cols-6 lg:grid-cols-12">
           <div className="space-y-1.5 md:col-span-6 lg:col-span-5">
-            <PrimaryFilterLabel>📍 Location</PrimaryFilterLabel>
+            <PrimaryFilterLabel>{`📍 ${shiftFilters.location}`}</PrimaryFilterLabel>
             <div className="grid grid-cols-2 gap-2">
               <input
                 id="shift-filter-city"
                 value={filters.city}
                 onChange={(e) => updateFilters("city", e.target.value)}
                 className={fieldClassName}
-                placeholder="Enter city"
+                placeholder={shiftFilters.enterCity}
               />
               <select
                 id="shift-filter-state"
                 value={filters.state}
                 onChange={(e) => updateFilters("state", e.target.value)}
                 className={fieldClassName}
-                aria-label="State"
+                aria-label={shiftFilters.state}
               >
-                <option value="">All States</option>
+                <option value="">{shiftFilters.allStates}</option>
                 {US_STATES.map((state) => (
                   <option key={state.code} value={state.code}>
                     {state.name}
@@ -316,7 +327,7 @@ export function ShiftsBrowseList({
           </div>
 
           <div className="space-y-1.5 md:col-span-2 lg:col-span-2">
-            <PrimaryFilterLabel htmlFor="shift-filter-date">📅 Date</PrimaryFilterLabel>
+            <PrimaryFilterLabel htmlFor="shift-filter-date">{`📅 ${shiftFilters.date}`}</PrimaryFilterLabel>
             <input
               id="shift-filter-date"
               type="date"
@@ -327,7 +338,7 @@ export function ShiftsBrowseList({
           </div>
 
           <div className="space-y-1.5 md:col-span-2 lg:col-span-2">
-            <PrimaryFilterLabel htmlFor="shift-filter-rate">💵 Pay</PrimaryFilterLabel>
+            <PrimaryFilterLabel htmlFor="shift-filter-rate">{`💵 ${shiftFilters.pay}`}</PrimaryFilterLabel>
             <input
               id="shift-filter-rate"
               type="number"
@@ -336,13 +347,13 @@ export function ShiftsBrowseList({
               value={filters.minHourlyRate}
               onChange={(e) => updateFilters("minHourlyRate", e.target.value)}
               className={fieldClassName}
-              placeholder="Min $/hr"
+              placeholder={shiftFilters.minPay}
             />
           </div>
 
           <div className="space-y-1.5 md:col-span-2 lg:col-span-3">
             <PrimaryFilterLabel htmlFor="shift-filter-work-type">
-              💼 Work Type
+              {`💼 ${shiftFilters.workType}`}
             </PrimaryFilterLabel>
             <select
               id="shift-filter-work-type"
@@ -355,7 +366,7 @@ export function ShiftsBrowseList({
               }
               className={fieldClassName}
             >
-              {WORK_TYPE_OPTIONS.map((option) => (
+              {workTypeOptions.map((option) => (
                 <option key={option.value || "all"} value={option.value}>
                   {option.label}
                 </option>
@@ -379,13 +390,13 @@ export function ShiftsBrowseList({
               )}
             >
               <span aria-hidden>⚙</span>
-              <span>More Filters</span>
+              <span>{shiftFilters.moreFilters}</span>
               <span aria-hidden className="text-[10px] text-fo-text-muted">
                 {showMoreFilters ? "▲" : "▼"}
               </span>
               {moreFiltersActive ? (
                 <span className="ml-0.5 rounded-full bg-fo-primary/25 px-1.5 py-0.5 text-[10px] font-semibold text-fo-primary-bright">
-                  Active
+                  {shiftFilters.active}
                 </span>
               ) : null}
             </button>
@@ -397,27 +408,27 @@ export function ShiftsBrowseList({
               >
                 <div className="flex flex-col gap-1">
                   <MoreFilterToggle
-                    label="Armed"
+                    label={shiftOptions.armed}
                     checked={filters.armed}
                     onChange={(armed) => updateFilters("armed", armed)}
                   />
                   <MoreFilterToggle
-                    label="Unarmed"
+                    label={shiftOptions.unarmed}
                     checked={filters.unarmed}
                     onChange={(unarmed) => updateFilters("unarmed", unarmed)}
                   />
                   <MoreFilterToggle
-                    label="Day Shift"
+                    label={shiftOptions.dayShift}
                     checked={filters.dayShift}
                     onChange={(dayShift) => updateFilters("dayShift", dayShift)}
                   />
                   <MoreFilterToggle
-                    label="Night Shift"
+                    label={shiftOptions.nightShift}
                     checked={filters.nightShift}
                     onChange={(nightShift) => updateFilters("nightShift", nightShift)}
                   />
                   <MoreFilterToggle
-                    label="Overnight"
+                    label={shiftOptions.overnight}
                     checked={filters.overnight}
                     onChange={(overnight) => updateFilters("overnight", overnight)}
                   />
@@ -434,7 +445,7 @@ export function ShiftsBrowseList({
               onClick={handleClearFilters}
               className="!min-h-9 w-full sm:w-auto"
             >
-              Clear Filters
+              {shiftsCopy.actions.clearFilters}
             </Button>
             <Button
               type="button"
@@ -442,7 +453,7 @@ export function ShiftsBrowseList({
               onClick={handleViewAllOpenShifts}
               className="!min-h-9 w-full sm:w-auto"
             >
-              View All Open Shifts
+              {shiftsCopy.actions.viewAllOpen}
             </Button>
           </div>
         </div>
@@ -460,7 +471,7 @@ export function ShiftsBrowseList({
                   htmlFor="shift-sort-by-mobile"
                   className="text-[11px] text-fo-text-muted"
                 >
-                  Sort by
+                  {shiftFilters.sortBy}
                 </label>
                 <select
                   id="shift-sort-by-mobile"
@@ -471,7 +482,7 @@ export function ShiftsBrowseList({
                   }}
                   className="min-h-8 max-w-[108px] rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-xs text-fo-text focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
                 >
-                  {SORT_OPTIONS.map((option) => (
+                  {sortOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -484,7 +495,7 @@ export function ShiftsBrowseList({
               <p className="text-sm font-semibold text-fo-text">{resultsHeader}</p>
               <div className="flex items-center gap-2">
                 <label htmlFor="shift-sort-by" className="text-xs text-fo-text-muted">
-                  Sort by
+                  {shiftFilters.sortBy}
                 </label>
                 {sortSelect}
               </div>
@@ -494,9 +505,9 @@ export function ShiftsBrowseList({
 
         {hasNoDatabaseShifts ? (
           <Card variant="muted" className="py-8 text-center">
-            <p className="text-base font-medium text-fo-text">No shifts posted yet.</p>
+            <p className="text-base font-medium text-fo-text">{shiftsCopy.empty.none}</p>
             <p className="mt-1 text-sm text-fo-text-muted">
-              Check back soon for new security opportunities.
+              {shiftsCopy.empty.noneDescription}
             </p>
           </Card>
         ) : hasNoMatchingShifts ? (
@@ -534,7 +545,7 @@ export function ShiftsBrowseList({
                   safePage <= 1 && "cursor-not-allowed opacity-40"
                 )}
               >
-                Prev
+                {t.browse.pagination.prev}
               </button>
 
               <span className="hidden items-center gap-1 md:flex">
@@ -580,7 +591,7 @@ export function ShiftsBrowseList({
                   safePage >= totalPages && "cursor-not-allowed opacity-40"
                 )}
               >
-                Next
+                {t.browse.pagination.next}
               </button>
             </div>
           </div>

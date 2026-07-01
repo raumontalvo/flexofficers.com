@@ -6,12 +6,13 @@ import { useRouter } from "next/navigation";
 import { FlexOfficersLogoLink } from "@/components/brand";
 import { IconShield } from "@/components/landing/icons";
 import { CompaniesIcon, ProfileIcon } from "@/components/nav/icons";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   Button,
   Card,
   CardDescription,
   CardTitle,
-  SectionHeading,
 } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -28,54 +29,49 @@ type FeatureGroup = {
 
 const PENDING_ROLE_KEY = "flexofficers.pendingRole";
 
-const officerFeatureGroups: FeatureGroup[] = [
-  {
-    title: "Find Work",
-    items: [
-      "Find open shifts",
-      "Get company invites",
-      "Apply to shifts in seconds",
-    ],
-  },
-  {
-    title: "Build Your Career",
-    items: [
-      "Build your professional profile",
-      "Showcase licenses and certifications",
-      "Work when it fits your schedule",
-    ],
-  },
-  {
-    title: "After Acceptance",
-    items: [
-      "Get company contact information after acceptance",
-      "Track your applications and upcoming shifts",
-    ],
-  },
-];
+function useOfficerFeatureGroups(): FeatureGroup[] {
+  const { t } = useLandingLanguage();
+  const o = t.onboarding.officer;
 
-const companyFeatureGroups: FeatureGroup[] = [
-  {
-    title: "Post Jobs",
-    items: [
-      "Create public & private job posts",
-      "Post open shifts",
-      "Fill shifts faster",
-    ],
-  },
-  {
-    title: "Hire Officers",
-    items: [
-      "Invite officers to apply",
-      "Review profiles, licenses & certifications",
-      "Accept or reject applicants",
-    ],
-  },
-  {
-    title: "Manage Team",
-    items: ["Manage staff", "Manage accepted officers"],
-  },
-];
+  return [
+    {
+      title: o.groups.findWork,
+      items: [o.items.findOpenShifts, o.items.getInvites, o.items.applyFast],
+    },
+    {
+      title: o.groups.buildCareer,
+      items: [
+        o.items.buildProfile,
+        o.items.showcaseLicenses,
+        o.items.flexibleSchedule,
+      ],
+    },
+    {
+      title: o.groups.afterAcceptance,
+      items: [o.items.contactAfterAcceptance, o.items.trackApplications],
+    },
+  ];
+}
+
+function useCompanyFeatureGroups(): FeatureGroup[] {
+  const { t } = useLandingLanguage();
+  const c = t.onboarding.company;
+
+  return [
+    {
+      title: c.groups.postJobs,
+      items: [c.items.publicPrivatePosts, c.items.postOpenShifts, c.items.fillFaster],
+    },
+    {
+      title: c.groups.hireOfficers,
+      items: [c.items.inviteOfficers, c.items.reviewProfiles, c.items.acceptReject],
+    },
+    {
+      title: c.groups.manageTeam,
+      items: [c.items.manageStaff, c.items.manageAccepted],
+    },
+  ];
+}
 
 const roleCardClassName = cn(
   "flex h-full min-h-0 flex-col overflow-visible border-slate-700/80 bg-gradient-to-b from-[#0c1424] via-fo-bg-elevated to-[#070d18]",
@@ -131,6 +127,9 @@ export default function OnboardingRoleChoice({
   initialRole = null,
 }: OnboardingRoleChoiceProps) {
   const router = useRouter();
+  const { t } = useLandingLanguage();
+  const officerFeatureGroups = useOfficerFeatureGroups();
+  const companyFeatureGroups = useCompanyFeatureGroups();
   const { isLoaded, isSignedIn } = useUser();
   const [error, setError] = useState("");
   const [savingRole, setSavingRole] = useState<Role | null>(null);
@@ -158,7 +157,7 @@ export default function OnboardingRoleChoice({
     } | null;
 
     setSavingRole(null);
-    setError(data?.error || "Could not save your role. Please try again.");
+    setError(data?.error || t.onboarding.errors.saveFailed);
   }
 
   async function chooseRole(role: Role) {
@@ -205,9 +204,8 @@ export default function OnboardingRoleChoice({
         />
       </div>
 
-      <SectionHeading
-        title="Welcome to FlexOfficers"
-        subtitle="Choose how you want to use the platform."
+      <TranslatedSectionHeading
+        page="onboarding"
         align="center"
         className="!flex-col !items-center !justify-center !text-center sm:!items-center sm:!text-center [&>div]:mx-auto [&>div]:text-center [&>div>p]:mx-auto"
       />
@@ -223,9 +221,9 @@ export default function OnboardingRoleChoice({
           <RoleCardIcon>
             <ProfileIcon className="h-7 w-7" />
           </RoleCardIcon>
-          <CardTitle className="text-xl sm:text-2xl">Security Officer</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">{t.onboarding.officer.title}</CardTitle>
           <CardDescription className="mt-2">
-            Browse shifts and find the right opportunities on your schedule.
+            {t.onboarding.officer.description}
           </CardDescription>
 
           <RoleFeatureGroups groups={officerFeatureGroups} className="flex-1" />
@@ -239,7 +237,7 @@ export default function OnboardingRoleChoice({
               onClick={() => chooseRole("OFFICER")}
             >
               <ProfileIcon className="h-5 w-5 shrink-0" />
-              {savingRole === "OFFICER" ? "Saving..." : "Continue as Officer"}
+              {savingRole === "OFFICER" ? t.onboarding.saving : t.onboarding.officer.cta}
             </Button>
           </div>
         </Card>
@@ -248,9 +246,9 @@ export default function OnboardingRoleChoice({
           <RoleCardIcon>
             <CompaniesIcon className="h-7 w-7" />
           </RoleCardIcon>
-          <CardTitle className="text-xl sm:text-2xl">Security Company</CardTitle>
+          <CardTitle className="text-xl sm:text-2xl">{t.onboarding.company.title}</CardTitle>
           <CardDescription className="mt-2">
-            Post shifts, review licensed officers, and fill coverage faster.
+            {t.onboarding.company.description}
           </CardDescription>
 
           <RoleFeatureGroups groups={companyFeatureGroups} className="flex-1" />
@@ -264,7 +262,7 @@ export default function OnboardingRoleChoice({
               onClick={() => chooseRole("COMPANY")}
             >
               <CompaniesIcon className="h-5 w-5 shrink-0" />
-              {savingRole === "COMPANY" ? "Saving..." : "Continue as Company"}
+              {savingRole === "COMPANY" ? t.onboarding.saving : t.onboarding.company.cta}
             </Button>
           </div>
         </Card>
@@ -275,12 +273,11 @@ export default function OnboardingRoleChoice({
           <div className="flex items-center gap-2">
             <IconShield className="h-7 w-7 shrink-0 text-fo-primary-bright" />
             <h3 className="text-sm font-semibold text-fo-text sm:text-base">
-              Important
+              {t.onboarding.disclaimer.title}
             </h3>
           </div>
           <p className="text-sm leading-relaxed text-fo-text sm:text-base">
-            Companies are responsible for verifying licenses, credentials, hiring
-            requirements, and paying officers directly for completed work.
+            {t.onboarding.disclaimer.body}
           </p>
         </div>
       </Card>

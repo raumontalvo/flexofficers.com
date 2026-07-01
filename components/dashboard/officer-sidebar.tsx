@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { FlexOfficersBadge } from "@/components/brand";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { officerSidebarItems } from "@/components/nav/nav-config";
+import { getOfficerSidebarItems } from "@/lib/nav-items";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { useUnreadNotificationCount } from "@/components/dashboard/use-unread-notification-count";
 import { cn } from "@/lib/cn";
 
@@ -24,12 +25,15 @@ type OfficerSidebarProps = {
 export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
   const pathname = usePathname();
   const { user } = useUser();
+  const { t } = useLandingLanguage();
   const unreadNotificationCount = useUnreadNotificationCount();
+  const nav = t.appNav;
+  const sidebarItems = getOfficerSidebarItems(nav.officerSidebar);
 
   const displayName =
     user?.fullName?.trim() ||
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-    "Officer";
+    nav.officerFallback;
   const email = user?.primaryEmailAddress?.emailAddress ?? "";
   const imageUrl = user?.imageUrl ?? null;
 
@@ -51,10 +55,10 @@ export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
       </div>
 
       <nav
-        aria-label="Officer dashboard"
+        aria-label={nav.aria.officerDashboard}
         className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3"
       >
-        {officerSidebarItems.map((item) => {
+        {sidebarItems.map((item) => {
           const active = isActive(pathname, item.href, item.match);
           const Icon = item.icon;
           const notificationCount =
@@ -67,7 +71,9 @@ export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
               key={item.href}
               href={item.href}
               aria-label={
-                hasUnreadNotifications ? `${item.label}, unread` : item.label
+                hasUnreadNotifications
+                  ? `${item.label}, ${nav.aria.unread}`
+                  : item.label
               }
               className={cn(
                 "flex min-h-9 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors",
@@ -107,7 +113,7 @@ export function OfficerSidebar({ badgeCounts }: OfficerSidebarProps) {
             type="button"
             className="flex min-h-9 w-full items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium text-slate-400 transition hover:bg-white/[0.04] hover:text-slate-200"
           >
-            Sign Out
+            {nav.signOut}
           </button>
         </SignOutButton>
       </div>

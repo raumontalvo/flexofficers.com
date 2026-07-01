@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
 import { ApplicationStatus, type ArmedStatus } from "@/app/generated/prisma/enums";
 import ApplyButton from "@/app/shifts/ApplyButton";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { OfficerProfileApplyNotice } from "@/components/officer/officer-profile-apply-notice";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -61,6 +62,8 @@ export function ShiftDetailActions({
   shiftAcceptingApplications,
   layout = "default",
 }: ShiftDetailActionsProps) {
+  const { t } = useLandingLanguage();
+  const actions = t.shiftDetail.actions;
   const mobile = layout === "mobile";
   const hasPendingApplication = applicationStatus === ApplicationStatus.PENDING;
   const hasAcceptedApplication = applicationStatus === ApplicationStatus.ACCEPTED;
@@ -73,23 +76,23 @@ export function ShiftDetailActions({
     />
   ) : hasAcceptedApplication ? (
     <button type="button" disabled className={actionButtonClassName("primary", mobile)}>
-      Application Accepted
+      {actions.applicationAccepted}
     </button>
   ) : hasPendingApplication ? (
     <button type="button" disabled className={actionButtonClassName("primary", mobile)}>
-      Application Pending
+      {actions.applicationPending}
     </button>
   ) : profileIncomplete ? (
     <Link href="/officer/profile" className={actionButtonClassName("primary", mobile)}>
-      Complete Profile to Apply
+      {actions.completeProfileToApply}
     </Link>
   ) : !isSignedIn && shiftAcceptingApplications ? (
     <Link href="/sign-in" className={actionButtonClassName("primary", mobile)}>
-      Sign in to apply
+      {actions.signInToApply}
     </Link>
   ) : (
     <button type="button" disabled className={actionButtonClassName("primary", mobile)}>
-      {shiftAcceptingApplications ? "Apply to Shift" : "Not accepting applications"}
+      {shiftAcceptingApplications ? actions.apply : actions.notAccepting}
     </button>
   );
 
@@ -102,20 +105,20 @@ export function ShiftDetailActions({
           "border-white/15 bg-transparent text-fo-text hover:bg-white/[0.04]"
       )}
     >
-      View Company Profile
+      {actions.viewCompanyProfile}
     </Link>
   ) : (
     <button
       type="button"
       disabled
-      title="This company has not published a public profile yet."
+      title={t.shiftDetail.company.noPublicProfile}
       className={cn(
         actionButtonClassName("secondary", mobile),
         mobile &&
           "border-white/15 bg-transparent text-fo-text hover:bg-white/[0.04]"
       )}
     >
-      View Company Profile
+      {actions.viewCompanyProfile}
     </button>
   );
 

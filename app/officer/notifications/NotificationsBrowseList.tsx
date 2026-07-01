@@ -2,13 +2,18 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
+import { TranslatedPageHeader } from "@/components/i18n/translated-page-header";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import {
+  formatNotificationsPagination,
+  getNotificationTabs,
+} from "@/lib/i18n/ui-labels";
+import {
   countUnreadNotifications,
   filterNotifications,
-  formatNotificationsPaginationRange,
-  getNotificationTabs,
   type NotificationTab,
   type OfficerNotificationData,
 } from "@/lib/officer-notification-data";
@@ -19,19 +24,6 @@ import { notifyNotificationsChanged } from "@/lib/notifications-changed";
 
 const PAGE_SIZE = 10;
 
-function buildPageNumbers(currentPage: number, totalPages: number) {
-  if (totalPages <= 5) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  }
-
-  const pages = new Set<number>([1, totalPages, currentPage]);
-
-  if (currentPage > 1) pages.add(currentPage - 1);
-  if (currentPage < totalPages) pages.add(currentPage + 1);
-
-  return [...pages].sort((a, b) => a - b);
-}
-
 type NotificationsBrowseListProps = {
   notifications: OfficerNotificationData[];
 };
@@ -40,6 +32,7 @@ export function NotificationsBrowseList({
   notifications: initialNotifications,
 }: NotificationsBrowseListProps) {
   const router = useRouter();
+  const { t } = useLandingLanguage();
   const listTopRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<NotificationTab>("all");
   const [notifications, setNotifications] = useState(initialNotifications);
@@ -51,7 +44,8 @@ export function NotificationsBrowseList({
     setNotifications(initialNotifications);
   }, [initialNotifications]);
 
-  const tabs = getNotificationTabs();
+  const tabs = getNotificationTabs(t);
+  const copy = t.browse.notifications;
 
   const visibleNotifications = useMemo(() => {
     const hidden = new Set(getHiddenNotificationIds());
@@ -81,8 +75,8 @@ export function NotificationsBrowseList({
   const rangeStart =
     filteredNotifications.length === 0 ? 0 : pageStart + 1;
   const rangeEnd = Math.min(pageStart + PAGE_SIZE, filteredNotifications.length);
-  const pageNumbers = buildPageNumbers(safePage, totalPages);
-  const paginationLabel = formatNotificationsPaginationRange(
+  const paginationLabel = formatNotificationsPagination(
+    t,
     rangeStart,
     rangeEnd,
     filteredNotifications.length
@@ -132,14 +126,11 @@ export function NotificationsBrowseList({
   return (
     <div ref={listTopRef} className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
-            Notifications
-          </h1>
-          <p className="max-w-2xl text-base text-fo-text-muted sm:text-lg">
-            Application updates and shift alerts will appear here.
-          </p>
-        </div>
+        <TranslatedPageHeader
+          page="officerNotifications"
+          titleClassName="text-3xl sm:text-4xl"
+          subtitleClassName="text-base sm:text-lg"
+        />
 
         <button
           type="button"
@@ -153,7 +144,7 @@ export function NotificationsBrowseList({
           )}
         >
           <span aria-hidden>✓</span>
-          {isPending ? "Marking…" : "Mark all as read"}
+          {isPending ? copy.marking : copy.markAllRead}
         </button>
       </div>
 
@@ -192,10 +183,9 @@ export function NotificationsBrowseList({
 
       {visibleNotifications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-10 text-center">
-          <p className="text-lg font-semibold text-fo-text">No notifications yet.</p>
+          <p className="text-lg font-semibold text-fo-text">{copy.empty.none}</p>
           <p className="mt-2 text-sm text-fo-text-muted">
-            Notifications will appear here when there are application updates,
-            shift alerts, or FlexOfficers system announcements.
+            {copy.empty.noneDescription}
           </p>
         </Card>
       ) : null}
@@ -203,7 +193,7 @@ export function NotificationsBrowseList({
       {visibleNotifications.length > 0 && filteredNotifications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-8 text-center">
           <p className="text-base font-medium text-fo-text">
-            No notifications in this tab.
+            {copy.empty.noMatch}
           </p>
         </Card>
       ) : null}
@@ -221,51 +211,12 @@ export function NotificationsBrowseList({
       ) : null}
 
       {filteredNotifications.length > PAGE_SIZE ? (
-        <div className="fo-glass-card flex flex-col gap-3 rounded-lg border border-white/10 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-fo-text-muted">{paginationLabel}</p>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => goToPage(Math.max(1, safePage - 1))}
-              disabled={safePage === 1}
-              className="rounded-lg border border-white/10 px-2.5 py-1 text-xs font-medium text-fo-text-muted transition hover:text-fo-text disabled:opacity-40"
-            >
-              Previous
-            </button>
-            {pageNumbers.map((page, index) => {
-              const previous = pageNumbers[index - 1];
-              const showEllipsis = previous != null && page - previous > 1;
-
-              return (
-                <span key={page} className="inline-flex items-center gap-1.5">
-                  {showEllipsis ? (
-                    <span className="px-1 text-xs text-fo-text-subtle">…</span>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => goToPage(page)}
-                    className={cn(
-                      "min-w-8 rounded-lg border px-2 py-1 text-xs font-medium transition",
-                      page === safePage
-                        ? "border-fo-primary-bright/50 bg-fo-primary/10 text-fo-primary-bright"
-                        : "border-white/10 text-fo-text-muted hover:text-fo-text"
-                    )}
-                  >
-                    {page}
-                  </button>
-                </span>
-              );
-            })}
-            <button
-              type="button"
-              onClick={() => goToPage(Math.min(totalPages, safePage + 1))}
-              disabled={safePage === totalPages}
-              className="rounded-lg border border-white/10 px-2.5 py-1 text-xs font-medium text-fo-text-muted transition hover:text-fo-text disabled:opacity-40"
-            >
-              Next
-            </button>
-          </div>
-        </div>
+        <BrowseListPagination
+          currentPage={safePage}
+          totalPages={totalPages}
+          label={paginationLabel}
+          onPageChange={goToPage}
+        />
       ) : filteredNotifications.length > 0 ? (
         <p className="text-xs text-fo-text-muted">{paginationLabel}</p>
       ) : null}

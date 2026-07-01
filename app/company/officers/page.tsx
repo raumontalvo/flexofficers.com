@@ -1,6 +1,7 @@
 import { UserRole, ApplicationStatus } from "@/app/generated/prisma/enums";
 import { CompanyOfficersPageContent } from "@/components/company/company-officers-page-content";
-import { PageShell, SectionHeading } from "@/components/ui";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
+import { PageShell } from "@/components/ui";
 import { serializeOfficerSearchResult } from "@/lib/company-officers-page";
 import { officerSearchCardSelect, officerUserSummarySelect } from "@/lib/officer-fields";
 import {
@@ -125,10 +126,7 @@ export default async function CompanyOfficersPage({
 
   return (
     <PageShell nav="company" maxWidth="full" sidebar>
-      <SectionHeading
-        title="Officers"
-        subtitle="Find qualified officers near your shifts and invite them to apply."
-      />
+      <TranslatedSectionHeading page="companyOfficers" />
 
       <CompanyOfficersPageContent
         officers={serializedOfficers}

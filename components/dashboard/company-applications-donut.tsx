@@ -1,4 +1,7 @@
+"use client";
+
 import { Card } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
 type DonutSegment = {
@@ -13,24 +16,16 @@ type CompanyApplicationsDonutProps = {
   acceptedCount: number;
 };
 
-function buildSegments({
-  pendingCount,
-  invitedCount,
-  acceptedCount,
-}: CompanyApplicationsDonutProps): DonutSegment[] {
-  return [
-    { label: "Pending", value: pendingCount, color: "#3b82f6" },
-    { label: "Invited", value: invitedCount, color: "#f59e0b" },
-    { label: "Accepted", value: acceptedCount, color: "#10b981" },
-  ];
-}
-
 function DonutChart({
   segments,
   size = "default",
+  noDataLabel,
+  totalLabel,
 }: {
   segments: DonutSegment[];
   size?: "default" | "compact";
+  noDataLabel: string;
+  totalLabel: string;
 }) {
   const total = segments.reduce((sum, segment) => sum + segment.value, 0);
   const isCompact = size === "compact";
@@ -46,7 +41,7 @@ function DonutChart({
           chartSize
         )}
       >
-        <span className="text-xs text-fo-text-muted">No data</span>
+        <span className="text-xs text-fo-text-muted">{noDataLabel}</span>
       </div>
     );
   }
@@ -78,7 +73,7 @@ function DonutChart({
         <div className="text-center">
           <p className={cn("font-bold text-fo-text", totalText)}>{total}</p>
           <p className="text-[10px] uppercase tracking-wide text-fo-text-muted">
-            Total
+            {totalLabel}
           </p>
         </div>
       </div>
@@ -113,7 +108,13 @@ function DonutLegend({
 }
 
 export function CompanyApplicationsDonut(props: CompanyApplicationsDonutProps) {
-  const segments = buildSegments(props);
+  const { t } = useLandingLanguage();
+  const copy = t.dashboard.company;
+  const segments: DonutSegment[] = [
+    { label: copy.donutPending, value: props.pendingCount, color: "#3b82f6" },
+    { label: copy.donutInvited, value: props.invitedCount, color: "#f59e0b" },
+    { label: copy.donutAccepted, value: props.acceptedCount, color: "#10b981" },
+  ];
   const total = segments.reduce((sum, segment) => sum + segment.value, 0);
 
   return (
@@ -123,19 +124,28 @@ export function CompanyApplicationsDonut(props: CompanyApplicationsDonutProps) {
         padding="none"
         className="fo-glass-card border border-white/10 p-3.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)] lg:hidden"
       >
-        <h2 className="text-base font-bold text-fo-text">Applicants Overview</h2>
+        <h2 className="text-base font-bold text-fo-text">{copy.applicantsOverview}</h2>
 
         {total === 0 ? (
           <div className="mt-3 flex items-center gap-4">
-            <DonutChart segments={segments} size="compact" />
+            <DonutChart
+              segments={segments}
+              size="compact"
+              noDataLabel={t.common.noData}
+              totalLabel={t.common.total}
+            />
             <p className="text-xs leading-relaxed text-fo-text-muted">
-              Applicant and invite activity will appear here once officers apply
-              or accept your invites.
+              {copy.applicantsEmpty}
             </p>
           </div>
         ) : (
           <div className="mt-3 flex items-center gap-4">
-            <DonutChart segments={segments} size="compact" />
+            <DonutChart
+              segments={segments}
+              size="compact"
+              noDataLabel={t.common.noData}
+              totalLabel={t.common.total}
+            />
             <DonutLegend segments={segments} compact />
           </div>
         )}
@@ -146,19 +156,24 @@ export function CompanyApplicationsDonut(props: CompanyApplicationsDonutProps) {
         padding="none"
         className="fo-glass-card hidden h-full border border-white/10 p-4 lg:block"
       >
-        <h2 className="text-base font-bold text-fo-text">Applicants Overview</h2>
+        <h2 className="text-base font-bold text-fo-text">{copy.applicantsOverview}</h2>
 
         {total === 0 ? (
           <div className="mt-6 flex flex-col items-center justify-center py-6 text-center">
-            <DonutChart segments={segments} />
-            <p className="mt-4 text-sm text-fo-text-muted">
-              Applicant and invite activity will appear here once officers apply
-              or accept your invites.
-            </p>
+            <DonutChart
+              segments={segments}
+              noDataLabel={t.common.noData}
+              totalLabel={t.common.total}
+            />
+            <p className="mt-4 text-sm text-fo-text-muted">{copy.applicantsEmpty}</p>
           </div>
         ) : (
           <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row sm:items-center">
-            <DonutChart segments={segments} />
+            <DonutChart
+              segments={segments}
+              noDataLabel={t.common.noData}
+              totalLabel={t.common.total}
+            />
             <DonutLegend segments={segments} />
           </div>
         )}

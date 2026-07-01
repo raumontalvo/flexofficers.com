@@ -1,5 +1,7 @@
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
-import { PageShell, SectionHeading } from "@/components/ui";
+import { TranslatedPageHeader } from "@/components/i18n/translated-page-header";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
+import { PageShell } from "@/components/ui";
 import { applicationIdOnlySelect, officerBrowseShiftSelect } from "@/lib/application-fields";
 import { prisma } from "@/lib/prisma";
 import type { ShiftCardData } from "@/lib/shift-card-data";
@@ -72,18 +74,14 @@ export default async function ShiftsPage() {
 
   return (
     <PageShell nav="officer" maxWidth="6xl" sidebar contentClassName="!pt-2 md:!pt-5">
-      <div className="space-y-0.5 md:hidden">
-        <h1 className="text-xl font-bold tracking-tight text-fo-text">Open Shifts</h1>
-        <p className="text-sm leading-snug text-fo-text-muted">
-          Browse open shifts posted by companies.
-        </p>
-      </div>
-
-      <SectionHeading
-        title="Open Shifts"
-        subtitle="Browse open shifts posted by companies."
-        className="hidden md:flex"
+      <TranslatedPageHeader
+        page="shifts"
+        className="md:hidden"
+        titleClassName="text-xl lg:text-xl"
+        subtitleClassName="text-sm leading-snug lg:text-sm"
       />
+
+      <TranslatedSectionHeading page="shifts" className="hidden md:flex" />
 
       <div className="mt-2 md:mt-3">
         <ShiftsBrowseList

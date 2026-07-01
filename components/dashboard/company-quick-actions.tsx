@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   ApplicantsIcon,
@@ -8,60 +10,61 @@ import {
 } from "@/components/nav/icons";
 import { Card, CardDescription, CardTitle } from "@/components/ui";
 import { MobileActionCard } from "@/components/ui/mobile";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
-const actions = [
+const actionConfig = [
   {
     href: "/shifts/create",
-    title: "Post a New Shift",
-    description: "Create a shift and start receiving applicants.",
+    titleKey: "postShift" as const,
+    descKey: "postShiftDesc" as const,
     icon: ShiftsIcon,
     iconClassName: "bg-blue-500/20 text-blue-300",
   },
   {
     href: "/company/applications",
-    title: "View Applicants",
-    description: "Review officer applications.",
+    titleKey: "viewApplicants" as const,
+    descKey: "viewApplicantsDesc" as const,
     icon: ApplicantsIcon,
     iconClassName: "bg-violet-500/20 text-violet-300",
   },
   {
     href: "/company/accepted-officers",
-    title: "Upcoming Shifts",
-    description: "See confirmed shifts.",
+    titleKey: "upcomingShifts" as const,
+    descKey: "upcomingShiftsDesc" as const,
     icon: UpcomingIcon,
     iconClassName: "bg-amber-500/20 text-amber-300",
   },
   {
     href: "/company/officers",
-    title: "Manage Officers",
-    description: "Search and review officer profiles.",
+    titleKey: "manageOfficers" as const,
+    descKey: "manageOfficersDesc" as const,
     icon: SearchIcon,
     iconClassName: "bg-emerald-500/20 text-emerald-300",
   },
   {
     href: "/company/staff",
-    title: "Staff",
-    description: "View your saved officers.",
+    titleKey: "staff" as const,
+    descKey: "staffDesc" as const,
     icon: StaffIcon,
     iconClassName: "bg-sky-500/20 text-sky-300",
   },
-] as const;
+];
 
 export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean }) {
+  const { t } = useLandingLanguage();
+  const actions = t.dashboard.company.quickActions;
   const postShiftHref = canPostShifts ? "/shifts/create" : "/company/billing";
 
   return (
     <section className="space-y-2.5">
       <div>
-        <h2 className="text-base font-bold text-fo-text">Quick Actions</h2>
-        <p className="text-xs text-fo-text-muted">
-          Jump to the tools you use most.
-        </p>
+        <h2 className="text-base font-bold text-fo-text">{t.common.quickActions}</h2>
+        <p className="text-xs text-fo-text-muted">{t.common.quickActionsSubtitle}</p>
       </div>
 
       <div className="flex flex-col gap-2 lg:hidden">
-        {actions.map((action) => {
+        {actionConfig.map((action) => {
           const Icon = action.icon;
           const href =
             action.href === "/shifts/create" ? postShiftHref : action.href;
@@ -70,8 +73,8 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
             <MobileActionCard
               key={action.href}
               href={href}
-              title={action.title}
-              description={action.description}
+              title={actions[action.titleKey]}
+              description={actions[action.descKey]}
               icon={<Icon className="h-4 w-4" />}
               iconClassName={action.iconClassName}
               className="rounded-2xl p-3.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.55)]"
@@ -81,7 +84,7 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
       </div>
 
       <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 lg:grid lg:grid-cols-3">
-        {actions.map((action) => {
+        {actionConfig.map((action) => {
           const Icon = action.icon;
           const href =
             action.href === "/shifts/create" ? postShiftHref : action.href;
@@ -110,9 +113,9 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
                   </span>
                 </div>
                 <div className="space-y-0.5">
-                  <CardTitle className="text-sm">{action.title}</CardTitle>
+                  <CardTitle className="text-sm">{actions[action.titleKey]}</CardTitle>
                   <CardDescription className="text-xs leading-snug">
-                    {action.description}
+                    {actions[action.descKey]}
                   </CardDescription>
                 </div>
               </Card>

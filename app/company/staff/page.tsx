@@ -1,5 +1,6 @@
 import { UserRole, ApplicationStatus } from "@/app/generated/prisma/enums";
-import { PageShell, SectionHeading } from "@/components/ui";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
+import { PageShell } from "@/components/ui";
 import {
   companyStaffMemberSelect,
   serializeCompanyStaffMember,
@@ -101,10 +102,7 @@ export default async function CompanyStaffPage() {
 
   return (
     <PageShell nav="company" maxWidth="full" sidebar>
-      <SectionHeading
-        title="Staff"
-        subtitle="Officers on your private roster. Invite them to staff-only shifts or any open shift you post."
-      />
+      <TranslatedSectionHeading page="companyStaff" />
 
       <CompanyStaffBrowseList
         staff={serializedStaff}

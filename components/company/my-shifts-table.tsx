@@ -1,13 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { MyShiftMobileCard } from "@/components/company/my-shift-mobile-card";
 import { ShiftRowActions } from "@/components/company/shift-row-actions";
 import { ShiftWorkforcePanel } from "@/components/company/shift-workforce-panel";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { interpolate } from "@/lib/app-i18n";
+import {
+  formatCompanyShiftsPagination,
+  getCompanyShiftsTabs,
+  getShiftStatusLabel,
+} from "@/lib/i18n/ui-labels";
 import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
 import {
   COMPANY_SHIFTS_PAGE_SIZE,
@@ -22,13 +28,7 @@ import {
   type SerializedCompanyShiftRow,
 } from "@/lib/company-shifts-page";
 import { formatHourlyRate, formatShiftTime } from "@/lib/format-shift";
-
-const TABS: { id: CompanyShiftsPageTab; label: string }[] = [
-  { id: "all", label: "All Shifts" },
-  { id: "open", label: "Open" },
-  { id: "filled", label: "Filled" },
-  { id: "cancelled", label: "Cancelled" },
-];
+import Link from "next/link";
 
 const MOBILE_TAB_STYLES: Record<
   CompanyShiftsPageTab,
@@ -93,6 +93,7 @@ function PeopleIcon({ className }: { className?: string }) {
 }
 
 function MyShiftStatusBadge({ status }: { status: ShiftStatus }) {
+  const { t } = useLandingLanguage();
   const styles = {
     [ShiftStatus.OPEN]:
       "border-green-500/25 bg-green-500/10 text-green-200",
@@ -115,7 +116,7 @@ function MyShiftStatusBadge({ status }: { status: ShiftStatus }) {
         styles[status] ?? styles[ShiftStatus.COMPLETED]
       )}
     >
-      {status.replaceAll("_", " ")}
+      {getShiftStatusLabel(t, status)}
     </span>
   );
 }
@@ -149,12 +150,13 @@ function FillProgressBar({
 }
 
 function EmptyShiftsState({ canPostShifts }: { canPostShifts: boolean }) {
+  const { t } = useLandingLanguage();
+  const copy = t.browse.companyShifts;
+
   return (
     <div className="px-4 py-16 text-center">
-      <h3 className="text-lg font-semibold text-fo-text">No shifts posted yet.</h3>
-      <p className="mt-2 text-sm text-fo-text-muted">
-        Post your first shift to start receiving applicants.
-      </p>
+      <h3 className="text-lg font-semibold text-fo-text">{copy.empty.none}</h3>
+      <p className="mt-2 text-sm text-fo-text-muted">{copy.empty.noneDescription}</p>
       <Link
         href={canPostShifts ? "/shifts/create" : "/company/billing"}
         className={buttonClassName({
@@ -162,7 +164,7 @@ function EmptyShiftsState({ canPostShifts }: { canPostShifts: boolean }) {
           className: "mt-6 inline-flex",
         })}
       >
-        Post a Shift
+        {canPostShifts ? copy.actions.postShift : copy.actions.subscribeToPost}
       </Link>
     </div>
   );
@@ -175,6 +177,8 @@ function MobilePagination({
   pagination: ReturnType<typeof paginateCompanyShifts<SerializedCompanyShiftRow>>;
   onPageChange: (page: number) => void;
 }) {
+  const { t } = useLandingLanguage();
+
   if (pagination.totalPages <= 1) {
     return null;
   }
@@ -187,10 +191,13 @@ function MobilePagination({
         disabled={pagination.page <= 1}
         className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Previous
+        {t.browse.pagination.previous}
       </button>
       <p className="text-xs text-fo-text-muted">
-        Page {pagination.page} of {pagination.totalPages}
+        {interpolate(t.browse.pagination.pageOf, {
+          page: pagination.page,
+          total: pagination.totalPages,
+        })}
       </p>
       <button
         type="button"
@@ -200,7 +207,7 @@ function MobilePagination({
         disabled={pagination.page >= pagination.totalPages}
         className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Next
+        {t.browse.pagination.next}
       </button>
     </div>
   );
@@ -211,6 +218,10 @@ export function MyShiftsTable({
   workforceByShiftId,
   canPostShifts,
 }: MyShiftsTableProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.browse.companyShifts;
+  const table = copy.table;
+  const tabs = getCompanyShiftsTabs(t);
   const [activeTab, setActiveTab] = useState<CompanyShiftsPageTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -256,7 +267,7 @@ export function MyShiftsTable({
       <section className="mt-4 space-y-4 pb-24 md:hidden">
         <div className="fo-glass-card space-y-3 rounded-2xl border border-white/10 p-3.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)]">
           <div className="grid w-full min-w-0 grid-cols-4 gap-1.5">
-              {TABS.map((tab) => {
+              {tabs.map((tab) => {
                 const count = tabCounts[tab.id];
                 const isActive = activeTab === tab.id;
                 const styles = MOBILE_TAB_STYLES[tab.id];
@@ -283,12 +294,12 @@ export function MyShiftsTable({
             </div>
 
           <label className="relative block">
-            <span className="sr-only">Search shifts</span>
+            <span className="sr-only">{copy.searchAria}</span>
             <input
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search shifts..."
+              placeholder={copy.searchPlaceholder}
               className="min-h-10 w-full rounded-xl border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
             />
           </label>
@@ -296,7 +307,7 @@ export function MyShiftsTable({
 
         {pagination.items.length === 0 ? (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-12 text-center text-sm text-fo-text-muted">
-            No shifts match this filter.
+            {copy.empty.noMatch}
           </div>
         ) : (
           <div className="space-y-2.5">
@@ -325,7 +336,7 @@ export function MyShiftsTable({
         <div className="flex flex-col gap-3 border-b border-white/[0.06] px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="overflow-x-auto">
             <div className="flex min-w-max flex-nowrap gap-2">
-              {TABS.map((tab) => {
+              {tabs.map((tab) => {
                 const count = tabCounts[tab.id];
 
                 return (
@@ -351,12 +362,12 @@ export function MyShiftsTable({
           </div>
 
           <label className="relative block w-full lg:max-w-xs">
-            <span className="sr-only">Search shifts</span>
+            <span className="sr-only">{copy.searchAria}</span>
             <input
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search shifts..."
+              placeholder={copy.searchPlaceholder}
               className="min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
             />
           </label>
@@ -366,13 +377,13 @@ export function MyShiftsTable({
           <table className="min-w-[960px] w-full text-left text-sm">
             <thead className="border-b border-white/[0.06] bg-white/[0.02] text-[11px] uppercase tracking-wide text-fo-text-muted">
               <tr>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Shift / Location</th>
-                <th className="px-4 py-3 font-semibold">Date &amp; Time</th>
-                <th className="px-4 py-3 font-semibold">Pay</th>
-                <th className="px-4 py-3 font-semibold">Filled</th>
-                <th className="px-4 py-3 font-semibold">Applicants</th>
-                <th className="px-4 py-3 font-semibold text-right">Actions</th>
+                <th className="px-4 py-3 font-semibold">{table.status}</th>
+                <th className="px-4 py-3 font-semibold">{table.shiftLocation}</th>
+                <th className="px-4 py-3 font-semibold">{table.dateTime}</th>
+                <th className="px-4 py-3 font-semibold">{table.pay}</th>
+                <th className="px-4 py-3 font-semibold">{table.filled}</th>
+                <th className="px-4 py-3 font-semibold">{table.applicants}</th>
+                <th className="px-4 py-3 font-semibold text-right">{table.actions}</th>
               </tr>
             </thead>
             <tbody>
@@ -382,7 +393,7 @@ export function MyShiftsTable({
                     colSpan={7}
                     className="px-4 py-12 text-center text-sm text-fo-text-muted"
                   >
-                    No shifts match this filter.
+                    {copy.empty.noMatch}
                   </td>
                 </tr>
               ) : (
@@ -447,7 +458,7 @@ export function MyShiftsTable({
                               }
                               className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text"
                             >
-                              {expandedShiftId === shift.id ? "Hide" : "Roster"}
+                              {expandedShiftId === shift.id ? table.hide : table.roster}
                             </button>
                             <ShiftRowActions shiftId={shift.id} status={shift.status} />
                           </div>
@@ -473,8 +484,12 @@ export function MyShiftsTable({
         {filteredShifts.length > 0 ? (
           <div className="flex flex-col gap-3 border-t border-white/[0.06] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-fo-text-muted">
-              Showing {pagination.startIndex} to {pagination.endIndex} of{" "}
-              {pagination.totalItems} shifts
+              {formatCompanyShiftsPagination(
+                t,
+                pagination.startIndex,
+                pagination.endIndex,
+                pagination.totalItems
+              )}
             </p>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -484,7 +499,7 @@ export function MyShiftsTable({
                 disabled={pagination.page <= 1}
                 className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Previous
+                {t.browse.pagination.previous}
               </button>
 
               {Array.from({ length: pagination.totalPages }, (_, index) => index + 1).map(
@@ -513,7 +528,7 @@ export function MyShiftsTable({
                 disabled={pagination.page >= pagination.totalPages}
                 className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:bg-white/[0.04] hover:text-fo-text disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Next
+                {t.browse.pagination.next}
               </button>
             </div>
           </div>

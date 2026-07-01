@@ -1,6 +1,8 @@
 "use client";
 
 import { ApplicationStatusBadge } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { interpolate } from "@/lib/app-i18n";
 import {
   formatEstimatedShiftPay,
   formatHourlyRate,
@@ -56,6 +58,8 @@ export function ApplicationCard({
   onListChange,
   onDeleted,
 }: ApplicationCardProps) {
+  const { t } = useLandingLanguage();
+  const card = t.browse.applications.card;
   const { shift } = application;
   const startTime = new Date(shift.startTime);
   const endTime = new Date(shift.endTime);
@@ -93,7 +97,9 @@ export function ApplicationCard({
               <span className="text-sm font-semibold text-fo-text-muted">/hr</span>
             </p>
             {estimatedPay ? (
-              <p className="mt-1 text-xs text-fo-text-muted">Est. {estimatedPay}</p>
+              <p className="mt-1 text-xs text-fo-text-muted">
+                {interpolate(card.estimatedPay, { pay: estimatedPay })}
+              </p>
             ) : null}
           </div>
 
@@ -112,7 +118,7 @@ export function ApplicationCard({
             </div>
 
             <p className="text-xs text-fo-text-muted">
-              Applied {formatAppliedDate(application.appliedAt)}
+              {interpolate(card.applied, { date: appliedDateLabel })}
             </p>
           </div>
 
@@ -172,9 +178,13 @@ export function ApplicationCard({
                 <span className="ml-1 text-sm font-semibold text-fo-text-muted">/hr</span>
               </p>
               {estimatedPay ? (
-                <p className="mt-1 text-sm text-fo-text-muted">Est. earnings {estimatedPay}</p>
+                <p className="mt-1 text-sm text-fo-text-muted">
+                  {interpolate(card.estimatedPay, { pay: estimatedPay })}
+                </p>
               ) : (
-                <p className="mt-1 text-sm text-fo-text-subtle">Estimated earnings unavailable</p>
+                <p className="mt-1 text-sm text-fo-text-subtle">
+                  {t.commonExtras.notProvided}
+                </p>
               )}
             </div>
           </div>
@@ -182,7 +192,7 @@ export function ApplicationCard({
           <div className="flex min-w-0 flex-col justify-between gap-4">
             <div className="space-y-1">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted">
-                Applied
+                {t.shiftDetail.actions.applied}
               </p>
               <p className="text-sm font-semibold text-fo-text">{appliedDateLabel}</p>
             </div>

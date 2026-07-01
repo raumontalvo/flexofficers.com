@@ -1,5 +1,6 @@
 "use client";
 
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 import {
   isWizardStepComplete,
@@ -29,21 +30,24 @@ export function ProfileWizardHeader({
   form,
   onStepSelect,
 }: ProfileWizardHeaderProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.dashboard.officer;
+
   return (
     <header className="space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 space-y-0.5">
           <h1 className="text-2xl font-bold tracking-tight text-fo-text sm:text-3xl">
-            Officer Profile
+            {t.pages.officerProfile.title}
           </h1>
           <p className="text-sm text-fo-text-muted">
-            Complete your profile step by step so companies can review you.
+            {t.pages.officerProfile.subtitle}
           </p>
         </div>
 
         <div className="fo-glass-card w-full shrink-0 rounded-fo-card border border-sky-500/25 p-3.5 sm:max-w-sm lg:w-80">
           <p className="text-xs font-medium uppercase tracking-wide text-fo-text-muted">
-            Profile Completion
+            {copy.profileCompletion}
           </p>
           <p className="mt-0.5 text-3xl font-bold text-fo-primary-bright">
             {completionPercent}%

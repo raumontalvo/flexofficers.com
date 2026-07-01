@@ -1,3 +1,5 @@
+"use client";
+
 import type { ComponentType, SVGProps } from "react";
 import Link from "next/link";
 import {
@@ -10,6 +12,7 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
 type DashboardSidebarWidgetsProps = {
@@ -59,6 +62,9 @@ export function DashboardSidebarWidgets({
   upcomingCount,
   className,
 }: DashboardSidebarWidgetsProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.dashboard.officer.sidebar;
+
   return (
     <div className={cn("space-y-2.5", className)}>
       <Card
@@ -66,14 +72,16 @@ export function DashboardSidebarWidgets({
         padding="none"
         className="fo-glass-card fo-glass-card-hover space-y-2.5 p-3.5"
       >
-        <CardTitle className="text-sm font-semibold">Upcoming Shift</CardTitle>
+        <CardTitle className="text-sm font-semibold">{copy.upcomingShift}</CardTitle>
         {upcomingCount > 0 ? (
           <div className="space-y-2">
             <p className="text-2xl font-bold leading-none text-fo-text">
               {upcomingCount}
             </p>
             <CardDescription className="text-xs">
-              Accepted {upcomingCount === 1 ? "shift" : "shifts"} starting soon.
+              {upcomingCount === 1
+                ? copy.acceptedStartingSoonOne
+                : copy.acceptedStartingSoon}
             </CardDescription>
             <Link
               href="/officer/upcoming-shifts"
@@ -84,16 +92,16 @@ export function DashboardSidebarWidgets({
                 className: "!min-h-8 !py-1.5 !text-xs",
               })}
             >
-              View Upcoming Shifts
+              {copy.viewUpcoming}
             </Link>
           </div>
         ) : (
           <WidgetEmptyState
             icon={AcceptedIcon}
-            title="No upcoming shifts"
-            description="Future accepted shifts appear here."
+            title={copy.noUpcoming}
+            description={copy.noUpcomingDesc}
             actionHref="/shifts"
-            actionLabel="Browse Shifts"
+            actionLabel={copy.browseShifts}
           />
         )}
       </Card>
@@ -103,13 +111,13 @@ export function DashboardSidebarWidgets({
         padding="none"
         className="fo-glass-card fo-glass-card-hover space-y-2.5 p-3.5"
       >
-        <CardTitle className="text-sm font-semibold">Announcements</CardTitle>
+        <CardTitle className="text-sm font-semibold">{copy.announcements}</CardTitle>
         <WidgetEmptyState
           icon={NotificationsIcon}
-          title="No announcements"
-          description="Platform updates will show here."
+          title={copy.noAnnouncements}
+          description={copy.noAnnouncementsDesc}
           actionHref="/officer/notifications"
-          actionLabel="View Notifications"
+          actionLabel={copy.viewNotifications}
         />
       </Card>
     </div>
