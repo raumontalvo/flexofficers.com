@@ -2,16 +2,12 @@ import { HeroBadge } from "@/components/landing/HeroBadge";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FlexOfficersLogoLink } from "@/components/brand";
 import Link from "next/link";
-import {
-  AcceptedPreview,
-  ApplicantsPreview,
-  BrowsePreview,
-  DashboardPreview,
-  InvitesPreview,
-  ManageShiftsPreview,
-} from "@/components/landing/AppPreviews";
-import { FeatureCard } from "@/components/landing/FeatureCard";
 import { HeroRolePhone } from "@/components/landing/HeroRolePhone";
+import { FeatureCard } from "@/components/landing/FeatureCard";
+import {
+  COMPANY_LANDING_SCREENSHOTS,
+  OFFICER_LANDING_SCREENSHOTS,
+} from "@/lib/landing-phone-screenshots";
 import {
   IconCalendar,
   IconCard,
@@ -223,21 +219,13 @@ export default function Home() {
               <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-8 lg:gap-10 xl:gap-12">
                 <HeroRolePhone
                   roleLabel="Security Officer"
+                  screenshots={OFFICER_LANDING_SCREENSHOTS}
                   style={{ animationDelay: "180ms" }}
-                  screens={[
-                    { label: "Browse Shifts", content: <BrowsePreview /> },
-                    { label: "Company Invites", content: <InvitesPreview /> },
-                    { label: "Accepted Shifts", content: <AcceptedPreview /> },
-                  ]}
                 />
                 <HeroRolePhone
                   roleLabel="Security Company"
+                  screenshots={COMPANY_LANDING_SCREENSHOTS}
                   style={{ animationDelay: "260ms" }}
-                  screens={[
-                    { label: "Dashboard", content: <DashboardPreview /> },
-                    { label: "Applicants", content: <ApplicantsPreview /> },
-                    { label: "My Shifts", content: <ManageShiftsPreview /> },
-                  ]}
                 />
               </div>
             </div>

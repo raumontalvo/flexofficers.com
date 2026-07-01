@@ -49,7 +49,7 @@ export function PhoneFrame({
           )}
         >
           <div className="mx-auto mb-2.5 h-1 w-14 rounded-full bg-white/10" />
-          <div className="overflow-hidden rounded-[1.65rem] bg-fo-bg min-h-[400px]">
+          <div className="overflow-hidden rounded-[1.65rem] bg-fo-bg">
             {children}
           </div>
         </div>

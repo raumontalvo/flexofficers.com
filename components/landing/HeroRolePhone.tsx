@@ -1,32 +1,28 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { useState } from "react";
 import { PhoneFrame } from "@/components/landing/PhoneFrame";
+import { PhoneScreenshotCarousel } from "@/components/landing/PhoneScreenshotCarousel";
+import type { LandingPhoneScreenshot } from "@/lib/landing-phone-screenshots";
+import { LANDING_PHONE_CYCLE_MS } from "@/lib/landing-phone-screenshots";
 import { cn } from "@/lib/cn";
-
-type HeroScreen = {
-  label: string;
-  content: ReactNode;
-};
 
 type HeroRolePhoneProps = {
   roleLabel: string;
-  screens: HeroScreen[];
+  screenshots: LandingPhoneScreenshot[];
   className?: string;
   style?: React.CSSProperties;
 };
 
 export function HeroRolePhone({
   roleLabel,
-  screens,
+  screenshots,
   className,
   style,
 }: HeroRolePhoneProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const activeScreen = screens[activeIndex] ?? screens[0];
+  const [activeLabel, setActiveLabel] = useState(screenshots[0]?.label ?? "");
 
-  if (!activeScreen) {
+  if (screenshots.length === 0) {
     return null;
   }
 
@@ -41,36 +37,12 @@ export function HeroRolePhone({
         </p>
       </div>
 
-      <div
-        className="flex w-full max-w-full flex-wrap items-center justify-center gap-1.5 px-1"
-        role="tablist"
-        aria-label={`${roleLabel} screens`}
-      >
-        {screens.map((screen, index) => {
-          const selected = index === activeIndex;
-
-          return (
-            <button
-              key={screen.label}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => setActiveIndex(index)}
-              className={cn(
-                "rounded-full border px-2.5 py-1 text-[10px] font-semibold transition sm:px-3 sm:py-1.5 sm:text-xs",
-                selected
-                  ? "border-fo-primary-bright/45 bg-fo-primary/15 text-fo-primary-hover"
-                  : "border-white/10 bg-white/[0.03] text-fo-text-muted hover:border-white/15 hover:text-fo-text"
-              )}
-            >
-              {screen.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <PhoneFrame label={activeScreen.label} size="hero" className="w-full">
-        {activeScreen.content}
+      <PhoneFrame label={activeLabel} size="hero" className="w-full">
+        <PhoneScreenshotCarousel
+          screenshots={screenshots}
+          intervalMs={LANDING_PHONE_CYCLE_MS}
+          onSlideChange={(screenshot) => setActiveLabel(screenshot.label)}
+        />
       </PhoneFrame>
     </div>
   );

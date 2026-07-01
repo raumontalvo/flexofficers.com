@@ -43,4 +43,7 @@ next-env.d.ts
 # clerk configuration (can include secrets)
 /.clerk/
 
+# landing screenshot capture profiles (local Chrome sessions)
+/.landing-capture/
+
 /app/generated/prisma

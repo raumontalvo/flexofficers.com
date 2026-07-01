@@ -12,7 +12,8 @@
     "bootstrap:admin": "bash scripts/bootstrap-first-admin.sh",
     "activate:company-subscription": "bash scripts/activate-company-subscription.sh",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "capture:landing-screenshots": "bash scripts/capture-landing-screenshots-chrome.sh all"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.4.2",
