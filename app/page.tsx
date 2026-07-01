@@ -3,12 +3,15 @@ import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FlexOfficersLogoLink } from "@/components/brand";
 import Link from "next/link";
 import {
+  AcceptedPreview,
   ApplicantsPreview,
   BrowsePreview,
   DashboardPreview,
   InvitesPreview,
+  ManageShiftsPreview,
 } from "@/components/landing/AppPreviews";
 import { FeatureCard } from "@/components/landing/FeatureCard";
+import { HeroRolePhone } from "@/components/landing/HeroRolePhone";
 import {
   IconCalendar,
   IconCard,
@@ -24,7 +27,6 @@ import {
   IconZap,
 } from "@/components/landing/icons";
 import { LandingEyebrow, LandingHeading } from "@/components/landing/LandingHeading";
-import { PhoneFrame } from "@/components/landing/PhoneFrame";
 import { buttonClassName, Card, CardDescription, CardTitle } from "@/components/ui";
 import { COMPANY_TRIAL_COPY } from "@/lib/company-billing-plan";
 import { cn } from "@/lib/cn";
@@ -176,8 +178,8 @@ export default function Home() {
       {/* Hero */}
       <section className="relative overflow-x-hidden">
         <div className="landing-hero-glow absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-5 pb-24 max-lg:pt-[calc(var(--landing-header-h)+0.5rem)] sm:px-8 sm:pb-32 sm:max-lg:pt-[calc(var(--landing-header-h)+0.75rem)] lg:px-8 lg:py-40">
-          <div className="flex flex-col max-lg:gap-16 lg:grid lg:grid-cols-2 lg:items-center lg:gap-20 xl:gap-28">
+        <div className="relative mx-auto max-w-7xl px-5 pb-24 max-lg:pt-[calc(var(--landing-header-h)+2rem)] sm:px-8 sm:pb-32 sm:max-lg:pt-[calc(var(--landing-header-h)+2.5rem)] lg:px-8 lg:pb-40 lg:pt-44">
+          <div className="flex flex-col max-lg:gap-16 lg:grid lg:grid-cols-2 lg:items-start lg:gap-20 xl:gap-28">
             <div className="landing-fade-up relative z-10 max-w-xl pb-[max(2rem,env(safe-area-inset-bottom,0px))] max-lg:order-1 lg:pb-0">
               <HeroBadge />
               <LandingEyebrow>Security staffing marketplace</LandingEyebrow>
@@ -215,29 +217,29 @@ export default function Home() {
             </div>
 
             <div
-              className="landing-hero-showcase landing-fade-up relative z-0 grid min-w-0 grid-cols-2 max-lg:order-2 max-lg:w-full max-lg:grid-cols-[repeat(2,minmax(0,1fr))] max-lg:gap-x-4 max-lg:gap-y-3 max-lg:px-4 sm:max-lg:gap-x-5 lg:grid-cols-2 lg:gap-12 xl:gap-14"
+              className="landing-hero-showcase landing-fade-up relative z-0 w-full min-w-0 max-lg:order-2 max-lg:pt-4 sm:max-lg:pt-6 lg:pt-10"
               style={{ animationDelay: "120ms" }}
             >
-              <PhoneFrame label="Officer Browse" style={{ animationDelay: "180ms" }}>
-                <BrowsePreview />
-              </PhoneFrame>
-              <PhoneFrame
-                label="Company Dashboard"
-                className="max-lg:mt-0 lg:mt-20"
-                style={{ animationDelay: "260ms" }}
-              >
-                <DashboardPreview />
-              </PhoneFrame>
-              <PhoneFrame label="Applicants" style={{ animationDelay: "340ms" }}>
-                <ApplicantsPreview />
-              </PhoneFrame>
-              <PhoneFrame
-                label="Company Invites"
-                className="max-lg:mt-0 lg:mt-20"
-                style={{ animationDelay: "420ms" }}
-              >
-                <InvitesPreview />
-              </PhoneFrame>
+              <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 sm:gap-8 lg:gap-10 xl:gap-12">
+                <HeroRolePhone
+                  roleLabel="Security Officer"
+                  style={{ animationDelay: "180ms" }}
+                  screens={[
+                    { label: "Browse Shifts", content: <BrowsePreview /> },
+                    { label: "Company Invites", content: <InvitesPreview /> },
+                    { label: "Accepted Shifts", content: <AcceptedPreview /> },
+                  ]}
+                />
+                <HeroRolePhone
+                  roleLabel="Security Company"
+                  style={{ animationDelay: "260ms" }}
+                  screens={[
+                    { label: "Dashboard", content: <DashboardPreview /> },
+                    { label: "Applicants", content: <ApplicantsPreview /> },
+                    { label: "My Shifts", content: <ManageShiftsPreview /> },
+                  ]}
+                />
+              </div>
             </div>
           </div>
         </div>

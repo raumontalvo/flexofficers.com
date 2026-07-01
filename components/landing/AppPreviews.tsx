@@ -10,7 +10,7 @@ import {
 import { ShiftStatusBadge, StatusBadge } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
-const PREVIEW_HEIGHT = "h-[332px]";
+const PREVIEW_HEIGHT = "h-[400px]";
 
 function isPreviewNavActive(activeHref: string, item: NavItem) {
   if (item.match) {
@@ -32,11 +32,11 @@ function PreviewBottomNav({
   return (
     <nav
       aria-hidden
-      className="shrink-0 border-t border-fo-border bg-fo-bg-elevated/95 px-0.5 pb-1 pt-1"
+      className="shrink-0 border-t border-fo-border bg-fo-bg-elevated/95 px-1 pb-1.5 pt-1.5 backdrop-blur-md"
     >
       <div
         className={cn(
-          "grid gap-0.5",
+          "grid gap-1",
           items.length === 6 && "grid-cols-6",
           items.length === 7 && "grid-cols-7"
         )}
@@ -49,14 +49,14 @@ function PreviewBottomNav({
             <div
               key={item.href}
               className={cn(
-                "flex min-h-[34px] flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1 text-center",
+                "flex min-h-[38px] flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 py-1 text-center",
                 active
                   ? "bg-fo-primary/10 text-fo-primary-hover"
                   : "text-fo-text-subtle"
               )}
             >
-              <Icon className="h-2.5 w-2.5 shrink-0" />
-              <span className="max-w-full truncate text-[5.5px] font-medium leading-none">
+              <Icon className="h-3 w-3 shrink-0" />
+              <span className="max-w-full truncate text-[6px] font-medium leading-none sm:text-[7px]">
                 {item.label}
               </span>
             </div>
@@ -81,7 +81,7 @@ function PreviewScreen({
   return (
     <div className={cn("flex flex-col bg-fo-bg", PREVIEW_HEIGHT)}>
       {header}
-      <div className="flex-1 space-y-2 overflow-hidden px-2 py-2">{children}</div>
+      <div className="flex-1 space-y-2.5 overflow-hidden px-2.5 py-2.5">{children}</div>
       <PreviewBottomNav role={role} activeHref={activeHref} />
     </div>
   );
@@ -173,7 +173,7 @@ function PreviewTabPills({
           <div
             key={tab.id}
             className={cn(
-              "rounded-full border px-1 py-0.5 text-center text-[5.5px] font-semibold leading-tight",
+              "rounded-full border px-1.5 py-0.5 text-center text-[6px] font-semibold leading-tight sm:text-[7px]",
               selected ? tab.selectedClass : tab.unselectedClass
             )}
           >
@@ -473,7 +473,7 @@ export function ApplicantsPreview() {
 
 export function AcceptedPreview() {
   return (
-    <PreviewScreen role="officer" activeHref="/officer/applications">
+    <PreviewScreen role="officer" activeHref="/officer/accepted-shifts">
       <PreviewGlassCard>
         <div className="space-y-2 p-2.5">
           <div className="flex items-start justify-between gap-2">

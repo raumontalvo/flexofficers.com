@@ -190,7 +190,7 @@ html {
 @media (max-width: 1023px) {
   .landing-hero-showcase {
     margin-top: 0;
-    scroll-margin-top: var(--landing-header-h);
+    scroll-margin-top: calc(var(--landing-header-h) + 1rem);
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
   }
 }

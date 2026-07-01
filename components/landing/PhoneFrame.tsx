@@ -10,7 +10,7 @@ type PhoneFrameProps = {
 };
 
 const sizeClasses = {
-  hero: "max-lg:w-full lg:w-[250px]",
+  hero: "w-full max-w-[300px] lg:max-w-[280px] xl:max-w-[300px]",
   showcase: "w-[260px] sm:w-[300px]",
 };
 
@@ -44,12 +44,12 @@ export function PhoneFrame({
         />
         <div
           className={cn(
-            "relative rounded-[2.25rem] bg-fo-surface/30 p-2.5 shadow-[0_32px_64px_-24px_rgba(0,0,0,0.7)] backdrop-blur-sm transition duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_40px_80px_-20px_rgba(37,99,235,0.2)]",
+            "relative w-full rounded-[2.25rem] bg-fo-surface/30 p-2.5 shadow-[0_32px_64px_-24px_rgba(0,0,0,0.7)] backdrop-blur-sm transition duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_40px_80px_-20px_rgba(37,99,235,0.2)]",
             sizeClasses[size]
           )}
         >
           <div className="mx-auto mb-2.5 h-1 w-14 rounded-full bg-white/10" />
-          <div className="overflow-hidden rounded-[1.65rem] bg-fo-bg min-h-[332px]">
+          <div className="overflow-hidden rounded-[1.65rem] bg-fo-bg min-h-[400px]">
             {children}
           </div>
         </div>
