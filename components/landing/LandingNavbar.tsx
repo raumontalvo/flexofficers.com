@@ -7,6 +7,7 @@ import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 const SECTION_LINKS = [
+  { href: "#introduction", label: "Introduction" },
   { href: "#how-it-works", label: "How It Works" },
   { href: "#companies", label: "For Companies" },
   { href: "#officers", label: "For Officers" },

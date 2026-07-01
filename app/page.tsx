@@ -211,33 +211,29 @@ export default function Home() {
       </section>
 
       {/* Introduction */}
-      <section className="border-t border-white/[0.06] px-5 py-16 sm:px-8 sm:py-20">
-        <div className="mx-auto max-w-4xl">
-          <div
-            className={cn(
-              landingCardClass,
-              "landing-fade-up px-6 py-8 sm:px-10 sm:py-10"
-            )}
-          >
-            <div className="mx-auto max-w-3xl text-center">
-              <LandingEyebrow>PRIVATE SECURITY WORKFORCE PLATFORM</LandingEyebrow>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight text-fo-text sm:text-4xl">
-                Introducing FlexOfficers
-              </h2>
-            </div>
-            <p className="mx-auto mt-6 max-w-4xl text-base leading-7 text-fo-text-muted sm:mt-8 sm:text-lg sm:leading-8">
-              FlexOfficers is the ultimate workforce platform for the private
-              security industry. Security companies create profiles, manage their
-              staff, and post shifts—either publicly for any qualified officer or
-              privately for their own team. When extra coverage is needed, companies
-              send direct invitations—no calls, no texts. Officers sign up for
-              free, build profiles, view shift details—time, location, pay—and apply
-              to shifts, even from new companies. If an officer declines, the next
-              invited officer steps in. Both sides track upcoming shifts and
-              assignments. FlexOfficers saves time, fills shifts fast, and keeps
-              everyone covered.
-            </p>
-          </div>
+      <section
+        id="introduction"
+        className="scroll-mt-[var(--landing-header-h)] border-t border-white/[0.06] px-5 py-20 sm:px-8 sm:py-28 lg:py-32"
+      >
+        <div className="landing-fade-up mx-auto max-w-5xl text-center">
+          <span className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-fo-primary-hover sm:text-sm">
+            INTRODUCTION
+          </span>
+          <h2 className="mt-6 text-4xl font-bold tracking-tight text-fo-text sm:mt-8 sm:text-5xl lg:text-6xl">
+            Meet FlexOfficers
+          </h2>
+          <p className="mx-auto mt-8 max-w-5xl text-base leading-8 text-fo-text-muted sm:mt-10 sm:text-lg sm:leading-8">
+            FlexOfficers is the ultimate workforce platform for the private security
+            industry. Security companies create profiles, manage their staff, and post
+            shifts—either publicly for any qualified officer or privately for their
+            own team. When extra coverage is needed, companies send direct
+            invitations—no calls, no texts. Officers sign up for free, build profiles,
+            view shift details—including time, location, and pay—and apply to shifts,
+            even from new companies. If an officer declines, the next invited officer
+            steps in. Both companies and officers can track upcoming shifts and
+            assignments. FlexOfficers saves time, fills shifts faster, and keeps
+            everyone covered.
+          </p>
         </div>
       </section>
 
