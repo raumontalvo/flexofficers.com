@@ -111,6 +111,39 @@ const planFeatures = [
   "No Commission Fees",
 ];
 
+const howItWorksSteps = [
+  {
+    step: "Step 1",
+    title: "Choose Your Role",
+    description:
+      "Security companies and security officers create the right account for their needs.",
+  },
+  {
+    step: "Step 2",
+    title: "Complete Your Profile",
+    description:
+      "Companies add business details. Officers add experience, licenses, certifications, availability, and contact info.",
+  },
+  {
+    step: "Step 3",
+    title: "Post or Find Shifts",
+    description:
+      "Companies post open shifts. Officers browse shifts, apply, and receive company invites.",
+  },
+  {
+    step: "Step 4",
+    title: "Review & Connect",
+    description:
+      "Companies review applicants, view officer profiles, verify license info, and manage staff.",
+  },
+  {
+    step: "Step 5",
+    title: "Manage Your Workforce",
+    description:
+      "Companies track applicants, accepted officers, staff, invites, and posted shifts in one place.",
+  },
+] as const;
+
 const landingCardClass =
   "landing-card-lift border-white/[0.04] bg-fo-surface/35 p-8 shadow-[0_16px_48px_-28px_rgba(0,0,0,0.65)]";
 
@@ -126,7 +159,7 @@ function StepCard({
   return (
     <Card
       variant="elevated"
-      className={cn(landingCardClass, "text-center")}
+      className={cn(landingCardClass, "h-full text-left sm:text-center")}
     >
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-fo-primary-hover">
         {step}
@@ -224,27 +257,20 @@ export default function Home() {
         <div className="mx-auto max-w-7xl">
           <LandingHeading
             title="How FlexOfficers Works"
-            subtitle="From signup to staffed shifts in three clear steps."
+            subtitle="From signup to a staffed workforce—on both sides of the marketplace."
             align="center"
             className="landing-fade-up"
           />
 
-          <div className="mt-16 grid gap-6 md:grid-cols-3 md:gap-8">
-            <StepCard
-              step="Step 1"
-              title="Choose Your Role"
-              description="Security Company or Security Officer—pick the path that fits you."
-            />
-            <StepCard
-              step="Step 2"
-              title="Complete Your Profile"
-              description="Build a professional company or officer profile."
-            />
-            <StepCard
-              step="Step 3"
-              title="Connect"
-              description="Companies review officer profiles and verify credentials through their own hiring process."
-            />
+          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
+            {howItWorksSteps.map((item) => (
+              <StepCard
+                key={item.step}
+                step={item.step}
+                title={item.title}
+                description={item.description}
+              />
+            ))}
           </div>
         </div>
       </section>
