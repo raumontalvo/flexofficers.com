@@ -191,6 +191,7 @@ html {
   .landing-hero-showcase {
     margin-top: 0;
     scroll-margin-top: var(--landing-header-h);
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
   }
 }
 

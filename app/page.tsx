@@ -8,6 +8,7 @@ import {
   BrowsePreview,
   DashboardPreview,
   HirePreview,
+  InvitesPreview,
   ManageShiftsPreview,
   MyShiftsPreview,
   OfficerSearchPreview,
@@ -180,7 +181,7 @@ export default function Home() {
       <LandingNavbar />
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-x-hidden">
         <div className="landing-hero-glow absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto max-w-7xl px-5 pb-24 max-lg:pt-[calc(var(--landing-header-h)+0.5rem)] sm:px-8 sm:pb-32 sm:max-lg:pt-[calc(var(--landing-header-h)+0.75rem)] lg:px-8 lg:py-40">
           <div className="flex flex-col max-lg:gap-16 lg:grid lg:grid-cols-2 lg:items-center lg:gap-20 xl:gap-28">
@@ -238,11 +239,11 @@ export default function Home() {
                 <ApplicantsPreview />
               </PhoneFrame>
               <PhoneFrame
-                label="Accepted Shift"
+                label="Company Invites"
                 className="max-lg:mt-0 lg:mt-20"
                 style={{ animationDelay: "420ms" }}
               >
-                <AcceptedPreview />
+                <InvitesPreview />
               </PhoneFrame>
             </div>
           </div>
@@ -346,11 +347,11 @@ export default function Home() {
                   <ShiftDetailPreview />
                 </PhoneFrame>
                 <FlowArrow />
-                <PhoneFrame size="showcase" label="Apply">
-                  <ShiftDetailPreview />
+                <PhoneFrame size="showcase" label="Company Invites">
+                  <InvitesPreview />
                 </PhoneFrame>
                 <FlowArrow />
-                <PhoneFrame size="showcase" label="My Shifts">
+                <PhoneFrame size="showcase" label="My Applications">
                   <MyShiftsPreview />
                 </PhoneFrame>
                 <FlowArrow />
