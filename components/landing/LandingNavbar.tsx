@@ -72,11 +72,11 @@ export function LandingNavbar() {
               <Image
                 src="/branding/concepts/flexofficers-logo-concept.png"
                 alt="FlexOfficers"
-                width={400}
-                height={96}
+                width={448}
+                height={112}
                 priority
-                sizes="(max-width: 1023px) 150px, 400px"
-                className="h-20 w-auto object-contain lg:h-24"
+                sizes="(max-width: 1023px) 150px, 448px"
+                className="h-20 w-auto object-contain lg:h-28"
               />
             </Link>
           </div>
