@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  LanguageDropdown,
+  LanguageDropdownCompact,
+} from "@/components/landing/LanguageDropdown";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
-
-const SECTION_LINKS = [
-  { href: "#introduction", label: "Introduction" },
-  { href: "#how-it-works", label: "How It Works" },
-  { href: "#companies", label: "For Companies" },
-  { href: "#officers", label: "For Officers" },
-  { href: "#pricing", label: "Pricing" },
-] as const;
 
 function MenuIcon({ open }: { open: boolean }) {
   return (
@@ -39,8 +36,20 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 export function LandingNavbar() {
+  const { t } = useLandingLanguage();
   const [open, setOpen] = useState(false);
   const menuId = useId();
+
+  const sectionLinks = useMemo(
+    () => [
+      { href: "#introduction", label: t.nav.introduction },
+      { href: "#how-it-works", label: t.nav.howItWorks },
+      { href: "#companies", label: t.nav.forCompanies },
+      { href: "#officers", label: t.nav.forOfficers },
+      { href: "#pricing", label: t.nav.pricing },
+    ],
+    [t]
+  );
 
   const closeMenu = useCallback(() => setOpen(false), []);
 
@@ -83,7 +92,7 @@ export function LandingNavbar() {
           </div>
 
           <div className="hidden items-center justify-center gap-8 whitespace-nowrap text-sm text-fo-text-muted lg:flex lg:gap-10 xl:gap-12">
-            {SECTION_LINKS.map((link) => (
+            {sectionLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
@@ -95,6 +104,7 @@ export function LandingNavbar() {
           </div>
 
           <div className="relative z-10 flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
+            <LanguageDropdownCompact className="hidden lg:flex" />
             <Link
               href="/onboarding?force=1"
               className={buttonClassName({
@@ -103,7 +113,7 @@ export function LandingNavbar() {
                   "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:min-h-11 lg:px-5 lg:text-sm",
               })}
             >
-              Get Started
+              {t.nav.getStarted}
             </Link>
             <Link
               href="/sign-in"
@@ -114,7 +124,7 @@ export function LandingNavbar() {
                   "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:border-transparent lg:bg-transparent lg:font-semibold lg:text-fo-text-muted lg:hover:bg-fo-surface lg:hover:text-fo-text",
               })}
             >
-              Sign In
+              {t.nav.signIn}
             </Link>
             <button
               type="button"
@@ -156,7 +166,7 @@ export function LandingNavbar() {
             >
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-fo-primary-hover">
-                  Menu
+                  {t.nav.menu}
                 </p>
                 <button
                   type="button"
@@ -172,8 +182,10 @@ export function LandingNavbar() {
                 </button>
               </div>
 
+              <LanguageDropdown id="landing-language-mobile" className="mb-4" />
+
               <nav className="flex flex-col gap-1">
-                {SECTION_LINKS.map((link) => (
+                {sectionLinks.map((link) => (
                   <a
                     key={link.href}
                     href={link.href}
@@ -196,7 +208,7 @@ export function LandingNavbar() {
                   })}
                   onClick={closeMenu}
                 >
-                  Sign In
+                  {t.nav.signIn}
                 </Link>
                 <Link
                   href="/onboarding?force=1"
@@ -207,7 +219,7 @@ export function LandingNavbar() {
                   })}
                   onClick={closeMenu}
                 >
-                  Get Started
+                  {t.nav.getStarted}
                 </Link>
               </div>
             </div>
