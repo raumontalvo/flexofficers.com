@@ -3,19 +3,12 @@ import { LandingNavbar } from "@/components/landing/LandingNavbar";
 import { FlexOfficersLogoLink } from "@/components/brand";
 import Link from "next/link";
 import {
-  AcceptedPreview,
   ApplicantsPreview,
   BrowsePreview,
   DashboardPreview,
-  HirePreview,
   InvitesPreview,
-  ManageShiftsPreview,
-  MyShiftsPreview,
-  OfficerSearchPreview,
-  ShiftDetailPreview,
 } from "@/components/landing/AppPreviews";
 import { FeatureCard } from "@/components/landing/FeatureCard";
-import { FlowArrow } from "@/components/landing/FlowArrow";
 import {
   IconCalendar,
   IconCard,
@@ -315,78 +308,6 @@ export default function Home() {
             {officerFeatures.map((feature) => (
               <FeatureCard key={feature.title} {...feature} />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* In action */}
-      <section className="relative overflow-hidden px-5 py-32 sm:px-8 sm:py-40">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(37,99,235,0.12),transparent_70%)]"
-          aria-hidden="true"
-        />
-        <div className="relative mx-auto max-w-7xl">
-          <LandingHeading
-            title="See FlexOfficers In Action"
-            subtitle="The real product flow—from browse to hire."
-            align="center"
-            titleClassName="lg:text-7xl"
-          />
-
-          <div className="mt-20 grid gap-20 lg:grid-cols-2 lg:gap-16 xl:gap-24">
-            <div className="max-lg:mx-auto max-lg:w-full">
-              <h3 className="text-center text-2xl font-semibold tracking-tight text-fo-text">
-                Officer Flow
-              </h3>
-              <div className="mt-10 flex w-full flex-col items-center">
-                <PhoneFrame size="showcase" label="Browse">
-                  <BrowsePreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="View Shift">
-                  <ShiftDetailPreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="Company Invites">
-                  <InvitesPreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="My Applications">
-                  <MyShiftsPreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="Accepted Shift">
-                  <AcceptedPreview />
-                </PhoneFrame>
-              </div>
-            </div>
-
-            <div className="max-lg:mx-auto max-lg:w-full">
-              <h3 className="text-center text-2xl font-semibold tracking-tight text-fo-text">
-                Company Flow
-              </h3>
-              <div className="mt-10 flex w-full flex-col items-center">
-                <PhoneFrame size="showcase" label="Dashboard">
-                  <DashboardPreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="Manage Shifts">
-                  <ManageShiftsPreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="Applicants">
-                  <ApplicantsPreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="Officer Search">
-                  <OfficerSearchPreview />
-                </PhoneFrame>
-                <FlowArrow />
-                <PhoneFrame size="showcase" label="Hire Officer">
-                  <HirePreview />
-                </PhoneFrame>
-              </div>
-            </div>
           </div>
         </div>
       </section>
