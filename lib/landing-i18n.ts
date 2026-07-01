@@ -366,7 +366,7 @@ const en: LandingContent = {
       confirm: "Delete My Account",
       deleting: "Deleting…",
       error:
-        "Account deletion could not be completed. Finish deletion in your Clerk account settings.",
+        "Account deletion could not be completed. Please try again or contact support.",
       closeAria: "Close dialog",
     },
     billingLink: {
@@ -607,7 +607,7 @@ const es: LandingContent = {
       confirm: "Eliminar Mi Cuenta",
       deleting: "Eliminando…",
       error:
-        "No se pudo completar la eliminación de la cuenta. Finaliza la eliminación en la configuración de tu cuenta de Clerk.",
+        "No se pudo completar la eliminación de la cuenta. Inténtalo de nuevo o contacta a soporte.",
       closeAria: "Cerrar diálogo",
     },
     billingLink: {

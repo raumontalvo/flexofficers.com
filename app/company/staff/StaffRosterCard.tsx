@@ -1,6 +1,7 @@
 "use client";
 
 import { AddToStaffButton } from "@/components/company/add-to-staff-button";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName } from "@/components/ui";
 import type { OfficerInviteButtonState } from "@/lib/company-invite-workflow";
 import type { SerializedOfficerSearchResult } from "@/lib/company-officers-page";
@@ -21,6 +22,9 @@ export function StaffRosterCard({
   onRemoveFromStaff,
   inviteState,
 }: StaffRosterCardProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.officerCards;
+
   return (
     <OfficerRosterCard
       officer={officer}
@@ -36,7 +40,7 @@ export function StaffRosterCard({
                 "min-h-10 flex-1 border-blue-500/30 px-4 text-sm text-blue-100 hover:bg-blue-500/10",
             })}
           >
-            View Full Profile
+            {copy.viewFullProfile}
           </button>
           {inviteState.kind === "invite" ? (
             <button
@@ -47,7 +51,7 @@ export function StaffRosterCard({
                 className: "min-h-10 flex-1 px-4 text-sm",
               })}
             >
-              Invite to Shift
+              {copy.inviteToShift}
             </button>
           ) : (
             <div className="flex min-h-10 flex-1 items-center justify-center rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-center">
@@ -57,7 +61,7 @@ export function StaffRosterCard({
                 </p>
                 {inviteState.kind === "pending" ? (
                   <p className="mt-0.5 text-xs text-amber-200/80">
-                    Pending Response
+                    {copy.pendingResponse}
                   </p>
                 ) : null}
               </div>

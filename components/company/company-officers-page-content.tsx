@@ -66,6 +66,9 @@ function OfficerResultCard({
   isOnStaff: boolean;
   onStaffChange: (officerId: string, onStaff: boolean) => void;
 }) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.officerCards;
+
   return (
     <OfficerRosterCard
       officer={officer}
@@ -81,7 +84,7 @@ function OfficerResultCard({
                 "min-h-10 flex-1 border-blue-500/30 px-4 text-sm text-blue-100 hover:bg-blue-500/10",
             })}
           >
-            View Full Profile
+            {copy.viewFullProfile}
           </button>
           {inviteState.kind === "invite" ? (
             <button
@@ -92,7 +95,7 @@ function OfficerResultCard({
                 className: "min-h-10 flex-1 px-4 text-sm",
               })}
             >
-              Invite to Apply
+              {copy.inviteToApply}
             </button>
           ) : (
             <div className="flex min-h-10 flex-1 items-center justify-center rounded-lg border border-amber-500/25 bg-amber-500/10 px-4 py-2 text-center">
@@ -102,7 +105,7 @@ function OfficerResultCard({
                 </p>
                 {inviteState.kind === "pending" ? (
                   <p className="mt-0.5 text-xs text-amber-200/80">
-                    Pending Response
+                    {copy.pendingResponse}
                   </p>
                 ) : null}
               </div>

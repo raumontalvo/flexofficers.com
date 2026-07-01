@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { dashboardUserSelect } from "@/lib/officer-fields";
+import { dashboardUserSelect, companyDashboardSelect } from "@/lib/officer-fields";
 import { getCompanyProfileCompletion } from "@/lib/company-profile-completion";
 import { syncCompanyLogoFromClerk, syncOfficerProfilePhotoFromClerk } from "@/lib/clerk-photo-sync";
+import { ensureCompanyOnSignup } from "@/lib/company-onboarding";
+import { getTrialStartUpdateIfEligible } from "@/lib/company-trial";
 import { prisma } from "@/lib/prisma";
 import CompanyDashboard from "./CompanyDashboard";
 import { DashboardSetupState } from "./DashboardSetupState";
@@ -37,7 +39,28 @@ export default async function DashboardPage() {
   }
 
   if (user.role === UserRole.COMPANY) {
-    if (!user.company) {
+    let company = user.company;
+
+    if (!company) {
+      await prisma.$transaction(async (tx) => {
+        await ensureCompanyOnSignup(tx, {
+          userId: user.id,
+          email: user.email,
+          firstName: clerkUser.firstName,
+        });
+      });
+
+      const refreshedUser = await prisma.user.findUnique({
+        where: {
+          clerkId: clerkUser.id,
+        },
+        select: dashboardUserSelect,
+      });
+
+      company = refreshedUser?.company ?? null;
+    }
+
+    if (!company) {
       return (
         <DashboardSetupState
           firstName={clerkUser.firstName}
@@ -46,23 +69,29 @@ export default async function DashboardPage() {
       );
     }
 
+    const trialUpdate = getTrialStartUpdateIfEligible(company);
+    if (Object.keys(trialUpdate).length > 0) {
+      company = await prisma.company.update({
+        where: { id: company.id },
+        data: trialUpdate,
+        select: companyDashboardSelect,
+      });
+    }
+
     const logoUrl =
       (await syncCompanyLogoFromClerk({
-        companyId: user.company.id,
-        logoUrl: user.company.logoUrl,
+        companyId: company.id,
+        logoUrl: company.logoUrl,
         clerkImageUrl: clerkUser.imageUrl,
       })) ?? "";
 
-    const profileCompletion = getCompanyProfileCompletion(
-      user.company,
-      user.email
-    );
+    const profileCompletion = getCompanyProfileCompletion(company, user.email);
 
     return (
       <CompanyDashboard
         firstName={clerkUser.firstName}
         logoUrl={logoUrl}
-        company={user.company}
+        company={company}
         profileCompletion={profileCompletion}
       />
     );

@@ -6,8 +6,10 @@ import {
   cancelCompanyShift,
   deleteCompanyShift,
 } from "@/components/company/shift-actions-menu";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { MobilePrimaryButton, MobileSecondaryButton } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { getShiftActionMessages } from "@/lib/i18n/ui-labels";
 
 type ShiftRowActionsProps = {
   shiftId: string;
@@ -81,24 +83,32 @@ function DeleteIcon({ className }: { className?: string }) {
 }
 
 export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowActionsProps) {
+  const { t } = useLandingLanguage();
+  const copy = getShiftActionMessages(t);
   const isCancelled = status === ShiftStatus.CANCELLED;
 
   if (stacked) {
     return (
       <div className="flex w-full flex-col gap-2">
-        <MobileSecondaryButton href={`/shifts/${shiftId}`}>View</MobileSecondaryButton>
+        <MobileSecondaryButton href={`/shifts/${shiftId}`}>{copy.view}</MobileSecondaryButton>
         {isCancelled ? (
-          <MobileSecondaryButton disabled>Edit</MobileSecondaryButton>
+          <MobileSecondaryButton disabled>{copy.edit}</MobileSecondaryButton>
         ) : (
           <MobileSecondaryButton href={`/company/shifts/${shiftId}/edit`}>
-            Edit
+            {copy.edit}
           </MobileSecondaryButton>
         )}
-        <MobileSecondaryButton onClick={() => void cancelCompanyShift(shiftId)} disabled={isCancelled}>
-          Cancel
+        <MobileSecondaryButton
+          onClick={() => void cancelCompanyShift(shiftId, copy)}
+          disabled={isCancelled}
+        >
+          {copy.cancel}
         </MobileSecondaryButton>
-        <MobilePrimaryButton onClick={() => void deleteCompanyShift(shiftId)} variant="danger">
-          Delete
+        <MobilePrimaryButton
+          onClick={() => void deleteCompanyShift(shiftId, copy)}
+          variant="danger"
+        >
+          {copy.delete}
         </MobilePrimaryButton>
       </div>
     );
@@ -112,8 +122,8 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
           iconButtonClassName,
           "border-blue-500/30 text-blue-200 hover:bg-blue-500/10"
         )}
-        aria-label="View shift"
-        title="View"
+        aria-label={copy.viewShiftAria}
+        title={copy.view}
       >
         <ViewIcon className="h-4 w-4" />
       </Link>
@@ -122,12 +132,9 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
         <button
           type="button"
           disabled
-          className={cn(
-            iconButtonClassName,
-            "border-blue-500/30 text-blue-200"
-          )}
-          aria-label="Edit shift"
-          title="Edit"
+          className={cn(iconButtonClassName, "border-blue-500/30 text-blue-200")}
+          aria-label={copy.editShiftAria}
+          title={copy.edit}
         >
           <EditIcon className="h-4 w-4" />
         </button>
@@ -138,8 +145,8 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
             iconButtonClassName,
             "border-blue-500/30 text-blue-200 hover:bg-blue-500/10"
           )}
-          aria-label="Edit shift"
-          title="Edit"
+          aria-label={copy.editShiftAria}
+          title={copy.edit}
         >
           <EditIcon className="h-4 w-4" />
         </Link>
@@ -147,27 +154,27 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
 
       <button
         type="button"
-        onClick={() => void cancelCompanyShift(shiftId)}
+        onClick={() => void cancelCompanyShift(shiftId, copy)}
         disabled={isCancelled}
         className={cn(
           iconButtonClassName,
           "border-amber-500/30 text-amber-200 hover:bg-amber-500/10"
         )}
-        aria-label="Cancel shift"
-        title="Cancel"
+        aria-label={copy.cancelShiftAria}
+        title={copy.cancel}
       >
         <CancelIcon className="h-4 w-4" />
       </button>
 
       <button
         type="button"
-        onClick={() => void deleteCompanyShift(shiftId)}
+        onClick={() => void deleteCompanyShift(shiftId, copy)}
         className={cn(
           iconButtonClassName,
           "border-red-500/30 text-red-200 hover:bg-red-500/10"
         )}
-        aria-label="Delete shift"
-        title="Delete"
+        aria-label={copy.deleteShiftAria}
+        title={copy.delete}
       >
         <DeleteIcon className="h-4 w-4" />
       </button>

@@ -2,6 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { ensureCompanyOnSignup } from "@/lib/company-onboarding";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
 type OnboardingPayload = {
@@ -69,25 +70,33 @@ export async function POST(req: Request) {
       );
     }
 
-    if (existingUser) {
-      await prisma.user.update({
-        where: {
-          id: existingUser.id,
-        },
-        data: {
+    await prisma.$transaction(async (tx) => {
+      const user = existingUser
+        ? await tx.user.update({
+            where: {
+              id: existingUser.id,
+            },
+            data: {
+              email,
+              role: parsed.role,
+            },
+          })
+        : await tx.user.create({
+            data: {
+              clerkId: clerkUser.id,
+              email,
+              role: parsed.role,
+            },
+          });
+
+      if (parsed.role === UserRole.COMPANY) {
+        await ensureCompanyOnSignup(tx, {
+          userId: user.id,
           email,
-          role: parsed.role,
-        },
-      });
-    } else {
-      await prisma.user.create({
-        data: {
-          clerkId: clerkUser.id,
-          email,
-          role: parsed.role,
-        },
-      });
-    }
+          firstName: clerkUser.firstName,
+        });
+      }
+    });
 
     return NextResponse.json({ success: true });
   } catch {

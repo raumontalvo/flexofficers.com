@@ -18,20 +18,30 @@ export function getDefaultTrialFields(now: Date = new Date()) {
   };
 }
 
-export function getPreTrialFields() {
-  return {
-    trialStartedAt: null,
-    trialEndsAt: null,
-    accessStatus: CompanyAccessStatus.EXPIRED,
-  };
+export function getDefaultCompanyName(
+  email: string,
+  firstName?: string | null
+) {
+  const trimmedFirst = firstName?.trim();
+
+  if (trimmedFirst) {
+    return `${trimmedFirst}'s Company`;
+  }
+
+  const localPart = email.split("@")[0]?.trim();
+
+  if (localPart) {
+    return localPart.charAt(0).toUpperCase() + localPart.slice(1);
+  }
+
+  return "My Company";
 }
 
 export function getTrialStartUpdateIfEligible(
   company: { trialStartedAt: Date | null } | null | undefined,
-  isProfileComplete: boolean,
   now: Date = new Date()
 ) {
-  if (!isProfileComplete || company?.trialStartedAt) {
+  if (company?.trialStartedAt) {
     return {};
   }
 

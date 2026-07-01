@@ -44,7 +44,7 @@ describe("company billing page data", () => {
     expect(billing.autoRenewalEnabled).toBe(false);
   });
 
-  it("returns trial pending before profile completion starts the trial", () => {
+  it("returns trial pending only for legacy accounts without a started trial", () => {
     const company = {
       accessStatus: CompanyAccessStatus.EXPIRED,
       trialStartedAt: null,

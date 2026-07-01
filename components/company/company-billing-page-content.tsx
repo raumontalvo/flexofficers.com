@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   BILLING_SUPPORT_PHONE,
   BILLING_SUPPORT_PHONE_HREF,
-  COMPANY_TRIAL_COPY,
 } from "@/lib/company-billing-plan";
 import type { CompanyBillingPageData } from "@/lib/company-billing-page-data";
 import { buttonClassName, StatusBadge } from "@/components/ui";
@@ -236,10 +235,10 @@ function CompanyBillingMobileContent({
         {billing.trialPending ? (
           <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 p-3">
             <p className="text-sm font-semibold text-amber-100">
-              {COMPANY_TRIAL_COPY.durationLabel}
+              {b.trial.durationLabel}
             </p>
             <p className="mt-1.5 text-sm leading-relaxed text-fo-text-muted">
-              {COMPANY_TRIAL_COPY.profileStartNote} {COMPANY_TRIAL_COPY.activeNote}
+              {b.trial.profileStartNote} {b.trial.activeNote}
             </p>
           </div>
         ) : null}
@@ -247,7 +246,7 @@ function CompanyBillingMobileContent({
         {billing.isOnTrial ? (
           <div className="mt-3 rounded-xl border border-blue-500/20 bg-blue-500/10 p-3">
             <p className="text-sm font-semibold text-fo-primary-hover">
-              {COMPANY_TRIAL_COPY.durationLabel}
+              {b.trial.durationLabel}
             </p>
             {billing.trialDaysRemaining !== null ? (
               <p className="mt-1.5 text-sm font-medium text-fo-text">
@@ -265,7 +264,7 @@ function CompanyBillingMobileContent({
               </div>
             ) : null}
             <p className="mt-2 text-xs leading-relaxed text-fo-text-muted">
-              {COMPANY_TRIAL_COPY.activeNote}
+              {b.trial.activeNote}
             </p>
           </div>
         ) : null}
@@ -393,7 +392,7 @@ function CompanyBillingMobileContent({
             {b.emptyStates.trialExpired}
           </p>
           <p className="mt-1.5 text-xs text-fo-text-muted">
-            {COMPANY_TRIAL_COPY.expiredNote}
+            {b.trial.expiredNote}
           </p>
           <Link
             href="/company/shifts"
@@ -471,10 +470,10 @@ export function CompanyBillingPageContent({
               {billing.trialPending ? (
                 <div className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
                   <p className="text-sm font-semibold text-amber-100">
-                    {COMPANY_TRIAL_COPY.durationLabel}
+                    {b.trial.durationLabel}
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-fo-text-muted">
-                    {COMPANY_TRIAL_COPY.profileStartNote} {COMPANY_TRIAL_COPY.activeNote}
+                    {b.trial.profileStartNote} {b.trial.activeNote}
                   </p>
                 </div>
               ) : null}
@@ -482,21 +481,26 @@ export function CompanyBillingPageContent({
               {billing.isOnTrial ? (
                 <div className="mt-6 rounded-xl border border-blue-500/20 bg-blue-500/10 p-4">
                   <p className="text-sm font-semibold text-fo-primary-hover">
-                    {COMPANY_TRIAL_COPY.durationLabel}
+                    {b.trial.durationLabel}
                   </p>
                   {billing.trialDaysRemaining !== null ? (
                     <p className="mt-2 text-sm text-fo-text">
-                      {billing.trialDaysRemaining}{" "}
-                      {billing.trialDaysRemaining === 1 ? "day" : "days"} remaining
+                      {billing.trialDaysRemaining === 1
+                        ? interpolate(b.labels.dayRemaining, {
+                            count: billing.trialDaysRemaining,
+                          })
+                        : interpolate(b.labels.daysRemainingPlural, {
+                            count: billing.trialDaysRemaining,
+                          })}
                     </p>
                   ) : null}
                   {billing.trialEndsAt ? (
                     <p className="mt-1 text-sm text-fo-text-muted">
-                      Trial ends: {billing.trialEndsAt}
+                      {b.trial.trialEndsPrefix} {billing.trialEndsAt}
                     </p>
                   ) : null}
                   <p className="mt-3 text-sm leading-relaxed text-fo-text-muted">
-                    {COMPANY_TRIAL_COPY.activeNote}
+                    {b.trial.activeNote}
                   </p>
                   <div className="mt-4">
                     {billing.stripeBillingReady ? (
@@ -714,7 +718,7 @@ export function CompanyBillingPageContent({
               {b.emptyStates.trialExpired}
             </p>
             <p className="mt-2 text-sm text-fo-text-muted">
-              {COMPANY_TRIAL_COPY.expiredNote}
+              {b.trial.expiredNote}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               {billing.stripeBillingReady ? (

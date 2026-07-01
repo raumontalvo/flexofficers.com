@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ProfileAvatar } from "@/components/ui";
 import { MobilePrimaryButton, MobileSecondaryButton } from "@/components/ui/mobile";
 import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
@@ -11,6 +12,7 @@ import {
   type SerializedOfficerSearchResult,
 } from "@/lib/company-officers-page";
 import type { OfficerInviteButtonState } from "@/lib/company-invite-workflow";
+import { formatOfficerExperienceMobile } from "@/lib/i18n/ui-labels";
 
 type OfficerSearchMobileCardProps = {
   officer: SerializedOfficerSearchResult;
@@ -94,32 +96,24 @@ function OfficerAvatar({
   );
 }
 
-function formatExperienceLabel(experienceYears: number | null) {
-  if (experienceYears === null || experienceYears === undefined) {
-    return null;
-  }
-
-  return `${experienceYears} ${experienceYears === 1 ? "Year" : "Years"} Experience`;
-}
-
-function hasKnownLocation(cityStateLabel: string) {
-  return (
-    cityStateLabel.trim().length > 0 &&
-    cityStateLabel !== "Location not provided"
-  );
-}
-
 export function OfficerSearchMobileCard({
   officer,
   onViewProfile,
   onInvite,
   inviteState,
-  inviteLabel = "Invite to Apply",
+  inviteLabel,
 }: OfficerSearchMobileCardProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.officerCards;
   const displayName = officerProfileNameLabel(officer.firstName, officer.lastName);
   const licenseDisplay = getOfficerLicenseChipDisplay(officer.licenseTypeLabels);
-  const experienceLabel = formatExperienceLabel(officer.experienceYears);
-  const locationKnown = hasKnownLocation(officer.cityStateLabel);
+  const experienceLabel = formatOfficerExperienceMobile(t, officer.experienceYears);
+  const locationNotProvided = copy.locationNotProvided;
+  const locationKnown =
+    officer.cityStateLabel.trim().length > 0 &&
+    officer.cityStateLabel !== locationNotProvided &&
+    officer.cityStateLabel !== "Location not provided";
+  const resolvedInviteLabel = inviteLabel ?? copy.inviteToApply;
 
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-3 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.55)] lg:hidden">
@@ -132,7 +126,7 @@ export function OfficerSearchMobileCard({
               {displayName}
             </h2>
             <p className="mt-1 text-xs font-medium text-fo-text-muted">
-              Security Officer
+              {copy.securityOfficer}
             </p>
           </div>
 
@@ -141,7 +135,7 @@ export function OfficerSearchMobileCard({
               {locationKnown ? (
                 <span className="truncate">{officer.cityStateLabel}</span>
               ) : (
-                <MutedPill>Location Unknown</MutedPill>
+                <MutedPill>{copy.locationUnknown}</MutedPill>
               )}
             </InfoRow>
 
@@ -153,7 +147,7 @@ export function OfficerSearchMobileCard({
               {experienceLabel ? (
                 <span>{experienceLabel}</span>
               ) : (
-                <MutedPill>Experience Unknown</MutedPill>
+                <MutedPill>{copy.experienceUnknown}</MutedPill>
               )}
             </InfoRow>
           </div>
@@ -162,7 +156,7 @@ export function OfficerSearchMobileCard({
 
       <div className="mt-2.5 flex flex-wrap gap-1.5">
         {licenseDisplay.chips.length === 0 ? (
-          <MutedPill>No Licenses</MutedPill>
+          <MutedPill>{copy.noLicenses}</MutedPill>
         ) : (
           <>
             {licenseDisplay.chips.map((licenseType) => (
@@ -187,11 +181,11 @@ export function OfficerSearchMobileCard({
           onClick={onViewProfile}
           className={buttonClassName}
         >
-          View Profile
+          {copy.viewProfile}
         </MobileSecondaryButton>
         {inviteState.kind === "invite" ? (
           <MobilePrimaryButton onClick={onInvite} className={buttonClassName}>
-            {inviteLabel}
+            {resolvedInviteLabel}
           </MobilePrimaryButton>
         ) : (
           <div
@@ -205,7 +199,7 @@ export function OfficerSearchMobileCard({
                 {inviteState.label}
               </p>
               {inviteState.kind === "pending" ? (
-                <p className="mt-0.5 text-[10px] text-amber-200/80">Pending</p>
+                <p className="mt-0.5 text-[10px] text-amber-200/80">{copy.pending}</p>
               ) : null}
             </div>
           </div>

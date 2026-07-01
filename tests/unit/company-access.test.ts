@@ -8,8 +8,8 @@ import {
 import {
   buildTrialExtensionUpdate,
   calculateExtendedTrialEnd,
+  getDefaultCompanyName,
   getDefaultTrialFields,
-  getPreTrialFields,
   getTrialDaysRemaining,
   getTrialStartUpdateIfEligible,
 } from "@/lib/company-trial";
@@ -25,24 +25,19 @@ describe("company trial helpers", () => {
     expect(defaults.trialEndsAt).toEqual(new Date("2026-07-02T12:00:00.000Z"));
   });
 
-  it("returns pre-trial fields before profile completion", () => {
-    expect(getPreTrialFields()).toEqual({
-      trialStartedAt: null,
-      trialEndsAt: null,
-      accessStatus: CompanyAccessStatus.EXPIRED,
-    });
+  it("builds a default company name from signup details", () => {
+    expect(getDefaultCompanyName("owner@acme.test", "Alex")).toBe("Alex's Company");
+    expect(getDefaultCompanyName("owner@acme.test")).toBe("Owner");
+    expect(getDefaultCompanyName("", null)).toBe("My Company");
   });
 
-  it("starts the trial only when profile is complete and trial has not started", () => {
-    expect(
-      getTrialStartUpdateIfEligible(null, false, now)
-    ).toEqual({});
-    expect(
-      getTrialStartUpdateIfEligible({ trialStartedAt: now }, true, now)
-    ).toEqual({});
-    expect(getTrialStartUpdateIfEligible(null, true, now)).toEqual(
+  it("starts the trial when it has not started yet", () => {
+    expect(getTrialStartUpdateIfEligible(null, now)).toEqual(
       getDefaultTrialFields(now)
     );
+    expect(
+      getTrialStartUpdateIfEligible({ trialStartedAt: now }, now)
+    ).toEqual({});
   });
 
   it("extends from the current trial end when still active", () => {

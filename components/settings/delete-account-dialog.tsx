@@ -1,6 +1,6 @@
 "use client";
 
-import { useClerk, useUser } from "@clerk/nextjs";
+import { useClerk } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, buttonClassName } from "@/components/ui";
@@ -13,8 +13,7 @@ type DeleteAccountDialogProps = {
 export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps) {
   const { t } = useLandingLanguage();
   const copy = t.settings.deleteDialog;
-  const { user } = useUser();
-  const { openUserProfile, signOut } = useClerk();
+  const { signOut } = useClerk();
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
@@ -47,22 +46,23 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
     setIsDeleting(true);
 
     try {
-      if (user?.deleteSelfEnabled) {
-        await user.delete();
-        await signOut({ redirectUrl: "/" });
+      const response = await fetch("/api/account/delete", {
+        method: "POST",
+      });
+
+      const data = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        setErrorMessage(data?.error || copy.error);
         return;
       }
 
       onClose();
-      openUserProfile({
-        __experimental_startPath: "/danger",
-      });
+      await signOut({ redirectUrl: "/" });
     } catch {
       setErrorMessage(copy.error);
-      onClose();
-      openUserProfile({
-        __experimental_startPath: "/danger",
-      });
     } finally {
       setIsDeleting(false);
     }

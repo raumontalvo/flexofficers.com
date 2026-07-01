@@ -373,6 +373,141 @@ export type ProfileShiftTranslations = {
       sending: string;
       sendFailed: string;
     };
+    staff: {
+      noStaffYet: string;
+      noStaffDescription: string;
+      searchSrOnly: string;
+      searchPlaceholder: string;
+      staffCount: string;
+      noStaffFound: string;
+      tryAnotherName: string;
+    };
+    officerCards: {
+      securityOfficer: string;
+      locationUnknown: string;
+      experienceUnknown: string;
+      locationNotProvided: string;
+      experienceNotProvided: string;
+      oneYearExperience: string;
+      yearsExperience: string;
+      oneYearExperienceMobile: string;
+      yearsExperienceMobile: string;
+      noLicenses: string;
+      noLicensesProvided: string;
+      viewProfile: string;
+      viewFullProfile: string;
+      inviteToApply: string;
+      inviteToShift: string;
+      pending: string;
+      pendingResponse: string;
+    };
+    filtersSheet: {
+      clear: string;
+      applyFilters: string;
+      licenseTypesLabel: string;
+    };
+    shiftActions: {
+      ariaLabel: string;
+      title: string;
+      hideRoster: string;
+      viewRoster: string;
+      view: string;
+      edit: string;
+      cancel: string;
+      delete: string;
+      cancelConfirm: string;
+      cancelFailed: string;
+      deleteConfirm: string;
+      deleteFailed: string;
+      viewShiftAria: string;
+      editShiftAria: string;
+      cancelShiftAria: string;
+      deleteShiftAria: string;
+    };
+    companyProfile: {
+      view: {
+        title: string;
+        dashboard: string;
+        publicPreview: string;
+        editProfile: string;
+        viewPublicProfile: string;
+        backToCompanyProfile: string;
+        backFallback: string;
+        licenseInformation: string;
+        companyDetails: string;
+        supportContact: string;
+        aboutUs: string;
+        servicesWeProvide: string;
+        whyOfficersChooseUs: string;
+        workEnvironment: string;
+        memberSince: string;
+        licensedInsured: string;
+        licenseNumber: string;
+        licenseType: string;
+        stateIssued: string;
+        issueDate: string;
+        expirationDate: string;
+        industry: string;
+        companySize: string;
+        established: string;
+        website: string;
+        contactEmail: string;
+        phone: string;
+        businessHours: string;
+        email: string;
+      };
+      edit: {
+        title: string;
+        subtitle: string;
+        backToProfile: string;
+        saveChanges: string;
+        saving: string;
+        uploading: string;
+        savedSuccess: string;
+        saveFailed: string;
+        logoSaveFailed: string;
+        logoHelper: string;
+        companyInformation: string;
+        companyName: string;
+        taglineCategory: string;
+        city: string;
+        state: string;
+        aboutUs: string;
+        companyDescription: string;
+        charCount: string;
+        servicesTitle: string;
+        servicesHelper: string;
+        benefitsTitle: string;
+        benefitsHelper: string;
+        workEnvTitle: string;
+        workEnvHelper: string;
+        addCustomService: string;
+        addCustomBenefit: string;
+        addCustomEnvironment: string;
+        customServicePlaceholder: string;
+        customBenefitPlaceholder: string;
+        customEnvironmentPlaceholder: string;
+        addService: string;
+        addBenefit: string;
+        addEnvironment: string;
+        selectState: string;
+        industry: string;
+        companySize: string;
+        established: string;
+        website: string;
+        industryPlaceholder: string;
+        companySizePlaceholder: string;
+        establishedPlaceholder: string;
+        websitePlaceholder: string;
+        supportContact: string;
+        supportHelper: string;
+        businessHours: string;
+        businessHoursPlaceholder: string;
+        preview: string;
+        previewHelper: string;
+        viewPublicProfile: string;
+      };
+    };
   };
 };
 
@@ -837,6 +972,145 @@ export const profileShiftEn: ProfileShiftTranslations = {
       sending: "Sending...",
       sendFailed: "Failed to send invite.",
     },
+    staff: {
+      noStaffYet: "No staff yet.",
+      noStaffDescription:
+        "Search officers and use Add to Staff to build your private roster for staff-only shift posts.",
+      searchSrOnly: "Search your staff by name",
+      searchPlaceholder: "Search your staff by name",
+      staffCount: "{filtered} of {total} officer{totalSuffix} on your staff",
+      noStaffFound: "No staff found.",
+      tryAnotherName: "Try another name from your staff roster.",
+    },
+    officerCards: {
+      securityOfficer: "Security Officer",
+      locationUnknown: "Location Unknown",
+      experienceUnknown: "Experience Unknown",
+      locationNotProvided: "Location not provided",
+      experienceNotProvided: "Experience not provided",
+      oneYearExperience: "1 year experience",
+      yearsExperience: "{count} years experience",
+      oneYearExperienceMobile: "1 Year Experience",
+      yearsExperienceMobile: "{count} Years Experience",
+      noLicenses: "No Licenses",
+      noLicensesProvided: "No licenses provided",
+      viewProfile: "View Profile",
+      viewFullProfile: "View Full Profile",
+      inviteToApply: "Invite to Apply",
+      inviteToShift: "Invite to Shift",
+      pending: "Pending",
+      pendingResponse: "Pending Response",
+    },
+    filtersSheet: {
+      clear: "Clear",
+      applyFilters: "Apply Filters",
+      licenseTypesLabel: "License types",
+    },
+    shiftActions: {
+      ariaLabel: "Shift actions",
+      title: "Shift Actions",
+      hideRoster: "Hide Roster",
+      viewRoster: "View Roster",
+      view: "View",
+      edit: "Edit",
+      cancel: "Cancel",
+      delete: "Delete",
+      cancelConfirm:
+        "Are you sure you want to cancel this shift? It will be removed from Available Shifts but kept in your company history.",
+      cancelFailed: "Failed to cancel shift",
+      deleteConfirm:
+        "Are you sure you want to delete this shift? This cannot be undone.",
+      deleteFailed: "Failed to delete shift",
+      viewShiftAria: "View shift",
+      editShiftAria: "Edit shift",
+      cancelShiftAria: "Cancel shift",
+      deleteShiftAria: "Delete shift",
+    },
+    companyProfile: {
+      view: {
+        title: "Company Profile",
+        dashboard: "Dashboard",
+        publicPreview: "Public Preview",
+        editProfile: "Edit Profile",
+        viewPublicProfile: "View Public Profile",
+        backToCompanyProfile: "Back to Company Profile",
+        backFallback: "← Back",
+        licenseInformation: "License Information",
+        companyDetails: "Company Details",
+        supportContact: "Support & Contact",
+        aboutUs: "About Us",
+        servicesWeProvide: "Services We Provide",
+        whyOfficersChooseUs: "Why Officers Choose Us",
+        workEnvironment: "Work Environment",
+        memberSince: "Member since {date}",
+        licensedInsured: "Licensed & Insured",
+        licenseNumber: "License Number",
+        licenseType: "License Type",
+        stateIssued: "State Issued",
+        issueDate: "Issue Date",
+        expirationDate: "Expiration Date",
+        industry: "Industry",
+        companySize: "Company Size",
+        established: "Established",
+        website: "Website",
+        contactEmail: "Contact Email",
+        phone: "Phone",
+        businessHours: "Business Hours",
+        email: "Email",
+      },
+      edit: {
+        title: "Edit Company Profile",
+        subtitle:
+          "Update your public profile information. This information is visible to officers.",
+        backToProfile: "Back to Profile",
+        saveChanges: "Save Changes",
+        saving: "Saving...",
+        uploading: "Uploading...",
+        savedSuccess: "Company profile saved.",
+        saveFailed: "Failed to save company profile.",
+        logoSaveFailed: "Failed to save company logo",
+        logoHelper: "Square JPG, PNG, or WEBP recommended. Max 5MB.",
+        companyInformation: "Company Information",
+        companyName: "Company Name",
+        taglineCategory: "Tagline / Category",
+        city: "City",
+        state: "State",
+        aboutUs: "About Us",
+        companyDescription: "Company Description",
+        charCount: "{count} / {max} characters",
+        servicesTitle: "Services We Provide",
+        servicesHelper: "Select all services your company provides.",
+        benefitsTitle: "Why Officers Choose Us",
+        benefitsHelper: "Select the benefits you offer to officers.",
+        workEnvTitle: "Work Environment",
+        workEnvHelper: "Select all that describe your work environment.",
+        addCustomService: "Add Your Own Service",
+        addCustomBenefit: "Add Your Own Benefit",
+        addCustomEnvironment: "Add Your Own Environment",
+        customServicePlaceholder: "Enter a service",
+        customBenefitPlaceholder: "Enter a benefit",
+        customEnvironmentPlaceholder: "Enter a work environment",
+        addService: "+ Add Service",
+        addBenefit: "+ Add Benefit",
+        addEnvironment: "+ Add Environment",
+        selectState: "Select state",
+        industry: "Industry",
+        companySize: "Company Size",
+        established: "Established",
+        website: "Website",
+        industryPlaceholder: "Security Services",
+        companySizePlaceholder: "11–50 employees",
+        establishedPlaceholder: "2018",
+        websitePlaceholder: "https://yourcompany.com",
+        supportContact: "Support & Contact",
+        supportHelper: "Business hours shown on your public profile.",
+        businessHours: "Business Hours",
+        businessHoursPlaceholder: "Mon–Fri 9:00 AM – 5:00 PM",
+        preview: "Preview",
+        previewHelper: "This is how your profile appears to officers.",
+        viewPublicProfile: "View Public Profile",
+      },
+    },
   },
 };
 
@@ -1296,6 +1570,145 @@ export const profileShiftEs: ProfileShiftTranslations = {
       sendInvite: "Enviar Invitación",
       sending: "Enviando...",
       sendFailed: "No se pudo enviar la invitación.",
+    },
+    staff: {
+      noStaffYet: "Aún no hay personal.",
+      noStaffDescription:
+        "Busca oficiales y usa Agregar al Personal para crear tu lista privada para publicaciones solo de personal.",
+      searchSrOnly: "Buscar en tu personal por nombre",
+      searchPlaceholder: "Buscar en tu personal por nombre",
+      staffCount: "{filtered} de {total} oficial{totalSuffix} en tu personal",
+      noStaffFound: "No se encontró personal.",
+      tryAnotherName: "Prueba otro nombre de tu lista de personal.",
+    },
+    officerCards: {
+      securityOfficer: "Oficial de Seguridad",
+      locationUnknown: "Ubicación Desconocida",
+      experienceUnknown: "Experiencia Desconocida",
+      locationNotProvided: "Ubicación no proporcionada",
+      experienceNotProvided: "Experiencia no proporcionada",
+      oneYearExperience: "1 año de experiencia",
+      yearsExperience: "{count} años de experiencia",
+      oneYearExperienceMobile: "1 Año de Experiencia",
+      yearsExperienceMobile: "{count} Años de Experiencia",
+      noLicenses: "Sin Licencias",
+      noLicensesProvided: "Sin licencias proporcionadas",
+      viewProfile: "Ver Perfil",
+      viewFullProfile: "Ver Perfil Completo",
+      inviteToApply: "Invitar a Aplicar",
+      inviteToShift: "Invitar al Turno",
+      pending: "Pendiente",
+      pendingResponse: "Respuesta Pendiente",
+    },
+    filtersSheet: {
+      clear: "Borrar",
+      applyFilters: "Aplicar Filtros",
+      licenseTypesLabel: "Tipos de licencia",
+    },
+    shiftActions: {
+      ariaLabel: "Acciones del turno",
+      title: "Acciones del Turno",
+      hideRoster: "Ocultar Lista",
+      viewRoster: "Ver Lista",
+      view: "Ver",
+      edit: "Editar",
+      cancel: "Cancelar",
+      delete: "Eliminar",
+      cancelConfirm:
+        "¿Estás seguro de que deseas cancelar este turno? Se eliminará de Turnos Disponibles pero se conservará en el historial de tu empresa.",
+      cancelFailed: "No se pudo cancelar el turno",
+      deleteConfirm:
+        "¿Estás seguro de que deseas eliminar este turno? Esta acción no se puede deshacer.",
+      deleteFailed: "No se pudo eliminar el turno",
+      viewShiftAria: "Ver turno",
+      editShiftAria: "Editar turno",
+      cancelShiftAria: "Cancelar turno",
+      deleteShiftAria: "Eliminar turno",
+    },
+    companyProfile: {
+      view: {
+        title: "Perfil de la Empresa",
+        dashboard: "Panel",
+        publicPreview: "Vista Previa Pública",
+        editProfile: "Editar Perfil",
+        viewPublicProfile: "Ver Perfil Público",
+        backToCompanyProfile: "Volver al Perfil de la Empresa",
+        backFallback: "← Atrás",
+        licenseInformation: "Información de Licencia",
+        companyDetails: "Detalles de la Empresa",
+        supportContact: "Soporte y Contacto",
+        aboutUs: "Sobre Nosotros",
+        servicesWeProvide: "Servicios que Ofrecemos",
+        whyOfficersChooseUs: "Por Qué Nos Eligen los Oficiales",
+        workEnvironment: "Entorno de Trabajo",
+        memberSince: "Miembro desde {date}",
+        licensedInsured: "Licenciado y Asegurado",
+        licenseNumber: "Número de Licencia",
+        licenseType: "Tipo de Licencia",
+        stateIssued: "Estado Emisor",
+        issueDate: "Fecha de Emisión",
+        expirationDate: "Fecha de Vencimiento",
+        industry: "Industria",
+        companySize: "Tamaño de la Empresa",
+        established: "Fundada",
+        website: "Sitio Web",
+        contactEmail: "Correo de Contacto",
+        phone: "Teléfono",
+        businessHours: "Horario Comercial",
+        email: "Correo",
+      },
+      edit: {
+        title: "Editar Perfil de la Empresa",
+        subtitle:
+          "Actualiza la información pública de tu empresa. Esta información es visible para los oficiales.",
+        backToProfile: "Volver al Perfil",
+        saveChanges: "Guardar Cambios",
+        saving: "Guardando...",
+        uploading: "Subiendo...",
+        savedSuccess: "Perfil de empresa guardado.",
+        saveFailed: "No se pudo guardar el perfil de la empresa.",
+        logoSaveFailed: "No se pudo guardar el logo de la empresa",
+        logoHelper: "Se recomienda JPG, PNG o WEBP cuadrado. Máx. 5 MB.",
+        companyInformation: "Información de la Empresa",
+        companyName: "Nombre de la Empresa",
+        taglineCategory: "Eslogan / Categoría",
+        city: "Ciudad",
+        state: "Estado",
+        aboutUs: "Sobre Nosotros",
+        companyDescription: "Descripción de la Empresa",
+        charCount: "{count} / {max} caracteres",
+        servicesTitle: "Servicios que Ofrecemos",
+        servicesHelper: "Selecciona todos los servicios que ofrece tu empresa.",
+        benefitsTitle: "Por Qué Nos Eligen los Oficiales",
+        benefitsHelper: "Selecciona los beneficios que ofreces a los oficiales.",
+        workEnvTitle: "Entorno de Trabajo",
+        workEnvHelper: "Selecciona todo lo que describa tu entorno de trabajo.",
+        addCustomService: "Agregar Tu Propio Servicio",
+        addCustomBenefit: "Agregar Tu Propio Beneficio",
+        addCustomEnvironment: "Agregar Tu Propio Entorno",
+        customServicePlaceholder: "Ingresa un servicio",
+        customBenefitPlaceholder: "Ingresa un beneficio",
+        customEnvironmentPlaceholder: "Ingresa un entorno de trabajo",
+        addService: "+ Agregar Servicio",
+        addBenefit: "+ Agregar Beneficio",
+        addEnvironment: "+ Agregar Entorno",
+        selectState: "Seleccionar estado",
+        industry: "Industria",
+        companySize: "Tamaño de la Empresa",
+        established: "Fundada",
+        website: "Sitio Web",
+        industryPlaceholder: "Servicios de Seguridad",
+        companySizePlaceholder: "11–50 empleados",
+        establishedPlaceholder: "2018",
+        websitePlaceholder: "https://tuempresa.com",
+        supportContact: "Soporte y Contacto",
+        supportHelper: "El horario comercial se muestra en tu perfil público.",
+        businessHours: "Horario Comercial",
+        businessHoursPlaceholder: "Lun–Vie 9:00 AM – 5:00 PM",
+        preview: "Vista Previa",
+        previewHelper: "Así aparece tu perfil para los oficiales.",
+        viewPublicProfile: "Ver Perfil Público",
+      },
     },
   },
 };

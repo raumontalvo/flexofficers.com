@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ProfileAvatar } from "@/components/ui";
 import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
 import { cn } from "@/lib/cn";
@@ -10,6 +11,10 @@ import {
   type SerializedOfficerSearchResult,
 } from "@/lib/company-officers-page";
 import { normalizeExperienceCategories } from "@/lib/profile-options";
+import {
+  formatOfficerExperienceDesktop,
+  translateProfileOptionLabel,
+} from "@/lib/i18n/ui-labels";
 
 type OfficerRosterCardProps = {
   officer: SerializedOfficerSearchResult;
@@ -73,21 +78,6 @@ function OfficerAvatar({
   );
 }
 
-function formatExperienceLabel(experienceYears: number | null) {
-  if (experienceYears === null || experienceYears === undefined) {
-    return "Experience not provided";
-  }
-
-  return `${experienceYears} ${experienceYears === 1 ? "year" : "years"} experience`;
-}
-
-function hasKnownLocation(cityStateLabel: string) {
-  return (
-    cityStateLabel.trim().length > 0 &&
-    cityStateLabel !== "Location not provided"
-  );
-}
-
 function getSkillChipDisplay(officer: SerializedOfficerSearchResult) {
   const chips = [
     ...new Set([
@@ -107,12 +97,19 @@ function getSkillChipDisplay(officer: SerializedOfficerSearchResult) {
 }
 
 export function OfficerRosterCard({ officer, actions }: OfficerRosterCardProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.company.officerCards;
   const displayName = officerProfileNameLabel(officer.firstName, officer.lastName);
   const licenseDisplay = getOfficerLicenseChipDisplay(officer.licenseTypeLabels);
   const skillDisplay = getSkillChipDisplay(officer);
-  const locationLabel = hasKnownLocation(officer.cityStateLabel)
+  const locationNotProvided = copy.locationNotProvided;
+  const locationKnown =
+    officer.cityStateLabel.trim().length > 0 &&
+    officer.cityStateLabel !== locationNotProvided &&
+    officer.cityStateLabel !== "Location not provided";
+  const locationLabel = locationKnown
     ? officer.cityStateLabel
-    : "Location not provided";
+    : locationNotProvided;
 
   return (
     <article className="rounded-xl border border-white/10 bg-white/[0.03] p-4 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.45)]">
@@ -123,20 +120,20 @@ export function OfficerRosterCard({ officer, actions }: OfficerRosterCardProps) 
           <h2 className="truncate text-base font-semibold text-fo-text">
             {displayName}
           </h2>
-          <p className="text-xs font-medium text-fo-text-muted">Security Officer</p>
+          <p className="text-xs font-medium text-fo-text-muted">{copy.securityOfficer}</p>
           <p className="text-sm text-fo-text-muted">
             <span className="truncate">{locationLabel}</span>
             <span className="mx-1.5 text-fo-text-subtle">·</span>
             <span>{officer.armedStatusLabel}</span>
             <span className="mx-1.5 text-fo-text-subtle">·</span>
-            <span>{formatExperienceLabel(officer.experienceYears)}</span>
+            <span>{formatOfficerExperienceDesktop(t, officer.experienceYears)}</span>
           </p>
         </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {licenseDisplay.chips.length === 0 ? (
-          <span className="text-xs text-fo-text-subtle">No licenses provided</span>
+          <span className="text-xs text-fo-text-subtle">{copy.noLicensesProvided}</span>
         ) : (
           <>
             {licenseDisplay.chips.map((licenseType) => (
@@ -159,7 +156,10 @@ export function OfficerRosterCard({ officer, actions }: OfficerRosterCardProps) 
       {skillDisplay.chips.length > 0 ? (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {skillDisplay.chips.map((label) => (
-            <SkillChip key={label} label={label} />
+            <SkillChip
+              key={label}
+              label={translateProfileOptionLabel(t, label)}
+            />
           ))}
           {skillDisplay.overflowCount > 0 ? (
             <SkillChip label={`+${skillDisplay.overflowCount}`} />

@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName, ProfileAvatar } from "@/components/ui";
+import { interpolate } from "@/lib/app-i18n";
 import { cn } from "@/lib/cn";
 import type { SerializedCompanyProfile } from "@/lib/company-profile-page-data";
 
@@ -27,16 +31,22 @@ function CheckIcon({ className }: { className?: string }) {
   );
 }
 
-function DetailValue({ value }: { value: string | null | undefined }) {
+function DetailValue({
+  value,
+  notProvided,
+}: {
+  value: string | null | undefined;
+  notProvided: string;
+}) {
   const trimmed = value?.trim();
   const display =
-    !trimmed || trimmed.toLowerCase() === "none" ? "Not provided" : trimmed;
+    !trimmed || trimmed.toLowerCase() === "none" ? notProvided : trimmed;
 
   return <span className="text-sm text-fo-text">{display}</span>;
 }
 
-function EmptyValue() {
-  return <span className="text-sm text-fo-text-muted">Not provided</span>;
+function EmptyValue({ notProvided }: { notProvided: string }) {
+  return <span className="text-sm text-fo-text-muted">{notProvided}</span>;
 }
 
 function ProfileSectionCard({
@@ -61,9 +71,15 @@ function ProfileSectionCard({
   );
 }
 
-function ServiceChipGrid({ items }: { items: string[] }) {
+function ServiceChipGrid({
+  items,
+  notProvided,
+}: {
+  items: string[];
+  notProvided: string;
+}) {
   if (items.length === 0) {
-    return <EmptyValue />;
+    return <EmptyValue notProvided={notProvided} />;
   }
 
   return (
@@ -80,9 +96,15 @@ function ServiceChipGrid({ items }: { items: string[] }) {
   );
 }
 
-function WorkEnvironmentGrid({ items }: { items: string[] }) {
+function WorkEnvironmentGrid({
+  items,
+  notProvided,
+}: {
+  items: string[];
+  notProvided: string;
+}) {
   if (items.length === 0) {
-    return <EmptyValue />;
+    return <EmptyValue notProvided={notProvided} />;
   }
 
   return (
@@ -146,9 +168,15 @@ function BenefitIcon({ label }: { label: string }) {
   }
 }
 
-function BenefitGrid({ items }: { items: string[] }) {
+function BenefitGrid({
+  items,
+  notProvided,
+}: {
+  items: string[];
+  notProvided: string;
+}) {
   if (items.length === 0) {
-    return <EmptyValue />;
+    return <EmptyValue notProvided={notProvided} />;
   }
 
   return (
@@ -171,72 +199,123 @@ function BenefitGrid({ items }: { items: string[] }) {
 function SidebarDetails({
   label,
   value,
+  notProvided,
 }: {
   label: string;
   value: string | null | undefined;
+  notProvided: string;
 }) {
   return (
     <div>
       <dt className="text-xs uppercase tracking-wide text-fo-text-muted">{label}</dt>
       <dd className="mt-1">
-        <DetailValue value={value} />
+        <DetailValue value={value} notProvided={notProvided} />
       </dd>
     </div>
   );
 }
 
-function ProfileSidebar({ profile }: { profile: SerializedCompanyProfile }) {
+function ProfileSidebar({
+  profile,
+  labels,
+  notProvided,
+}: {
+  profile: SerializedCompanyProfile;
+  labels: ReturnType<typeof useLandingLanguage>["t"]["company"]["companyProfile"]["view"];
+  notProvided: string;
+}) {
   return (
     <aside className="space-y-4 self-start">
-      <ProfileSectionCard title="License Information">
+      <ProfileSectionCard title={labels.licenseInformation}>
         <dl className="space-y-3">
-          <SidebarDetails label="License Number" value={profile.license.licenseNumber} />
-          <SidebarDetails label="License Type" value={profile.license.licenseType} />
-          <SidebarDetails label="State Issued" value={profile.license.licenseState} />
-          <SidebarDetails label="Issue Date" value={profile.license.issueDate} />
           <SidebarDetails
-            label="Expiration Date"
+            label={labels.licenseNumber}
+            value={profile.license.licenseNumber}
+            notProvided={notProvided}
+          />
+          <SidebarDetails
+            label={labels.licenseType}
+            value={profile.license.licenseType}
+            notProvided={notProvided}
+          />
+          <SidebarDetails
+            label={labels.stateIssued}
+            value={profile.license.licenseState}
+            notProvided={notProvided}
+          />
+          <SidebarDetails
+            label={labels.issueDate}
+            value={profile.license.issueDate}
+            notProvided={notProvided}
+          />
+          <SidebarDetails
+            label={labels.expirationDate}
             value={profile.license.expirationDate}
+            notProvided={notProvided}
           />
         </dl>
       </ProfileSectionCard>
 
-      <ProfileSectionCard title="Company Details">
+      <ProfileSectionCard title={labels.companyDetails}>
         <dl className="space-y-3">
-          <SidebarDetails label="Industry" value={profile.details.industry} />
-          <SidebarDetails label="Company Size" value={profile.details.companySize} />
-          <SidebarDetails label="Established" value={profile.details.established} />
-          <SidebarDetails label="Website" value={profile.details.website} />
+          <SidebarDetails
+            label={labels.industry}
+            value={profile.details.industry}
+            notProvided={notProvided}
+          />
+          <SidebarDetails
+            label={labels.companySize}
+            value={profile.details.companySize}
+            notProvided={notProvided}
+          />
+          <SidebarDetails
+            label={labels.established}
+            value={profile.details.established}
+            notProvided={notProvided}
+          />
+          <SidebarDetails
+            label={labels.website}
+            value={profile.details.website}
+            notProvided={notProvided}
+          />
           {profile.showContactDetails ? (
             <>
               <SidebarDetails
-                label="Contact Email"
+                label={labels.contactEmail}
                 value={profile.details.contactEmail}
+                notProvided={notProvided}
               />
-              <SidebarDetails label="Phone" value={profile.details.phone} />
+              <SidebarDetails
+                label={labels.phone}
+                value={profile.details.phone}
+                notProvided={notProvided}
+              />
             </>
           ) : (
             <>
-              <SidebarDetails label="Contact Email" value={null} />
-              <SidebarDetails label="Phone" value={null} />
+              <SidebarDetails label={labels.contactEmail} value={null} notProvided={notProvided} />
+              <SidebarDetails label={labels.phone} value={null} notProvided={notProvided} />
             </>
           )}
         </dl>
       </ProfileSectionCard>
 
-      <ProfileSectionCard title="Support & Contact">
+      <ProfileSectionCard title={labels.supportContact}>
         <dl className="space-y-3">
           <SidebarDetails
-            label="Business Hours"
+            label={labels.businessHours}
             value={profile.support.businessHours}
+            notProvided={notProvided}
           />
           <SidebarDetails
-            label="Email"
+            label={labels.email}
             value={profile.showContactDetails ? profile.support.email : null}
+            notProvided={notProvided}
           />
           <SidebarDetails
-            label="Phone"
+            label={labels.phone}
             value={profile.showContactDetails ? profile.support.phone : null}
+            notProvided={notProvided}
           />
         </dl>
       </ProfileSectionCard>
@@ -244,7 +323,15 @@ function ProfileSidebar({ profile }: { profile: SerializedCompanyProfile }) {
   );
 }
 
-function ProfileHero({ profile }: { profile: SerializedCompanyProfile }) {
+function ProfileHero({
+  profile,
+  labels,
+  notProvided,
+}: {
+  profile: SerializedCompanyProfile;
+  labels: ReturnType<typeof useLandingLanguage>["t"]["company"]["companyProfile"]["view"];
+  notProvided: string;
+}) {
   return (
     <section className="fo-glass-card h-auto self-start rounded-xl border border-white/10 p-4 sm:p-5">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start lg:gap-5">
@@ -266,7 +353,7 @@ function ProfileHero({ profile }: { profile: SerializedCompanyProfile }) {
             </div>
 
             <p className="mt-1 text-sm text-blue-100">
-              {profile.categoryLabel || "Not provided"}
+              {profile.categoryLabel || notProvided}
             </p>
 
             <p className="mt-2 text-sm text-fo-text-muted">{profile.locationLabel}</p>
@@ -281,17 +368,17 @@ function ProfileHero({ profile }: { profile: SerializedCompanyProfile }) {
                 {profile.website}
               </a>
             ) : (
-              <p className="mt-1 text-sm text-fo-text-muted">Not provided</p>
+              <p className="mt-1 text-sm text-fo-text-muted">{notProvided}</p>
             )}
 
             <p className="mt-2 text-sm text-fo-text-muted">
-              Member since {profile.memberSinceLabel}
+              {interpolate(labels.memberSince, { date: profile.memberSinceLabel })}
             </p>
 
             {profile.showLicensedInsuredBadge ? (
               <div className="mt-3">
                 <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-200">
-                  Licensed & Insured
+                  {labels.licensedInsured}
                 </span>
               </div>
             ) : null}
@@ -300,7 +387,7 @@ function ProfileHero({ profile }: { profile: SerializedCompanyProfile }) {
 
         <div>
           <p className="text-sm leading-relaxed text-fo-text-muted">
-            {profile.introduction?.trim() || "Not provided"}
+            {profile.introduction?.trim() || notProvided}
           </p>
         </div>
       </div>
@@ -314,6 +401,10 @@ export function CompanyProfileView({
   backHref,
   backLabel,
 }: CompanyProfileViewProps) {
+  const { t } = useLandingLanguage();
+  const labels = t.company.companyProfile.view;
+  const notProvided = t.commonExtras.notProvided;
+
   return (
     <div className="space-y-4">
       {mode === "owner" ? (
@@ -326,14 +417,14 @@ export function CompanyProfileView({
                     href="/dashboard"
                     className="transition hover:text-fo-primary-hover"
                   >
-                    Dashboard
+                    {labels.dashboard}
                   </Link>
                 </li>
                 <li aria-hidden="true">&gt;</li>
-                <li className="text-fo-text">Company Profile</li>
+                <li className="text-fo-text">{labels.title}</li>
               </ol>
             </nav>
-            <h1 className="text-2xl font-bold text-fo-text">Company Profile</h1>
+            <h1 className="text-2xl font-bold text-fo-text">{labels.title}</h1>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -344,7 +435,7 @@ export function CompanyProfileView({
                 size: "md",
               })}
             >
-              Edit Profile
+              {labels.editProfile}
             </Link>
             {profile.hasPublicProfile ? (
               <Link
@@ -354,7 +445,7 @@ export function CompanyProfileView({
                   size: "md",
                 })}
               >
-                View Public Profile
+                {labels.viewPublicProfile}
               </Link>
             ) : null}
           </div>
@@ -366,7 +457,7 @@ export function CompanyProfileView({
           <ol className="flex flex-wrap items-center gap-1.5">
             <li>
               <Link href="/dashboard" className="transition hover:text-fo-primary-hover">
-                Dashboard
+                {labels.dashboard}
               </Link>
             </li>
             <li aria-hidden="true">&gt;</li>
@@ -375,11 +466,11 @@ export function CompanyProfileView({
                 href="/company/profile"
                 className="transition hover:text-fo-primary-hover"
               >
-                Company Profile
+                {labels.title}
               </Link>
             </li>
             <li aria-hidden="true">&gt;</li>
-            <li className="text-fo-text">Public Preview</li>
+            <li className="text-fo-text">{labels.publicPreview}</li>
           </ol>
         </nav>
       ) : null}
@@ -389,38 +480,41 @@ export function CompanyProfileView({
           href={backHref}
           className="inline-flex min-h-11 items-center text-sm font-medium text-fo-primary-hover hover:text-fo-primary-bright"
         >
-          {backLabel ?? "← Back"}
+          {backLabel ?? labels.backFallback}
         </Link>
       ) : null}
 
       {mode === "public" && !backHref ? (
-        <h1 className="text-2xl font-bold text-fo-text">Company Profile</h1>
+        <h1 className="text-2xl font-bold text-fo-text">{labels.title}</h1>
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start">
         <div className="space-y-4">
-          <ProfileHero profile={profile} />
+          <ProfileHero profile={profile} labels={labels} notProvided={notProvided} />
 
-          <ProfileSectionCard title="About Us">
+          <ProfileSectionCard title={labels.aboutUs}>
             <p className="text-sm leading-relaxed text-fo-text-muted">
-              {profile.aboutDescription?.trim() || "Not provided"}
+              {profile.aboutDescription?.trim() || notProvided}
             </p>
           </ProfileSectionCard>
 
-          <ProfileSectionCard title="Services We Provide">
-            <ServiceChipGrid items={profile.services} />
+          <ProfileSectionCard title={labels.servicesWeProvide}>
+            <ServiceChipGrid items={profile.services} notProvided={notProvided} />
           </ProfileSectionCard>
 
-          <ProfileSectionCard title="Why Officers Choose Us">
-            <BenefitGrid items={profile.officerBenefits} />
+          <ProfileSectionCard title={labels.whyOfficersChooseUs}>
+            <BenefitGrid items={profile.officerBenefits} notProvided={notProvided} />
           </ProfileSectionCard>
 
-          <ProfileSectionCard title="Work Environment">
-            <WorkEnvironmentGrid items={profile.workEnvironment} />
+          <ProfileSectionCard title={labels.workEnvironment}>
+            <WorkEnvironmentGrid
+              items={profile.workEnvironment}
+              notProvided={notProvided}
+            />
           </ProfileSectionCard>
         </div>
 
-        <ProfileSidebar profile={profile} />
+        <ProfileSidebar profile={profile} labels={labels} notProvided={notProvided} />
       </div>
 
       {mode === "preview" ? (
@@ -431,7 +525,7 @@ export function CompanyProfileView({
             size: "md",
           })}
         >
-          Back to Company Profile
+          {labels.backToCompanyProfile}
         </Link>
       ) : null}
     </div>

@@ -5,6 +5,7 @@ import { OfficerProfilePanel } from "@/components/company/officer-profile-panel"
 import { officerProfileNameLabel } from "@/components/company/officer-profile-name";
 import { InviteOfficerModal } from "@/components/company/invite-officer-modal";
 import type { CompanyOpenShiftOption } from "@/components/company/invite-officer-to-shift";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   getOfficerInviteButtonState,
   type CompanyOfficerInviteRecord,
@@ -15,6 +16,7 @@ import {
   searchCompanyStaff,
   type SerializedCompanyStaffMember,
 } from "@/lib/company-staff";
+import { formatStaffCountLabel } from "@/lib/i18n/ui-labels";
 import { OfficerSearchMobileCard } from "@/app/company/officers/OfficerSearchMobileCard";
 import { StaffRosterCard } from "./StaffRosterCard";
 
@@ -55,6 +57,9 @@ export function CompanyStaffBrowseList({
   invites: initialInvites,
   acceptedAssignments,
 }: CompanyStaffBrowseListProps) {
+  const { language, t } = useLandingLanguage();
+  const staffCopy = t.company.staff;
+  const officersCopy = t.company.officers;
   const [staff, setStaff] = useState(initialStaff);
   const [invites, setInvites] = useState(initialInvites);
   const [profileOfficerId, setProfileOfficerId] = useState<string | null>(null);
@@ -88,10 +93,9 @@ export function CompanyStaffBrowseList({
   if (staff.length === 0) {
     return (
       <section className="fo-glass-card mt-4 rounded-xl border border-white/10 px-4 py-12 text-center lg:mt-6">
-        <h2 className="text-lg font-semibold text-fo-text">No staff yet.</h2>
+        <h2 className="text-lg font-semibold text-fo-text">{staffCopy.noStaffYet}</h2>
         <p className="mt-2 text-sm text-fo-text-muted">
-          Search officers and use Add to Staff to build your private roster for
-          staff-only shift posts.
+          {staffCopy.noStaffDescription}
         </p>
       </section>
     );
@@ -101,31 +105,30 @@ export function CompanyStaffBrowseList({
     <div className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
       {showInviteSentToast ? (
         <StatusToast
-          message="Invite sent"
+          message={officersCopy.inviteSent}
           onClose={() => setShowInviteSentToast(false)}
         />
       ) : null}
       <label className="block">
-        <span className="sr-only">Search your staff by name</span>
+        <span className="sr-only">{staffCopy.searchSrOnly}</span>
         <input
           type="search"
           value={searchQuery}
           onChange={(event) => setSearchQuery(event.target.value)}
-          placeholder="Search your staff by name"
+          placeholder={staffCopy.searchPlaceholder}
           className="min-h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20 lg:min-h-10 lg:rounded-lg lg:border-fo-border lg:bg-fo-bg/80"
         />
       </label>
 
       <p className="text-sm font-medium text-fo-text">
-        {filteredStaff.length} of {staff.length} officer
-        {staff.length === 1 ? "" : "s"} on your staff
+        {formatStaffCountLabel(t, filteredStaff.length, staff.length, language)}
       </p>
 
       {filteredStaff.length === 0 ? (
         <section className="fo-glass-card rounded-xl border border-white/10 px-4 py-10 text-center">
-          <h2 className="text-base font-semibold text-fo-text">No staff found.</h2>
+          <h2 className="text-base font-semibold text-fo-text">{staffCopy.noStaffFound}</h2>
           <p className="mt-2 text-sm text-fo-text-muted">
-            Try another name from your staff roster.
+            {staffCopy.tryAnotherName}
           </p>
         </section>
       ) : (
@@ -143,7 +146,7 @@ export function CompanyStaffBrowseList({
               openShiftIds,
               acceptedAssignments
             )}
-            inviteLabel="Invite to Shift"
+            inviteLabel={t.company.officerCards.inviteToShift}
           />
         ))}
       </div>
@@ -191,7 +194,7 @@ export function CompanyStaffBrowseList({
                 inviteOfficer.firstName,
                 inviteOfficer.lastName
               )
-            : "Officer"
+            : officersCopy.officerFallback
         }
         openShifts={openShifts}
         invites={invites}

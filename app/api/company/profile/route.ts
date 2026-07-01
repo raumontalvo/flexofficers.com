@@ -1,10 +1,8 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { getCompanyProfileCompletion } from "@/lib/company-profile-completion";
 import {
   getDefaultTrialFields,
-  getPreTrialFields,
   getTrialStartUpdateIfEligible,
 } from "@/lib/company-trial";
 import { embedCompanyProfileMeta } from "@/lib/company-profile-meta";
@@ -106,18 +104,6 @@ export async function POST(req: Request) {
         },
       });
 
-  const profileCompletion = getCompanyProfileCompletion(
-    {
-      companyName: parsed.data.companyName,
-      email: parsed.data.email,
-      phone: parsed.data.phone,
-      address: parsed.data.address,
-      city: parsed.data.city,
-      state: parsed.data.state,
-    },
-    parsed.data.email
-  );
-
   const existingCompany = await prisma.company.findUnique({
     where: {
       userId: user.id,
@@ -127,13 +113,8 @@ export async function POST(req: Request) {
     },
   });
 
-  const trialStartUpdate = getTrialStartUpdateIfEligible(
-    existingCompany,
-    profileCompletion.isComplete
-  );
-  const createTrialFields = profileCompletion.isComplete
-    ? getDefaultTrialFields()
-    : getPreTrialFields();
+  const trialStartUpdate = getTrialStartUpdateIfEligible(existingCompany);
+  const createTrialFields = getDefaultTrialFields();
   const logoUrl =
     resolveSyncedPhotoUrl(parsed.data.logoUrl, clerkUser.imageUrl) ??
     normalizePhotoUrl(parsed.data.logoUrl);

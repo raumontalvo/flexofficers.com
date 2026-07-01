@@ -4,9 +4,31 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { FlexOfficersBadge } from "@/components/brand";
-import { adminSidebarItems } from "@/components/nav/admin-nav-config";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import {
+  ApplicantsIcon,
+  AuditIcon,
+  CompaniesIcon,
+  DashboardIcon,
+  ProfileIcon,
+  ReportsIcon,
+  SettingsIcon,
+  ShiftsIcon,
+} from "@/components/nav/icons";
 import { cn } from "@/lib/cn";
+import { getAdminSidebarItems } from "@/lib/i18n/ui-labels";
+
+const ADMIN_ICONS = {
+  "/admin": DashboardIcon,
+  "/admin/companies": CompaniesIcon,
+  "/admin/officers": ProfileIcon,
+  "/admin/shifts": ShiftsIcon,
+  "/admin/applications": ApplicantsIcon,
+  "/admin/reports": ReportsIcon,
+  "/admin/audit-logs": AuditIcon,
+  "/admin/settings": SettingsIcon,
+} as const;
 
 function isActive(pathname: string, href: string, match?: (pathname: string) => boolean) {
   if (match) {
@@ -19,11 +41,14 @@ function isActive(pathname: string, href: string, match?: (pathname: string) => 
 export function AdminSidebar() {
   const pathname = usePathname();
   const { user } = useUser();
+  const { t } = useLandingLanguage();
+  const adminCopy = t.admin;
+  const navItems = getAdminSidebarItems(t);
 
   const displayName =
     user?.fullName?.trim() ||
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
-    "Admin";
+    adminCopy.fallbackName;
   const email = user?.primaryEmailAddress?.emailAddress ?? "";
   const imageUrl = user?.imageUrl ?? null;
 
@@ -43,19 +68,19 @@ export function AdminSidebar() {
               <span className="text-slate-100">Officers</span>
             </span>
             <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Admin
+              {adminCopy.badge}
             </span>
           </div>
         </Link>
       </div>
 
       <nav
-        aria-label="Admin dashboard"
+        aria-label={adminCopy.navAria}
         className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3"
       >
-        {adminSidebarItems.map((item) => {
+        {navItems.map((item) => {
           const active = isActive(pathname, item.href, item.match);
-          const Icon = item.icon;
+          const Icon = ADMIN_ICONS[item.href as keyof typeof ADMIN_ICONS];
 
           return (
             <Link
@@ -92,7 +117,7 @@ export function AdminSidebar() {
             type="button"
             className="w-full rounded-xl border border-white/[0.08] px-3 py-2 text-[12px] font-medium text-slate-300 transition hover:bg-white/[0.04] hover:text-white"
           >
-            Sign out
+            {adminCopy.signOut}
           </button>
         </SignOutButton>
       </div>

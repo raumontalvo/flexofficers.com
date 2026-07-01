@@ -142,10 +142,6 @@ export function getTranslatedCompanyPostingBlockMessage(
   const messages = t.browse.companyShifts.blockMessage;
 
   if (effectiveStatus === CompanyAccessStatus.EXPIRED) {
-    if (!company.trialStartedAt) {
-      return messages.profileIncomplete;
-    }
-
     return messages.trialExpired;
   }
 
@@ -617,3 +613,93 @@ const PROFILE_WIZARD_STEP_REQUIRED: Record<ProfileWizardStepId, boolean> = {
   certifications: false,
   availability: false,
 };
+
+export function getShiftActionMessages(t: AppTranslations) {
+  return t.company.shiftActions;
+}
+
+export function formatOfficerExperienceMobile(
+  t: AppTranslations,
+  experienceYears: number | null | undefined
+) {
+  const copy = t.company.officerCards;
+  if (experienceYears === null || experienceYears === undefined) {
+    return null;
+  }
+
+  return experienceYears === 1
+    ? copy.oneYearExperienceMobile
+    : interpolate(copy.yearsExperienceMobile, { count: String(experienceYears) });
+}
+
+export function formatOfficerExperienceDesktop(
+  t: AppTranslations,
+  experienceYears: number | null | undefined
+) {
+  const copy = t.company.officerCards;
+  if (experienceYears === null || experienceYears === undefined) {
+    return copy.experienceNotProvided;
+  }
+
+  return experienceYears === 1
+    ? copy.oneYearExperience
+    : interpolate(copy.yearsExperience, { count: String(experienceYears) });
+}
+
+export function formatStaffCountLabel(
+  t: AppTranslations,
+  filtered: number,
+  total: number,
+  language: string
+) {
+  const totalSuffix =
+    language === "es" ? (total === 1 ? "" : "es") : total === 1 ? "" : "s";
+
+  return interpolate(t.company.staff.staffCount, {
+    filtered: String(filtered),
+    total: String(total),
+    totalSuffix,
+  });
+}
+
+export function getAdminSidebarItems(t: AppTranslations) {
+  const items = t.admin.items;
+  return [
+    { href: "/admin", label: items.dashboard, match: (pathname: string) => pathname === "/admin" },
+    {
+      href: "/admin/companies",
+      label: items.companies,
+      match: (pathname: string) => pathname.startsWith("/admin/companies"),
+    },
+    {
+      href: "/admin/officers",
+      label: items.officers,
+      match: (pathname: string) => pathname.startsWith("/admin/officers"),
+    },
+    {
+      href: "/admin/shifts",
+      label: items.shifts,
+      match: (pathname: string) => pathname.startsWith("/admin/shifts"),
+    },
+    {
+      href: "/admin/applications",
+      label: items.applications,
+      match: (pathname: string) => pathname.startsWith("/admin/applications"),
+    },
+    {
+      href: "/admin/reports",
+      label: items.reports,
+      match: (pathname: string) => pathname.startsWith("/admin/reports"),
+    },
+    {
+      href: "/admin/audit-logs",
+      label: items.auditLogs,
+      match: (pathname: string) => pathname.startsWith("/admin/audit-logs"),
+    },
+    {
+      href: "/admin/settings",
+      label: items.settings,
+      match: (pathname: string) => pathname.startsWith("/admin/settings"),
+    },
+  ] as const;
+}

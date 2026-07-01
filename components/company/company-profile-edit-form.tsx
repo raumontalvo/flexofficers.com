@@ -6,7 +6,9 @@ import {
   COMPANY_PROFILE_FORM_OPTIONS,
   parseCompanyPayload,
 } from "@/app/api/company/profile/validation";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName } from "@/components/ui";
+import { interpolate } from "@/lib/app-i18n";
 import { ProfilePhotoUpload } from "@/components/profile/profile-photo-upload";
 import { cn } from "@/lib/cn";
 import type { CompanyProfileEditFormState } from "@/lib/company-profile-edit-data";
@@ -194,6 +196,9 @@ function SelectionChipField({
 }
 
 export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormProps) {
+  const { t } = useLandingLanguage();
+  const e = t.company.companyProfile.edit;
+  const v = t.company.companyProfile.view;
   const [form, setForm] = useState(initialForm);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -282,7 +287,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
     setIsSaving(false);
 
     if (response.ok) {
-      setSubmitSuccess("Company profile saved.");
+      setSubmitSuccess(e.savedSuccess);
       return;
     }
 
@@ -299,18 +304,15 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
       return;
     }
 
-    setSubmitError(data.error || "Failed to save company profile.");
+    setSubmitError(data.error || e.saveFailed);
   }
 
   return (
     <form id="company-profile-edit-form" onSubmit={handleSubmit} className="space-y-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold text-fo-text">Edit Company Profile</h1>
-          <p className="text-sm text-fo-text-muted">
-            Update your public profile information. This information is visible to
-            officers.
-          </p>
+          <h1 className="text-2xl font-bold text-fo-text">{e.title}</h1>
+          <p className="text-sm text-fo-text-muted">{e.subtitle}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -321,7 +323,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               size: "md",
             })}
           >
-            Back to Profile
+            {e.backToProfile}
           </Link>
           <button
             type="submit"
@@ -329,10 +331,10 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
             className={buttonClassName({ size: "md" })}
           >
             {isUploadingLogo
-              ? "Uploading..."
+              ? e.uploading
               : isSaving
-                ? "Saving..."
-                : "Save Changes"}
+                ? e.saving
+                : e.saveChanges}
           </button>
         </div>
       </div>
@@ -357,7 +359,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_280px] xl:items-start">
         <div className="space-y-4">
-          <EditSectionCard title="Company Information">
+          <EditSectionCard title={e.companyInformation}>
             <ProfilePhotoUpload
               value={form.logoUrl}
               onChange={(logoUrl) => setForm({ ...form, logoUrl })}
@@ -371,19 +373,19 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                 });
 
                 if (!response.ok) {
-                  throw new Error("Failed to save company logo");
+                  throw new Error(e.logoSaveFailed);
                 }
               }}
               previewName={form.companyName}
               onUploadingChange={setIsUploadingLogo}
               disabled={isSaving}
               previewShape="circle"
-              helperText="Square JPG, PNG, or WEBP recommended. Max 5MB."
+              helperText={e.logoHelper}
             />
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2 sm:col-span-2">
-                <RequiredLabel htmlFor="companyName">Company Name</RequiredLabel>
+                <RequiredLabel htmlFor="companyName">{e.companyName}</RequiredLabel>
                 <input
                   id="companyName"
                   value={form.companyName}
@@ -396,7 +398,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
 
               <div className="space-y-2 sm:col-span-2">
-                <RequiredLabel htmlFor="tagline">Tagline / Category</RequiredLabel>
+                <RequiredLabel htmlFor="tagline">{e.taglineCategory}</RequiredLabel>
                 <input
                   id="tagline"
                   value={form.tagline}
@@ -409,7 +411,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="city">City</RequiredLabel>
+                <RequiredLabel htmlFor="city">{e.city}</RequiredLabel>
                 <input
                   id="city"
                   value={form.city}
@@ -422,7 +424,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="state">State</RequiredLabel>
+                <RequiredLabel htmlFor="state">{e.state}</RequiredLabel>
                 <select
                   id="state"
                   value={form.state}
@@ -431,7 +433,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                   }
                   className={inputClassName(Boolean(fieldErrors.state))}
                 >
-                  <option value="">Select state</option>
+                  <option value="">{e.selectState}</option>
                   {US_STATES.map((state) => (
                     <option key={state.code} value={state.code}>
                       {state.name}
@@ -443,9 +445,9 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
             </div>
           </EditSectionCard>
 
-          <EditSectionCard title="About Us">
+          <EditSectionCard title={e.aboutUs}>
             <div className="space-y-2">
-              <RequiredLabel htmlFor="description">Company Description</RequiredLabel>
+              <RequiredLabel htmlFor="description">{e.companyDescription}</RequiredLabel>
               <textarea
                 id="description"
                 value={form.description}
@@ -458,14 +460,17 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               />
               <FieldErrorMessage message={fieldErrors.description} />
               <p className="text-xs text-fo-text-muted">
-                {descriptionCount} / {descriptionMax} characters
+                {interpolate(e.charCount, {
+                  count: descriptionCount,
+                  max: descriptionMax,
+                })}
               </p>
             </div>
           </EditSectionCard>
 
           <EditSectionCard
-            title="Services We Provide"
-            helper="Select all services your company provides."
+            title={e.servicesTitle}
+            helper={e.servicesHelper}
           >
             <SelectionChipField
               options={COMPANY_PROFILE_FORM_OPTIONS.services}
@@ -474,15 +479,15 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               onToggle={(value) => toggleSelection("services", value)}
               onAddCustom={(value) => addCustomItem("customServices", value)}
               onRemoveCustom={(value) => removeCustomItem("customServices", value)}
-              customLabel="Add Your Own Service"
-              customPlaceholder="Enter a service"
-              addButtonLabel="+ Add Service"
+              customLabel={e.addCustomService}
+              customPlaceholder={e.customServicePlaceholder}
+              addButtonLabel={e.addService}
             />
           </EditSectionCard>
 
           <EditSectionCard
-            title="Why Officers Choose Us"
-            helper="Select the benefits you offer to officers."
+            title={e.benefitsTitle}
+            helper={e.benefitsHelper}
           >
             <SelectionChipField
               options={COMPANY_PROFILE_FORM_OPTIONS.officerBenefits}
@@ -491,15 +496,15 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               onToggle={(value) => toggleSelection("officerBenefits", value)}
               onAddCustom={(value) => addCustomItem("customBenefits", value)}
               onRemoveCustom={(value) => removeCustomItem("customBenefits", value)}
-              customLabel="Add Your Own Benefit"
-              customPlaceholder="Enter a benefit"
-              addButtonLabel="+ Add Benefit"
+              customLabel={e.addCustomBenefit}
+              customPlaceholder={e.customBenefitPlaceholder}
+              addButtonLabel={e.addBenefit}
             />
           </EditSectionCard>
 
           <EditSectionCard
-            title="Work Environment"
-            helper="Select all that describe your work environment."
+            title={e.workEnvTitle}
+            helper={e.workEnvHelper}
           >
             <SelectionChipField
               options={COMPANY_PROFILE_FORM_OPTIONS.workEnvironment}
@@ -510,18 +515,18 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               onRemoveCustom={(value) =>
                 removeCustomItem("customWorkEnvironment", value)
               }
-              customLabel="Add Your Own Environment"
-              customPlaceholder="Enter a work environment"
-              addButtonLabel="+ Add Environment"
+              customLabel={e.addCustomEnvironment}
+              customPlaceholder={e.customEnvironmentPlaceholder}
+              addButtonLabel={e.addEnvironment}
             />
           </EditSectionCard>
         </div>
 
         <aside className="space-y-4 self-start">
-          <EditSectionCard title="License Information">
+          <EditSectionCard title={v.licenseInformation}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <RequiredLabel htmlFor="licenseNumber">License Number</RequiredLabel>
+                <RequiredLabel htmlFor="licenseNumber">{v.licenseNumber}</RequiredLabel>
                 <input
                   id="licenseNumber"
                   value={form.licenseNumber}
@@ -534,7 +539,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="licenseType">License Type</RequiredLabel>
+                <RequiredLabel htmlFor="licenseType">{v.licenseType}</RequiredLabel>
                 <input
                   id="licenseType"
                   value={form.licenseType}
@@ -547,7 +552,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="licenseState">State Issued</RequiredLabel>
+                <RequiredLabel htmlFor="licenseState">{v.stateIssued}</RequiredLabel>
                 <select
                   id="licenseState"
                   value={form.licenseState}
@@ -556,7 +561,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                   }
                   className={inputClassName(Boolean(fieldErrors.licenseState))}
                 >
-                  <option value="">Select state</option>
+                  <option value="">{e.selectState}</option>
                   {US_STATES.map((state) => (
                     <option key={state.code} value={state.code}>
                       {state.name}
@@ -567,7 +572,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="licenseIssueDate">Issue Date</RequiredLabel>
+                <RequiredLabel htmlFor="licenseIssueDate">{v.issueDate}</RequiredLabel>
                 <input
                   id="licenseIssueDate"
                   type="date"
@@ -582,7 +587,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
 
               <div className="space-y-2">
                 <RequiredLabel htmlFor="licenseExpirationDate">
-                  Expiration Date
+                  {v.expirationDate}
                 </RequiredLabel>
                 <input
                   id="licenseExpirationDate"
@@ -598,10 +603,10 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
             </div>
           </EditSectionCard>
 
-          <EditSectionCard title="Company Details">
+          <EditSectionCard title={v.companyDetails}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <OptionalLabel htmlFor="industry">Industry</OptionalLabel>
+                <OptionalLabel htmlFor="industry">{v.industry}</OptionalLabel>
                 <input
                   id="industry"
                   value={form.industry}
@@ -609,13 +614,13 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                     setForm({ ...form, industry: event.target.value })
                   }
                   className={inputClassName(Boolean(fieldErrors.industry))}
-                  placeholder="Security Services"
+                  placeholder={e.industryPlaceholder}
                 />
                 <FieldErrorMessage message={fieldErrors.industry} />
               </div>
 
               <div className="space-y-2">
-                <OptionalLabel htmlFor="companySize">Company Size</OptionalLabel>
+                <OptionalLabel htmlFor="companySize">{v.companySize}</OptionalLabel>
                 <input
                   id="companySize"
                   value={form.companySize}
@@ -623,13 +628,13 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                     setForm({ ...form, companySize: event.target.value })
                   }
                   className={inputClassName(Boolean(fieldErrors.companySize))}
-                  placeholder="11–50 employees"
+                  placeholder={e.companySizePlaceholder}
                 />
                 <FieldErrorMessage message={fieldErrors.companySize} />
               </div>
 
               <div className="space-y-2">
-                <OptionalLabel htmlFor="established">Established</OptionalLabel>
+                <OptionalLabel htmlFor="established">{v.established}</OptionalLabel>
                 <input
                   id="established"
                   value={form.established}
@@ -637,13 +642,13 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                     setForm({ ...form, established: event.target.value })
                   }
                   className={inputClassName(Boolean(fieldErrors.established))}
-                  placeholder="2018"
+                  placeholder={e.establishedPlaceholder}
                 />
                 <FieldErrorMessage message={fieldErrors.established} />
               </div>
 
               <div className="space-y-2">
-                <OptionalLabel htmlFor="website">Website</OptionalLabel>
+                <OptionalLabel htmlFor="website">{v.website}</OptionalLabel>
                 <input
                   id="website"
                   value={form.website}
@@ -651,13 +656,13 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                     setForm({ ...form, website: event.target.value })
                   }
                   className={inputClassName(Boolean(fieldErrors.website))}
-                  placeholder="https://yourcompany.com"
+                  placeholder={e.websitePlaceholder}
                 />
                 <FieldErrorMessage message={fieldErrors.website} />
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="email">Contact Email</RequiredLabel>
+                <RequiredLabel htmlFor="email">{v.contactEmail}</RequiredLabel>
                 <input
                   id="email"
                   type="email"
@@ -671,7 +676,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
               </div>
 
               <div className="space-y-2">
-                <RequiredLabel htmlFor="phone">Phone</RequiredLabel>
+                <RequiredLabel htmlFor="phone">{v.phone}</RequiredLabel>
                 <input
                   id="phone"
                   value={form.phone}
@@ -686,12 +691,12 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
           </EditSectionCard>
 
           <EditSectionCard
-            title="Support & Contact"
-            helper="Business hours shown on your public profile."
+            title={e.supportContact}
+            helper={e.supportHelper}
           >
             <div className="space-y-4">
               <div className="space-y-2">
-                <RequiredLabel htmlFor="businessHours">Business Hours</RequiredLabel>
+                <RequiredLabel htmlFor="businessHours">{e.businessHours}</RequiredLabel>
                 <input
                   id="businessHours"
                   value={form.businessHours}
@@ -699,17 +704,15 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                     setForm({ ...form, businessHours: event.target.value })
                   }
                   className={inputClassName(Boolean(fieldErrors.businessHours))}
-                  placeholder="Mon–Fri 9:00 AM – 5:00 PM"
+                  placeholder={e.businessHoursPlaceholder}
                 />
                 <FieldErrorMessage message={fieldErrors.businessHours} />
               </div>
             </div>
           </EditSectionCard>
 
-          <EditSectionCard title="Preview">
-            <p className="text-sm text-fo-text-muted">
-              This is how your profile appears to officers.
-            </p>
+          <EditSectionCard title={e.preview}>
+            <p className="text-sm text-fo-text-muted">{e.previewHelper}</p>
             <Link
               href={previewHref}
               className={buttonClassName({
@@ -718,7 +721,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
                 className: "mt-4 w-full text-center",
               })}
             >
-              View Public Profile
+              {e.viewPublicProfile}
             </Link>
           </EditSectionCard>
         </aside>

@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { MobileBottomSheet } from "@/components/ui/mobile";
 import { cn } from "@/lib/cn";
+import { getShiftActionMessages } from "@/lib/i18n/ui-labels";
 
 type ShiftActionsMenuProps = {
   shiftId: string;
@@ -13,6 +15,8 @@ type ShiftActionsMenuProps = {
   onViewRoster: () => void;
   className?: string;
 };
+
+type ShiftActionMessages = ReturnType<typeof getShiftActionMessages>;
 
 function MoreIcon({ className }: { className?: string }) {
   return (
@@ -24,10 +28,11 @@ function MoreIcon({ className }: { className?: string }) {
   );
 }
 
-export async function cancelCompanyShift(shiftId: string) {
-  const confirmed = window.confirm(
-    "Are you sure you want to cancel this shift? It will be removed from Available Shifts but kept in your company history."
-  );
+export async function cancelCompanyShift(
+  shiftId: string,
+  messages: ShiftActionMessages
+) {
+  const confirmed = window.confirm(messages.cancelConfirm);
 
   if (!confirmed) {
     return false;
@@ -46,14 +51,15 @@ export async function cancelCompanyShift(shiftId: string) {
     return true;
   }
 
-  alert("Failed to cancel shift");
+  alert(messages.cancelFailed);
   return false;
 }
 
-export async function deleteCompanyShift(shiftId: string) {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this shift? This cannot be undone."
-  );
+export async function deleteCompanyShift(
+  shiftId: string,
+  messages: ShiftActionMessages
+) {
+  const confirmed = window.confirm(messages.deleteConfirm);
 
   if (!confirmed) {
     return false;
@@ -72,7 +78,7 @@ export async function deleteCompanyShift(shiftId: string) {
     return true;
   }
 
-  alert("Failed to delete shift");
+  alert(messages.deleteFailed);
   return false;
 }
 
@@ -86,6 +92,8 @@ export function ShiftActionsMenu({
   onViewRoster,
   className,
 }: ShiftActionsMenuProps) {
+  const { t } = useLandingLanguage();
+  const copy = getShiftActionMessages(t);
   const [open, setOpen] = useState(false);
   const isCancelled = status === ShiftStatus.CANCELLED;
 
@@ -102,16 +110,12 @@ export function ShiftActionsMenu({
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 text-fo-text-muted transition hover:bg-white/[0.05] hover:text-fo-text",
           className
         )}
-        aria-label="Shift actions"
+        aria-label={copy.ariaLabel}
       >
         <MoreIcon className="h-4 w-4" />
       </button>
 
-      <MobileBottomSheet
-        open={open}
-        onClose={closeMenu}
-        title="Shift Actions"
-      >
+      <MobileBottomSheet open={open} onClose={closeMenu} title={copy.title}>
         <div className="space-y-2 pb-2">
           <button
             type="button"
@@ -121,7 +125,7 @@ export function ShiftActionsMenu({
               closeMenu();
             }}
           >
-            {rosterExpanded ? "Hide Roster" : "View Roster"}
+            {rosterExpanded ? copy.hideRoster : copy.viewRoster}
           </button>
 
           <Link
@@ -129,12 +133,12 @@ export function ShiftActionsMenu({
             className={menuItemClassName}
             onClick={closeMenu}
           >
-            View
+            {copy.view}
           </Link>
 
           {isCancelled ? (
             <button type="button" disabled className={cn(menuItemClassName, "opacity-40")}>
-              Edit
+              {copy.edit}
             </button>
           ) : (
             <Link
@@ -142,7 +146,7 @@ export function ShiftActionsMenu({
               className={menuItemClassName}
               onClick={closeMenu}
             >
-              Edit
+              {copy.edit}
             </Link>
           )}
 
@@ -156,10 +160,10 @@ export function ShiftActionsMenu({
             )}
             onClick={() => {
               closeMenu();
-              void cancelCompanyShift(shiftId);
+              void cancelCompanyShift(shiftId, copy);
             }}
           >
-            Cancel
+            {copy.cancel}
           </button>
 
           <button
@@ -167,10 +171,10 @@ export function ShiftActionsMenu({
             className={cn(menuItemClassName, "border-red-500/20 text-red-200")}
             onClick={() => {
               closeMenu();
-              void deleteCompanyShift(shiftId);
+              void deleteCompanyShift(shiftId, copy);
             }}
           >
-            Delete
+            {copy.delete}
           </button>
         </div>
       </MobileBottomSheet>

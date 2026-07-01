@@ -416,6 +416,35 @@ export type UiTranslations = {
     table: { date: string; description: string; status: string; amount: string; invoice: string };
     plan: { name: string; yearly: string };
     support: { hours: string };
+    trial: {
+      durationLabel: string;
+      profileStartNote: string;
+      activeNote: string;
+      expiredNote: string;
+      pricingBadge: string;
+      pricingStartNote: string;
+      pricingSubscribeNote: string;
+      trialEndsPrefix: string;
+      day: string;
+      days: string;
+      remaining: string;
+    };
+  };
+  admin: {
+    navAria: string;
+    badge: string;
+    signOut: string;
+    fallbackName: string;
+    items: {
+      dashboard: string;
+      companies: string;
+      officers: string;
+      shifts: string;
+      applications: string;
+      reports: string;
+      auditLogs: string;
+      settings: string;
+    };
   };
   forms: {
     profile: { completeToApply: string; finishItems: string };
@@ -955,6 +984,39 @@ export const uiEn: UiTranslations = {
     },
     plan: { name: "FlexOfficers Annual", yearly: "Yearly" },
     support: { hours: "Monday – Friday, 9AM – 6PM EST" },
+    trial: {
+      durationLabel: "7-Day Free Trial",
+      profileStartNote:
+        "Your free trial starts automatically when you complete your company profile (company name, email, phone, address, city, state, etc.).",
+      activeNote:
+        "You won't be charged when your trial ends. Subscribe anytime to re-unlock features.",
+      expiredNote:
+        "Your free trial has ended. Subscribe to re-unlock posting, officer search, and applicant management.",
+      pricingBadge: "7-day free trial",
+      pricingStartNote:
+        "Your trial starts after your company profile is complete. You won't be charged when the trial ends.",
+      pricingSubscribeNote: "Subscribe when ready to re-unlock company features.",
+      trialEndsPrefix: "Trial ends:",
+      day: "day",
+      days: "days",
+      remaining: "remaining",
+    },
+  },
+  admin: {
+    navAria: "Admin dashboard",
+    badge: "Admin",
+    signOut: "Sign out",
+    fallbackName: "Admin",
+    items: {
+      dashboard: "Dashboard",
+      companies: "Companies",
+      officers: "Officers",
+      shifts: "Shifts",
+      applications: "Applications",
+      reports: "Reports",
+      auditLogs: "Audit Logs",
+      settings: "Settings",
+    },
   },
   forms: {
     profile: {
@@ -1515,6 +1577,40 @@ export const uiEs: UiTranslations = {
     },
     plan: { name: "FlexOfficers Anual", yearly: "Anual" },
     support: { hours: "Lunes – Viernes, 9AM – 6PM EST" },
+    trial: {
+      durationLabel: "Prueba Gratuita de 7 Días",
+      profileStartNote:
+        "Tu prueba gratuita comienza automáticamente cuando completes el perfil de tu empresa (nombre, correo, teléfono, dirección, ciudad, estado, etc.).",
+      activeNote:
+        "No se te cobrará cuando termine la prueba. Suscríbete en cualquier momento para volver a desbloquear funciones.",
+      expiredNote:
+        "Tu prueba gratuita ha terminado. Suscríbete para volver a desbloquear publicaciones, búsqueda de oficiales y gestión de solicitantes.",
+      pricingBadge: "prueba gratuita de 7 días",
+      pricingStartNote:
+        "Tu prueba comienza después de completar el perfil de tu empresa. No se te cobrará cuando termine la prueba.",
+      pricingSubscribeNote:
+        "Suscríbete cuando estés listo para volver a desbloquear funciones de empresa.",
+      trialEndsPrefix: "La prueba termina:",
+      day: "día",
+      days: "días",
+      remaining: "restantes",
+    },
+  },
+  admin: {
+    navAria: "Panel de administración",
+    badge: "Admin",
+    signOut: "Cerrar sesión",
+    fallbackName: "Admin",
+    items: {
+      dashboard: "Panel",
+      companies: "Empresas",
+      officers: "Oficiales",
+      shifts: "Turnos",
+      applications: "Solicitudes",
+      reports: "Informes",
+      auditLogs: "Registros de Auditoría",
+      settings: "Configuración",
+    },
   },
   forms: {
     profile: {

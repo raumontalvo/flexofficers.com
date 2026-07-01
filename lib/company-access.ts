@@ -76,10 +76,6 @@ export function getCompanyPostingBlockMessage(
   const effectiveStatus = getEffectiveAccessStatus(company, now);
 
   if (effectiveStatus === CompanyAccessStatus.EXPIRED) {
-    if (!company.trialStartedAt) {
-      return "Complete your company profile (company name, email, phone, address, city, state, etc.) to start your 7-day free trial.";
-    }
-
     return "Your free trial has ended. Subscribe to re-unlock posting, officer search, and applicant management.";
   }
 

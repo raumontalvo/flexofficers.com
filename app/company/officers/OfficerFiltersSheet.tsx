@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   MobileBottomSheet,
   MobilePrimaryButton,
@@ -113,6 +114,9 @@ export function OfficerFiltersSheet({
   onClose,
 }: OfficerFiltersSheetProps) {
   const router = useRouter();
+  const { t } = useLandingLanguage();
+  const officersCopy = t.company.officers;
+  const sheetCopy = t.company.filtersSheet;
   const [draft, setDraft] = useState<DraftFilters>(() => toDraft(filters));
 
   useEffect(() => {
@@ -167,11 +171,11 @@ export function OfficerFiltersSheet({
   }
 
   return (
-    <MobileBottomSheet open={open} onClose={onClose} title="Filters">
+    <MobileBottomSheet open={open} onClose={onClose} title={officersCopy.filters}>
       <div className="space-y-4 pb-2">
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
-            <FilterLabel htmlFor="filter-first-name">First name</FilterLabel>
+            <FilterLabel htmlFor="filter-first-name">{officersCopy.firstName}</FilterLabel>
             <input
               id="filter-first-name"
               value={draft.firstName}
@@ -182,11 +186,11 @@ export function OfficerFiltersSheet({
                 }))
               }
               className={mobileFieldClassName}
-              placeholder="First name"
+              placeholder={officersCopy.firstName}
             />
           </div>
           <div className="space-y-1">
-            <FilterLabel htmlFor="filter-last-name">Last name</FilterLabel>
+            <FilterLabel htmlFor="filter-last-name">{officersCopy.lastName}</FilterLabel>
             <input
               id="filter-last-name"
               value={draft.lastName}
@@ -197,14 +201,14 @@ export function OfficerFiltersSheet({
                 }))
               }
               className={mobileFieldClassName}
-              placeholder="Last name"
+              placeholder={officersCopy.lastName}
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">
-            <FilterLabel htmlFor="filter-city">City</FilterLabel>
+            <FilterLabel htmlFor="filter-city">{officersCopy.city}</FilterLabel>
             <input
               id="filter-city"
               value={draft.city}
@@ -212,11 +216,11 @@ export function OfficerFiltersSheet({
                 setDraft((current) => ({ ...current, city: event.target.value }))
               }
               className={mobileFieldClassName}
-              placeholder="City"
+              placeholder={officersCopy.city}
             />
           </div>
           <div className="space-y-1">
-            <FilterLabel htmlFor="filter-state">State</FilterLabel>
+            <FilterLabel htmlFor="filter-state">{officersCopy.state}</FilterLabel>
             <input
               id="filter-state"
               list="mobile-officer-state-options"
@@ -225,7 +229,7 @@ export function OfficerFiltersSheet({
                 setDraft((current) => ({ ...current, state: event.target.value }))
               }
               className={mobileFieldClassName}
-              placeholder="State"
+              placeholder={officersCopy.state}
             />
             <datalist id="mobile-officer-state-options">
               {US_STATES.map((state) => (
@@ -239,7 +243,7 @@ export function OfficerFiltersSheet({
         </div>
 
         <FilterCheckboxGroup
-          label="Background"
+          label={officersCopy.background}
           options={OFFICER_BACKGROUND_FILTER_OPTIONS}
           selected={draft.backgrounds}
           onChange={(backgrounds) =>
@@ -248,7 +252,7 @@ export function OfficerFiltersSheet({
         />
 
         <FilterCheckboxGroup
-          label="License types"
+          label={sheetCopy.licenseTypesLabel}
           options={OFFICER_LICENSE_FILTER_OPTIONS}
           selected={draft.licenseTypes}
           onChange={(licenseTypes) =>
@@ -257,7 +261,7 @@ export function OfficerFiltersSheet({
         />
 
         <FilterCheckboxGroup
-          label="Certifications"
+          label={officersCopy.certifications}
           options={OFFICER_CERTIFICATION_FILTER_OPTIONS}
           selected={draft.certifications}
           onChange={(certifications) =>
@@ -266,7 +270,7 @@ export function OfficerFiltersSheet({
         />
 
         <FilterCheckboxGroup
-          label="Availability"
+          label={officersCopy.availability}
           options={OFFICER_AVAILABILITY_FILTER_OPTIONS}
           selected={draft.availabilities}
           onChange={(availabilities) =>
@@ -275,8 +279,8 @@ export function OfficerFiltersSheet({
         />
 
         <div className="grid grid-cols-2 gap-2 pt-1">
-          <MobileSecondaryButton onClick={clearDraft}>Clear</MobileSecondaryButton>
-          <MobilePrimaryButton onClick={applyDraft}>Apply Filters</MobilePrimaryButton>
+          <MobileSecondaryButton onClick={clearDraft}>{sheetCopy.clear}</MobileSecondaryButton>
+          <MobilePrimaryButton onClick={applyDraft}>{sheetCopy.applyFilters}</MobilePrimaryButton>
         </div>
       </div>
     </MobileBottomSheet>
