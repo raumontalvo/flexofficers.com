@@ -10,7 +10,7 @@ import {
   IconClock,
   IconGift,
   IconLayout,
-  IconPhone,
+  IconMessageCircle,
   IconSearch,
   IconShield,
   IconSpark,
@@ -80,7 +80,7 @@ const officerFeatures = [
   {
     title: "Contact Companies After Acceptance",
     description: "Company contact info unlocks once you are accepted.",
-    icon: IconPhone,
+    icon: IconMessageCircle,
   },
   {
     title: "Free Forever",

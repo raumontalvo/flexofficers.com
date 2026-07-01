@@ -110,10 +110,10 @@ export function IconCheck(props: IconProps) {
   );
 }
 
-export function IconPhone(props: IconProps) {
+export function IconMessageCircle(props: IconProps) {
   return (
     <IconBase {...props}>
-      <path d="M8 3h8l1 4-3 1a11 11 0 0 0 5 5l1-3 4 1v8a2 2 0 0 1-2 2C9.5 21 3 14.5 3 6a2 2 0 0 1 2-2Z" />
+      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
     </IconBase>
   );
 }
