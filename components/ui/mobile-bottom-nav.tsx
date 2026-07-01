@@ -65,14 +65,16 @@ export function MobileBottomNav({
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[11px] font-medium transition",
+                "flex min-h-14 min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 py-2 text-[10px] font-medium transition",
                 active
                   ? "bg-fo-primary/10 text-fo-primary-hover"
                   : "text-fo-text-subtle hover:bg-fo-surface hover:text-fo-text-muted"
               )}
             >
-              <Icon className="h-5 w-5" />
-              <span>{item.label}</span>
+              <Icon className="h-5 w-5 shrink-0" />
+              <span className="max-w-full min-w-0 truncate whitespace-nowrap">
+                {item.label}
+              </span>
             </Link>
           );
         })}

@@ -547,11 +547,11 @@ const es: AppCore = {
     companyMobile: {
       home: "Inicio",
       shifts: "Turnos",
-      applicants: "Solicitantes",
-      officers: "Oficiales",
-      staff: "Personal",
+      applicants: "Solic.",
+      officers: "Ofic.",
+      staff: "Staff",
       profile: "Perfil",
-      settings: "Configuración",
+      settings: "Ajustes",
     },
     companySidebar: {
       home: "Inicio",
