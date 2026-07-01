@@ -18,14 +18,17 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
 
   return (
     <div
-      className={cn("inline-flex shrink-0 items-center gap-2 text-sm", className)}
+      className={cn(
+        "flex shrink-0 items-center gap-1.5 whitespace-nowrap text-sm",
+        className
+      )}
       role="group"
       aria-label="Language"
     >
       {options.map((option, index) => (
-        <span key={option.code} className="inline-flex items-center gap-2">
+        <span key={option.code} className="inline-flex shrink-0 items-center gap-1.5">
           {index > 0 ? (
-            <span className="text-gray-600" aria-hidden>
+            <span className="shrink-0 text-gray-600" aria-hidden>
               |
             </span>
           ) : null}
@@ -33,7 +36,7 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
             type="button"
             onClick={() => setLanguage(option.code)}
             className={cn(
-              "p-0 font-normal leading-none transition",
+              "shrink-0 whitespace-nowrap p-0 font-normal leading-none transition",
               language === option.code
                 ? "font-semibold text-blue-500"
                 : "text-gray-400 hover:text-white"

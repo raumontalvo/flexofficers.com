@@ -33,7 +33,7 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 export function LandingNavbar() {
-  const { t } = useLandingLanguage();
+  const { t, language } = useLandingLanguage();
   const [open, setOpen] = useState(false);
   const menuId = useId();
 
@@ -88,17 +88,24 @@ export function LandingNavbar() {
             </Link>
           </div>
 
-          <div className="hidden items-center justify-center gap-8 whitespace-nowrap text-sm text-fo-text-muted lg:flex lg:gap-10 xl:gap-12">
+          <div
+            className={cn(
+              "hidden items-center justify-center whitespace-nowrap text-sm text-fo-text-muted lg:flex",
+              language === "es"
+                ? "gap-6 lg:gap-8 xl:gap-10"
+                : "gap-8 lg:gap-10 xl:gap-12"
+            )}
+          >
             {sectionLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="transition hover:text-fo-text"
+                className="shrink-0 transition hover:text-fo-text"
               >
                 {link.label}
               </a>
             ))}
-            <LanguageToggle className="ml-5 mr-5 shrink-0" />
+            <LanguageToggle className="ml-5 mr-5" />
           </div>
 
           <div className="relative z-10 flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
