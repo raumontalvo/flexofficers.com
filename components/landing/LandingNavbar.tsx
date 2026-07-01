@@ -67,19 +67,16 @@ export function LandingNavbar() {
     <>
       <header className="landing-header sticky top-0 z-[100] border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
         <nav className="relative z-[110] mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-4 lg:px-8 lg:py-5">
-          <div className="flex max-w-[130px] min-w-fit shrink-0 items-center overflow-visible sm:max-w-[150px] lg:max-w-none">
-            <Link
-              href="/"
-              className="flex min-w-fit shrink-0 items-center overflow-visible"
-            >
+          <div className="flex max-w-[130px] shrink-0 items-center sm:max-w-[150px] lg:min-w-fit lg:max-w-none">
+            <Link href="/" className="flex shrink-0 items-center">
               <Image
                 src="/branding/concepts/flexofficers-logo-concept.png"
                 alt="FlexOfficers"
-                width={320}
-                height={80}
+                width={400}
+                height={96}
                 priority
-                sizes="(max-width: 1023px) 150px, 320px"
-                className="h-20 w-auto object-contain"
+                sizes="(max-width: 1023px) 150px, 400px"
+                className="h-20 w-auto object-contain lg:h-24"
               />
             </Link>
           </div>
