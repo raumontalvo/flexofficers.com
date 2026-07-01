@@ -2,6 +2,7 @@
 
 import { SignOutButton, useClerk, useUser } from "@clerk/nextjs";
 import { useState } from "react";
+import { LanguageToggle } from "@/components/landing/LanguageToggle";
 import { Button, Card, CardDescription, CardHeader, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { DeleteAccountDialog } from "./delete-account-dialog";
@@ -167,6 +168,20 @@ export function AccountSettingsContent({
             Your account is securely managed by Clerk. We never store your
             password.
           </p>
+        </Card>
+
+        <Card variant="elevated" className="fo-glass-card border border-white/10">
+          <CardHeader className="mb-0">
+            <CardTitle className="text-lg">Language Preference</CardTitle>
+            <CardDescription>
+              Choose the language used across FlexOfficers. More dashboard
+              translations coming soon.
+            </CardDescription>
+          </CardHeader>
+
+          <div className="mt-4 flex justify-start sm:justify-end">
+            <LanguageToggle />
+          </div>
         </Card>
 
         <Card variant="elevated" className="fo-glass-card border border-white/10">
