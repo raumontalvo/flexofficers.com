@@ -36,6 +36,20 @@ export function LandingLanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    function handleStorage(event: StorageEvent) {
+      if (
+        event.key === LANDING_LANGUAGE_STORAGE_KEY &&
+        isLandingLanguage(event.newValue)
+      ) {
+        setLanguageState(event.newValue);
+      }
+    }
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
 

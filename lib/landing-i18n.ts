@@ -71,6 +71,66 @@ export type LandingTranslations = {
     terms: string;
     contact: string;
   };
+  settings: {
+    pageTitle: string;
+    pageSubtitle: string;
+    loading: string;
+    accountSecurity: {
+      title: string;
+      description: string;
+      emailLabel: string;
+      changeEmail: string;
+      passwordLabel: string;
+      changePassword: string;
+      noEmail: string;
+      managedByProvider: string;
+      clerkFootnote: string;
+    };
+    language: {
+      title: string;
+      description: string;
+    };
+    privacy: {
+      title: string;
+      description: string;
+      officerItems: string[];
+      companyItems: string[];
+    };
+    contact: {
+      title: string;
+      description: string;
+      callUs: string;
+      copy: string;
+      copied: string;
+      hours: string;
+    };
+    danger: {
+      title: string;
+      description: string;
+      deleteAccount: string;
+      officerDeleteDescription: string;
+      companyDeleteDescription: string;
+      deleteButton: string;
+    };
+    signOut: {
+      title: string;
+      description: string;
+      button: string;
+    };
+    deleteDialog: {
+      title: string;
+      description: string;
+      cancel: string;
+      confirm: string;
+      deleting: string;
+      error: string;
+      closeAria: string;
+    };
+    billingLink: {
+      title: string;
+      description: string;
+    };
+  };
 };
 
 const en: LandingTranslations = {
@@ -234,6 +294,82 @@ const en: LandingTranslations = {
     privacy: "Privacy",
     terms: "Terms",
     contact: "Contact",
+  },
+  settings: {
+    pageTitle: "Settings",
+    pageSubtitle: "Manage your account preferences and security.",
+    loading: "Loading account settings…",
+    accountSecurity: {
+      title: "Account Security",
+      description:
+        "Manage your email and password. Your account is securely managed by Clerk.",
+      emailLabel: "Email Address",
+      changeEmail: "Change Email",
+      passwordLabel: "Password",
+      changePassword: "Change Password",
+      noEmail: "No email on file",
+      managedByProvider: "Managed through your sign-in provider",
+      clerkFootnote:
+        "Your account is securely managed by Clerk. We never store your password.",
+    },
+    language: {
+      title: "Language Preference",
+      description:
+        "Choose the language used across FlexOfficers. More dashboard translations coming soon.",
+    },
+    privacy: {
+      title: "Privacy & Safety",
+      description: "Learn how your information is used and shared.",
+      officerItems: [
+        "Companies can view your profile after you apply to a shift.",
+        "Your phone number and email are shared only after you are accepted for a shift.",
+        "Once you are accepted for a shift, you are responsible for arranging how you will be paid. The company's contact information is shared after acceptance so you can ask about payment and other questions.",
+        "License information is self-reported by officers.",
+      ],
+      companyItems: [
+        "Officer profiles are visible when they apply to your shifts.",
+        "Your company contact information may be shared with accepted officers.",
+        "You are responsible for verifying officer licenses and credentials.",
+      ],
+    },
+    contact: {
+      title: "Contact Support",
+      description: "Need help? Our support team is here for you.",
+      callUs: "Call Us",
+      copy: "Copy",
+      copied: "Copied",
+      hours: "We're available Monday – Friday, 9AM – 6PM EST.",
+    },
+    danger: {
+      title: "Danger Zone",
+      description: "Permanently delete your FlexOfficers account.",
+      deleteAccount: "Delete Account",
+      officerDeleteDescription:
+        "This action will permanently delete your account and all associated data, including your profile and applications. This action cannot be undone.",
+      companyDeleteDescription:
+        "This action will permanently delete your account and all associated data, including your company profile, shifts, and applicant records. This action cannot be undone.",
+      deleteButton: "Delete Account",
+    },
+    signOut: {
+      title: "Sign Out",
+      description: "Sign out of FlexOfficers on this device.",
+      button: "Sign Out",
+    },
+    deleteDialog: {
+      title: "Delete account?",
+      description:
+        "Deleting your account will permanently remove your FlexOfficers account, profile, applications, and saved data. This action cannot be undone.",
+      cancel: "Cancel",
+      confirm: "Delete My Account",
+      deleting: "Deleting…",
+      error:
+        "Account deletion could not be completed. Finish deletion in your Clerk account settings.",
+      closeAria: "Close dialog",
+    },
+    billingLink: {
+      title: "Billing & Plan",
+      description: "Manage subscription and payment method.",
+    },
   },
 };
 
@@ -400,6 +536,82 @@ const es: LandingTranslations = {
     privacy: "Privacidad",
     terms: "Términos",
     contact: "Contacto",
+  },
+  settings: {
+    pageTitle: "Configuración",
+    pageSubtitle: "Administra las preferencias y la seguridad de tu cuenta.",
+    loading: "Cargando configuración de la cuenta…",
+    accountSecurity: {
+      title: "Seguridad de la Cuenta",
+      description:
+        "Administra tu correo y contraseña. Tu cuenta está gestionada de forma segura por Clerk.",
+      emailLabel: "Correo Electrónico",
+      changeEmail: "Cambiar Correo",
+      passwordLabel: "Contraseña",
+      changePassword: "Cambiar Contraseña",
+      noEmail: "No hay correo registrado",
+      managedByProvider: "Gestionado a través de tu proveedor de inicio de sesión",
+      clerkFootnote:
+        "Tu cuenta está gestionada de forma segura por Clerk. Nunca almacenamos tu contraseña.",
+    },
+    language: {
+      title: "Preferencia de Idioma",
+      description:
+        "Elige el idioma usado en FlexOfficers. Más traducciones del panel próximamente.",
+    },
+    privacy: {
+      title: "Privacidad y Seguridad",
+      description: "Conoce cómo se usa y comparte tu información.",
+      officerItems: [
+        "Las empresas pueden ver tu perfil después de que solicites un turno.",
+        "Tu número de teléfono y correo se comparten solo después de ser aceptado para un turno.",
+        "Una vez aceptado para un turno, eres responsable de coordinar cómo te pagarán. La información de contacto de la empresa se comparte después de la aceptación para que puedas preguntar sobre el pago y otras dudas.",
+        "La información de licencia es autodeclarada por los oficiales.",
+      ],
+      companyItems: [
+        "Los perfiles de oficiales son visibles cuando solicitan tus turnos.",
+        "La información de contacto de tu empresa puede compartirse con oficiales aceptados.",
+        "Eres responsable de verificar las licencias y credenciales de los oficiales.",
+      ],
+    },
+    contact: {
+      title: "Contactar Soporte",
+      description: "¿Necesitas ayuda? Nuestro equipo de soporte está aquí para ti.",
+      callUs: "Llámanos",
+      copy: "Copiar",
+      copied: "Copiado",
+      hours: "Estamos disponibles de lunes a viernes, 9AM – 6PM EST.",
+    },
+    danger: {
+      title: "Zona de Peligro",
+      description: "Elimina permanentemente tu cuenta de FlexOfficers.",
+      deleteAccount: "Eliminar Cuenta",
+      officerDeleteDescription:
+        "Esta acción eliminará permanentemente tu cuenta y todos los datos asociados, incluyendo tu perfil y solicitudes. Esta acción no se puede deshacer.",
+      companyDeleteDescription:
+        "Esta acción eliminará permanentemente tu cuenta y todos los datos asociados, incluyendo el perfil de tu empresa, turnos y registros de solicitantes. Esta acción no se puede deshacer.",
+      deleteButton: "Eliminar Cuenta",
+    },
+    signOut: {
+      title: "Cerrar Sesión",
+      description: "Cierra sesión en FlexOfficers en este dispositivo.",
+      button: "Cerrar Sesión",
+    },
+    deleteDialog: {
+      title: "¿Eliminar cuenta?",
+      description:
+        "Eliminar tu cuenta removerá permanentemente tu cuenta de FlexOfficers, perfil, solicitudes y datos guardados. Esta acción no se puede deshacer.",
+      cancel: "Cancelar",
+      confirm: "Eliminar Mi Cuenta",
+      deleting: "Eliminando…",
+      error:
+        "No se pudo completar la eliminación de la cuenta. Finaliza la eliminación en la configuración de tu cuenta de Clerk.",
+      closeAria: "Cerrar diálogo",
+    },
+    billingLink: {
+      title: "Facturación y Plan",
+      description: "Administra la suscripción y el método de pago.",
+    },
   },
 };
 

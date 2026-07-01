@@ -2,6 +2,7 @@
 
 import { useClerk, useUser } from "@clerk/nextjs";
 import { useEffect, useRef, useState } from "react";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, buttonClassName } from "@/components/ui";
 
 type DeleteAccountDialogProps = {
@@ -10,6 +11,8 @@ type DeleteAccountDialogProps = {
 };
 
 export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps) {
+  const { t } = useLandingLanguage();
+  const copy = t.settings.deleteDialog;
   const { user } = useUser();
   const { openUserProfile, signOut } = useClerk();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -55,9 +58,7 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
         __experimental_startPath: "/danger",
       });
     } catch {
-      setErrorMessage(
-        "Account deletion could not be completed. Finish deletion in your Clerk account settings."
-      );
+      setErrorMessage(copy.error);
       onClose();
       openUserProfile({
         __experimental_startPath: "/danger",
@@ -71,7 +72,7 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
     <div className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center">
       <button
         type="button"
-        aria-label="Close dialog"
+        aria-label={copy.closeAria}
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={onClose}
       />
@@ -83,11 +84,10 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
         className="relative w-full max-w-md rounded-2xl border border-red-500/30 bg-[#0a1220]/95 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl"
       >
         <h2 id="delete-account-title" className="text-lg font-semibold text-fo-text">
-          Delete account?
+          {copy.title}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-fo-text-muted">
-          Deleting your account will permanently remove your FlexOfficers account,
-          profile, applications, and saved data. This action cannot be undone.
+          {copy.description}
         </p>
 
         {errorMessage ? (
@@ -105,7 +105,7 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
               size: "md",
             })}
           >
-            Cancel
+            {copy.cancel}
           </button>
           <Button
             type="button"
@@ -115,7 +115,7 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
             onClick={handleConfirmDelete}
             className="bg-red-600 hover:bg-red-500"
           >
-            {isDeleting ? "Deleting…" : "Delete My Account"}
+            {isDeleting ? copy.deleting : copy.confirm}
           </Button>
         </div>
       </div>

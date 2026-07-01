@@ -3,25 +3,14 @@
 import { SignOutButton, useClerk, useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { LanguageToggle } from "@/components/landing/LanguageToggle";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Button, Card, CardDescription, CardHeader, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import type { LandingTranslations } from "@/lib/landing-i18n";
 import { DeleteAccountDialog } from "./delete-account-dialog";
 
 const SUPPORT_PHONE = "239-900-5653";
 const SUPPORT_PHONE_HREF = "tel:+12399005653";
-
-export const OFFICER_PRIVACY_ITEMS = [
-  "Companies can view your profile after you apply to a shift.",
-  "Your phone number and email are shared only after you are accepted for a shift.",
-  "Once you are accepted for a shift, you are responsible for arranging how you will be paid. The company's contact information is shared after acceptance so you can ask about payment and other questions.",
-  "License information is self-reported by officers.",
-];
-
-export const COMPANY_PRIVACY_ITEMS = [
-  "Officer profiles are visible when they apply to your shifts.",
-  "Your company contact information may be shared with accepted officers.",
-  "You are responsible for verifying officer licenses and credentials.",
-];
 
 const actionButtonClassName =
   "inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fo-primary-bright/40 disabled:cursor-not-allowed disabled:opacity-50";
@@ -68,21 +57,23 @@ function PrivacyBullet({ children }: { children: string }) {
   );
 }
 
-function SignOutRow() {
+function SignOutRow({
+  copy,
+}: {
+  copy: LandingTranslations["settings"]["signOut"];
+}) {
   return (
     <div className="flex flex-col gap-3 border-t border-white/[0.06] pt-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 space-y-1">
-        <p className="text-sm font-semibold text-fo-text">Sign Out</p>
-        <p className="text-sm text-fo-text-muted">
-          Sign out of FlexOfficers on this device.
-        </p>
+        <p className="text-sm font-semibold text-fo-text">{copy.title}</p>
+        <p className="text-sm text-fo-text-muted">{copy.description}</p>
       </div>
       <SignOutButton redirectUrl="/">
         <button
           type="button"
           className={cn(actionButtonClassName, "w-full min-h-12 sm:w-auto sm:min-h-9")}
         >
-          Sign Out
+          {copy.button}
         </button>
       </SignOutButton>
     </div>
@@ -90,27 +81,35 @@ function SignOutRow() {
 }
 
 type AccountSettingsContentProps = {
-  privacyItems: string[];
-  deleteDescription: string;
+  role: "officer" | "company";
 };
 
-export function AccountSettingsContent({
-  privacyItems,
-  deleteDescription,
-}: AccountSettingsContentProps) {
+export function AccountSettingsContent({ role }: AccountSettingsContentProps) {
+  const { t } = useLandingLanguage();
+  const settings = t.settings;
   const { isLoaded, user } = useUser();
   const { openUserProfile } = useClerk();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [copiedPhone, setCopiedPhone] = useState(false);
 
+  const privacyItems =
+    role === "officer"
+      ? settings.privacy.officerItems
+      : settings.privacy.companyItems;
+
+  const deleteDescription =
+    role === "officer"
+      ? settings.danger.officerDeleteDescription
+      : settings.danger.companyDeleteDescription;
+
   const email =
     user?.primaryEmailAddress?.emailAddress ??
     user?.emailAddresses[0]?.emailAddress ??
-    "No email on file";
+    settings.accountSecurity.noEmail;
 
   const passwordLabel = user?.passwordEnabled
     ? "••••••••••"
-    : "Managed through your sign-in provider";
+    : settings.accountSecurity.managedByProvider;
 
   function openClerkProfile(path: string) {
     openUserProfile({
@@ -131,7 +130,7 @@ export function AccountSettingsContent({
   if (!isLoaded) {
     return (
       <Card variant="elevated" className="fo-glass-card border border-white/10">
-        <p className="text-sm text-fo-text-muted">Loading account settings…</p>
+        <p className="text-sm text-fo-text-muted">{settings.loading}</p>
       </Card>
     );
   }
@@ -141,42 +140,35 @@ export function AccountSettingsContent({
       <div className="space-y-4">
         <Card variant="elevated" className="fo-glass-card border border-white/10">
           <CardHeader className="mb-0">
-            <CardTitle className="text-lg">Account Security</CardTitle>
-            <CardDescription>
-              Manage your email and password. Your account is securely managed by
-              Clerk.
-            </CardDescription>
+            <CardTitle className="text-lg">{settings.accountSecurity.title}</CardTitle>
+            <CardDescription>{settings.accountSecurity.description}</CardDescription>
           </CardHeader>
 
           <div className="mt-4">
             <SettingsRow
-              label="Email Address"
+              label={settings.accountSecurity.emailLabel}
               value={email}
-              actionLabel="Change Email"
+              actionLabel={settings.accountSecurity.changeEmail}
               onAction={() => openClerkProfile("/email-addresses")}
             />
             <SettingsRow
-              label="Password"
+              label={settings.accountSecurity.passwordLabel}
               value={passwordLabel}
-              actionLabel="Change Password"
+              actionLabel={settings.accountSecurity.changePassword}
               onAction={() => openClerkProfile("/password")}
             />
-            <SignOutRow />
+            <SignOutRow copy={settings.signOut} />
           </div>
 
           <p className="mt-4 text-xs leading-relaxed text-fo-text-subtle">
-            Your account is securely managed by Clerk. We never store your
-            password.
+            {settings.accountSecurity.clerkFootnote}
           </p>
         </Card>
 
         <Card variant="elevated" className="fo-glass-card border border-white/10">
           <CardHeader className="mb-0">
-            <CardTitle className="text-lg">Language Preference</CardTitle>
-            <CardDescription>
-              Choose the language used across FlexOfficers. More dashboard
-              translations coming soon.
-            </CardDescription>
+            <CardTitle className="text-lg">{settings.language.title}</CardTitle>
+            <CardDescription>{settings.language.description}</CardDescription>
           </CardHeader>
 
           <div className="mt-4 flex justify-start sm:justify-end">
@@ -186,10 +178,8 @@ export function AccountSettingsContent({
 
         <Card variant="elevated" className="fo-glass-card border border-white/10">
           <CardHeader className="mb-0">
-            <CardTitle className="text-lg">Privacy &amp; Safety</CardTitle>
-            <CardDescription>
-              Learn how your information is used and shared.
-            </CardDescription>
+            <CardTitle className="text-lg">{settings.privacy.title}</CardTitle>
+            <CardDescription>{settings.privacy.description}</CardDescription>
           </CardHeader>
 
           <ul className="mt-4 space-y-3">
@@ -201,15 +191,13 @@ export function AccountSettingsContent({
 
         <Card variant="elevated" className="fo-glass-card border border-white/10">
           <CardHeader className="mb-0">
-            <CardTitle className="text-lg">Contact Support</CardTitle>
-            <CardDescription>
-              Need help? Our support team is here for you.
-            </CardDescription>
+            <CardTitle className="text-lg">{settings.contact.title}</CardTitle>
+            <CardDescription>{settings.contact.description}</CardDescription>
           </CardHeader>
 
           <div className="mt-4 space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-fo-text-subtle">
-              Call Us
+              {settings.contact.callUs}
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <a
@@ -223,12 +211,10 @@ export function AccountSettingsContent({
                 onClick={handleCopyPhone}
                 className={cn(actionButtonClassName, "min-h-8")}
               >
-                {copiedPhone ? "Copied" : "Copy"}
+                {copiedPhone ? settings.contact.copied : settings.contact.copy}
               </button>
             </div>
-            <p className="text-xs text-fo-text-muted">
-              We&apos;re available Monday – Friday, 9AM – 6PM EST.
-            </p>
+            <p className="text-xs text-fo-text-muted">{settings.contact.hours}</p>
           </div>
         </Card>
 
@@ -237,15 +223,17 @@ export function AccountSettingsContent({
           className="fo-glass-card border border-red-500/30 bg-red-950/10"
         >
           <CardHeader className="mb-0">
-            <CardTitle className="text-lg text-red-200">Danger Zone</CardTitle>
+            <CardTitle className="text-lg text-red-200">{settings.danger.title}</CardTitle>
             <CardDescription className="text-red-200/70">
-              Permanently delete your FlexOfficers account.
+              {settings.danger.description}
             </CardDescription>
           </CardHeader>
 
           <div className="mt-4 space-y-4 rounded-lg border border-red-500/20 bg-red-950/10 p-4">
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-red-100">Delete Account</p>
+              <p className="text-sm font-semibold text-red-100">
+                {settings.danger.deleteAccount}
+              </p>
               <p className="text-sm leading-relaxed text-red-200/70">
                 {deleteDescription}
               </p>
@@ -258,7 +246,7 @@ export function AccountSettingsContent({
               onClick={() => setDeleteDialogOpen(true)}
               className="bg-red-600 hover:bg-red-500"
             >
-              Delete Account
+              {settings.danger.deleteButton}
             </Button>
           </div>
         </Card>
