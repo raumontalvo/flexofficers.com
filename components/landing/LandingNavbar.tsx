@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  LanguageDropdown,
-  LanguageDropdownCompact,
-} from "@/components/landing/LanguageDropdown";
+import { LanguageToggle } from "@/components/landing/LanguageToggle";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -104,7 +101,7 @@ export function LandingNavbar() {
           </div>
 
           <div className="relative z-10 flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
-            <LanguageDropdownCompact className="hidden lg:flex" />
+            <LanguageToggle className="hidden lg:inline-flex" />
             <Link
               href="/onboarding?force=1"
               className={buttonClassName({
@@ -182,7 +179,7 @@ export function LandingNavbar() {
                 </button>
               </div>
 
-              <LanguageDropdown id="landing-language-mobile" className="mb-4" />
+              <LanguageToggle className="mb-4 w-full justify-center lg:hidden" />
 
               <nav className="flex flex-col gap-1">
                 {sectionLinks.map((link) => (

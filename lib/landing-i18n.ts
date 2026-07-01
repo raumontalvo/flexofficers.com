@@ -1,31 +1,8 @@
 export const LANDING_LANGUAGE_STORAGE_KEY = "flexofficers-landing-language";
 
-export const LANDING_LANGUAGES = [
-  "en",
-  "es",
-  "pt",
-  "fr",
-  "ht",
-  "ar",
-  "zh",
-  "hi",
-] as const;
+export const LANDING_LANGUAGES = ["en", "es"] as const;
 
 export type LandingLanguage = (typeof LANDING_LANGUAGES)[number];
-
-export const LANDING_LANGUAGE_OPTIONS: {
-  code: LandingLanguage;
-  label: string;
-}[] = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "pt", label: "Português" },
-  { code: "fr", label: "Français" },
-  { code: "ht", label: "Kreyòl Ayisyen" },
-  { code: "ar", label: "العربية" },
-  { code: "zh", label: "中文" },
-  { code: "hi", label: "हिन्दी" },
-];
 
 export type LandingTranslations = {
   nav: {
