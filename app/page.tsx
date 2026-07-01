@@ -424,6 +424,17 @@ export default function Home() {
                   /year
                 </span>
               </p>
+              <p className="mt-5 inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-fo-primary-hover sm:text-base">
+                {COMPANY_TRIAL_COPY.pricingBadge}
+              </p>
+              <div className="mx-auto mt-6 max-w-lg space-y-3 rounded-xl border border-blue-500/20 bg-blue-500/10 px-5 py-4 text-left sm:text-center">
+                <p className="text-sm leading-relaxed text-fo-text-muted sm:text-base">
+                  {COMPANY_TRIAL_COPY.pricingStartNote}
+                </p>
+                <p className="text-sm font-medium text-fo-text sm:text-base">
+                  {COMPANY_TRIAL_COPY.pricingSubscribeNote}
+                </p>
+              </div>
             </div>
 
             <ul className="space-y-4">
