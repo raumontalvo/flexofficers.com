@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   COMPANY_PROFILE_FORM_OPTIONS,
   parseCompanyPayload,
@@ -196,6 +197,7 @@ function SelectionChipField({
 }
 
 export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormProps) {
+  const router = useRouter();
   const { t } = useLandingLanguage();
   const e = t.company.companyProfile.edit;
   const v = t.company.companyProfile.view;
@@ -205,14 +207,10 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const saveDisabled = isSaving || isUploadingLogo;
 
   const descriptionCount = form.description.length;
   const descriptionMax = COMPANY_PROFILE_FORM_OPTIONS.descriptionMaxLength;
-
-  const previewHref = useMemo(
-    () => (form.hasPublicProfile ? "/company/profile/preview" : "/company/profile"),
-    [form.hasPublicProfile]
-  );
 
   function toggleSelection(
     key: "services" | "officerBenefits" | "workEnvironment",
@@ -252,9 +250,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
     }));
   }
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    setIsSaving(true);
+  async function saveProfile(): Promise<boolean> {
     setSubmitError(null);
     setSubmitSuccess(null);
     setFieldErrors({});
@@ -268,43 +264,60 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
       );
 
       setFieldErrors(nextFieldErrors);
-      setSubmitError(
-        formatCompanyProfileFieldErrors(parsed.errors).join(" ")
-      );
+      setSubmitError(formatCompanyProfileFieldErrors(parsed.errors).join(" "));
+      return false;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const response = await fetch("/api/company/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return true;
+      }
+
+      if (Array.isArray(data.details)) {
+        const nextFieldErrors = Object.fromEntries(
+          data.details.map((error: { field: string; message: string }) => [
+            error.field,
+            error.message,
+          ])
+        );
+
+        setFieldErrors(nextFieldErrors);
+        setSubmitError(formatCompanyProfileFieldErrors(data.details).join(" "));
+        return false;
+      }
+
+      setSubmitError(data.error || e.saveFailed);
+      return false;
+    } finally {
       setIsSaving(false);
-      return;
     }
+  }
 
-    const response = await fetch("/api/company/profile", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
 
-    const data = await response.json();
-    setIsSaving(false);
-
-    if (response.ok) {
+    if (await saveProfile()) {
       setSubmitSuccess(e.savedSuccess);
-      return;
     }
+  }
 
-    if (Array.isArray(data.details)) {
-      const nextFieldErrors = Object.fromEntries(
-        data.details.map((error: { field: string; message: string }) => [
-          error.field,
-          error.message,
-        ])
-      );
-
-      setFieldErrors(nextFieldErrors);
-      setSubmitError(formatCompanyProfileFieldErrors(data.details).join(" "));
-      return;
+  async function handleViewPublicProfile() {
+    if (await saveProfile()) {
+      router.refresh();
+      router.push("/company/profile/preview");
     }
-
-    setSubmitError(data.error || e.saveFailed);
   }
 
   return (
@@ -327,7 +340,7 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
           </Link>
           <button
             type="submit"
-            disabled={isSaving || isUploadingLogo}
+            disabled={saveDisabled}
             className={buttonClassName({ size: "md" })}
           >
             {isUploadingLogo
@@ -713,16 +726,18 @@ export function CompanyProfileEditForm({ initialForm }: CompanyProfileEditFormPr
 
           <EditSectionCard title={e.preview}>
             <p className="text-sm text-fo-text-muted">{e.previewHelper}</p>
-            <Link
-              href={previewHref}
+            <button
+              type="button"
+              disabled={saveDisabled}
+              onClick={() => void handleViewPublicProfile()}
               className={buttonClassName({
                 variant: "secondary",
                 size: "md",
                 className: "mt-4 w-full text-center",
               })}
             >
-              {e.viewPublicProfile}
-            </Link>
+              {isSaving ? e.saving : e.viewPublicProfile}
+            </button>
           </EditSectionCard>
         </aside>
       </div>

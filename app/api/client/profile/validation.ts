@@ -17,7 +17,6 @@ export type ClientProfilePayload = {
 export type ClientNotificationPrefsPayload = {
   emailNotifications: boolean;
   newCompanyApplications: boolean;
-  messages: boolean;
   marketingEmails: boolean;
 };
 
@@ -99,7 +98,6 @@ export function parseClientNotificationPrefsPayload(payload: unknown) {
   const boolFields = [
     "emailNotifications",
     "newCompanyApplications",
-    "messages",
     "marketingEmails",
   ] as const;
   const errors: FieldError[] = [];

@@ -7,9 +7,10 @@ import type { MobileBottomNavRole } from "@/components/ui/mobile-bottom-nav";
 import { cn } from "@/lib/cn";
 import { useUnreadNotificationCount } from "./use-unread-notification-count";
 
-const notificationsHref: Record<Exclude<MobileBottomNavRole, "client">, string> = {
+const notificationsHref: Record<MobileBottomNavRole, string> = {
   officer: "/officer/notifications",
   company: "/company/notifications",
+  client: "/client/applicants",
 };
 
 const homeHref: Record<MobileBottomNavRole, string> = {
@@ -36,32 +37,26 @@ export function MobileDashboardHeader({ role }: MobileDashboardHeaderProps) {
         </span>
       </Link>
 
-      {role !== "client" ? (
-        <Link
-          href={notificationsHref[role]}
-          className={cn(
-            "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition",
-            hasUnread
-              ? "border-red-500/45 bg-red-500/10 text-red-400 hover:border-red-400/60 hover:bg-red-500/15"
-              : "border-white/10 bg-[#070f1c]/60 text-fo-text-muted hover:border-fo-primary-bright/35 hover:text-fo-primary-hover"
-          )}
-          aria-label={
-            hasUnread
-              ? `Notifications, ${unreadCount} unread`
-              : "Notifications"
-          }
-        >
-          <NotificationsIcon className={cn("h-5 w-5", hasUnread && "text-red-400")} />
-          {hasUnread ? (
-            <span
-              className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-[#070f1c]"
-              aria-hidden
-            />
-          ) : null}
-        </Link>
-      ) : (
-        <div className="h-10 w-10 shrink-0" aria-hidden />
-      )}
+      <Link
+        href={notificationsHref[role]}
+        className={cn(
+          "relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition",
+          hasUnread
+            ? "border-red-500/45 bg-red-500/10 text-red-400 hover:border-red-400/60 hover:bg-red-500/15"
+            : "border-white/10 bg-[#070f1c]/60 text-fo-text-muted hover:border-fo-primary-bright/35 hover:text-fo-primary-hover"
+        )}
+        aria-label={
+          hasUnread ? `Notifications, ${unreadCount} unread` : "Notifications"
+        }
+      >
+        <NotificationsIcon className={cn("h-5 w-5", hasUnread && "text-red-400")} />
+        {hasUnread ? (
+          <span
+            className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-[#070f1c]"
+            aria-hidden
+          />
+        ) : null}
+      </Link>
     </header>
   );
 }

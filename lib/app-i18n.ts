@@ -209,6 +209,212 @@ export type AppTranslations = {
         state: string;
       };
     };
+    client: {
+      title: string;
+      subtitle: string;
+      createLead: string;
+      statMyLeads: string;
+      statMyLeadsHint: string;
+      statMyLeadsLink: string;
+      statActiveLeads: string;
+      statActiveLeadsHint: string;
+      statActiveLeadsLink: string;
+      statPendingApplicants: string;
+      statPendingApplicantsHint: string;
+      statPendingApplicantsLink: string;
+      statPostingFee: string;
+      statPostingFeeHint: string;
+      statPostingFeeLink: string;
+      recentLeads: string;
+      viewAll: string;
+      applicantsOverview: string;
+      applicantsEmpty: string;
+      donutHired: string;
+      donutPendingReview: string;
+      donutDeclined: string;
+      donutWithdrawn: string;
+      totalApplicants: string;
+      applicantsCount: string;
+      applicantCountOne: string;
+      recentLeadsEmptyTitle: string;
+      recentLeadsEmptyDesc: string;
+      quickActions: {
+        createLead: string;
+        createLeadDesc: string;
+        viewApplicants: string;
+        viewApplicantsDesc: string;
+        billingHistory: string;
+        billingHistoryDesc: string;
+      };
+      ctaTitle: string;
+      ctaDescription: string;
+    };
+    clientSecurityRequests: {
+      title: string;
+      subtitle: string;
+      createLead: string;
+      tabs: {
+        all: string;
+        active: string;
+        pending: string;
+        completed: string;
+        cancelled: string;
+      };
+      searchPlaceholder: string;
+      filter: string;
+      stats: {
+        total: string;
+        totalHint: string;
+        active: string;
+        activeHint: string;
+        pending: string;
+        pendingHint: string;
+        completed: string;
+        completedHint: string;
+        cancelled: string;
+        cancelledHint: string;
+      };
+      table: {
+        request: string;
+        location: string;
+        dateTime: string;
+        officers: string;
+        budget: string;
+        status: string;
+        applicants: string;
+        actions: string;
+        officersLabel: string;
+        budgetTotal: string;
+        view: string;
+      };
+      emptyTitle: string;
+      emptyDescription: string;
+      emptyFiltered: string;
+      ctaTitle: string;
+      ctaDescription: string;
+    };
+    clientLeadApplications: {
+      title: string;
+      subtitle: string;
+      createLead: string;
+      tabs: {
+        all: string;
+        pending: string;
+        hired: string;
+        declined: string;
+        withdrawn: string;
+      };
+      searchPlaceholder: string;
+      filters: string;
+      stats: {
+        total: string;
+        totalHint: string;
+        pending: string;
+        pendingHint: string;
+        hired: string;
+        hiredHint: string;
+        declined: string;
+        declinedHint: string;
+      };
+      table: {
+        applicant: string;
+        leadRequest: string;
+        appliedOn: string;
+        status: string;
+        offer: string;
+        actions: string;
+        offerTotal: string;
+        viewProfile: string;
+      };
+      emptyTitle: string;
+      emptyDescription: string;
+      emptyFiltered: string;
+      ctaTitle: string;
+      ctaDescription: string;
+    };
+    companySecurityLeads: {
+      title: string;
+      subtitle: string;
+      myApplications: string;
+      viewMyApplications: string;
+      tabs: {
+        all: string;
+        active: string;
+        filled: string;
+        closed: string;
+        cancelled: string;
+      };
+      searchPlaceholder: string;
+      filter: string;
+      stats: {
+        total: string;
+        totalHint: string;
+        active: string;
+        activeHint: string;
+        filled: string;
+        filledHint: string;
+        closed: string;
+        closedHint: string;
+        cancelled: string;
+        cancelledHint: string;
+      };
+      table: {
+        leadTitle: string;
+        location: string;
+        dateTime: string;
+        officers: string;
+        budget: string;
+        status: string;
+        actions: string;
+        officersLabel: string;
+        budgetTotal: string;
+        viewDetails: string;
+      };
+      emptyTitle: string;
+      emptyDescription: string;
+      emptyFiltered: string;
+      ctaTitle: string;
+      ctaDescription: string;
+    };
+    companyLeadApplications: {
+      title: string;
+      subtitle: string;
+      browseLeads: string;
+      tabs: {
+        all: string;
+        pending: string;
+        hired: string;
+        notSelected: string;
+        withdrawn: string;
+      };
+      searchPlaceholder: string;
+      filters: string;
+      stats: {
+        total: string;
+        totalHint: string;
+        pending: string;
+        pendingHint: string;
+        hired: string;
+        hiredHint: string;
+        notSelected: string;
+        notSelectedHint: string;
+      };
+      table: {
+        leadRequest: string;
+        client: string;
+        appliedOn: string;
+        status: string;
+        offer: string;
+        actions: string;
+        offerTotal: string;
+        viewDetails: string;
+      };
+      emptyTitle: string;
+      emptyDescription: string;
+      emptyFiltered: string;
+      ctaTitle: string;
+      ctaDescription: string;
+    };
   };
   pages: {
     onboarding: { title: string; subtitle: string };
@@ -466,6 +672,222 @@ const en: AppCore = {
         city: "City",
         state: "State",
       },
+    },
+    client: {
+      title: "Client Dashboard",
+      subtitle: "Post security needs and review company applicants.",
+      createLead: "+ Create Lead",
+      statMyLeads: "My Leads",
+      statMyLeadsHint: "Total leads created",
+      statMyLeadsLink: "View all leads →",
+      statActiveLeads: "Active Leads",
+      statActiveLeadsHint: "Currently active",
+      statActiveLeadsLink: "View active leads →",
+      statPendingApplicants: "Pending Applicants",
+      statPendingApplicantsHint: "Awaiting review",
+      statPendingApplicantsLink: "Review applicants →",
+      statPostingFee: "Posting Fee",
+      statPostingFeeHint: "Per security lead",
+      statPostingFeeLink: "Payment history →",
+      recentLeads: "Recent Leads",
+      viewAll: "View all",
+      applicantsOverview: "Applicants Overview",
+      applicantsEmpty:
+        "Company applications will appear here once security companies apply to your leads.",
+      donutHired: "Hired",
+      donutPendingReview: "Pending Review",
+      donutDeclined: "Declined",
+      donutWithdrawn: "Withdrawn",
+      totalApplicants: "Total Applicants",
+      applicantsCount: "{count} Applicants",
+      applicantCountOne: "1 Applicant",
+      recentLeadsEmptyTitle: "No security requests yet.",
+      recentLeadsEmptyDesc:
+        "Create your first security request and start receiving applications from trusted security companies.",
+      quickActions: {
+        createLead: "Create New Lead",
+        createLeadDesc: "Post a new security request",
+        viewApplicants: "View Applicants",
+        viewApplicantsDesc: "Review and manage applicants",
+        billingHistory: "Billing History",
+        billingHistoryDesc: "View your payment history",
+      },
+      ctaTitle: "Need Qualified Security Officers?",
+      ctaDescription:
+        "Post your security need and get matched with qualified, verified security professionals.",
+    },
+    clientSecurityRequests: {
+      title: "My Security Requests",
+      subtitle: "Manage and track all your posted security requests.",
+      createLead: "+ Create Lead",
+      tabs: {
+        all: "All Requests",
+        active: "Active",
+        pending: "Pending",
+        completed: "Completed",
+        cancelled: "Cancelled",
+      },
+      searchPlaceholder: "Search requests...",
+      filter: "Filter",
+      stats: {
+        total: "Total Requests",
+        totalHint: "All time",
+        active: "Active",
+        activeHint: "Currently active",
+        pending: "Pending",
+        pendingHint: "Awaiting payment",
+        completed: "Completed",
+        completedHint: "Finished",
+        cancelled: "Cancelled",
+        cancelledHint: "Cancelled requests",
+      },
+      table: {
+        request: "Request",
+        location: "Location",
+        dateTime: "Date & Time",
+        officers: "Officers",
+        budget: "Budget",
+        status: "Status",
+        applicants: "Applicants",
+        actions: "Actions",
+        officersLabel: "Officers",
+        budgetTotal: "Total",
+        view: "View",
+      },
+      emptyTitle: "No security requests yet",
+      emptyDescription:
+        "Create your first security request to receive applications from trusted security companies.",
+      emptyFiltered: "No requests match your filters.",
+      ctaTitle: "Need qualified security officers?",
+      ctaDescription:
+        "Post a new security request and get matched with verified security professionals.",
+    },
+    clientLeadApplications: {
+      title: "My Lead Applications",
+      subtitle: "All company applications across your security leads.",
+      createLead: "+ Create Lead",
+      tabs: {
+        all: "All Applications",
+        pending: "Pending Review",
+        hired: "Hired",
+        declined: "Declined",
+        withdrawn: "Withdrawn",
+      },
+      searchPlaceholder: "Search applications...",
+      filters: "Filters",
+      stats: {
+        total: "Total Applications",
+        totalHint: "All time",
+        pending: "Pending Review",
+        pendingHint: "Awaiting your review",
+        hired: "Hired",
+        hiredHint: "Successfully hired",
+        declined: "Declined",
+        declinedHint: "Not selected",
+      },
+      table: {
+        applicant: "Applicant",
+        leadRequest: "Lead Request",
+        appliedOn: "Applied On",
+        status: "Status",
+        offer: "Offer",
+        actions: "Actions",
+        offerTotal: "Total",
+        viewProfile: "View Profile",
+      },
+      emptyTitle: "No applications yet",
+      emptyDescription:
+        "Company applications will appear here once security companies apply to your posted requests.",
+      emptyFiltered: "No applications match your filters.",
+      ctaTitle: "Post more leads and get more qualified applications.",
+      ctaDescription: "Find the right security partner for every job you post.",
+    },
+    companySecurityLeads: {
+      title: "Security Leads",
+      subtitle: "Browse public security needs posted by clients.",
+      myApplications: "My Applications",
+      viewMyApplications: "View My Applications",
+      tabs: {
+        all: "All Leads",
+        active: "Active",
+        filled: "Filled",
+        closed: "Closed",
+        cancelled: "Cancelled",
+      },
+      searchPlaceholder: "Search security leads...",
+      filter: "Filter",
+      stats: {
+        total: "Total Leads",
+        totalHint: "All time",
+        active: "Active",
+        activeHint: "Currently open",
+        filled: "Filled",
+        filledHint: "Successfully filled",
+        closed: "Closed",
+        closedHint: "Completed",
+        cancelled: "Cancelled",
+        cancelledHint: "Cancelled leads",
+      },
+      table: {
+        leadTitle: "Lead Title",
+        location: "Location",
+        dateTime: "Date & Time",
+        officers: "Officers Needed",
+        budget: "Budget",
+        status: "Status",
+        actions: "Actions",
+        officersLabel: "Officers",
+        budgetTotal: "Total",
+        viewDetails: "View Details",
+      },
+      emptyTitle: "No public security leads available",
+      emptyDescription:
+        "Client security requests will appear here as they are published.",
+      emptyFiltered: "No leads match your filters.",
+      ctaTitle: "Don't see the right lead?",
+      ctaDescription:
+        "Check back often — new security leads are posted daily.",
+    },
+    companyLeadApplications: {
+      title: "My Lead Applications",
+      subtitle: "Track applications you submitted to client security leads.",
+      browseLeads: "Browse Leads",
+      tabs: {
+        all: "All Applications",
+        pending: "Pending Review",
+        hired: "Hired",
+        notSelected: "Not Selected",
+        withdrawn: "Withdrawn",
+      },
+      searchPlaceholder: "Search applications...",
+      filters: "Filters",
+      stats: {
+        total: "Total Applications",
+        totalHint: "All time",
+        pending: "Pending Review",
+        pendingHint: "Awaiting client review",
+        hired: "Hired",
+        hiredHint: "Successfully hired",
+        notSelected: "Not Selected",
+        notSelectedHint: "Not chosen by client",
+      },
+      table: {
+        leadRequest: "Lead Request",
+        client: "Client",
+        appliedOn: "Applied On",
+        status: "Status",
+        offer: "Offer",
+        actions: "Actions",
+        offerTotal: "Total",
+        viewDetails: "View Details",
+      },
+      emptyTitle: "You have not applied to any leads yet",
+      emptyDescription:
+        "Browse public security leads and apply to opportunities that fit your company.",
+      emptyFiltered: "No applications match your filters.",
+      ctaTitle: "Want more leads?",
+      ctaDescription:
+        "Browse available security leads and grow your business.",
     },
   },
   pages: {
@@ -796,6 +1218,223 @@ const es: AppCore = {
         city: "Ciudad",
         state: "Estado",
       },
+    },
+    client: {
+      title: "Panel del Cliente",
+      subtitle:
+        "Publica necesidades de seguridad y revisa solicitudes de empresas.",
+      createLead: "+ Crear Lead",
+      statMyLeads: "Mis Leads",
+      statMyLeadsHint: "Total de leads creados",
+      statMyLeadsLink: "Ver todos los leads →",
+      statActiveLeads: "Leads Activos",
+      statActiveLeadsHint: "Actualmente activos",
+      statActiveLeadsLink: "Ver leads activos →",
+      statPendingApplicants: "Solicitantes Pendientes",
+      statPendingApplicantsHint: "En espera de revisión",
+      statPendingApplicantsLink: "Revisar solicitantes →",
+      statPostingFee: "Tarifa de Publicación",
+      statPostingFeeHint: "Por lead de seguridad",
+      statPostingFeeLink: "Historial de pagos →",
+      recentLeads: "Leads Recientes",
+      viewAll: "Ver todo",
+      applicantsOverview: "Resumen de Solicitantes",
+      applicantsEmpty:
+        "Las solicitudes de empresas aparecerán aquí cuando apliquen a tus leads.",
+      donutHired: "Contratados",
+      donutPendingReview: "En Revisión",
+      donutDeclined: "Rechazados",
+      donutWithdrawn: "Retirados",
+      totalApplicants: "Total de Solicitantes",
+      applicantsCount: "{count} Solicitantes",
+      applicantCountOne: "1 Solicitante",
+      recentLeadsEmptyTitle: "Aún no hay solicitudes de seguridad.",
+      recentLeadsEmptyDesc:
+        "Crea tu primera solicitud de seguridad y comienza a recibir aplicaciones de empresas de seguridad confiables.",
+      quickActions: {
+        createLead: "Crear Nuevo Lead",
+        createLeadDesc: "Publica una nueva solicitud de seguridad",
+        viewApplicants: "Ver Solicitantes",
+        viewApplicantsDesc: "Revisa y gestiona solicitantes",
+        billingHistory: "Historial de Facturación",
+        billingHistoryDesc: "Ver tu historial de pagos",
+      },
+      ctaTitle: "¿Necesitas Oficiales de Seguridad Calificados?",
+      ctaDescription:
+        "Publica tu necesidad de seguridad y conéctate con profesionales de seguridad verificados.",
+    },
+    clientSecurityRequests: {
+      title: "Mis Solicitudes de Seguridad",
+      subtitle: "Administra y sigue todas tus solicitudes de seguridad publicadas.",
+      createLead: "+ Crear Lead",
+      tabs: {
+        all: "Todas",
+        active: "Activas",
+        pending: "Pendientes",
+        completed: "Completadas",
+        cancelled: "Canceladas",
+      },
+      searchPlaceholder: "Buscar solicitudes...",
+      filter: "Filtrar",
+      stats: {
+        total: "Total de Solicitudes",
+        totalHint: "Todo el tiempo",
+        active: "Activas",
+        activeHint: "Actualmente activas",
+        pending: "Pendientes",
+        pendingHint: "En espera de pago",
+        completed: "Completadas",
+        completedHint: "Finalizadas",
+        cancelled: "Canceladas",
+        cancelledHint: "Solicitudes canceladas",
+      },
+      table: {
+        request: "Solicitud",
+        location: "Ubicación",
+        dateTime: "Fecha y Hora",
+        officers: "Oficiales",
+        budget: "Presupuesto",
+        status: "Estado",
+        applicants: "Solicitantes",
+        actions: "Acciones",
+        officersLabel: "Oficiales",
+        budgetTotal: "Total",
+        view: "Ver",
+      },
+      emptyTitle: "Aún no hay solicitudes de seguridad",
+      emptyDescription:
+        "Crea tu primera solicitud de seguridad para recibir aplicaciones de empresas de seguridad confiables.",
+      emptyFiltered: "Ninguna solicitud coincide con tus filtros.",
+      ctaTitle: "¿Necesitas oficiales de seguridad calificados?",
+      ctaDescription:
+        "Publica una nueva solicitud de seguridad y conéctate con profesionales verificados.",
+    },
+    clientLeadApplications: {
+      title: "Mis Solicitudes de Empresas",
+      subtitle: "Todas las solicitudes de empresas en tus leads de seguridad.",
+      createLead: "+ Crear Lead",
+      tabs: {
+        all: "Todas las Solicitudes",
+        pending: "En Revisión",
+        hired: "Contratadas",
+        declined: "Rechazadas",
+        withdrawn: "Retiradas",
+      },
+      searchPlaceholder: "Buscar solicitudes...",
+      filters: "Filtros",
+      stats: {
+        total: "Total de Solicitudes",
+        totalHint: "Todo el tiempo",
+        pending: "En Revisión",
+        pendingHint: "En espera de tu revisión",
+        hired: "Contratadas",
+        hiredHint: "Contratadas con éxito",
+        declined: "Rechazadas",
+        declinedHint: "No seleccionadas",
+      },
+      table: {
+        applicant: "Solicitante",
+        leadRequest: "Solicitud de Lead",
+        appliedOn: "Aplicó el",
+        status: "Estado",
+        offer: "Oferta",
+        actions: "Acciones",
+        offerTotal: "Total",
+        viewProfile: "Ver Perfil",
+      },
+      emptyTitle: "Aún no hay solicitudes",
+      emptyDescription:
+        "Las solicitudes de empresas aparecerán aquí cuando apliquen a tus solicitudes publicadas.",
+      emptyFiltered: "Ninguna solicitud coincide con tus filtros.",
+      ctaTitle: "Publica más leads y recibe más solicitudes calificadas.",
+      ctaDescription: "Encuentra el socio de seguridad adecuado para cada trabajo que publiques.",
+    },
+    companySecurityLeads: {
+      title: "Oportunidades de Seguridad",
+      subtitle: "Explora necesidades de seguridad públicas publicadas por clientes.",
+      myApplications: "Mis Solicitudes",
+      viewMyApplications: "Ver Mis Solicitudes",
+      tabs: {
+        all: "Todos los Leads",
+        active: "Activos",
+        filled: "Cubiertos",
+        closed: "Cerrados",
+        cancelled: "Cancelados",
+      },
+      searchPlaceholder: "Buscar leads de seguridad...",
+      filter: "Filtrar",
+      stats: {
+        total: "Total de Leads",
+        totalHint: "Todo el tiempo",
+        active: "Activos",
+        activeHint: "Actualmente abiertos",
+        filled: "Cubiertos",
+        filledHint: "Cubiertos con éxito",
+        closed: "Cerrados",
+        closedHint: "Completados",
+        cancelled: "Cancelados",
+        cancelledHint: "Leads cancelados",
+      },
+      table: {
+        leadTitle: "Título del Lead",
+        location: "Ubicación",
+        dateTime: "Fecha y Hora",
+        officers: "Oficiales Necesarios",
+        budget: "Presupuesto",
+        status: "Estado",
+        actions: "Acciones",
+        officersLabel: "Oficiales",
+        budgetTotal: "Total",
+        viewDetails: "Ver Detalles",
+      },
+      emptyTitle: "No hay leads de seguridad públicos disponibles",
+      emptyDescription:
+        "Las solicitudes de seguridad de clientes aparecerán aquí cuando se publiquen.",
+      emptyFiltered: "Ningún lead coincide con tus filtros.",
+      ctaTitle: "¿No ves el lead adecuado?",
+      ctaDescription:
+        "Vuelve a revisar — se publican nuevos leads de seguridad a diario.",
+    },
+    companyLeadApplications: {
+      title: "Mis Solicitudes de Leads",
+      subtitle: "Sigue las solicitudes que enviaste a leads de seguridad de clientes.",
+      browseLeads: "Explorar Leads",
+      tabs: {
+        all: "Todas las Solicitudes",
+        pending: "En Revisión",
+        hired: "Contratadas",
+        notSelected: "No Seleccionadas",
+        withdrawn: "Retiradas",
+      },
+      searchPlaceholder: "Buscar solicitudes...",
+      filters: "Filtros",
+      stats: {
+        total: "Total de Solicitudes",
+        totalHint: "Todo el tiempo",
+        pending: "En Revisión",
+        pendingHint: "En espera de revisión del cliente",
+        hired: "Contratadas",
+        hiredHint: "Contratadas con éxito",
+        notSelected: "No Seleccionadas",
+        notSelectedHint: "No elegidas por el cliente",
+      },
+      table: {
+        leadRequest: "Solicitud de Lead",
+        client: "Cliente",
+        appliedOn: "Aplicó el",
+        status: "Estado",
+        offer: "Oferta",
+        actions: "Acciones",
+        offerTotal: "Total",
+        viewDetails: "Ver Detalles",
+      },
+      emptyTitle: "Aún no has aplicado a ningún lead",
+      emptyDescription:
+        "Explora leads de seguridad públicos y aplica a oportunidades que se ajusten a tu empresa.",
+      emptyFiltered: "Ninguna solicitud coincide con tus filtros.",
+      ctaTitle: "¿Quieres más leads?",
+      ctaDescription:
+        "Explora leads de seguridad disponibles y haz crecer tu negocio.",
     },
   },
   pages: {

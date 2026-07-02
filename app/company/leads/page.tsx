@@ -1,68 +1,48 @@
-import Link from "next/link";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { CompanyLeadsBrowse } from "@/components/company/company-leads-browse";
-import { buttonClassName, PageShell } from "@/components/ui";
-import { securityLeadBrowseSelect } from "@/lib/security-lead-fields";
+import { CompanySecurityLeadsPage } from "@/components/company/company-security-leads-page";
+import { PageShell } from "@/components/ui";
 import {
-  buildPublicLeadsWhere,
-  serializeSecurityLeadCard,
-} from "@/lib/security-lead-data";
+  getCompanyLeadsPageStats,
+  serializeCompanySecurityLead,
+  type CompanyLeadsPageTab,
+} from "@/lib/company-leads-page";
 import { prisma } from "@/lib/prisma";
 import { requirePageRole } from "@/lib/page-rbac";
+import { securityLeadBrowseSelect } from "@/lib/security-lead-fields";
+import { buildCompanyPublicLeadsBrowseWhere } from "@/lib/security-lead-data";
 
 export const dynamic = "force-dynamic";
 
-export default async function CompanyLeadsPage() {
-  const clerkUser = await requirePageRole(UserRole.COMPANY);
+type CompanyLeadsPageProps = {
+  searchParams: Promise<{ status?: string }>;
+};
 
-  const company = await prisma.company.findFirst({
-    where: { user: { clerkId: clerkUser.id } },
-    select: { id: true },
+function getInitialTab(status?: string): CompanyLeadsPageTab {
+  if (status === "active") return "active";
+  if (status === "filled") return "filled";
+  if (status === "closed") return "closed";
+  if (status === "cancelled") return "cancelled";
+  return "all";
+}
+
+export default async function CompanyLeadsPage({ searchParams }: CompanyLeadsPageProps) {
+  await requirePageRole(UserRole.COMPANY);
+
+  const { status } = await searchParams;
+  const initialTab = getInitialTab(status);
+
+  const leads = await prisma.securityLead.findMany({
+    where: buildCompanyPublicLeadsBrowseWhere(),
+    select: securityLeadBrowseSelect,
+    orderBy: { createdAt: "desc" },
   });
 
-  const [leads, applications] = await Promise.all([
-    prisma.securityLead.findMany({
-      where: buildPublicLeadsWhere(),
-      select: securityLeadBrowseSelect,
-      orderBy: { createdAt: "desc" },
-    }),
-    company
-      ? prisma.securityLeadApplication.findMany({
-          where: { companyId: company.id },
-          select: { securityLeadId: true },
-        })
-      : Promise.resolve([]),
-  ]);
-
-  const serialized = leads.map(serializeSecurityLeadCard);
-  const appliedLeadIds = applications.map((item) => item.securityLeadId);
+  const serialized = leads.map((lead) => serializeCompanySecurityLead(lead));
+  const stats = getCompanyLeadsPageStats(leads);
 
   return (
     <PageShell nav="company" sidebar maxWidth="full">
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-fo-text sm:text-3xl">
-              Security Leads
-            </h1>
-            <p className="mt-1.5 text-sm text-fo-text-muted">
-              Browse public security needs posted by clients.
-            </p>
-          </div>
-          <Link
-            href="/company/lead-applications"
-            className={buttonClassName({
-              variant: "secondary",
-              size: "md",
-              className: "shrink-0 self-start",
-            })}
-          >
-            My Applications
-          </Link>
-        </div>
-
-        <CompanyLeadsBrowse leads={serialized} appliedLeadIds={appliedLeadIds} />
-      </div>
+      <CompanySecurityLeadsPage leads={serialized} stats={stats} initialTab={initialTab} />
     </PageShell>
   );
 }

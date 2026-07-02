@@ -677,6 +677,11 @@ export function getAdminSidebarItems(t: AppTranslations) {
       match: (pathname: string) => pathname.startsWith("/admin/officers"),
     },
     {
+      href: "/admin/clients",
+      label: items.clients,
+      match: (pathname: string) => pathname.startsWith("/admin/clients"),
+    },
+    {
       href: "/admin/shifts",
       label: items.shifts,
       match: (pathname: string) => pathname.startsWith("/admin/shifts"),

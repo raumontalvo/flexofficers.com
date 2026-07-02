@@ -21,7 +21,6 @@ export type SerializedClientBilling = {
 export type SerializedClientNotificationPrefs = {
   emailNotifications: boolean;
   newCompanyApplications: boolean;
-  messages: boolean;
   marketingEmails: boolean;
 };
 
@@ -170,7 +169,6 @@ export function serializeClientProfile(input: {
     notifications: {
       emailNotifications: input.user.emailNotificationsEnabled,
       newCompanyApplications: input.client.notifyNewApplications,
-      messages: input.client.notifyMessages,
       marketingEmails: input.client.notifyMarketing,
     },
     recentActivity: buildClientRecentActivity(input.leads, locale),

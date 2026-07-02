@@ -19,6 +19,10 @@ export function getStripePriceId() {
   return readEnv(process.env.STRIPE_PRICE_ID);
 }
 
+export function getStripeSecurityLeadPriceId() {
+  return readEnv(process.env.STRIPE_SECURITY_LEAD_PRICE_ID);
+}
+
 export function getStripeWebhookSecret() {
   return readEnv(process.env.STRIPE_WEBHOOK_SECRET);
 }

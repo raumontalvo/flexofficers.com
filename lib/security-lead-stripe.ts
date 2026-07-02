@@ -1,15 +1,14 @@
 import type Stripe from "stripe";
 import { LeadPaymentStatus } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import { getAppUrl, getStripeClient } from "@/lib/stripe";
-
 import {
-  SECURITY_LEAD_PRICE_CENTS,
-  SECURITY_LEAD_PRODUCT_NAME,
-} from "@/lib/security-lead-pricing";
+  getAppUrl,
+  getStripeClient,
+  getStripeSecurityLeadPriceId,
+} from "@/lib/stripe";
 
 export function isStripeLeadPaymentReady() {
-  return Boolean(getStripeClient());
+  return Boolean(getStripeClient() && getStripeSecurityLeadPriceId());
 }
 
 export async function createSecurityLeadCheckoutSession(input: {
@@ -24,7 +23,18 @@ export async function createSecurityLeadCheckoutSession(input: {
     return { error: "Stripe is not configured." as const };
   }
 
+  const priceId = getStripeSecurityLeadPriceId();
+
+  if (!priceId) {
+    return { error: "Missing STRIPE_SECURITY_LEAD_PRICE_ID" as const };
+  }
+
   const appUrl = getAppUrl();
+
+  if (!appUrl.startsWith("http://") && !appUrl.startsWith("https://")) {
+    return { error: "Invalid redirect URL configuration." as const };
+  }
+
   const metadata = {
     securityLeadId: input.leadId,
     clientId: input.clientId,
@@ -37,13 +47,7 @@ export async function createSecurityLeadCheckoutSession(input: {
     customer_email: input.contactEmail,
     line_items: [
       {
-        price_data: {
-          currency: "usd",
-          unit_amount: SECURITY_LEAD_PRICE_CENTS,
-          product_data: {
-            name: SECURITY_LEAD_PRODUCT_NAME,
-          },
-        },
+        price: priceId,
         quantity: 1,
       },
     ],

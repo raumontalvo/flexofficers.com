@@ -173,7 +173,7 @@ describe("shift create form helpers", () => {
       visibility: "STAFF_ONLY",
     });
 
-    expect(summary.visibility).toBe("Private post for staff");
+    expect(summary.visibility).toBe("Private post for selected staff or search officers");
   });
 
   it("shows no requirements in summary when none selected", () => {

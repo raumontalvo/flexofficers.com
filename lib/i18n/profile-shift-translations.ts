@@ -544,7 +544,6 @@ export type ProfileShiftTranslations = {
         notificationPreferences: string;
         emailNotifications: string;
         newCompanyApplications: string;
-        messages: string;
         marketingEmails: string;
         savePreferences: string;
         savingPreferences: string;
@@ -587,7 +586,6 @@ export type ProfileShiftTranslations = {
       help: string;
       mySecurityRequests: string;
       myLeadApplications: string;
-      messages: string;
       paymentMethods: string;
       billingHistory: string;
       helpCenter: string;
@@ -899,9 +897,9 @@ export const profileShiftEn: ProfileShiftTranslations = {
       visibilityQuestion: "Who can see this shift?",
       publicTitle: "Public post shift",
       publicDescription: "Listed in Browse Shifts for all security officers.",
-      privateTitle: "Private post for staff",
+      privateTitle: "Private post for selected staff or search officers",
       privateDescription:
-        "Hidden from public browse. Invite officers from your Staff roster.",
+        "Hidden from the public security officer browse. Invite selected officers from your staff or a officer you search and want to invite can view this private post.",
       selected: "Selected: {value}",
       notSet: "Not set",
       tipsTitle: "Tips for a Successful Post",
@@ -1235,7 +1233,6 @@ export const profileShiftEn: ProfileShiftTranslations = {
         notificationPreferences: "Notification Preferences",
         emailNotifications: "Email Notifications",
         newCompanyApplications: "New Company Applications",
-        messages: "Messages",
         marketingEmails: "Marketing Emails",
         savePreferences: "Save Preferences",
         savingPreferences: "Saving...",
@@ -1279,7 +1276,6 @@ export const profileShiftEn: ProfileShiftTranslations = {
       help: "HELP",
       mySecurityRequests: "My Security Requests",
       myLeadApplications: "My Lead Applications",
-      messages: "Messages",
       paymentMethods: "Payment Methods",
       billingHistory: "Billing History",
       helpCenter: "Help Center",
@@ -1923,7 +1919,6 @@ export const profileShiftEs: ProfileShiftTranslations = {
         notificationPreferences: "Preferencias de Notificación",
         emailNotifications: "Notificaciones por Correo",
         newCompanyApplications: "Nuevas Solicitudes de Empresas",
-        messages: "Mensajes",
         marketingEmails: "Correos de Marketing",
         savePreferences: "Guardar Preferencias",
         savingPreferences: "Guardando...",
@@ -1969,7 +1964,6 @@ export const profileShiftEs: ProfileShiftTranslations = {
       help: "AYUDA",
       mySecurityRequests: "Mis Solicitudes de Seguridad",
       myLeadApplications: "Mis Solicitudes de Empresas",
-      messages: "Mensajes",
       paymentMethods: "Métodos de Pago",
       billingHistory: "Historial de Facturación",
       helpCenter: "Centro de Ayuda",

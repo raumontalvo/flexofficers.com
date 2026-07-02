@@ -2,6 +2,7 @@ import type { NavItem } from "./nav-config";
 import {
   ApplicantsIcon,
   AuditIcon,
+  BrowseIcon,
   CompaniesIcon,
   DashboardIcon,
   ProfileIcon,
@@ -28,6 +29,12 @@ export const adminSidebarItems: NavItem[] = [
     label: "Officers",
     icon: ProfileIcon,
     match: (pathname) => pathname.startsWith("/admin/officers"),
+  },
+  {
+    href: "/admin/clients",
+    label: "Clients",
+    icon: BrowseIcon,
+    match: (pathname) => pathname.startsWith("/admin/clients"),
   },
   {
     href: "/admin/shifts",

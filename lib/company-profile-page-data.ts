@@ -200,8 +200,15 @@ export function serializeCompanyProfile(input: {
   userEmail: string;
   shifts: { requirements: string[] }[];
   showContactDetails?: boolean;
+  savedProfileDataOnly?: boolean;
 }): SerializedCompanyProfile {
-  const { company, userEmail, shifts, showContactDetails = true } = input;
+  const {
+    company,
+    userEmail,
+    shifts,
+    showContactDetails = true,
+    savedProfileDataOnly = false,
+  } = input;
   const rawDescription = company.description;
   const meta = parseCompanyProfileMeta(rawDescription);
   const description = sanitizeDisplayValue(stripCompanyProfileMeta(rawDescription));
@@ -213,7 +220,9 @@ export function serializeCompanyProfile(input: {
   const licenseType = sanitizeDisplayValue(company.licenseType);
   const licenseState = sanitizeDisplayValue(company.licenseState);
   const displayPhone = formatDisplayPhone(company.phone);
-  const contactEmail = sanitizeDisplayValue(company.email) || userEmail.trim();
+  const contactEmail = savedProfileDataOnly
+    ? sanitizeDisplayValue(company.email)
+    : sanitizeDisplayValue(company.email) || userEmail.trim();
   const cityState = formatShiftCityState({
     city,
     state,
@@ -223,8 +232,11 @@ export function serializeCompanyProfile(input: {
   const hasBusinessLicense = Boolean(
     licenseType && licenseNumber && licenseState
   );
-  const services =
-    meta.services.length > 0 ? meta.services : buildCompanyServices(shifts);
+  const services = savedProfileDataOnly
+    ? meta.services
+    : meta.services.length > 0
+      ? meta.services
+      : buildCompanyServices(shifts);
 
   const profile: SerializedCompanyProfile = {
     id: company.id,

@@ -87,6 +87,7 @@ export default async function AdminDashboardPage() {
             {[
               { href: "/admin/companies", label: "Companies" },
               { href: "/admin/officers", label: "Officers" },
+              { href: "/admin/clients", label: "Clients" },
               { href: "/admin/shifts", label: "Shifts" },
               { href: "/admin/applications", label: "Applications" },
             ].map((item) => (

@@ -63,6 +63,30 @@ describe("company profile page data", () => {
     expect(profile.showContactDetails).toBe(false);
   });
 
+  it("shows only saved profile data in owner preview mode", () => {
+    const profile = serializeCompanyProfile({
+      company: {
+        ...baseCompany,
+        description:
+          'Professional security services.\n[fo-meta]{"services":["Event Security"],"officerBenefits":["Weekly Pay"],"workEnvironment":["Professional"],"businessHours":"Mon-Fri 9am-5pm","licenseIssueDate":"2024-01-01","licenseExpirationDate":"2026-01-01","industry":"Security","companySize":"11-50","established":"2010"}[/fo-meta]',
+        email: "contact@uss.test",
+      },
+      userEmail: "owner@uss.test",
+      shifts: [{ requirements: ["Armed Security"] }],
+      showContactDetails: true,
+      savedProfileDataOnly: true,
+    });
+
+    expect(profile.services).toEqual(["Event Security"]);
+    expect(profile.officerBenefits).toEqual(["Weekly Pay"]);
+    expect(profile.workEnvironment).toEqual(["Professional"]);
+    expect(profile.support.businessHours).toBe("Mon-Fri 9am-5pm");
+    expect(profile.details.contactEmail).toBe("contact@uss.test");
+    expect(profile.details.phone).toBe("(239) 555-0100");
+    expect(profile.support.email).toBe("contact@uss.test");
+    expect(profile.support.phone).toBe("(239) 555-0100");
+  });
+
   it("formats display helpers and public profile eligibility", () => {
     expect(formatTitleCase("UNITED STATES SECURITY")).toBe("United States Security");
     expect(formatDisplayPhone("2399005653")).toBe("(239) 900-5653");

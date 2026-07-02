@@ -412,7 +412,7 @@ export function getShiftSummaryFields(form: PostShiftFormValues) {
     description: form.description.trim() || "Not set",
     visibility:
       form.visibility === "STAFF_ONLY"
-        ? "Private post for staff"
+        ? "Private post for selected staff or search officers"
         : "Public post shift",
   };
 }

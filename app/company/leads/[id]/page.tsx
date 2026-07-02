@@ -6,7 +6,7 @@ import { SecurityLeadCard } from "@/components/security-leads/security-lead-card
 import { buttonClassName, PageShell } from "@/components/ui";
 import { securityLeadDetailSelect } from "@/lib/security-lead-fields";
 import {
-  buildPublicLeadsWhere,
+  buildCompanyPublicLeadsBrowseWhere,
   serializeSecurityLeadCard,
 } from "@/lib/security-lead-data";
 import { prisma } from "@/lib/prisma";
@@ -28,7 +28,7 @@ export default async function CompanyLeadDetailPage({ params }: PageProps) {
   });
 
   const lead = await prisma.securityLead.findFirst({
-    where: { id, ...buildPublicLeadsWhere() },
+    where: { id, ...buildCompanyPublicLeadsBrowseWhere() },
     select: securityLeadDetailSelect,
   });
 

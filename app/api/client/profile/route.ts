@@ -141,7 +141,6 @@ export async function PATCH(req: Request) {
       where: { id: auth.client.id },
       data: {
         notifyNewApplications: parsed.data.newCompanyApplications,
-        notifyMessages: parsed.data.messages,
         notifyMarketing: parsed.data.marketingEmails,
       },
     }),
@@ -157,7 +156,6 @@ export async function PATCH(req: Request) {
     notifications: {
       emailNotifications: user.emailNotificationsEnabled,
       newCompanyApplications: client.notifyNewApplications,
-      messages: client.notifyMessages,
       marketingEmails: client.notifyMarketing,
     },
   });

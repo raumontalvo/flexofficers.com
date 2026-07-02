@@ -186,3 +186,10 @@ export function buildPublicLeadsWhere() {
     postType: "PUBLIC" as const,
   };
 }
+
+export function buildCompanyPublicLeadsBrowseWhere() {
+  return {
+    paymentStatus: "PAID" as const,
+    postType: "PUBLIC" as const,
+  };
+}

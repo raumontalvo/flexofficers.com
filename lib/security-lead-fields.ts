@@ -5,6 +5,7 @@ export const securityLeadBrowseSelect = {
   serviceNeeded: true,
   city: true,
   state: true,
+  address: true,
   dateNeeded: true,
   startTime: true,
   endTime: true,
@@ -30,6 +31,28 @@ export const securityLeadClientCardSelect = {
   budgetOffer: true,
   status: true,
   paymentStatus: true,
+  _count: {
+    select: {
+      applications: true,
+    },
+  },
+} satisfies Prisma.SecurityLeadSelect;
+
+export const securityLeadClientListSelect = {
+  id: true,
+  serviceNeeded: true,
+  description: true,
+  city: true,
+  state: true,
+  address: true,
+  dateNeeded: true,
+  startTime: true,
+  endTime: true,
+  officersNeeded: true,
+  budgetOffer: true,
+  status: true,
+  paymentStatus: true,
+  createdAt: true,
   _count: {
     select: {
       applications: true,
@@ -86,11 +109,38 @@ export const leadApplicationListSelect = {
   },
 } satisfies Prisma.SecurityLeadApplicationSelect;
 
+export const clientLeadApplicationListSelect = {
+  id: true,
+  status: true,
+  createdAt: true,
+  securityLeadId: true,
+  companyId: true,
+  company: {
+    select: {
+      id: true,
+      companyName: true,
+      logoUrl: true,
+    },
+  },
+  securityLead: {
+    select: {
+      serviceNeeded: true,
+      city: true,
+      state: true,
+      dateNeeded: true,
+      startTime: true,
+      endTime: true,
+      budgetOffer: true,
+    },
+  },
+} satisfies Prisma.SecurityLeadApplicationSelect;
+
 export const companyLeadApplicationListSelect = {
   id: true,
   message: true,
   status: true,
   createdAt: true,
+  securityLeadId: true,
   securityLead: {
     select: {
       id: true,
@@ -103,6 +153,15 @@ export const companyLeadApplicationListSelect = {
       budgetOffer: true,
       urgency: true,
       status: true,
+      companyName: true,
+      contactName: true,
+      client: {
+        select: {
+          companyName: true,
+          contactName: true,
+          profilePhotoUrl: true,
+        },
+      },
     },
   },
 } satisfies Prisma.SecurityLeadApplicationSelect;

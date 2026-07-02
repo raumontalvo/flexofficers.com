@@ -29,20 +29,12 @@ export default async function CompanyProfilePreviewPage() {
     );
   }
 
-  const shifts = await prisma.shift.findMany({
-    where: {
-      companyId: company.id,
-    },
-    select: {
-      requirements: true,
-    },
-  });
-
   const profile = serializeCompanyProfile({
     company,
     userEmail: user.email,
-    shifts,
-    showContactDetails: false,
+    shifts: [],
+    showContactDetails: true,
+    savedProfileDataOnly: true,
   });
 
   return (

@@ -7,13 +7,38 @@ import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
 import { parseSecurityLeadPayload } from "@/lib/security-lead-validation";
 import { createSecurityLeadCheckoutSession } from "@/lib/security-lead-stripe";
+import {
+  getAppUrl,
+  getStripeClient,
+  getStripeSecurityLeadPriceId,
+} from "@/lib/stripe";
+
+function isDevelopment() {
+  return process.env.NODE_ENV === "development";
+}
+
+function formatCreateLeadError(error: unknown) {
+  if (isDevelopment()) {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return "Unknown error";
+  }
+
+  return "Failed to create security lead.";
+}
+
+function errorResponse(message: string, status: number) {
+  return NextResponse.json({ error: message }, { status });
+}
 
 export async function POST(req: Request) {
   try {
     const clerkUser = await currentUser();
 
     if (!clerkUser) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return errorResponse("Unauthorized", 401);
     }
 
     const rateLimitResponse = enforceRateLimit({
@@ -27,8 +52,23 @@ export async function POST(req: Request) {
       return rateLimitResponse;
     }
 
-    const body = await req.json();
-    const parsed = parseSecurityLeadPayload(body);
+    let body: unknown;
+
+    try {
+      body = await req.json();
+    } catch (error) {
+      console.error("Create Security Request Error:", error);
+      return errorResponse(
+        isDevelopment()
+          ? error instanceof Error
+            ? error.message
+            : "Invalid JSON body"
+          : "Invalid request payload",
+        400
+      );
+    }
+
+    const parsed = parseSecurityLeadPayload(body as Record<string, unknown>);
 
     if ("errors" in parsed) {
       return NextResponse.json(
@@ -42,18 +82,37 @@ export async function POST(req: Request) {
       select: { id: true, role: true, email: true },
     });
 
-    if (!existingUser?.role) {
-      return NextResponse.json(
-        { error: "Complete onboarding before posting a security request." },
-        { status: 403 }
+    if (!existingUser) {
+      return errorResponse("User not found.", 404);
+    }
+
+    if (!existingUser.role) {
+      return errorResponse(
+        "Complete onboarding before posting a security request.",
+        403
       );
     }
 
     if (existingUser.role !== UserRole.CLIENT) {
-      return NextResponse.json(
-        { error: "Only client accounts can post security leads." },
-        { status: 403 }
-      );
+      return errorResponse("Only client accounts can post security leads.", 403);
+    }
+
+    const stripePriceId = getStripeSecurityLeadPriceId();
+
+    if (!stripePriceId) {
+      return errorResponse("Missing STRIPE_SECURITY_LEAD_PRICE_ID", 500);
+    }
+
+    const stripe = getStripeClient();
+
+    if (!stripe) {
+      return errorResponse("Stripe is not configured.", 503);
+    }
+
+    const appUrl = getAppUrl();
+
+    if (!appUrl.startsWith("http://") && !appUrl.startsWith("https://")) {
+      return errorResponse("Invalid redirect URL configuration.", 500);
     }
 
     const user = await prisma.user.update({
@@ -62,11 +121,24 @@ export async function POST(req: Request) {
     });
 
     const result = await prisma.$transaction(async (tx) => {
-      await ensureClientOnSignup(tx, {
+      const clientRecord = await ensureClientOnSignup(tx, {
         userId: user.id,
         email: parsed.data.contactEmail,
         firstName: clerkUser.firstName,
       });
+
+      if (!clientRecord?.id) {
+        throw new Error("Client profile could not be created.");
+      }
+
+      const clientProfile = await tx.client.findUnique({
+        where: { id: clientRecord.id },
+        select: { id: true },
+      });
+
+      if (!clientProfile) {
+        throw new Error("Client profile not found.");
+      }
 
       const record = await tx.client.update({
         where: { userId: user.id },
@@ -78,6 +150,10 @@ export async function POST(req: Request) {
         },
       });
 
+      if (!record?.id) {
+        throw new Error("Client profile could not be updated.");
+      }
+
       const lead = await tx.securityLead.create({
         data: {
           clientId: record.id,
@@ -85,8 +161,20 @@ export async function POST(req: Request) {
         },
       });
 
+      if (!lead?.id) {
+        throw new Error("Security lead record could not be created.");
+      }
+
       return { client: record, lead };
     });
+
+    if (!result.client?.id) {
+      return errorResponse("Client profile not found after save.", 500);
+    }
+
+    if (!result.lead?.id) {
+      return errorResponse("Security lead record was not created.", 500);
+    }
 
     const checkout = await createSecurityLeadCheckoutSession({
       leadId: result.lead.id,
@@ -96,18 +184,21 @@ export async function POST(req: Request) {
     });
 
     if ("error" in checkout) {
-      return NextResponse.json({ error: checkout.error }, { status: 503 });
+      return errorResponse(checkout.error ?? "Checkout failed", 503);
+    }
+
+    if (!checkout.url) {
+      return errorResponse("Stripe checkout session URL was not returned.", 503);
     }
 
     return NextResponse.json({
       leadId: result.lead.id,
       checkoutUrl: checkout.url,
     });
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to create security lead." },
-      { status: 500 }
-    );
+  } catch (error) {
+    console.error("Create Security Request Error:", error);
+
+    return errorResponse(formatCreateLeadError(error), 500);
   }
 }
 

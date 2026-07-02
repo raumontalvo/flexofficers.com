@@ -455,6 +455,7 @@ export type UiTranslations = {
       dashboard: string;
       companies: string;
       officers: string;
+      clients: string;
       shifts: string;
       applications: string;
       reports: string;
@@ -1048,6 +1049,7 @@ export const uiEn: UiTranslations = {
       dashboard: "Dashboard",
       companies: "Companies",
       officers: "Officers",
+      clients: "Clients",
       shifts: "Shifts",
       applications: "Applications",
       reports: "Reports",
@@ -1663,6 +1665,7 @@ export const uiEs: UiTranslations = {
       dashboard: "Panel",
       companies: "Empresas",
       officers: "Oficiales",
+      clients: "Clientes",
       shifts: "Turnos",
       applications: "Solicitudes",
       reports: "Informes",

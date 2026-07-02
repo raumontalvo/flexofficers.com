@@ -467,12 +467,6 @@ export function ClientProfileView({ profile: initialProfile }: ClientProfileView
                 disabled={isSavingPrefs}
               />
               <ToggleSwitch
-                label={labels.messages}
-                checked={prefs.messages}
-                onChange={(next) => setPrefs((current) => ({ ...current, messages: next }))}
-                disabled={isSavingPrefs}
-              />
-              <ToggleSwitch
                 label={labels.marketingEmails}
                 checked={prefs.marketingEmails}
                 onChange={(next) => setPrefs((current) => ({ ...current, marketingEmails: next }))}
