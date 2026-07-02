@@ -15,7 +15,6 @@ const isPrivatePage = createRouteMatcher([
   "/client(.*)",
   "/admin(.*)",
   "/shifts/create(.*)",
-  "/onboarding(.*)",
 ]);
 
 const isPrivateApi = createRouteMatcher(["/api(.*)"]);

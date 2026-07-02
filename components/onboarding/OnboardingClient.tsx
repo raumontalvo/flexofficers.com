@@ -11,11 +11,14 @@ import { CompaniesIcon, ProfileIcon } from "@/components/nav/icons";
 import { Button, Card, CardDescription, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { getRoleHomePath } from "@/lib/rbac-paths";
-
-type Role = "OFFICER" | "COMPANY" | "CLIENT";
+import {
+  getSignUpPath,
+  isOnboardingRole,
+  type OnboardingRole,
+} from "@/lib/onboarding-flow";
 
 type OnboardingClientProps = {
-  initialRole?: Role | null;
+  initialRole?: OnboardingRole | null;
   forceRoleChoice?: boolean;
 };
 
@@ -31,16 +34,12 @@ const roleCardClassName = cn(
   "!px-8 !pt-8 !pb-10 sm:!px-9 sm:!pt-9 sm:!pb-10 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-colors md:hover:border-fo-primary-bright/60"
 );
 
-function isValidRole(value: string | null): value is Role {
-  return value === "OFFICER" || value === "COMPANY" || value === "CLIENT";
+function isValidRole(value: string | null): value is OnboardingRole {
+  return isOnboardingRole(value ?? undefined);
 }
 
-function getRoleDestination(role: Role) {
+function getRoleDestination(role: OnboardingRole) {
   return getRoleHomePath(role);
-}
-
-function getSignUpDestination(role: Role) {
-  return role === "CLIENT" ? "/client/sign-up" : "/sign-up";
 }
 
 function RoleCardIcon({ children }: { children: ReactNode }) {
@@ -92,7 +91,7 @@ export default function OnboardingClient({
   const { isLoaded, isSignedIn } = useUser();
   const { t } = useLandingLanguage();
   const [error, setError] = useState("");
-  const [savingRole, setSavingRole] = useState<Role | null>(null);
+  const [savingRole, setSavingRole] = useState<OnboardingRole | null>(null);
   const autoSaveAttempted = useRef(false);
   const copy = t.onboarding;
 
@@ -149,7 +148,7 @@ export default function OnboardingClient({
     },
   ];
 
-  const saveRole = useCallback(async (role: Role) => {
+  const saveRole = useCallback(async (role: OnboardingRole) => {
     setError("");
     setSavingRole(role);
 
@@ -169,7 +168,7 @@ export default function OnboardingClient({
 
     if (response.status === 409) {
       const data = (await response.json().catch(() => null)) as {
-        role?: Role;
+        role?: OnboardingRole;
       } | null;
 
       window.localStorage.removeItem(PENDING_ROLE_KEY);
@@ -188,14 +187,14 @@ export default function OnboardingClient({
     setError(data?.error || copy.errors.saveFailed);
   }, [copy.errors.saveFailed, router]);
 
-  async function chooseRole(role: Role) {
+  async function chooseRole(role: OnboardingRole) {
     if (!isLoaded) {
       return;
     }
 
     if (!isSignedIn) {
       window.localStorage.setItem(PENDING_ROLE_KEY, role);
-      router.push(getSignUpDestination(role));
+      router.push(getSignUpPath(role));
       return;
     }
 

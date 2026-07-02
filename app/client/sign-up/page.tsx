@@ -1,7 +1,18 @@
 import { SignUp } from "@clerk/nextjs";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { BrandHeader } from "@/components/brand";
+import { getOnboardingReturnUrl } from "@/lib/onboarding-flow";
 
-export default function ClientSignUpPage() {
+type ClientSignUpPageProps = {
+  searchParams?: Promise<{
+    role?: string;
+  }>;
+};
+
+export default async function ClientSignUpPage({ searchParams }: ClientSignUpPageProps) {
+  const params = await searchParams;
+  const returnUrl = getOnboardingReturnUrl(params?.role ?? UserRole.CLIENT);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-fo-bg px-6 py-10">
       <BrandHeader className="mb-10" logoHeight={56} />
@@ -9,9 +20,9 @@ export default function ClientSignUpPage() {
         routing="path"
         path="/client/sign-up"
         signInUrl="/client/sign-in"
-        forceRedirectUrl="/onboarding?role=CLIENT"
-        fallbackRedirectUrl="/onboarding?role=CLIENT"
-        signInForceRedirectUrl="/client"
+        forceRedirectUrl={returnUrl}
+        fallbackRedirectUrl={returnUrl}
+        signInForceRedirectUrl="/client/sign-in"
       />
     </main>
   );
