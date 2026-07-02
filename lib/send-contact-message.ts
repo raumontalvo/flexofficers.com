@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
-const CONTACT_INBOX = "flexofficer@gmail.com";
+const CONTACT_INBOX =
+  process.env.CONTACT_TO_EMAIL?.trim() || "flexofficers@gmail.com";
 
 export function isContactEmailConfigured() {
   return Boolean(
