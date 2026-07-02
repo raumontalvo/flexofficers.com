@@ -16,6 +16,7 @@ type Role = "OFFICER" | "COMPANY" | "CLIENT";
 
 type OnboardingClientProps = {
   initialRole?: Role | null;
+  forceRoleChoice?: boolean;
 };
 
 type FeatureGroup = {
@@ -85,6 +86,7 @@ function RoleFeatureGroups({
 
 export default function OnboardingClient({
   initialRole = null,
+  forceRoleChoice = false,
 }: OnboardingClientProps) {
   const router = useRouter();
   const { isLoaded, isSignedIn } = useUser();
@@ -201,7 +203,7 @@ export default function OnboardingClient({
   }
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn || autoSaveAttempted.current) {
+    if (forceRoleChoice || !isLoaded || !isSignedIn || autoSaveAttempted.current) {
       return;
     }
 
@@ -221,7 +223,7 @@ export default function OnboardingClient({
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [initialRole, isLoaded, isSignedIn, saveRole]);
+  }, [forceRoleChoice, initialRole, isLoaded, isSignedIn, saveRole]);
 
   return (
     <>

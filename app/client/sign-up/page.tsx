@@ -9,8 +9,8 @@ export default function ClientSignUpPage() {
         routing="path"
         path="/client/sign-up"
         signInUrl="/client/sign-in"
-        forceRedirectUrl="/onboarding?role=CLIENT&force=1"
-        fallbackRedirectUrl="/onboarding?role=CLIENT&force=1"
+        forceRedirectUrl="/onboarding?role=CLIENT"
+        fallbackRedirectUrl="/onboarding?role=CLIENT"
         signInForceRedirectUrl="/client"
       />
     </main>

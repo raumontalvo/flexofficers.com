@@ -82,7 +82,7 @@ export function LandingAudienceCards() {
             description={audience.officer.description}
             bullets={audience.officer.bullets}
             cta={audience.officer.cta}
-            href="/onboarding?force=1&role=OFFICER"
+            href="/onboarding?role=OFFICER"
             icon={<ProfileIcon className="h-5 w-5 shrink-0" />}
           />
           <AudienceCard
@@ -90,7 +90,7 @@ export function LandingAudienceCards() {
             description={audience.company.description}
             bullets={audience.company.bullets}
             cta={audience.company.cta}
-            href="/onboarding?force=1&role=COMPANY"
+            href="/onboarding?role=COMPANY"
             icon={<CompaniesIcon className="h-5 w-5 shrink-0" />}
           />
           <AudienceCard
@@ -98,7 +98,7 @@ export function LandingAudienceCards() {
             description={audience.client.description}
             bullets={audience.client.bullets}
             cta={audience.client.cta}
-            href="/onboarding?force=1&role=CLIENT"
+            href="/onboarding?role=CLIENT"
             icon={<IconShield className="h-5 w-5 shrink-0" />}
           />
         </div>

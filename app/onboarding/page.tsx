@@ -63,7 +63,7 @@ export default async function OnboardingPage({
 
   const clerkUser = await currentUser();
 
-  if (selectedRole === UserRole.CLIENT && clerkUser) {
+  if (!forceRoleChoice && selectedRole === UserRole.CLIENT && clerkUser) {
     const email = clerkUser.emailAddresses[0]?.emailAddress;
 
     if (email) {
@@ -104,7 +104,10 @@ export default async function OnboardingPage({
 
   return (
     <PageShell maxWidth="full" contentClassName="!overflow-visible !pt-8 md:!pt-12 !pb-8">
-      <OnboardingClient initialRole={onboardingRole} />
+      <OnboardingClient
+        initialRole={onboardingRole}
+        forceRoleChoice={forceRoleChoice}
+      />
     </PageShell>
   );
 }

@@ -449,7 +449,7 @@ export function LandingPageContent() {
               description={t.pricing.officer.description}
               features={t.pricing.officer.features}
               cta={t.pricing.officer.cta}
-              href="/onboarding?force=1&role=OFFICER"
+              href="/onboarding?role=OFFICER"
               icon={IconUsers}
             />
             <PricingAudienceCard
@@ -459,7 +459,7 @@ export function LandingPageContent() {
               description={t.pricing.client.description}
               features={t.pricing.client.features}
               cta={t.pricing.client.cta}
-              href="/onboarding?force=1&role=CLIENT"
+              href="/onboarding?role=CLIENT"
               icon={IconShield}
             />
           </div>

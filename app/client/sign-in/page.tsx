@@ -11,7 +11,7 @@ export default function ClientSignInPage() {
         signUpUrl="/client/sign-up"
         forceRedirectUrl="/client"
         fallbackRedirectUrl="/client"
-        signUpForceRedirectUrl="/onboarding?role=CLIENT&force=1"
+        signUpForceRedirectUrl="/onboarding?role=CLIENT"
       />
     </main>
   );
