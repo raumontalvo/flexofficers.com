@@ -13,6 +13,8 @@ async function deleteOfficerData(tx: TransactionClient, officerId: string) {
 }
 
 async function deleteCompanyData(tx: TransactionClient, companyId: string) {
+  await tx.securityLeadApplication.deleteMany({ where: { companyId } });
+
   const shifts = await tx.shift.findMany({
     where: { companyId },
     select: { id: true },
@@ -29,6 +31,23 @@ async function deleteCompanyData(tx: TransactionClient, companyId: string) {
   await tx.company.delete({ where: { id: companyId } });
 }
 
+async function deleteClientData(tx: TransactionClient, clientId: string) {
+  const leads = await tx.securityLead.findMany({
+    where: { clientId },
+    select: { id: true },
+  });
+  const leadIds = leads.map((lead) => lead.id);
+
+  if (leadIds.length > 0) {
+    await tx.securityLeadApplication.deleteMany({
+      where: { securityLeadId: { in: leadIds } },
+    });
+    await tx.securityLead.deleteMany({ where: { clientId } });
+  }
+
+  await tx.client.delete({ where: { id: clientId } });
+}
+
 export async function deleteAppUserDataByClerkId(clerkId: string) {
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
@@ -36,6 +55,7 @@ export async function deleteAppUserDataByClerkId(clerkId: string) {
       include: {
         officer: { select: { id: true } },
         company: { select: { id: true } },
+        client: { select: { id: true } },
       },
     });
 
@@ -51,6 +71,10 @@ export async function deleteAppUserDataByClerkId(clerkId: string) {
 
     if (user.company) {
       await deleteCompanyData(tx, user.company.id);
+    }
+
+    if (user.client) {
+      await deleteClientData(tx, user.client.id);
     }
 
     await tx.user.delete({ where: { id: user.id } });

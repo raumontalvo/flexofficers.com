@@ -1,5 +1,6 @@
-import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { getRoleHomePath } from "@/lib/page-rbac";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { dashboardUserSelect, companyDashboardSelect } from "@/lib/officer-fields";
 import { getCompanyProfileCompletion } from "@/lib/company-profile-completion";
@@ -36,6 +37,14 @@ export default async function DashboardPage() {
 
   if (user.role === UserRole.ADMIN) {
     redirect("/admin");
+  }
+
+  if (user.role === UserRole.CLIENT) {
+    redirect("/client");
+  }
+
+  if (user.role !== UserRole.COMPANY && user.role !== UserRole.OFFICER) {
+    redirect(getRoleHomePath(user.role));
   }
 
   if (user.role === UserRole.COMPANY) {

@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { NavItem } from "@/lib/nav-items";
-import { getCompanyNavItems, getOfficerNavItems } from "@/lib/nav-items";
+import { getCompanyNavItems, getClientNavItems, getOfficerNavItems } from "@/lib/nav-items";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
-export type MobileBottomNavRole = "officer" | "company";
+export type MobileBottomNavRole = "officer" | "company" | "client";
 
 type MobileBottomNavProps = {
   role: MobileBottomNavRole;
@@ -35,12 +35,18 @@ export function MobileBottomNav({
     items ??
     (role === "officer"
       ? getOfficerNavItems(nav.officerMobile)
-      : getCompanyNavItems(nav.companyMobile));
+      : role === "company"
+        ? getCompanyNavItems(nav.companyMobile)
+        : getClientNavItems(nav.clientMobile));
 
   return (
     <nav
       aria-label={
-        role === "officer" ? nav.aria.officerNav : nav.aria.companyNav
+        role === "officer"
+          ? nav.aria.officerNav
+          : role === "company"
+            ? nav.aria.companyNav
+            : "Client navigation"
       }
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 border-t border-fo-border bg-fo-bg-elevated/95 backdrop-blur-md md:hidden",

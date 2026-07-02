@@ -349,6 +349,22 @@ export type UiTranslations = {
         manageAccepted: string;
       };
     };
+    client: {
+      title: string;
+      description: string;
+      cta: string;
+      groups: { postNeed: string; reviewApplicants: string; secureConfidence: string };
+      items: {
+        describeNeed: string;
+        setDetails: string;
+        reachCompanies: string;
+        reviewProfiles: string;
+        compareExperience: string;
+        acceptBestMatch: string;
+        simpleFee: string;
+        fastResponses: string;
+      };
+    };
     disclaimer: { title: string; body: string };
     errors: { saveFailed: string };
   };
@@ -906,9 +922,30 @@ export const uiEn: UiTranslations = {
         manageAccepted: "Manage accepted officers",
       },
     },
+    client: {
+      title: "Need Security?",
+      description:
+        "Post a security need and let qualified security companies apply to you.",
+      cta: "Continue as Client",
+      groups: {
+        postNeed: "Post Your Need",
+        reviewApplicants: "Review Applicants",
+        secureConfidence: "Secure With Confidence",
+      },
+      items: {
+        describeNeed: "Describe the security service you need",
+        setDetails: "Set date, location, and budget",
+        reachCompanies: "Reach verified security companies",
+        reviewProfiles: "Review company profiles",
+        compareExperience: "Compare experience, licenses, and services",
+        acceptBestMatch: "Accept the best match",
+        simpleFee: "Simple $5 posting fee",
+        fastResponses: "Fast responses from trusted companies",
+      },
+    },
     disclaimer: {
       title: "Important",
-      body: "Companies are responsible for verifying licenses and credentials. Officers are responsible for maintaining valid qualifications.",
+      body: "Companies are responsible for verifying licenses and credentials and paying the security officers. Security Officers are responsible for maintaining valid qualifications.",
     },
     errors: { saveFailed: "Could not save your role. Please try again." },
   },
@@ -1498,9 +1535,30 @@ export const uiEs: UiTranslations = {
         manageAccepted: "Gestiona oficiales aceptados",
       },
     },
+    client: {
+      title: "¿Necesitas Seguridad?",
+      description:
+        "Publica una necesidad de seguridad y deja que empresas calificadas te contacten.",
+      cta: "Continuar como Cliente",
+      groups: {
+        postNeed: "Publica Tu Necesidad",
+        reviewApplicants: "Revisa Solicitantes",
+        secureConfidence: "Contrata con Confianza",
+      },
+      items: {
+        describeNeed: "Describe el servicio de seguridad que necesitas",
+        setDetails: "Define fecha, ubicación y presupuesto",
+        reachCompanies: "Llega a empresas de seguridad verificadas",
+        reviewProfiles: "Revisa perfiles de empresas",
+        compareExperience: "Compara experiencia, licencias y servicios",
+        acceptBestMatch: "Acepta la mejor opción",
+        simpleFee: "Tarifa simple de $5 por publicación",
+        fastResponses: "Respuestas rápidas de empresas confiables",
+      },
+    },
     disclaimer: {
       title: "Importante",
-      body: "Las empresas son responsables de verificar licencias y credenciales. Los oficiales son responsables de mantener calificaciones válidas.",
+      body: "Las empresas son responsables de verificar licencias y credenciales y de pagar a los oficiales de seguridad. Los Oficiales de Seguridad son responsables de mantener calificaciones válidas.",
     },
     errors: { saveFailed: "No se pudo guardar tu rol. Inténtalo de nuevo." },
   },

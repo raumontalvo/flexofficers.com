@@ -293,11 +293,37 @@ html {
 }
 
 @media (min-width: 1024px) {
-  .hero-badge-scene {
-    --hero-badge-w: 310px;
-    justify-content: flex-start;
-    margin-top: -28px;
-    margin-bottom: 20px;
+  .hero-badge-scene--desktop {
+    --hero-badge-w: 300px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .hero-badge-scene--desktop .hero-badge-particle {
+    width: 4px;
+    height: 4px;
+    box-shadow: 0 0 6px rgba(125, 211, 252, 0.5);
+  }
+}
+
+@media (min-width: 1280px) {
+  .hero-badge-scene--desktop {
+    --hero-badge-w: 380px;
+  }
+
+  .hero-badge-scene--desktop .hero-badge-particle {
+    width: 5px;
+    height: 5px;
+    box-shadow: 0 0 8px rgba(125, 211, 252, 0.55);
+  }
+}
+
+@media (min-width: 1536px) {
+  .hero-badge-scene--desktop {
+    --hero-badge-w: 440px;
   }
 }
 

@@ -4,6 +4,7 @@ import {
 } from "@/components/brand";
 import { OfficerSidebar } from "@/components/dashboard/officer-sidebar";
 import { CompanySidebar } from "@/components/dashboard/company-sidebar";
+import { ClientSidebar } from "@/components/dashboard/client-sidebar";
 import { MobileDashboardHeader } from "@/components/dashboard/mobile-dashboard-header";
 import { cn } from "@/lib/cn";
 import {
@@ -41,10 +42,15 @@ export function PageShell({
 }: PageShellProps) {
   const showNav = nav !== "none";
   const showBrand = brand ?? (nav !== "none" && !sidebar);
-  const showSidebar = sidebar && (nav === "officer" || nav === "company");
+  const showSidebar = sidebar && (nav === "officer" || nav === "company" || nav === "client");
 
   if (showSidebar) {
-    const Sidebar = nav === "officer" ? OfficerSidebar : CompanySidebar;
+    const Sidebar =
+      nav === "officer"
+        ? OfficerSidebar
+        : nav === "company"
+          ? CompanySidebar
+          : ClientSidebar;
 
     return (
       <div className={cn("fo-dashboard-shell min-h-screen overflow-x-hidden text-fo-text", className)}>

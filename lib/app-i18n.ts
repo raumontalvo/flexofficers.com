@@ -54,7 +54,24 @@ export type AppTranslations = {
       companyProfile: string;
       billing: string;
       settings: string;
+      securityLeads: string;
+      leadApplications: string;
     };
+    clientMobile: {
+      home: string;
+      leads: string;
+      create: string;
+      applicants: string;
+      settings: string;
+    };
+    clientSidebar: {
+      dashboard: string;
+      myLeads: string;
+      createLead: string;
+      applicants: string;
+      settings: string;
+    };
+    clientFallback: string;
   };
   common: {
     quickActions: string;
@@ -227,6 +244,7 @@ const en: AppCore = {
     signOut: "Sign Out",
     officerFallback: "Officer",
     companyFallback: "Company",
+    clientFallback: "Client",
     officerMobile: {
       home: "Home",
       browse: "Browse",
@@ -265,6 +283,22 @@ const en: AppCore = {
       staff: "Staff",
       companyProfile: "Company Profile",
       billing: "Billing & Plan",
+      settings: "Settings",
+      securityLeads: "Security Leads",
+      leadApplications: "My Lead Applications",
+    },
+    clientMobile: {
+      home: "Home",
+      leads: "Leads",
+      create: "Create",
+      applicants: "Applicants",
+      settings: "Settings",
+    },
+    clientSidebar: {
+      dashboard: "Dashboard",
+      myLeads: "My Leads",
+      createLead: "Create Lead",
+      applicants: "Applicants",
       settings: "Settings",
     },
   },
@@ -525,6 +559,7 @@ const es: AppCore = {
     signOut: "Cerrar Sesión",
     officerFallback: "Oficial",
     companyFallback: "Empresa",
+    clientFallback: "Cliente",
     officerMobile: {
       home: "Inicio",
       browse: "Explorar",
@@ -563,6 +598,22 @@ const es: AppCore = {
       staff: "Personal",
       companyProfile: "Perfil de Empresa",
       billing: "Facturación y Plan",
+      settings: "Configuración",
+      securityLeads: "Oportunidades de Seguridad",
+      leadApplications: "Mis Solicitudes",
+    },
+    clientMobile: {
+      home: "Inicio",
+      leads: "Leads",
+      create: "Crear",
+      applicants: "Solic.",
+      settings: "Ajustes",
+    },
+    clientSidebar: {
+      dashboard: "Panel",
+      myLeads: "Mis Leads",
+      createLead: "Crear Lead",
+      applicants: "Solicitantes",
       settings: "Configuración",
     },
   },

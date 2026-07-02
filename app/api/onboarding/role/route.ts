@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { ensureCompanyOnSignup } from "@/lib/company-onboarding";
+import { ensureClientOnSignup } from "@/lib/client-onboarding";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
 type OnboardingPayload = {
@@ -10,9 +11,13 @@ type OnboardingPayload = {
 };
 
 function parseRole(payload: OnboardingPayload) {
-  if (payload.role !== UserRole.OFFICER && payload.role !== UserRole.COMPANY) {
+  if (
+    payload.role !== UserRole.OFFICER &&
+    payload.role !== UserRole.COMPANY &&
+    payload.role !== UserRole.CLIENT
+  ) {
     return {
-      error: "Invalid role. Allowed values are OFFICER or COMPANY.",
+      error: "Invalid role. Allowed values are OFFICER, COMPANY, or CLIENT.",
     };
   }
 
@@ -65,7 +70,10 @@ export async function POST(req: Request) {
 
     if (existingUser?.role) {
       return NextResponse.json(
-        { error: "Role has already been selected and cannot be changed." },
+        {
+          error: "Role has already been selected and cannot be changed.",
+          role: existingUser.role,
+        },
         { status: 409 }
       );
     }
@@ -91,6 +99,14 @@ export async function POST(req: Request) {
 
       if (parsed.role === UserRole.COMPANY) {
         await ensureCompanyOnSignup(tx, {
+          userId: user.id,
+          email,
+          firstName: clerkUser.firstName,
+        });
+      }
+
+      if (parsed.role === UserRole.CLIENT) {
+        await ensureClientOnSignup(tx, {
           userId: user.id,
           email,
           firstName: clerkUser.firstName,

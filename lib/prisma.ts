@@ -9,8 +9,8 @@ if (!connectionString) {
 
 const adapter = new PrismaPg({ connectionString });
 
-/** Bump when Officer schema fields change to invalidate stale dev clients. */
-const PRISMA_CLIENT_VERSION = "officer-armedStatuses-v2";
+/** Bump when schema models change to invalidate stale dev/prod clients. */
+const PRISMA_CLIENT_VERSION = "security-leads-v1";
 
 type PrismaGlobal = typeof globalThis & {
   prisma?: PrismaClient;
@@ -39,20 +39,10 @@ function getPrismaClient() {
 
   const client = createPrismaClient();
 
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = client;
-    globalForPrisma.prismaClientVersion = PRISMA_CLIENT_VERSION;
-  }
+  globalForPrisma.prisma = client;
+  globalForPrisma.prismaClientVersion = PRISMA_CLIENT_VERSION;
 
   return client;
 }
 
-export const prisma =
-  process.env.NODE_ENV === "production"
-    ? globalForPrisma.prisma ?? createPrismaClient()
-    : getPrismaClient();
-
-if (process.env.NODE_ENV === "production" && !globalForPrisma.prisma) {
-  globalForPrisma.prisma = prisma;
-  globalForPrisma.prismaClientVersion = PRISMA_CLIENT_VERSION;
-}
+export const prisma = getPrismaClient();

@@ -51,6 +51,11 @@ export async function POST(request: Request) {
 
         if (session.mode === "subscription") {
           await syncCompanyFromCheckoutSession(session);
+        } else if (session.mode === "payment") {
+          const { syncSecurityLeadFromCheckoutSession } = await import(
+            "@/lib/security-lead-stripe"
+          );
+          await syncSecurityLeadFromCheckoutSession(session);
         }
         break;
       }

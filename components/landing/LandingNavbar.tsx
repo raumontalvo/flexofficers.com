@@ -32,7 +32,7 @@ function MenuIcon({ open }: { open: boolean }) {
   );
 }
 
-export function LandingNavbar() {
+export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boolean }) {
   const { t, language } = useLandingLanguage();
   const [open, setOpen] = useState(false);
   const menuId = useId();
@@ -43,9 +43,15 @@ export function LandingNavbar() {
       { href: "#how-it-works", label: t.nav.howItWorks },
       { href: "#companies", label: t.nav.forCompanies },
       { href: "#officers", label: t.nav.forOfficers },
+      { href: "#need-security", label: t.nav.needSecurity },
       { href: "#pricing", label: t.nav.pricing },
     ],
     [t]
+  );
+
+  const resolveHref = useCallback(
+    (href: string) => (useHomeAnchors && href.startsWith("#") ? `/${href}` : href),
+    [useHomeAnchors]
   );
 
   const closeMenu = useCallback(() => setOpen(false), []);
@@ -73,7 +79,12 @@ export function LandingNavbar() {
   return (
     <>
       <header className="landing-header sticky top-0 z-[100] border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
-        <nav className="relative z-[110] mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:gap-4 lg:px-8 lg:py-5">
+        <nav
+          className={cn(
+            "relative z-[110] mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:px-8 lg:py-5",
+            language === "es" ? "lg:gap-2" : "lg:gap-4"
+          )}
+        >
           <div className="flex max-w-[130px] shrink-0 items-center sm:max-w-[150px] lg:min-w-fit lg:max-w-none">
             <Link href="/" className="flex shrink-0 items-center">
               <Image
@@ -90,31 +101,43 @@ export function LandingNavbar() {
 
           <div
             className={cn(
-              "hidden items-center justify-center whitespace-nowrap text-sm text-fo-text-muted lg:flex",
+              "hidden items-center justify-center whitespace-nowrap text-fo-text-muted lg:flex",
               language === "es"
-                ? "gap-6 lg:gap-8 xl:gap-10"
-                : "gap-8 lg:gap-10 xl:gap-12"
+                ? "gap-2.5 text-sm tracking-tight xl:gap-3"
+                : "gap-6 text-sm lg:gap-7 xl:gap-8"
             )}
           >
             {sectionLinks.map((link) => (
               <a
                 key={link.href}
-                href={link.href}
+                href={resolveHref(link.href)}
                 className="shrink-0 transition hover:text-fo-text"
               >
                 {link.label}
               </a>
             ))}
-            <LanguageToggle className="ml-5 mr-5" />
+            <LanguageToggle
+              className={cn(
+                "shrink-0",
+                language === "es" ? "ml-1.5 text-xs" : "ml-5 mr-5"
+              )}
+            />
           </div>
 
-          <div className="relative z-10 flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end lg:gap-3">
+          <div
+            className={cn(
+              "relative z-10 flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end",
+              language === "es" ? "lg:gap-2" : "lg:gap-3"
+            )}
+          >
             <Link
               href="/onboarding?force=1"
               className={buttonClassName({
                 size: "md",
-                className:
-                  "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:min-h-11 lg:px-5 lg:text-sm",
+                className: cn(
+                  "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:min-h-11 lg:text-sm",
+                  language === "es" ? "lg:px-3.5" : "lg:px-5"
+                ),
               })}
             >
               {t.nav.getStarted}
@@ -124,8 +147,10 @@ export function LandingNavbar() {
               className={buttonClassName({
                 variant: "secondary",
                 size: "md",
-                className:
+                className: cn(
                   "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:border-transparent lg:bg-transparent lg:font-semibold lg:text-fo-text-muted lg:hover:bg-fo-surface lg:hover:text-fo-text",
+                  language === "es" ? "lg:px-3 lg:text-sm" : "lg:px-5"
+                ),
               })}
             >
               {t.nav.signIn}
@@ -192,7 +217,7 @@ export function LandingNavbar() {
                 {sectionLinks.map((link) => (
                   <a
                     key={link.href}
-                    href={link.href}
+                    href={resolveHref(link.href)}
                     className="rounded-xl px-4 py-4 text-base font-medium text-fo-text transition hover:bg-fo-surface hover:text-fo-primary-hover"
                     onClick={closeMenu}
                   >

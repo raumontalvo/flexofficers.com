@@ -4,6 +4,7 @@ import {
   BRAND_BADGE_TRANSPARENT_PNG,
   BRAND_BADGE_TRANSPARENT_WIDTH,
 } from "@/components/brand/brand-assets";
+import { cn } from "@/lib/cn";
 
 const PARTICLES = [
   { top: "20%", left: "24%", delay: "0s", duration: "4.8s" },
@@ -13,9 +14,20 @@ const PARTICLES = [
   { top: "14%", left: "50%", delay: "1.8s", duration: "5.4s" },
 ] as const;
 
-export function HeroBadge() {
+export function HeroBadge({
+  variant = "default",
+}: {
+  variant?: "default" | "desktop";
+}) {
   return (
-    <div className="hero-badge-scene" aria-hidden="true">
+    <div
+      className={cn(
+        "hero-badge-scene",
+        variant === "desktop" &&
+          "hero-badge-scene--desktop lg:h-[520px] lg:w-[520px] xl:h-[620px] xl:w-[620px] 2xl:h-[700px] 2xl:w-[700px]"
+      )}
+      aria-hidden="true"
+    >
       <div className="hero-badge-float">
         <div className="hero-badge-stage">
           <div className="hero-badge-orbit-host">

@@ -1,13 +1,14 @@
 "use client";
 
+import type { ComponentType, SVGProps } from "react";
 import { HeroBadge } from "@/components/landing/HeroBadge";
+import { LandingAudienceCards } from "@/components/landing/landing-audience-cards";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
-import { FlexOfficersLogoLink } from "@/components/brand";
+import { LandingFooter } from "@/components/landing/LandingFooter";
 import Link from "next/link";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import {
   IconCalendar,
-  IconCard,
   IconCheck,
   IconClock,
   IconGift,
@@ -20,8 +21,11 @@ import {
   IconZap,
 } from "@/components/landing/icons";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import type { LandingTranslations } from "@/lib/landing-i18n";
 import { LandingEyebrow, LandingHeading } from "@/components/landing/LandingHeading";
-import { buttonClassName, Card, CardDescription, CardTitle } from "@/components/ui";
+import { LandingHowItWorks } from "@/components/landing/landing-how-it-works";
+import { ClientLandingCta } from "@/components/landing/client-landing-cta";
+import { buttonClassName, Card, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 const companyFeatureIcons = [
@@ -30,7 +34,7 @@ const companyFeatureIcons = [
   IconSearch,
   IconZap,
   IconShield,
-  IconCard,
+  IconShield,
 ] as const;
 
 const officerFeatureIcons = [
@@ -45,29 +49,173 @@ const officerFeatureIcons = [
 const landingCardClass =
   "landing-card-lift border-white/[0.04] bg-fo-surface/35 p-8 shadow-[0_16px_48px_-28px_rgba(0,0,0,0.65)]";
 
-function StepCard({
-  step,
-  title,
-  description,
+const pricingCardClass = cn(
+  "landing-card-lift flex h-full min-h-0 min-w-0 flex-col rounded-2xl",
+  "border border-blue-500/20 bg-gradient-to-b from-[#0c1424]/95 via-fo-bg-elevated/85 to-[#070d18]/95",
+  "p-6 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition sm:p-7",
+  "hover:border-blue-500/35 hover:shadow-[0_16px_48px_-12px_rgba(37,99,235,0.28)]"
+);
+
+const pricingButtonClass =
+  "mt-auto w-full shadow-[0_20px_40px_-16px_rgba(37,99,235,0.55)] transition hover:shadow-[0_24px_48px_-14px_rgba(37,99,235,0.65)]";
+
+function PricingFeatureList({ features }: { features: string[] }) {
+  return (
+    <ul className="space-y-2.5">
+      {features.map((feature) => (
+        <li
+          key={feature}
+          className="flex min-w-0 items-start gap-2.5 text-sm leading-snug text-fo-text-muted"
+        >
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500/15 text-[10px] font-bold text-fo-primary-hover">
+            ✓
+          </span>
+          <span className="min-w-0">{feature}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function PricingImportantBar({
+  items,
 }: {
-  step: string;
-  title: string;
-  description: string;
+  items: Array<{ text: string; icon: ComponentType<SVGProps<SVGSVGElement>> }>;
 }) {
   return (
     <Card
-      variant="elevated"
-      className={cn(landingCardClass, "h-full text-left sm:text-center")}
+      padding="none"
+      variant="muted"
+      className="mt-10 rounded-2xl border border-blue-500/20 bg-blue-500/10 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:p-6"
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-fo-primary-hover">
-        {step}
-      </p>
-      <CardTitle className="mt-4 text-2xl font-semibold tracking-tight">
-        {title}
-      </CardTitle>
-      <CardDescription className="mt-4 text-base leading-relaxed text-fo-text-subtle">
-        {description}
-      </CardDescription>
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-3 md:gap-6">
+        {items.map(({ text, icon: Icon }) => (
+          <div key={text} className="flex min-w-0 items-start gap-2.5">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-blue-500/30 bg-blue-500/10 text-fo-primary-bright">
+              <Icon className="h-4 w-4" strokeWidth={1.75} />
+            </div>
+            <p className="text-sm leading-snug text-fo-text-muted">{text}</p>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+type PricingAudienceCardProps = {
+  badge: string;
+  title: string;
+  price?: string;
+  description: string;
+  features: string[];
+  cta: string;
+  href: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+};
+
+function PricingAudienceCard({
+  badge,
+  title,
+  price,
+  description,
+  features,
+  cta,
+  href,
+  icon: Icon,
+}: PricingAudienceCardProps) {
+  return (
+    <Card padding="none" variant="elevated" className={pricingCardClass}>
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-500/30 bg-blue-500/10 text-fo-primary-bright shadow-[0_0_16px_-4px_rgba(37,99,235,0.35)]">
+        <Icon className="h-5 w-5" strokeWidth={1.75} />
+      </div>
+
+      <div className="mt-4 min-w-0">
+        <LandingEyebrow>{badge}</LandingEyebrow>
+        <CardTitle className="mt-2 text-xl font-bold tracking-tight text-fo-text lg:text-2xl">
+          {title}
+        </CardTitle>
+        {price ? (
+          <p className="mt-2 text-lg font-semibold text-fo-primary-bright">
+            {price}
+          </p>
+        ) : null}
+        <p className="mt-2 text-sm leading-snug text-fo-text-muted">
+          {description}
+        </p>
+      </div>
+
+      <div className="mt-4 flex-1">
+        <PricingFeatureList features={features} />
+      </div>
+
+      <Link
+        href={href}
+        className={buttonClassName({
+          size: "lg",
+          fullWidth: true,
+          className: pricingButtonClass,
+        })}
+      >
+        {cta}
+      </Link>
+    </Card>
+  );
+}
+
+function CompanyPricingCard({
+  pricing,
+}: {
+  pricing: LandingTranslations["pricing"];
+}) {
+  return (
+    <Card
+      padding="none"
+      variant="elevated"
+      className={cn(
+        pricingCardClass,
+        "ring-1 ring-blue-500/15 shadow-[0_20px_56px_-16px_rgba(37,99,235,0.32)]"
+      )}
+    >
+      <div className="min-w-0">
+        <LandingEyebrow>{pricing.annualPlan}</LandingEyebrow>
+        <CardTitle className="mt-2 text-xl font-bold tracking-tight text-fo-text lg:text-2xl">
+          {pricing.planName}
+        </CardTitle>
+        <div className="mt-3 flex min-w-0 flex-wrap items-end gap-1.5">
+          <span className="text-4xl font-bold leading-none tracking-tight text-fo-primary-bright lg:text-[2.75rem]">
+            $599
+          </span>
+          <span className="mb-0.5 text-lg font-semibold leading-none text-fo-text-muted">
+            {pricing.perYear}
+          </span>
+        </div>
+        <p className="mt-3 inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-3 py-1 text-xs font-semibold text-fo-primary-hover sm:text-sm">
+          {pricing.trialBadge}
+        </p>
+        <div className="mt-3 space-y-1.5 rounded-xl border border-blue-500/20 bg-blue-500/10 px-3.5 py-3">
+          <p className="text-sm leading-snug text-fo-text-muted">
+            {pricing.trialStartNote}
+          </p>
+          <p className="text-sm font-semibold leading-snug text-fo-text">
+            {pricing.trialSubscribeNote}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex-1">
+        <PricingFeatureList features={pricing.features} />
+      </div>
+
+      <Link
+        href="/onboarding?force=1"
+        className={buttonClassName({
+          size: "lg",
+          fullWidth: true,
+          className: pricingButtonClass,
+        })}
+      >
+        {pricing.getStarted}
+      </Link>
     </Card>
   );
 }
@@ -82,17 +230,22 @@ export function LandingPageContent() {
       {/* Hero */}
       <section className="relative overflow-x-hidden">
         <div className="landing-hero-glow absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-5 pb-28 max-lg:pt-[calc(var(--landing-header-h)+1.75rem)] sm:px-8 sm:pb-36 sm:max-lg:pt-[calc(var(--landing-header-h)+2rem)] lg:px-8 lg:py-36 xl:py-44">
-          <div className="landing-fade-up relative z-10 mx-auto w-full max-w-4xl lg:max-w-5xl">
+        <div className="relative mx-auto max-w-7xl px-5 pb-28 max-lg:pt-[calc(var(--landing-header-h)+1.75rem)] sm:px-8 sm:pb-36 sm:max-lg:pt-[calc(var(--landing-header-h)+2rem)] lg:px-8 lg:py-28 xl:py-36">
+          {/* Mobile — original centered hero layout */}
+          <div className="landing-fade-up relative z-10 mx-auto w-full max-w-4xl lg:hidden">
             <HeroBadge />
-            <LandingEyebrow>{t.hero.eyebrow}</LandingEyebrow>
-            <h1 className="mt-6 text-[2.75rem] font-bold leading-[1.04] tracking-tight sm:text-6xl sm:leading-[1.02] lg:text-7xl lg:leading-[1.02] xl:text-[4.5rem]">
-              {t.hero.title}
+            <LandingEyebrow>{t.hero.badge}</LandingEyebrow>
+            <h1 className="mt-6 text-[2.75rem] font-bold leading-[1.04] tracking-tight sm:text-6xl sm:leading-[1.02]">
+              <span className="block">{t.hero.titleLine1}</span>
+              <span className="block">{t.hero.titleLine2}</span>
+              <span className="mt-1 block bg-gradient-to-r from-fo-primary-bright via-blue-400 to-sky-300 bg-clip-text text-transparent">
+                {t.hero.titleHighlight}
+              </span>
             </h1>
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-fo-text-muted/90 sm:mt-9 sm:text-xl sm:leading-9 lg:mt-10 lg:max-w-3xl lg:text-2xl lg:leading-10">
+            <p className="mt-8 max-w-2xl text-lg leading-8 text-fo-text-muted/90 sm:mt-9 sm:text-xl sm:leading-9">
               {t.hero.subtitle}
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row sm:items-center lg:mt-14">
+            <div className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row sm:items-center">
               <Link
                 href="/onboarding?force=1"
                 className={buttonClassName({
@@ -105,7 +258,7 @@ export function LandingPageContent() {
                 {t.hero.getStarted}
               </Link>
               <Link
-                href="/sign-in"
+                href="#need-security"
                 className={buttonClassName({
                   variant: "secondary",
                   size: "lg",
@@ -114,12 +267,60 @@ export function LandingPageContent() {
                     "sm:w-auto sm:min-w-[200px] border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]",
                 })}
               >
-                {t.hero.signIn}
+                {t.hero.needSecurity}
               </Link>
+            </div>
+          </div>
+
+          {/* Desktop — two-column hero layout */}
+          <div className="relative z-10 hidden min-w-0 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:items-center lg:gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,620px)] xl:gap-10 2xl:grid-cols-[minmax(0,1fr)_minmax(0,700px)]">
+            <div className="landing-fade-up min-w-0">
+              <span className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-fo-primary-hover">
+                {t.hero.badge}
+              </span>
+              <h1 className="mt-6 text-6xl font-bold leading-[1.03] tracking-tight xl:text-[3.75rem]">
+                <span className="block">{t.hero.titleLine1}</span>
+                <span className="block">{t.hero.titleLine2}</span>
+                <span className="mt-1 block bg-gradient-to-r from-fo-primary-bright via-blue-400 to-sky-300 bg-clip-text text-transparent">
+                  {t.hero.titleHighlight}
+                </span>
+              </h1>
+              <p className="mt-7 max-w-2xl text-xl leading-9 text-fo-text-muted/90">
+                {t.hero.subtitle}
+              </p>
+              <div className="mt-12 flex flex-wrap items-center gap-3">
+                <Link
+                  href="/onboarding?force=1"
+                  className={buttonClassName({
+                    size: "lg",
+                    className:
+                      "min-w-[200px] shadow-[0_20px_40px_-16px_rgba(37,99,235,0.55)] transition hover:shadow-[0_24px_48px_-14px_rgba(37,99,235,0.65)]",
+                  })}
+                >
+                  {t.hero.getStarted}
+                </Link>
+                <Link
+                  href="#need-security"
+                  className={buttonClassName({
+                    variant: "secondary",
+                    size: "lg",
+                    className:
+                      "min-w-[200px] border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]",
+                  })}
+                >
+                  {t.hero.needSecurity}
+                </Link>
+              </div>
+            </div>
+
+            <div className="flex min-w-0 flex-1 items-center justify-center overflow-hidden">
+              <HeroBadge variant="desktop" />
             </div>
           </div>
         </div>
       </section>
+
+      <LandingAudienceCards />
 
       {/* Introduction */}
       <section
@@ -133,37 +334,13 @@ export function LandingPageContent() {
           <h2 className="mt-6 text-4xl font-bold tracking-tight text-fo-text sm:mt-8 sm:text-5xl lg:text-6xl">
             {t.introduction.title}
           </h2>
-          <p className="mx-auto mt-8 max-w-5xl text-base leading-8 text-fo-text-muted sm:mt-10 sm:text-lg sm:leading-8">
+          <p className="mx-auto mt-8 max-w-5xl whitespace-pre-line text-base leading-8 text-fo-text-muted sm:mt-10 sm:text-lg sm:leading-8">
             {t.introduction.body}
           </p>
         </div>
       </section>
 
-      {/* How it works */}
-      <section
-        id="how-it-works"
-        className="border-t border-white/[0.06] bg-fo-bg-elevated/30 px-5 py-28 sm:px-8 sm:py-36"
-      >
-        <div className="mx-auto max-w-7xl">
-          <LandingHeading
-            title={t.howItWorks.title}
-            subtitle={t.howItWorks.subtitle}
-            align="center"
-            className="landing-fade-up"
-          />
-
-          <div className="mt-16 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8">
-            {t.howItWorks.steps.map((item) => (
-              <StepCard
-                key={item.step}
-                step={item.step}
-                title={item.title}
-                description={item.description}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      <LandingHowItWorks />
 
       {/* Companies */}
       <section
@@ -195,6 +372,30 @@ export function LandingPageContent() {
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-fo-text-muted sm:text-base">
             {t.companies.trialProfileNote} {t.companies.trialActiveNote}
           </p>
+        </div>
+      </section>
+
+      {/* Clients */}
+      <section
+        id="need-security"
+        className="border-t border-white/[0.06] bg-fo-bg-elevated/20 px-5 py-28 sm:px-8 sm:py-36"
+      >
+        <div className="mx-auto max-w-7xl">
+          <LandingHeading title={t.clients.title} subtitle={t.clients.subtitle} />
+          <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 xl:grid-cols-4">
+            {t.clients.features.map((feature) => (
+              <FeatureCard
+                key={feature.title}
+                title={feature.title}
+                description={feature.description}
+                icon={IconShield}
+              />
+            ))}
+          </div>
+          <p className="mt-8 text-center text-sm font-medium text-fo-primary-hover sm:text-base">
+            {t.clients.feeNote}
+          </p>
+          <ClientLandingCta />
         </div>
       </section>
 
@@ -233,134 +434,47 @@ export function LandingPageContent() {
           className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(37,99,235,0.14),transparent_70%)]"
           aria-hidden="true"
         />
-        <div className="relative mx-auto max-w-2xl">
+        <div className="relative mx-auto max-w-7xl overflow-x-hidden">
           <LandingHeading
             title={t.pricing.title}
             subtitle={t.pricing.subtitle}
             align="center"
           />
 
-          <Card
-            variant="elevated"
-            className={cn(
-              landingCardClass,
-              "mt-14 space-y-8 p-10 shadow-[0_32px_80px_-36px_rgba(37,99,235,0.3)] sm:p-12"
-            )}
-          >
-            <div className="text-center">
-              <LandingEyebrow>{t.pricing.annualPlan}</LandingEyebrow>
-              <CardTitle className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">
-                {t.pricing.planName}
-              </CardTitle>
-              <div className="mt-10 flex max-w-full min-w-0 flex-wrap items-end justify-center gap-2 overflow-hidden">
-                <span className="text-[72px] font-bold leading-none tracking-tighter text-fo-primary-bright min-[390px]:text-[88px] sm:text-8xl md:text-9xl">
-                  $599
-                </span>
-                <span className="mb-2 text-3xl font-semibold leading-none tracking-tight text-fo-text-muted min-[390px]:text-4xl sm:text-5xl">
-                  {t.pricing.perYear}
-                </span>
-              </div>
-              <p className="mt-5 inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-fo-primary-hover sm:text-base">
-                {t.pricing.trialBadge}
-              </p>
-              <div className="mx-auto mt-6 max-w-lg space-y-3 rounded-xl border border-blue-500/20 bg-blue-500/10 px-5 py-4 text-left sm:text-center">
-                <p className="text-sm leading-relaxed text-fo-text-muted sm:text-base">
-                  {t.pricing.trialStartNote}
-                </p>
-                <p className="text-sm font-medium text-fo-text sm:text-base">
-                  {t.pricing.trialSubscribeNote}
-                </p>
-              </div>
-            </div>
+          <div className="mt-12 grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3 lg:gap-8">
+            <CompanyPricingCard pricing={t.pricing} />
+            <PricingAudienceCard
+              badge={t.pricing.officer.badge}
+              title={t.pricing.officer.title}
+              description={t.pricing.officer.description}
+              features={t.pricing.officer.features}
+              cta={t.pricing.officer.cta}
+              href="/onboarding?force=1&role=OFFICER"
+              icon={IconUsers}
+            />
+            <PricingAudienceCard
+              badge={t.pricing.client.badge}
+              title={t.pricing.client.title}
+              price={t.pricing.client.price}
+              description={t.pricing.client.description}
+              features={t.pricing.client.features}
+              cta={t.pricing.client.cta}
+              href="/onboarding?force=1&role=CLIENT"
+              icon={IconShield}
+            />
+          </div>
 
-            <ul className="space-y-4">
-              {t.pricing.features.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-center gap-4 text-base text-fo-text-muted"
-                >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-fo-primary/15 text-xs font-bold text-fo-primary-hover">
-                    ✓
-                  </span>
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <Link
-              href="/onboarding?force=1"
-              className={buttonClassName({
-                size: "lg",
-                fullWidth: true,
-                className:
-                  "w-full shadow-[0_20px_40px_-16px_rgba(37,99,235,0.55)] transition hover:shadow-[0_24px_48px_-14px_rgba(37,99,235,0.65)]",
-              })}
-            >
-              {t.pricing.getStarted}
-            </Link>
-          </Card>
-
-          <p className="mt-12 text-center text-xl font-semibold tracking-tight text-fo-success sm:text-2xl">
-            {t.pricing.officersJoinFree}
-          </p>
+          <PricingImportantBar
+            items={[
+              { text: t.pricing.important.company, icon: IconShield },
+              { text: t.pricing.important.officer, icon: IconCheck },
+              { text: t.pricing.important.client, icon: IconUsers },
+            ]}
+          />
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative border-t border-white/[0.06] px-5 py-24 sm:px-8 sm:py-32 lg:py-40">
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(37,99,235,0.12),transparent_70%)]"
-          aria-hidden="true"
-        />
-        <div className="relative mx-auto max-w-3xl text-center">
-          <LandingEyebrow>{t.cta.eyebrow}</LandingEyebrow>
-          <h2 className="mt-6 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
-            {t.cta.title}
-          </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-fo-text-muted sm:text-xl">
-            {t.cta.subtitle}
-          </p>
-          <p className="mt-5 text-sm font-semibold tracking-wide text-fo-primary-hover sm:text-base">
-            {t.cta.tagline}
-          </p>
-          <Link
-            href="/onboarding?force=1"
-            className={buttonClassName({
-              size: "lg",
-              className: cn(
-                "mt-10 inline-flex min-w-[240px] px-10",
-                "shadow-[0_24px_48px_-16px_rgba(37,99,235,0.6)] transition hover:shadow-[0_28px_56px_-14px_rgba(37,99,235,0.7)]"
-              ),
-            })}
-          >
-            {t.cta.getStarted}
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-white/[0.06] py-12">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-5 text-sm text-fo-text-subtle sm:px-8 md:flex-row">
-          <div className="flex flex-col items-center gap-4 md:flex-row">
-            <FlexOfficersLogoLink href="/" height={40} />
-            <p>© {new Date().getFullYear()} FlexOfficers</p>
-          </div>
-          <div className="flex gap-8">
-            <a href="#" className="transition hover:text-fo-text-muted">
-              {t.footer.privacy}
-            </a>
-            <a href="#" className="transition hover:text-fo-text-muted">
-              {t.footer.terms}
-            </a>
-            <a
-              href="mailto:hello@flexofficers.com"
-              className="transition hover:text-fo-text-muted"
-            >
-              {t.footer.contact}
-            </a>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </main>
   );
 }

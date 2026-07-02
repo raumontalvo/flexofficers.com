@@ -156,6 +156,20 @@ export function getCompanySidebarItems(
       match: (pathname) => pathname.startsWith("/company/applications"),
     },
     {
+      href: "/company/leads",
+      label: labels.securityLeads,
+      icon: BrowseIcon,
+      match: (pathname) =>
+        pathname === "/company/leads" ||
+        pathname.startsWith("/company/leads/"),
+    },
+    {
+      href: "/company/lead-applications",
+      label: labels.leadApplications,
+      icon: AcceptedIcon,
+      match: (pathname) => pathname.startsWith("/company/lead-applications"),
+    },
+    {
       href: "/company/notifications",
       label: labels.notifications,
       icon: NotificationsIcon,
@@ -239,6 +253,86 @@ export function getCompanyNavItems(labels: LandingTranslations["appNav"]["compan
       match: (pathname) =>
         pathname.startsWith("/company/settings") ||
         pathname.startsWith("/company/billing"),
+    },
+  ];
+}
+
+export function getClientNavItems(
+  labels: LandingTranslations["appNav"]["clientMobile"]
+): NavItem[] {
+  return [
+    {
+      href: "/client",
+      label: labels.home,
+      icon: DashboardIcon,
+      match: (pathname) => pathname === "/client",
+    },
+    {
+      href: "/client/leads",
+      label: labels.leads,
+      icon: ShiftsIcon,
+      match: (pathname) =>
+        pathname === "/client/leads" ||
+        (pathname.startsWith("/client/leads/") &&
+          !pathname.startsWith("/client/leads/new")),
+    },
+    {
+      href: "/client/leads/new",
+      label: labels.create,
+      icon: BrowseIcon,
+      match: (pathname) => pathname.startsWith("/client/leads/new"),
+    },
+    {
+      href: "/client/applicants",
+      label: labels.applicants,
+      icon: ApplicantsIcon,
+      match: (pathname) => pathname.startsWith("/client/applicants"),
+    },
+    {
+      href: "/client/settings",
+      label: labels.settings,
+      icon: SettingsIcon,
+      match: (pathname) => pathname.startsWith("/client/settings"),
+    },
+  ];
+}
+
+export function getClientSidebarItems(
+  labels: LandingTranslations["appNav"]["clientSidebar"]
+): NavItem[] {
+  return [
+    {
+      href: "/client",
+      label: labels.dashboard,
+      icon: DashboardIcon,
+      match: (pathname) => pathname === "/client",
+    },
+    {
+      href: "/client/leads",
+      label: labels.myLeads,
+      icon: ShiftsIcon,
+      match: (pathname) =>
+        pathname === "/client/leads" ||
+        (pathname.startsWith("/client/leads/") &&
+          !pathname.startsWith("/client/leads/new")),
+    },
+    {
+      href: "/client/leads/new",
+      label: labels.createLead,
+      icon: BrowseIcon,
+      match: (pathname) => pathname.startsWith("/client/leads/new"),
+    },
+    {
+      href: "/client/applicants",
+      label: labels.applicants,
+      icon: ApplicantsIcon,
+      match: (pathname) => pathname.startsWith("/client/applicants"),
+    },
+    {
+      href: "/client/settings",
+      label: labels.settings,
+      icon: SettingsIcon,
+      match: (pathname) => pathname.startsWith("/client/settings"),
     },
   ];
 }

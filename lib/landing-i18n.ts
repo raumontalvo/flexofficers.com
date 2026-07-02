@@ -1,4 +1,8 @@
 import { getAppTranslations, type AppTranslations } from "@/lib/app-i18n";
+import {
+  getLegalPagesTranslations,
+  type LegalPagesTranslations,
+} from "@/lib/landing-legal-i18n";
 
 export const LANDING_LANGUAGE_STORAGE_KEY = "flexofficers-landing-language";
 
@@ -12,6 +16,7 @@ export type LandingTranslations = {
     howItWorks: string;
     forCompanies: string;
     forOfficers: string;
+    needSecurity: string;
     pricing: string;
     getStarted: string;
     signIn: string;
@@ -19,11 +24,38 @@ export type LandingTranslations = {
     language: string;
   };
   hero: {
-    eyebrow: string;
-    title: string;
+    badge: string;
+    titleLine1: string;
+    titleLine2: string;
+    titleHighlight: string;
     subtitle: string;
     getStarted: string;
-    signIn: string;
+    needSecurity: string;
+  };
+  audience: {
+    officer: {
+      title: string;
+      description: string;
+      bullets: string[];
+      cta: string;
+    };
+    company: {
+      title: string;
+      description: string;
+      bullets: string[];
+      cta: string;
+    };
+    client: {
+      title: string;
+      description: string;
+      bullets: string[];
+      cta: string;
+    };
+    important: {
+      company: string;
+      officer: string;
+      client: string;
+    };
   };
   introduction: {
     badge: string;
@@ -31,9 +63,48 @@ export type LandingTranslations = {
     body: string;
   };
   howItWorks: {
+    badge: string;
     title: string;
     subtitle: string;
-    steps: Array<{ step: string; title: string; description: string }>;
+    steps: Array<
+      | {
+          step: string;
+          title: string;
+          layout: "list";
+          items: string[];
+          description: string;
+        }
+      | {
+          step: string;
+          title: string;
+          layout: "roles";
+          roles: Array<{ label: string; body: string }>;
+        }
+      | {
+          step: string;
+          title: string;
+          layout: "list-only";
+          items: string[];
+        }
+      | {
+          step: string;
+          title: string;
+          layout: "manage";
+          companies: string[];
+          officers: string[];
+          clients: string[];
+        }
+    >;
+    manageLabels: {
+      companies: string;
+      officers: string;
+      clients: string;
+    };
+    important: {
+      company: string;
+      officer: string;
+      client: string;
+    };
   };
   companies: {
     title: string;
@@ -41,6 +112,14 @@ export type LandingTranslations = {
     trialDuration: string;
     trialProfileNote: string;
     trialActiveNote: string;
+    features: Array<{ title: string; description: string }>;
+  };
+  clients: {
+    title: string;
+    subtitle: string;
+    cta: string;
+    signIn: string;
+    feeNote: string;
     features: Array<{ title: string; description: string }>;
   };
   officers: {
@@ -59,7 +138,26 @@ export type LandingTranslations = {
     trialSubscribeNote: string;
     features: string[];
     getStarted: string;
-    officersJoinFree: string;
+    officer: {
+      badge: string;
+      title: string;
+      description: string;
+      features: string[];
+      cta: string;
+    };
+    client: {
+      badge: string;
+      title: string;
+      price: string;
+      description: string;
+      features: string[];
+      cta: string;
+    };
+    important: {
+      company: string;
+      officer: string;
+      client: string;
+    };
   };
   cta: {
     eyebrow: string;
@@ -73,6 +171,7 @@ export type LandingTranslations = {
     terms: string;
     contact: string;
   };
+  legalPages: LegalPagesTranslations;
   settings: {
     pageTitle: string;
     pageSubtitle: string;
@@ -135,7 +234,7 @@ export type LandingTranslations = {
   };
 } & AppTranslations;
 
-type LandingContent = Omit<LandingTranslations, keyof AppTranslations>;
+type LandingContent = Omit<LandingTranslations, keyof AppTranslations | "legalPages">;
 
 const en: LandingContent = {
   nav: {
@@ -143,6 +242,7 @@ const en: LandingContent = {
     howItWorks: "How It Works",
     forCompanies: "For Companies",
     forOfficers: "For Officers",
+    needSecurity: "Need Security?",
     pricing: "Pricing",
     getStarted: "Get Started",
     signIn: "Sign In",
@@ -150,54 +250,176 @@ const en: LandingContent = {
     language: "Language",
   },
   hero: {
-    eyebrow: "Security staffing marketplace",
-    title:
-      "The Modern Workforce Platform for Security Companies & Security Officers",
+    badge: "PRIVATE SECURITY NETWORK",
+    titleLine1: "The All-in-One Platform",
+    titleLine2: "for the",
+    titleHighlight: "Private Security Industry",
     subtitle:
-      "Post shifts, discover qualified security officers, and fill open positions faster—all from one platform.",
+      "Hire Flexible officers. Find work. Connect with trusted security companies. Everything the private security industry needs—all in one platform.",
     getStarted: "Get Started",
-    signIn: "Sign In",
+    needSecurity: "Need Security?",
+  },
+  audience: {
+    officer: {
+      title: "Security Officers",
+      description: "Find flexible shifts and build your career.",
+      bullets: [
+        "Browse open shifts",
+        "Get company invites",
+        "Apply in seconds",
+        "Build your professional profile",
+        "And more…",
+      ],
+      cta: "Continue as Officer",
+    },
+    company: {
+      title: "Security Companies",
+      description: "Hire officers, manage your team, and grow your business.",
+      bullets: [
+        "Post shifts (public & private)",
+        "Hire licensed officers",
+        "Manage staff & applications",
+        "Receive leads & win new clients",
+        "And more…",
+      ],
+      cta: "Continue as Company",
+    },
+    client: {
+      title: "Need Security?",
+      description:
+        "Post your security need and get applications from trusted companies.",
+      bullets: [
+        "Describe the service you need",
+        "Set date, location & budget",
+        "Receive applications from verified companies",
+        "Compare profiles & accept the best match",
+        "And more…",
+      ],
+      cta: "Continue as Client",
+    },
+    important: {
+      company: "Companies verify officer licenses and credentials.",
+      officer: "Officers maintain valid licenses and certifications.",
+      client: "Clients review company profiles before selecting a provider.",
+    },
   },
   introduction: {
     badge: "INTRODUCTION",
     title: "Meet FlexOfficers",
-    body: "FlexOfficers is the ultimate workforce platform for the private security industry. Security companies create profiles, manage their staff, and post shifts—either publicly for any qualified officer or privately for invited officers only. Private shifts are only visible to the officers you invite. When extra coverage is needed, companies send direct invitations—no calls, no texts. Officers sign up for free, build professional profiles, view detailed shift information—including time, location, and pay—and apply to shifts, even from companies they've never worked with before. If an invited officer declines, companies can simply invite the next qualified officer. Both companies and officers can track upcoming shifts and assignments in one place. FlexOfficers saves time, fills shifts faster, and keeps everyone covered.",
+    body: "FlexOfficers is the all-in-one private security network connecting security companies, security officers, and clients who need professional security services. Security companies create profiles, manage their staff, post public or private shifts, invite officers, and browse security requests from clients looking for coverage. Private shifts are visible only to the selected security officers a company invites to apply to shifts.\n\nSecurity officers sign up for free, build professional profiles, showcase their licenses and certifications, browse public shifts, receive private company invitations, and apply to opportunities that match their flexible schedule.\n\nClients can create a profile and post a security request for just $5 by providing their service details, location, schedule, budget, and security requirements. Verified security companies can then apply, allowing clients to compare company profiles, qualifications, and experience before selecting the best fit.\n\nFrom hiring officers and finding work to connecting clients with trusted security companies, FlexOfficers saves time, fills positions faster, helps companies grow, and keeps everyone covered.",
   },
   howItWorks: {
+    badge: "HOW IT WORKS",
     title: "How FlexOfficers Works",
-    subtitle: "From signup to a staffed workforce—on both sides of the marketplace.",
+    subtitle:
+      "From finding work to hiring officers and connecting with trusted security companies—all in one private security network.",
+    manageLabels: {
+      companies: "Companies",
+      officers: "Officers",
+      clients: "Clients",
+    },
     steps: [
       {
-        step: "Step 1",
-        title: "Choose Your Role",
-        description:
-          "Security companies and security officers create the right account for their needs.",
+        step: "STEP 1",
+        title: "Choose Your Experience",
+        layout: "list",
+        items: [
+          "Security Officer",
+          "Security Company",
+          "Need Security? (Client)",
+        ],
+        description: "Choose the experience that matches your needs.",
       },
       {
-        step: "Step 2",
-        title: "Complete Your Profile",
-        description:
-          "Companies add business details. Officers add experience, licenses, certifications, availability, and contact info.",
+        step: "STEP 2",
+        title: "Build Your Profile",
+        layout: "roles",
+        roles: [
+          {
+            label: "Security Officers",
+            body: "Create a professional profile with licenses and certifications.",
+          },
+          {
+            label: "Security Companies",
+            body: "Build your company profile, add your company license information, and if you already have staff, tell them to create their profiles and then add them to your staff to send a private shift post for the selected security officer or officers.",
+          },
+          {
+            label: "Clients",
+            body: "Create your account to post security requests.",
+          },
+        ],
       },
       {
-        step: "Step 3",
-        title: "Post or Find Shifts",
-        description:
-          "Companies post open shifts. Officers browse shifts, apply, and receive company invites.",
+        step: "STEP 3",
+        title: "Create Opportunities",
+        layout: "roles",
+        roles: [
+          {
+            label: "Security Companies",
+            body: "Post public or private shifts.",
+          },
+          {
+            label: "Security Officers",
+            body: "Browse public shifts, apply, and receive private company invitations.",
+          },
+          {
+            label: "Clients",
+            body: "Post a security need with your contact information, location, schedule, and budget.",
+          },
+        ],
       },
       {
-        step: "Step 4",
-        title: "Review & Connect",
-        description:
-          "Companies review applicants, view officer profiles, verify license info, and manage staff.",
+        step: "STEP 4",
+        title: "Connect",
+        layout: "list-only",
+        items: [
+          "Companies invite officers.",
+          "Officers apply to shifts.",
+          "Companies browse security leads.",
+          "Clients receive applications from qualified security companies.",
+        ],
       },
       {
-        step: "Step 5",
-        title: "Manage Your Workforce",
-        description:
-          "Companies track applicants, accepted officers, staff, invites, and posted shifts in one place.",
+        step: "STEP 5",
+        title: "Review & Hire",
+        layout: "roles",
+        roles: [
+          {
+            label: "Companies",
+            body: "Review officer profiles and hire the best officers.",
+          },
+          {
+            label: "Clients",
+            body: "Review company profiles, licenses, experience, services, and verification before selecting the right security company.",
+          },
+        ],
+      },
+      {
+        step: "STEP 6",
+        title: "Manage Everything",
+        layout: "manage",
+        companies: ["Staff", "Shifts", "Applications", "Security Leads"],
+        officers: [
+          "Upcoming shifts",
+          "View public shifts & apply",
+          "Company invites",
+          "Accepted shifts",
+        ],
+        clients: [
+          "Security requests",
+          "Company applicants",
+          "Accepted companies",
+          "Share contact",
+          "Request history",
+        ],
       },
     ],
+    important: {
+      company: "Companies verify officer licenses and credentials.",
+      officer: "Officers maintain valid licenses and certifications.",
+      client:
+        "Clients review company profiles, qualifications, licenses, and experience before selecting a security provider.",
+    },
   },
   companies: {
     title: "Built For Security Companies",
@@ -209,8 +431,9 @@ const en: LandingContent = {
       "You won't be charged when your trial ends. Subscribe anytime to re-unlock features.",
     features: [
       {
-        title: "Unlimited Shift Postings",
-        description: "Publish open shifts whenever you need coverage.",
+        title: "Unlimited Shift Postings, From Public to Private",
+        description:
+          "Public shifts are viewed by all security officers using the platform. For private shifts, tell your staff to create their profiles, add them to your staff, and send a private shift post for the selected security officer or officers.",
       },
       {
         title: "Review Officer Profiles",
@@ -222,16 +445,48 @@ const en: LandingContent = {
       },
       {
         title: "Fill Open Shifts Faster",
-        description: "Connect with officers ready to work on short notice.",
+        description:
+          "Connect with officers ready to work on short notice. Got a contract in a different city? Find security officers in that city to cover your shift and invite them to apply.",
       },
       {
         title: "Unlimited Hiring",
         description: "Accept as many officers as your shifts require.",
       },
       {
-        title: "Annual Subscription",
+        title: "Find Security Requests",
         description:
-          "7-day free trial, then $599/year for unlimited platform usage. No charge when your trial ends.",
+          "Browse security requests posted by clients looking for professional security services. Apply to opportunities, connect with new clients, and grow your business.",
+      },
+    ],
+  },
+  clients: {
+    title: "Need Security?",
+    subtitle:
+      "Post a security need and let qualified security companies apply to you.",
+    cta: "Post a Security Need",
+    signIn: "Client Sign In",
+    feeNote:
+      "$5 per security request · Posted to security companies. Receive applications from companies willing to meet your budget, schedule, location, and security requirements.",
+    features: [
+      {
+        title: "Create Your Client Profile",
+        description:
+          "Create a profile so you can manage your security requests, view company applicants, share contact details, and track your request history.",
+      },
+      {
+        title: "Post Security Requests",
+        description:
+          "HOAs, businesses, events, and property managers can post security needs in minutes.",
+      },
+      {
+        title: "Review Company Applicants",
+        description:
+          "Accept or reject applicants and view full company profiles before you hire.",
+      },
+      {
+        title: "Simple $5 Posting Fee",
+        description:
+          "Pay once per request. Your posting goes live after secure Stripe checkout.",
       },
     ],
   },
@@ -241,7 +496,7 @@ const en: LandingContent = {
     features: [
       {
         title: "Apply For Free",
-        description: "Officers never pay to browse or apply for shifts.",
+        description: "Officers never pay to browse or apply for shifts or company invites.",
       },
       {
         title: "Browse Unlimited Shifts",
@@ -260,16 +515,18 @@ const en: LandingContent = {
         description: "Company contact info unlocks once you are accepted.",
       },
       {
-        title: "Free Forever",
-        description: "FlexOfficers is free for security officers.",
+        title: "Complete Your Profile",
+        description:
+          "Complete your profile and get found by security companies looking for officers to cover a contract in your area that they need covered.",
       },
     ],
   },
   pricing: {
     title: "Simple Pricing",
-    subtitle: "One plan for companies. Free for officers.",
-    annualPlan: "Annual plan",
-    planName: "FlexOfficers Company Plan",
+    subtitle:
+      "One plan for companies. Free for officers. $5 security requests for clients.",
+    annualPlan: "ANNUAL PLAN",
+    planName: "Security Company Plan",
     perYear: "/year",
     trialBadge: "7-day free trial",
     trialStartNote:
@@ -281,10 +538,45 @@ const en: LandingContent = {
       "Unlimited Hiring",
       "Unlimited Officer Search",
       "Unlimited Platform Usage",
+      "Apply to unlimited security request leads",
       "No Commission Fees",
     ],
     getStarted: "Get Started",
-    officersJoinFree: "Security Officers Join Free",
+    officer: {
+      badge: "FOR SECURITY OFFICERS",
+      title: "Always Free",
+      description:
+        "Complete your profile and get discovered by security companies looking for licensed officers to cover contracts in your area.",
+      features: [
+        "Browse and apply to public shifts",
+        "Receive private company invitations",
+        "Build your professional profile",
+        "Showcase licenses and certifications",
+        "Get hired and work on your schedule",
+      ],
+      cta: "Create Your Free Profile",
+    },
+    client: {
+      badge: "FOR CLIENTS (NEED SECURITY?)",
+      title: "Find Security Services",
+      price: "$5 per security request",
+      description:
+        "Posted to verified security companies. Receive applications from companies willing to meet your budget, schedule, location, and security requirements.",
+      features: [
+        "Post your security request in minutes",
+        "Receive applications from trusted companies",
+        "Compare company profiles and qualifications",
+        "Choose the best company for your needs",
+        "No Commission Fees",
+      ],
+      cta: "Post a Security Request",
+    },
+    important: {
+      company: "Companies verify officer licenses and credentials.",
+      officer: "Officers maintain valid licenses and certifications.",
+      client:
+        "Clients review company profiles, qualifications, licenses, and experience before selecting a security provider.",
+    },
   },
   cta: {
     eyebrow: "Ready to get started?",
@@ -380,8 +672,9 @@ const es: LandingContent = {
   nav: {
     introduction: "Introducción",
     howItWorks: "Cómo Funciona",
-    forCompanies: "Para Empresas",
-    forOfficers: "Para Oficiales",
+    forCompanies: "Empresas",
+    forOfficers: "Oficiales",
+    needSecurity: "¿Necesitas Seguridad?",
     pricing: "Precios",
     getStarted: "Comenzar",
     signIn: "Iniciar Sesión",
@@ -389,55 +682,176 @@ const es: LandingContent = {
     language: "Idioma",
   },
   hero: {
-    eyebrow: "Mercado de personal de seguridad",
-    title:
-      "La Plataforma Moderna de Personal para Empresas de Seguridad y Oficiales de Seguridad",
+    badge: "RED DE SEGURIDAD PRIVADA",
+    titleLine1: "La Plataforma Todo en Uno",
+    titleLine2: "para la",
+    titleHighlight: "Industria de Seguridad Privada",
     subtitle:
-      "Publica turnos, descubre oficiales de seguridad calificados y cubre vacantes más rápido—todo desde una sola plataforma.",
+      "Contrata oficiales flexibles. Encuentra trabajo. Conéctate con empresas de seguridad confiables. Todo lo que la industria de seguridad privada necesita—en una sola plataforma.",
     getStarted: "Comenzar",
-    signIn: "Iniciar Sesión",
+    needSecurity: "¿Necesitas Seguridad?",
+  },
+  audience: {
+    officer: {
+      title: "Oficiales de Seguridad",
+      description: "Encuentra turnos flexibles y construye tu carrera.",
+      bullets: [
+        "Explora turnos abiertos",
+        "Recibe invitaciones de empresas",
+        "Solicita en segundos",
+        "Construye tu perfil profesional",
+        "Y más…",
+      ],
+      cta: "Continuar como Oficial",
+    },
+    company: {
+      title: "Empresas de Seguridad",
+      description: "Contrata oficiales, gestiona tu equipo y haz crecer tu negocio.",
+      bullets: [
+        "Publica turnos (públicos y privados)",
+        "Contrata oficiales con licencia",
+        "Gestiona personal y solicitudes",
+        "Recibe leads y gana nuevos clientes",
+        "Y más…",
+      ],
+      cta: "Continuar como Empresa",
+    },
+    client: {
+      title: "¿Necesitas Seguridad?",
+      description:
+        "Publica tu necesidad de seguridad y recibe solicitudes de empresas confiables.",
+      bullets: [
+        "Describe el servicio que necesitas",
+        "Define fecha, ubicación y presupuesto",
+        "Recibe solicitudes de empresas verificadas",
+        "Compara perfiles y acepta la mejor opción",
+        "Y más…",
+      ],
+      cta: "Continuar como Cliente",
+    },
+    important: {
+      company: "Las empresas verifican licencias y credenciales de los oficiales.",
+      officer: "Los oficiales mantienen licencias y certificaciones válidas.",
+      client: "Los clientes revisan perfiles de empresas antes de elegir un proveedor.",
+    },
   },
   introduction: {
     badge: "INTRODUCCIÓN",
     title: "Conoce FlexOfficers",
-    body: "FlexOfficers es la plataforma definitiva de personal para la industria de seguridad privada. Las empresas de seguridad crean perfiles, gestionan su personal y publican turnos—ya sea públicamente para cualquier oficial calificado o de forma privada para su propio equipo. Cuando se necesita cobertura adicional, las empresas envían invitaciones directas—sin llamadas ni mensajes de texto. Los oficiales se registran gratis, crean perfiles, ven los detalles del turno—incluyendo hora, ubicación y pago—y solicitan turnos, incluso de empresas nuevas. Si un oficial declina, el siguiente oficial invitado entra en acción. Tanto empresas como oficiales pueden seguir los turnos y asignaciones próximas. FlexOfficers ahorra tiempo, cubre turnos más rápido y mantiene a todos cubiertos.",
+    body: "FlexOfficers es la red privada de seguridad todo en uno que conecta a empresas de seguridad, oficiales de seguridad y clientes que necesitan servicios profesionales de seguridad. Las empresas de seguridad crean perfiles, gestionan su personal, publican turnos públicos o privados, invitan oficiales y exploran solicitudes de seguridad de clientes que buscan cobertura. Los turnos privados solo son visibles para los oficiales de seguridad seleccionados a quienes una empresa invita a solicitar turnos.\n\nLos oficiales de seguridad se registran gratis, crean perfiles profesionales, muestran sus licencias y certificaciones, exploran turnos públicos, reciben invitaciones privadas de empresas y solicitan oportunidades que se ajustan a su horario flexible.\n\nLos clientes pueden crear un perfil y publicar una solicitud de seguridad por solo $5 proporcionando los detalles del servicio, ubicación, horario, presupuesto y requisitos de seguridad. Las empresas de seguridad verificadas pueden entonces solicitar, lo que permite a los clientes comparar perfiles de empresas, calificaciones y experiencia antes de seleccionar la mejor opción.\n\nDesde contratar oficiales y encontrar trabajo hasta conectar clientes con empresas de seguridad confiables, FlexOfficers ahorra tiempo, cubre posiciones más rápido, ayuda a las empresas a crecer y mantiene a todos cubiertos.",
   },
   howItWorks: {
+    badge: "CÓMO FUNCIONA",
     title: "Cómo Funciona FlexOfficers",
     subtitle:
-      "Desde el registro hasta un equipo completo—en ambos lados del mercado.",
+      "Desde encontrar trabajo hasta contratar oficiales y conectar con empresas de seguridad confiables—todo en una red de seguridad privada.",
+    manageLabels: {
+      companies: "Empresas",
+      officers: "Oficiales",
+      clients: "Clientes",
+    },
     steps: [
       {
-        step: "Paso 1",
-        title: "Elige Tu Rol",
-        description:
-          "Las empresas de seguridad y los oficiales crean la cuenta adecuada para sus necesidades.",
+        step: "PASO 1",
+        title: "Elige Tu Experiencia",
+        layout: "list",
+        items: [
+          "Oficial de Seguridad",
+          "Empresa de Seguridad",
+          "¿Necesitas Seguridad? (Cliente)",
+        ],
+        description: "Elige la experiencia que se adapte a tus necesidades.",
       },
       {
-        step: "Paso 2",
-        title: "Completa Tu Perfil",
-        description:
-          "Las empresas agregan datos comerciales. Los oficiales agregan experiencia, licencias, certificaciones, disponibilidad e información de contacto.",
+        step: "PASO 2",
+        title: "Construye Tu Perfil",
+        layout: "roles",
+        roles: [
+          {
+            label: "Oficiales de Seguridad",
+            body: "Crea un perfil profesional con licencias y certificaciones.",
+          },
+          {
+            label: "Empresas de Seguridad",
+            body: "Crea el perfil de tu empresa, agrega la información de licencia de tu empresa y, si ya tienes personal, pídeles que creen sus perfiles y luego agrégalos a tu equipo para enviar una publicación de turno privado al oficial o oficiales de seguridad seleccionados.",
+          },
+          {
+            label: "Clientes",
+            body: "Crea tu cuenta para publicar solicitudes de seguridad.",
+          },
+        ],
       },
       {
-        step: "Paso 3",
-        title: "Publica o Busca Turnos",
-        description:
-          "Las empresas publican turnos abiertos. Los oficiales exploran turnos, solicitan y reciben invitaciones de empresas.",
+        step: "PASO 3",
+        title: "Crea Oportunidades",
+        layout: "roles",
+        roles: [
+          {
+            label: "Empresas de Seguridad",
+            body: "Publica turnos públicos o privados.",
+          },
+          {
+            label: "Oficiales de Seguridad",
+            body: "Explora turnos públicos, solicita y recibe invitaciones privadas de empresas.",
+          },
+          {
+            label: "Clientes",
+            body: "Publica una necesidad de seguridad con tu información de contacto, ubicación, horario y presupuesto.",
+          },
+        ],
       },
       {
-        step: "Paso 4",
-        title: "Revisa y Conecta",
-        description:
-          "Las empresas revisan solicitantes, ven perfiles de oficiales, verifican licencias y gestionan personal.",
+        step: "PASO 4",
+        title: "Conecta",
+        layout: "list-only",
+        items: [
+          "Las empresas invitan a oficiales.",
+          "Los oficiales solicitan turnos.",
+          "Las empresas exploran oportunidades de seguridad.",
+          "Los clientes reciben solicitudes de empresas de seguridad calificadas.",
+        ],
       },
       {
-        step: "Paso 5",
-        title: "Gestiona Tu Personal",
-        description:
-          "Las empresas siguen solicitantes, oficiales aceptados, personal, invitaciones y turnos publicados en un solo lugar.",
+        step: "PASO 5",
+        title: "Revisa y Contrata",
+        layout: "roles",
+        roles: [
+          {
+            label: "Empresas",
+            body: "Revisa perfiles de oficiales y contrata a los mejores.",
+          },
+          {
+            label: "Clientes",
+            body: "Revisa perfiles de empresas, licencias, experiencia, servicios y verificación antes de elegir la empresa de seguridad adecuada.",
+          },
+        ],
+      },
+      {
+        step: "PASO 6",
+        title: "Gestiona Todo",
+        layout: "manage",
+        companies: ["Personal", "Turnos", "Solicitudes", "Oportunidades de Seguridad"],
+        officers: [
+          "Turnos próximos",
+          "Ver turnos públicos y solicitar",
+          "Invitaciones de empresas",
+          "Turnos aceptados",
+        ],
+        clients: [
+          "Solicitudes de seguridad",
+          "Solicitantes de empresas",
+          "Empresas aceptadas",
+          "Compartir contacto",
+          "Historial de solicitudes",
+        ],
       },
     ],
+    important: {
+      company: "Las empresas verifican licencias y credenciales de los oficiales.",
+      officer: "Los oficiales mantienen licencias y certificaciones válidas.",
+      client:
+        "Los clientes revisan perfiles de empresas, calificaciones, licencias y experiencia antes de elegir un proveedor de seguridad.",
+    },
   },
   companies: {
     title: "Hecho Para Empresas de Seguridad",
@@ -449,8 +863,9 @@ const es: LandingContent = {
       "No se te cobrará cuando termine tu prueba. Suscríbete en cualquier momento para volver a desbloquear funciones.",
     features: [
       {
-        title: "Publicaciones Ilimitadas de Turnos",
-        description: "Publica turnos abiertos cuando necesites cobertura.",
+        title: "Publicaciones Ilimitadas de Turnos, de Público a Privado",
+        description:
+          "Los turnos públicos son visibles para todos los oficiales de seguridad en la plataforma. Para turnos privados, pídeles a tu personal que creen sus perfiles, agrégalos a tu equipo y envía una publicación de turno privado al oficial o oficiales de seguridad seleccionados.",
       },
       {
         title: "Revisa Perfiles de Oficiales",
@@ -462,16 +877,48 @@ const es: LandingContent = {
       },
       {
         title: "Cubre Turnos Más Rápido",
-        description: "Conéctate con oficiales listos para trabajar con poco aviso.",
+        description:
+          "Conéctate con oficiales listos para trabajar con poco aviso. ¿Tienes un contrato en otra ciudad? Encuentra oficiales de seguridad en esa ciudad para cubrir tu turno e invítalos a solicitar.",
       },
       {
         title: "Contratación Ilimitada",
         description: "Acepta tantos oficiales como requieran tus turnos.",
       },
       {
-        title: "Suscripción Anual",
+        title: "Encuentra Solicitudes de Seguridad",
         description:
-          "Prueba gratuita de 7 días, luego $599/año por uso ilimitado de la plataforma. Sin cargo al finalizar la prueba.",
+          "Explora solicitudes de seguridad publicadas por clientes que buscan servicios de seguridad profesionales. Solicita oportunidades, conéctate con nuevos clientes y haz crecer tu negocio.",
+      },
+    ],
+  },
+  clients: {
+    title: "¿Necesitas Seguridad?",
+    subtitle:
+      "Publica una necesidad de seguridad y deja que empresas calificadas te contacten.",
+    cta: "Publicar Necesidad de Seguridad",
+    signIn: "Iniciar Sesión Cliente",
+    feeNote:
+      "$5 por solicitud de seguridad · Publicado para empresas de seguridad. Recibe solicitudes de empresas dispuestas a cumplir tu presupuesto, horario, ubicación y requisitos de seguridad.",
+    features: [
+      {
+        title: "Crea Tu Perfil de Cliente",
+        description:
+          "Crea un perfil para gestionar tus solicitudes de seguridad, ver solicitantes de empresas, compartir datos de contacto y seguir el historial de tus solicitudes.",
+      },
+      {
+        title: "Publica Solicitudes de Seguridad",
+        description:
+          "HOA, negocios, eventos y administradores pueden publicar necesidades en minutos.",
+      },
+      {
+        title: "Revisa Solicitudes de Empresas",
+        description:
+          "Acepta o rechaza solicitantes y ve perfiles completos antes de contratar.",
+      },
+      {
+        title: "Tarifa Simple de $5",
+        description:
+          "Paga una vez por solicitud. Tu publicación se activa después del pago con Stripe.",
       },
     ],
   },
@@ -481,7 +928,7 @@ const es: LandingContent = {
     features: [
       {
         title: "Solicita Gratis",
-        description: "Los oficiales nunca pagan por explorar o solicitar turnos.",
+        description: "Los oficiales nunca pagan por explorar o solicitar turnos o invitaciones de empresas.",
       },
       {
         title: "Explora Turnos Ilimitados",
@@ -500,16 +947,18 @@ const es: LandingContent = {
         description: "La información de contacto de la empresa se desbloquea al ser aceptado.",
       },
       {
-        title: "Gratis Para Siempre",
-        description: "FlexOfficers es gratis para oficiales de seguridad.",
+        title: "Completa Tu Perfil",
+        description:
+          "Completa tu perfil y sé encontrado por empresas de seguridad que buscan oficiales para cubrir un contrato en tu área que necesitan cubrir.",
       },
     ],
   },
   pricing: {
     title: "Precios Simples",
-    subtitle: "Un plan para empresas. Gratis para oficiales.",
-    annualPlan: "Plan anual",
-    planName: "Plan Empresarial FlexOfficers",
+    subtitle:
+      "Un plan para empresas. Gratis para oficiales. Solicitudes de seguridad por $5 para clientes.",
+    annualPlan: "PLAN ANUAL",
+    planName: "Plan para Empresas de Seguridad",
     perYear: "/año",
     trialBadge: "Prueba gratuita de 7 días",
     trialStartNote:
@@ -522,10 +971,45 @@ const es: LandingContent = {
       "Contratación Ilimitada",
       "Búsqueda Ilimitada de Oficiales",
       "Uso Ilimitado de la Plataforma",
+      "Solicita oportunidades ilimitadas de solicitudes de seguridad",
       "Sin Comisiones",
     ],
     getStarted: "Comenzar",
-    officersJoinFree: "Los Oficiales de Seguridad Se Unen Gratis",
+    officer: {
+      badge: "PARA OFICIALES DE SEGURIDAD",
+      title: "Siempre Gratis",
+      description:
+        "Completa tu perfil y sé descubierto por empresas de seguridad que buscan oficiales con licencia para cubrir contratos en tu área.",
+      features: [
+        "Explora y solicita turnos públicos",
+        "Recibe invitaciones privadas de empresas",
+        "Construye tu perfil profesional",
+        "Muestra licencias y certificaciones",
+        "Consigue trabajo y trabaja en tu horario",
+      ],
+      cta: "Crea Tu Perfil Gratuito",
+    },
+    client: {
+      badge: "PARA CLIENTES (¿NECESITAS SEGURIDAD?)",
+      title: "Encuentra Servicios de Seguridad",
+      price: "$5 por solicitud de seguridad",
+      description:
+        "Publicado para empresas de seguridad verificadas. Recibe solicitudes de empresas dispuestas a cumplir tu presupuesto, horario, ubicación y requisitos de seguridad.",
+      features: [
+        "Publica tu solicitud de seguridad en minutos",
+        "Recibe solicitudes de empresas confiables",
+        "Compara perfiles y calificaciones de empresas",
+        "Elige la mejor empresa para tus necesidades",
+        "Sin Comisiones",
+      ],
+      cta: "Publicar una Solicitud de Seguridad",
+    },
+    important: {
+      company: "Las empresas verifican licencias y credenciales de los oficiales.",
+      officer: "Los oficiales mantienen licencias y certificaciones válidas.",
+      client:
+        "Los clientes revisan perfiles de empresas, calificaciones, licencias y experiencia antes de elegir un proveedor de seguridad.",
+    },
   },
   cta: {
     eyebrow: "¿Listo para comenzar?",
@@ -628,5 +1112,9 @@ export function isLandingLanguage(value: string | null | undefined): value is La
 
 export function getLandingTranslations(language: LandingLanguage): LandingTranslations {
   const landing = translations[language] ?? en;
-  return { ...landing, ...getAppTranslations(language) };
+  return {
+    ...landing,
+    ...getAppTranslations(language),
+    legalPages: getLegalPagesTranslations(language),
+  };
 }

@@ -1,24 +1,20 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { FlexOfficersLogoLink } from "@/components/brand";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
+import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
 import { IconShield } from "@/components/landing/icons";
 import { CompaniesIcon, ProfileIcon } from "@/components/nav/icons";
-import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
-import { useLandingLanguage } from "@/components/landing/landing-language-context";
-import {
-  Button,
-  Card,
-  CardDescription,
-  CardTitle,
-} from "@/components/ui";
+import { Button, Card, CardDescription, CardTitle } from "@/components/ui";
 import { cn } from "@/lib/cn";
+import { getRoleHomePath } from "@/lib/rbac-paths";
 
-type Role = "OFFICER" | "COMPANY";
+type Role = "OFFICER" | "COMPANY" | "CLIENT";
 
-type OnboardingRoleChoiceProps = {
+type OnboardingClientProps = {
   initialRole?: Role | null;
 };
 
@@ -29,57 +25,21 @@ type FeatureGroup = {
 
 const PENDING_ROLE_KEY = "flexofficers.pendingRole";
 
-function useOfficerFeatureGroups(): FeatureGroup[] {
-  const { t } = useLandingLanguage();
-  const o = t.onboarding.officer;
-
-  return [
-    {
-      title: o.groups.findWork,
-      items: [o.items.findOpenShifts, o.items.getInvites, o.items.applyFast],
-    },
-    {
-      title: o.groups.buildCareer,
-      items: [
-        o.items.buildProfile,
-        o.items.showcaseLicenses,
-        o.items.flexibleSchedule,
-      ],
-    },
-    {
-      title: o.groups.afterAcceptance,
-      items: [o.items.contactAfterAcceptance, o.items.trackApplications],
-    },
-  ];
-}
-
-function useCompanyFeatureGroups(): FeatureGroup[] {
-  const { t } = useLandingLanguage();
-  const c = t.onboarding.company;
-
-  return [
-    {
-      title: c.groups.postJobs,
-      items: [c.items.publicPrivatePosts, c.items.postOpenShifts, c.items.fillFaster],
-    },
-    {
-      title: c.groups.hireOfficers,
-      items: [c.items.inviteOfficers, c.items.reviewProfiles, c.items.acceptReject],
-    },
-    {
-      title: c.groups.manageTeam,
-      items: [c.items.manageStaff, c.items.manageAccepted],
-    },
-  ];
-}
-
 const roleCardClassName = cn(
   "flex h-full min-h-0 flex-col overflow-visible border-slate-700/80 bg-gradient-to-b from-[#0c1424] via-fo-bg-elevated to-[#070d18]",
   "!px-8 !pt-8 !pb-10 sm:!px-9 sm:!pt-9 sm:!pb-10 shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-colors md:hover:border-fo-primary-bright/60"
 );
 
 function isValidRole(value: string | null): value is Role {
-  return value === "OFFICER" || value === "COMPANY";
+  return value === "OFFICER" || value === "COMPANY" || value === "CLIENT";
+}
+
+function getRoleDestination(role: Role) {
+  return getRoleHomePath(role);
+}
+
+function getSignUpDestination(role: Role) {
+  return role === "CLIENT" ? "/client/sign-up" : "/sign-up";
 }
 
 function RoleCardIcon({ children }: { children: ReactNode }) {
@@ -123,18 +83,71 @@ function RoleFeatureGroups({
   );
 }
 
-export default function OnboardingRoleChoice({
+export default function OnboardingClient({
   initialRole = null,
-}: OnboardingRoleChoiceProps) {
+}: OnboardingClientProps) {
   const router = useRouter();
-  const { t } = useLandingLanguage();
-  const officerFeatureGroups = useOfficerFeatureGroups();
-  const companyFeatureGroups = useCompanyFeatureGroups();
   const { isLoaded, isSignedIn } = useUser();
+  const { t } = useLandingLanguage();
   const [error, setError] = useState("");
   const [savingRole, setSavingRole] = useState<Role | null>(null);
+  const autoSaveAttempted = useRef(false);
+  const copy = t.onboarding;
 
-  async function saveRole(role: Role) {
+  const officerFeatureGroups: FeatureGroup[] = [
+    {
+      title: copy.officer.groups.findWork,
+      items: [copy.officer.items.findOpenShifts, copy.officer.items.getInvites, copy.officer.items.applyFast],
+    },
+    {
+      title: copy.officer.groups.buildCareer,
+      items: [
+        copy.officer.items.buildProfile,
+        copy.officer.items.showcaseLicenses,
+        copy.officer.items.flexibleSchedule,
+      ],
+    },
+    {
+      title: copy.officer.groups.afterAcceptance,
+      items: [copy.officer.items.contactAfterAcceptance, copy.officer.items.trackApplications],
+    },
+  ];
+
+  const companyFeatureGroups: FeatureGroup[] = [
+    {
+      title: copy.company.groups.postJobs,
+      items: [copy.company.items.publicPrivatePosts, copy.company.items.postOpenShifts, copy.company.items.fillFaster],
+    },
+    {
+      title: copy.company.groups.hireOfficers,
+      items: [copy.company.items.inviteOfficers, copy.company.items.reviewProfiles, copy.company.items.acceptReject],
+    },
+    {
+      title: copy.company.groups.manageTeam,
+      items: [copy.company.items.manageStaff, copy.company.items.manageAccepted],
+    },
+  ];
+
+  const clientFeatureGroups: FeatureGroup[] = [
+    {
+      title: copy.client.groups.postNeed,
+      items: [copy.client.items.describeNeed, copy.client.items.setDetails, copy.client.items.reachCompanies],
+    },
+    {
+      title: copy.client.groups.reviewApplicants,
+      items: [
+        copy.client.items.reviewProfiles,
+        copy.client.items.compareExperience,
+        copy.client.items.acceptBestMatch,
+      ],
+    },
+    {
+      title: copy.client.groups.secureConfidence,
+      items: [copy.client.items.simpleFee, copy.client.items.fastResponses],
+    },
+  ];
+
+  const saveRole = useCallback(async (role: Role) => {
     setError("");
     setSavingRole(role);
 
@@ -146,10 +159,23 @@ export default function OnboardingRoleChoice({
       body: JSON.stringify({ role }),
     });
 
-    if (response.ok || response.status === 409) {
+    if (response.ok) {
       window.localStorage.removeItem(PENDING_ROLE_KEY);
-      router.push("/dashboard");
+      router.push(getRoleDestination(role));
       return;
+    }
+
+    if (response.status === 409) {
+      const data = (await response.json().catch(() => null)) as {
+        role?: Role;
+      } | null;
+
+      window.localStorage.removeItem(PENDING_ROLE_KEY);
+
+      if (data?.role) {
+        router.push(getRoleHomePath(data.role));
+        return;
+      }
     }
 
     const data = (await response.json().catch(() => null)) as {
@@ -157,8 +183,8 @@ export default function OnboardingRoleChoice({
     } | null;
 
     setSavingRole(null);
-    setError(data?.error || t.onboarding.errors.saveFailed);
-  }
+    setError(data?.error || copy.errors.saveFailed);
+  }, [copy.errors.saveFailed, router]);
 
   async function chooseRole(role: Role) {
     if (!isLoaded) {
@@ -167,7 +193,7 @@ export default function OnboardingRoleChoice({
 
     if (!isSignedIn) {
       window.localStorage.setItem(PENDING_ROLE_KEY, role);
-      router.push("/sign-up");
+      router.push(getSignUpDestination(role));
       return;
     }
 
@@ -175,7 +201,7 @@ export default function OnboardingRoleChoice({
   }
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) {
+    if (!isLoaded || !isSignedIn || autoSaveAttempted.current) {
       return;
     }
 
@@ -189,9 +215,13 @@ export default function OnboardingRoleChoice({
       return;
     }
 
-    void saveRole(pendingRole);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, isSignedIn, initialRole]);
+    autoSaveAttempted.current = true;
+    const timer = window.setTimeout(() => {
+      void saveRole(pendingRole);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [initialRole, isLoaded, isSignedIn, saveRole]);
 
   return (
     <>
@@ -216,18 +246,14 @@ export default function OnboardingRoleChoice({
         </Card>
       ) : null}
 
-      <div className="mt-6 grid items-stretch gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 items-stretch gap-4 lg:grid-cols-3">
         <Card variant="elevated" className={roleCardClassName}>
           <RoleCardIcon>
             <ProfileIcon className="h-7 w-7" />
           </RoleCardIcon>
-          <CardTitle className="text-xl sm:text-2xl">{t.onboarding.officer.title}</CardTitle>
-          <CardDescription className="mt-2">
-            {t.onboarding.officer.description}
-          </CardDescription>
-
+          <CardTitle className="text-xl sm:text-2xl">{copy.officer.title}</CardTitle>
+          <CardDescription className="mt-2">{copy.officer.description}</CardDescription>
           <RoleFeatureGroups groups={officerFeatureGroups} className="flex-1" />
-
           <div className="mt-auto shrink-0 pt-8">
             <Button
               type="button"
@@ -237,7 +263,7 @@ export default function OnboardingRoleChoice({
               onClick={() => chooseRole("OFFICER")}
             >
               <ProfileIcon className="h-5 w-5 shrink-0" />
-              {savingRole === "OFFICER" ? t.onboarding.saving : t.onboarding.officer.cta}
+              {savingRole === "OFFICER" ? copy.saving : copy.officer.cta}
             </Button>
           </div>
         </Card>
@@ -246,13 +272,9 @@ export default function OnboardingRoleChoice({
           <RoleCardIcon>
             <CompaniesIcon className="h-7 w-7" />
           </RoleCardIcon>
-          <CardTitle className="text-xl sm:text-2xl">{t.onboarding.company.title}</CardTitle>
-          <CardDescription className="mt-2">
-            {t.onboarding.company.description}
-          </CardDescription>
-
+          <CardTitle className="text-xl sm:text-2xl">{copy.company.title}</CardTitle>
+          <CardDescription className="mt-2">{copy.company.description}</CardDescription>
           <RoleFeatureGroups groups={companyFeatureGroups} className="flex-1" />
-
           <div className="mt-auto shrink-0 pt-8">
             <Button
               type="button"
@@ -262,7 +284,28 @@ export default function OnboardingRoleChoice({
               onClick={() => chooseRole("COMPANY")}
             >
               <CompaniesIcon className="h-5 w-5 shrink-0" />
-              {savingRole === "COMPANY" ? t.onboarding.saving : t.onboarding.company.cta}
+              {savingRole === "COMPANY" ? copy.saving : copy.company.cta}
+            </Button>
+          </div>
+        </Card>
+
+        <Card variant="elevated" className={roleCardClassName}>
+          <RoleCardIcon>
+            <IconShield className="h-7 w-7" />
+          </RoleCardIcon>
+          <CardTitle className="text-xl sm:text-2xl">{copy.client.title}</CardTitle>
+          <CardDescription className="mt-2">{copy.client.description}</CardDescription>
+          <RoleFeatureGroups groups={clientFeatureGroups} className="flex-1" />
+          <div className="mt-auto shrink-0 pt-8">
+            <Button
+              type="button"
+              fullWidth
+              className="w-full gap-2"
+              disabled={savingRole !== null}
+              onClick={() => chooseRole("CLIENT")}
+            >
+              <IconShield className="h-5 w-5 shrink-0" />
+              {savingRole === "CLIENT" ? copy.saving : copy.client.cta}
             </Button>
           </div>
         </Card>
@@ -273,11 +316,11 @@ export default function OnboardingRoleChoice({
           <div className="flex items-center gap-2">
             <IconShield className="h-7 w-7 shrink-0 text-fo-primary-bright" />
             <h3 className="text-sm font-semibold text-fo-text sm:text-base">
-              {t.onboarding.disclaimer.title}
+              {copy.disclaimer.title}
             </h3>
           </div>
           <p className="text-sm leading-relaxed text-fo-text sm:text-base">
-            {t.onboarding.disclaimer.body}
+            {copy.disclaimer.body}
           </p>
         </div>
       </Card>

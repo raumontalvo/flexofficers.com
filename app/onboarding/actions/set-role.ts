@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { ensureCompanyOnSignup } from "@/lib/company-onboarding";
+import { getRoleHomePath } from "@/lib/rbac-paths";
 
 async function saveRole(role: UserRole) {
   const clerkUser = await currentUser();
@@ -19,11 +20,18 @@ async function saveRole(role: UserRole) {
     throw new Error("User email not found");
   }
 
+  const existingUser = await prisma.user.findUnique({
+    where: { clerkId: clerkUser.id },
+    select: { id: true, role: true },
+  });
+
+  if (existingUser?.role) {
+    redirect(getRoleHomePath(existingUser.role));
+  }
+
   await prisma.$transaction(async (tx) => {
-    const user = await tx.user.upsert({
-      where: { clerkId: clerkUser.id },
-      update: { role, email },
-      create: {
+    const user = await tx.user.create({
+      data: {
         clerkId: clerkUser.id,
         email,
         role,
@@ -39,7 +47,7 @@ async function saveRole(role: UserRole) {
     }
   });
 
-  redirect("/dashboard");
+  redirect(getRoleHomePath(role));
 }
 
 export async function setOfficerRole() {
