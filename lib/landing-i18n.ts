@@ -161,7 +161,7 @@ const en: LandingContent = {
   introduction: {
     badge: "INTRODUCTION",
     title: "Meet FlexOfficers",
-    body: "FlexOfficers is the ultimate workforce platform for the private security industry. Security companies create profiles, manage their staff, and post shifts—either publicly for any qualified officer or privately for their own team. When extra coverage is needed, companies send direct invitations—no calls, no texts. Officers sign up for free, build profiles, view shift details—including time, location, and pay—and apply to shifts, even from new companies. If an officer declines, the next invited officer steps in. Both companies and officers can track upcoming shifts and assignments. FlexOfficers saves time, fills shifts faster, and keeps everyone covered.",
+    body: "FlexOfficers is the ultimate workforce platform for the private security industry. Security companies create profiles, manage their staff, and post shifts—either publicly for any qualified officer or privately for invited officers only. Private shifts are only visible to the officers you invite. When extra coverage is needed, companies send direct invitations—no calls, no texts. Officers sign up for free, build professional profiles, view detailed shift information—including time, location, and pay—and apply to shifts, even from companies they've never worked with before. If an invited officer declines, companies can simply invite the next qualified officer. Both companies and officers can track upcoming shifts and assignments in one place. FlexOfficers saves time, fills shifts faster, and keeps everyone covered.",
   },
   howItWorks: {
     title: "How FlexOfficers Works",
