@@ -13,7 +13,7 @@ export function ClientLandingCta() {
     return (
       <div className="mt-10 flex justify-center">
         <Link
-          href="/client"
+          href="/onboarding?force=1"
           className={buttonClassName({
             size: "lg",
             fullWidth: true,
@@ -29,7 +29,7 @@ export function ClientLandingCta() {
   return (
     <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center">
       <Link
-        href="/client/sign-up"
+        href="/onboarding?force=1"
         className={buttonClassName({
           size: "lg",
           fullWidth: true,
