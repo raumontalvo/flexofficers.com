@@ -270,7 +270,7 @@ const en: LegalPagesTranslations = {
       intro:
         "Our team is ready to assist you. Whether you're a security company, officer, or client, we'll get back to you as soon as possible.",
       emailLabel: "Email",
-      email: "flexofficer@gmail.com",
+      email: "FlexOfficers@gmail.com",
       phoneLabel: "Phone",
       phone: "239-900-5653",
       hoursLabel: "Response Time",
@@ -491,7 +491,7 @@ const es: LegalPagesTranslations = {
       intro:
         "Nuestro equipo está listo para ayudarte. Ya seas una empresa de seguridad, oficial o cliente, te responderemos lo antes posible.",
       emailLabel: "Correo",
-      email: "flexofficer@gmail.com",
+      email: "FlexOfficers@gmail.com",
       phoneLabel: "Teléfono",
       phone: "239-900-5653",
       hoursLabel: "Tiempo de Respuesta",

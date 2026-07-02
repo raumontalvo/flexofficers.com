@@ -6,6 +6,7 @@ import {
   BrowseIcon,
   DashboardIcon,
   InvitesIcon,
+  MessagesIcon,
   NotificationsIcon,
   ProfileIcon,
   SearchIcon,
@@ -21,6 +22,11 @@ export type NavItem = {
   label: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   match?: (pathname: string) => boolean;
+};
+
+export type NavSection = {
+  title?: string;
+  items: NavItem[];
 };
 
 export function getOfficerNavItems(labels: LandingTranslations["appNav"]["officerMobile"]): NavItem[] {
@@ -289,10 +295,102 @@ export function getClientNavItems(
       match: (pathname) => pathname.startsWith("/client/applicants"),
     },
     {
+      href: "/client/profile",
+      label: labels.profile,
+      icon: ProfileIcon,
+      match: (pathname) => pathname.startsWith("/client/profile"),
+    },
+    {
       href: "/client/settings",
       label: labels.settings,
       icon: SettingsIcon,
       match: (pathname) => pathname.startsWith("/client/settings"),
+    },
+  ];
+}
+
+export function getClientSidebarSections(
+  sidebar: LandingTranslations["client"]["sidebar"],
+  nav: LandingTranslations["appNav"]["clientSidebar"]
+): NavSection[] {
+  return [
+    {
+      title: sidebar.portal,
+      items: [
+        {
+          href: "/client",
+          label: nav.dashboard,
+          icon: DashboardIcon,
+          match: (pathname) => pathname === "/client",
+        },
+        {
+          href: "/client/leads",
+          label: sidebar.mySecurityRequests,
+          icon: ShiftsIcon,
+          match: (pathname) =>
+            pathname === "/client/leads" ||
+            (pathname.startsWith("/client/leads/") &&
+              !pathname.startsWith("/client/leads/new")),
+        },
+        {
+          href: "/client/applicants",
+          label: sidebar.myLeadApplications,
+          icon: ApplicantsIcon,
+          match: (pathname) => pathname.startsWith("/client/applicants"),
+        },
+        {
+          href: "/client/messages",
+          label: sidebar.messages,
+          icon: MessagesIcon,
+          match: (pathname) => pathname.startsWith("/client/messages"),
+        },
+      ],
+    },
+    {
+      title: sidebar.account,
+      items: [
+        {
+          href: "/client/profile",
+          label: nav.profile,
+          icon: ProfileIcon,
+          match: (pathname) => pathname.startsWith("/client/profile"),
+        },
+        {
+          href: "/client/billing",
+          label: sidebar.paymentMethods,
+          icon: BillingIcon,
+          match: (pathname) => pathname.startsWith("/client/billing"),
+        },
+        {
+          href: "/client/billing#history",
+          label: sidebar.billingHistory,
+          icon: AcceptedIcon,
+          match: (pathname) => pathname.startsWith("/client/billing"),
+        },
+        {
+          href: "/client/settings",
+          label: nav.settings,
+          icon: SettingsIcon,
+          match: (pathname) => pathname.startsWith("/client/settings"),
+        },
+      ],
+    },
+    {
+      title: sidebar.help,
+      items: [
+        {
+          href: "/contact",
+          label: sidebar.helpCenter,
+          icon: BrowseIcon,
+          match: (pathname) => pathname === "/contact",
+        },
+        {
+          href: "/contact",
+          label: sidebar.contactSupport,
+          icon: InvitesIcon,
+          match: (pathname) => pathname === "/contact",
+        },
+      ],
     },
   ];
 }
@@ -327,6 +425,12 @@ export function getClientSidebarItems(
       label: labels.applicants,
       icon: ApplicantsIcon,
       match: (pathname) => pathname.startsWith("/client/applicants"),
+    },
+    {
+      href: "/client/profile",
+      label: labels.profile,
+      icon: ProfileIcon,
+      match: (pathname) => pathname.startsWith("/client/profile"),
     },
     {
       href: "/client/settings",

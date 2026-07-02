@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { IconClipboard, IconShield } from "@/components/landing/icons";
 import {
   ApplicantsIcon,
   SearchIcon,
@@ -13,7 +14,7 @@ import { MobileActionCard } from "@/components/ui/mobile";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 
-const actionConfig = [
+const desktopActionConfig = [
   {
     href: "/shifts/create",
     titleKey: "postShift" as const,
@@ -51,6 +52,29 @@ const actionConfig = [
   },
 ];
 
+const mobileOnlyActionConfig = [
+  {
+    href: "/company/leads",
+    titleKey: "securityLeads" as const,
+    descKey: "securityLeadsDesc" as const,
+    icon: IconShield,
+    iconClassName: "bg-indigo-500/20 text-indigo-300",
+  },
+  {
+    href: "/company/lead-applications",
+    titleKey: "leadApplications" as const,
+    descKey: "leadApplicationsDesc" as const,
+    icon: IconClipboard,
+    iconClassName: "bg-rose-500/20 text-rose-300",
+  },
+];
+
+const mobileActionConfig = [
+  ...desktopActionConfig.slice(0, 4),
+  ...mobileOnlyActionConfig,
+  desktopActionConfig[4],
+];
+
 export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean }) {
   const { t } = useLandingLanguage();
   const actions = t.dashboard.company.quickActions;
@@ -64,7 +88,7 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
       </div>
 
       <div className="flex flex-col gap-2 lg:hidden">
-        {actionConfig.map((action) => {
+        {mobileActionConfig.map((action) => {
           const Icon = action.icon;
           const href =
             action.href === "/shifts/create" ? postShiftHref : action.href;
@@ -84,7 +108,7 @@ export function CompanyQuickActions({ canPostShifts }: { canPostShifts: boolean 
       </div>
 
       <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 lg:grid lg:grid-cols-3">
-        {actionConfig.map((action) => {
+        {desktopActionConfig.map((action) => {
           const Icon = action.icon;
           const href =
             action.href === "/shifts/create" ? postShiftHref : action.href;

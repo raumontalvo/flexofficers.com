@@ -3,8 +3,10 @@ import { LeadPaymentStatus } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { getAppUrl, getStripeClient } from "@/lib/stripe";
 
-export const SECURITY_LEAD_PRICE_CENTS = 500;
-export const SECURITY_LEAD_PRODUCT_NAME = "FlexOfficers Security Lead";
+import {
+  SECURITY_LEAD_PRICE_CENTS,
+  SECURITY_LEAD_PRODUCT_NAME,
+} from "@/lib/security-lead-pricing";
 
 export function isStripeLeadPaymentReady() {
   return Boolean(getStripeClient());

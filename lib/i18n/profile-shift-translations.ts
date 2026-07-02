@@ -509,6 +509,93 @@ export type ProfileShiftTranslations = {
       };
     };
   };
+  client: {
+    clientProfile: {
+      view: {
+        title: string;
+        subtitle: string;
+        editProfile: string;
+        clientBadge: string;
+        memberSince: string;
+        statSecurityRequests: string;
+        statApplications: string;
+        statCompleted: string;
+        personalInformation: string;
+        fullName: string;
+        emailAddress: string;
+        phoneNumber: string;
+        businessName: string;
+        industry: string;
+        website: string;
+        verified: string;
+        businessAddress: string;
+        businessAddressHelper: string;
+        address: string;
+        city: string;
+        state: string;
+        zipCode: string;
+        country: string;
+        billingSummary: string;
+        totalSpent: string;
+        latestPaymentMethod: string;
+        managePaymentMethods: string;
+        viewBillingHistory: string;
+        noPaymentMethod: string;
+        notificationPreferences: string;
+        emailNotifications: string;
+        newCompanyApplications: string;
+        messages: string;
+        marketingEmails: string;
+        savePreferences: string;
+        savingPreferences: string;
+        preferencesSaved: string;
+        preferencesSaveFailed: string;
+        recentActivity: string;
+        noRecentActivity: string;
+        activityLeadCreated: string;
+        activityCompanyApplied: string;
+        activityCompanyAccepted: string;
+        activityRequestCompleted: string;
+        changePhoto: string;
+        optional: string;
+      };
+      edit: {
+        title: string;
+        subtitle: string;
+        backToProfile: string;
+        saveChanges: string;
+        saving: string;
+        savedSuccess: string;
+        saveFailed: string;
+        photoHelper: string;
+        photoSaveFailed: string;
+      };
+    };
+    billing: {
+      title: string;
+      subtitle: string;
+      historyTitle: string;
+      emptyHistory: string;
+      paidOn: string;
+      leadPostingFee: string;
+      paymentMethodsTitle: string;
+      paymentMethodsHelper: string;
+    };
+    sidebar: {
+      portal: string;
+      account: string;
+      help: string;
+      mySecurityRequests: string;
+      myLeadApplications: string;
+      messages: string;
+      paymentMethods: string;
+      billingHistory: string;
+      helpCenter: string;
+      contactSupport: string;
+      needHelpFast: string;
+      needHelpDesc: string;
+    };
+  };
 };
 
 const experienceCategoryKeys = [
@@ -1112,6 +1199,95 @@ export const profileShiftEn: ProfileShiftTranslations = {
       },
     },
   },
+  client: {
+    clientProfile: {
+      view: {
+        title: "My Profile",
+        subtitle: "Manage your personal information and preferences.",
+        editProfile: "Edit Profile",
+        clientBadge: "CLIENT",
+        memberSince: "Member since {date}",
+        statSecurityRequests: "Security Requests",
+        statApplications: "Applications",
+        statCompleted: "Completed",
+        personalInformation: "Personal Information",
+        fullName: "Full Name",
+        emailAddress: "Email Address",
+        phoneNumber: "Phone Number",
+        businessName: "Business / Organization Name",
+        industry: "Industry",
+        website: "Website",
+        verified: "Verified",
+        businessAddress: "Business Address",
+        businessAddressHelper:
+          "Add this only if you are posting security requests for a business, property, event venue, or organization.",
+        address: "Address",
+        city: "City",
+        state: "State",
+        zipCode: "ZIP Code",
+        country: "Country",
+        billingSummary: "Billing Summary",
+        totalSpent: "Total Spent",
+        latestPaymentMethod: "Latest payment method",
+        managePaymentMethods: "Manage Payment Methods",
+        viewBillingHistory: "View Billing History",
+        noPaymentMethod: "No saved payment method yet.",
+        notificationPreferences: "Notification Preferences",
+        emailNotifications: "Email Notifications",
+        newCompanyApplications: "New Company Applications",
+        messages: "Messages",
+        marketingEmails: "Marketing Emails",
+        savePreferences: "Save Preferences",
+        savingPreferences: "Saving...",
+        preferencesSaved: "Notification preferences saved.",
+        preferencesSaveFailed: "Failed to save notification preferences.",
+        recentActivity: "Recent Activity",
+        noRecentActivity: "Activity will appear here as you post requests and review applicants.",
+        activityLeadCreated: "New security request created",
+        activityCompanyApplied: "{company} applied",
+        activityCompanyAccepted: "{company} accepted",
+        activityRequestCompleted: "Request completed",
+        changePhoto: "Change photo",
+        optional: "Optional",
+      },
+      edit: {
+        title: "Edit Profile",
+        subtitle: "Update your contact details and optional business information.",
+        backToProfile: "Back to Profile",
+        saveChanges: "Save Changes",
+        saving: "Saving...",
+        savedSuccess: "Profile saved.",
+        saveFailed: "Failed to save profile.",
+        photoHelper: "JPG, PNG, or WEBP. Max 5MB.",
+        photoSaveFailed: "Failed to save profile photo.",
+      },
+    },
+    billing: {
+      title: "Billing History",
+      subtitle: "Review your security request posting payments.",
+      historyTitle: "Payment History",
+      emptyHistory: "No payments yet. Posting fees appear here after you publish a security request.",
+      paidOn: "Paid on {date}",
+      leadPostingFee: "Security lead posting fee",
+      paymentMethodsTitle: "Payment Methods",
+      paymentMethodsHelper:
+        "Payments are processed securely through Stripe Checkout when you post a security request.",
+    },
+    sidebar: {
+      portal: "CLIENT PORTAL",
+      account: "ACCOUNT",
+      help: "HELP",
+      mySecurityRequests: "My Security Requests",
+      myLeadApplications: "My Lead Applications",
+      messages: "Messages",
+      paymentMethods: "Payment Methods",
+      billingHistory: "Billing History",
+      helpCenter: "Help Center",
+      contactSupport: "Contact Support",
+      needHelpFast: "Need Help Fast?",
+      needHelpDesc: "Our support team is here to assist you.",
+    },
+  },
 };
 
 export const profileShiftEs: ProfileShiftTranslations = {
@@ -1709,6 +1885,97 @@ export const profileShiftEs: ProfileShiftTranslations = {
         previewHelper: "Así aparece tu perfil para los oficiales.",
         viewPublicProfile: "Ver Perfil Público",
       },
+    },
+  },
+  client: {
+    clientProfile: {
+      view: {
+        title: "Mi Perfil",
+        subtitle: "Administra tu información personal y preferencias.",
+        editProfile: "Editar Perfil",
+        clientBadge: "CLIENTE",
+        memberSince: "Miembro desde {date}",
+        statSecurityRequests: "Solicitudes de Seguridad",
+        statApplications: "Solicitudes",
+        statCompleted: "Completadas",
+        personalInformation: "Información Personal",
+        fullName: "Nombre Completo",
+        emailAddress: "Correo Electrónico",
+        phoneNumber: "Número de Teléfono",
+        businessName: "Empresa / Organización",
+        industry: "Industria",
+        website: "Sitio Web",
+        verified: "Verificado",
+        businessAddress: "Dirección Comercial",
+        businessAddressHelper:
+          "Agrega esto solo si publicas solicitudes de seguridad para un negocio, propiedad, evento u organización.",
+        address: "Dirección",
+        city: "Ciudad",
+        state: "Estado",
+        zipCode: "Código Postal",
+        country: "País",
+        billingSummary: "Resumen de Facturación",
+        totalSpent: "Total Gastado",
+        latestPaymentMethod: "Último método de pago",
+        managePaymentMethods: "Administrar Métodos de Pago",
+        viewBillingHistory: "Ver Historial de Facturación",
+        noPaymentMethod: "Aún no hay un método de pago guardado.",
+        notificationPreferences: "Preferencias de Notificación",
+        emailNotifications: "Notificaciones por Correo",
+        newCompanyApplications: "Nuevas Solicitudes de Empresas",
+        messages: "Mensajes",
+        marketingEmails: "Correos de Marketing",
+        savePreferences: "Guardar Preferencias",
+        savingPreferences: "Guardando...",
+        preferencesSaved: "Preferencias de notificación guardadas.",
+        preferencesSaveFailed: "No se pudieron guardar las preferencias de notificación.",
+        recentActivity: "Actividad Reciente",
+        noRecentActivity:
+          "La actividad aparecerá aquí cuando publiques solicitudes y revises solicitantes.",
+        activityLeadCreated: "Nueva solicitud de seguridad creada",
+        activityCompanyApplied: "{company} se postuló",
+        activityCompanyAccepted: "{company} aceptada",
+        activityRequestCompleted: "Solicitud completada",
+        changePhoto: "Cambiar foto",
+        optional: "Opcional",
+      },
+      edit: {
+        title: "Editar Perfil",
+        subtitle: "Actualiza tus datos de contacto e información comercial opcional.",
+        backToProfile: "Volver al Perfil",
+        saveChanges: "Guardar Cambios",
+        saving: "Guardando...",
+        savedSuccess: "Perfil guardado.",
+        saveFailed: "No se pudo guardar el perfil.",
+        photoHelper: "JPG, PNG o WEBP. Máx. 5 MB.",
+        photoSaveFailed: "No se pudo guardar la foto de perfil.",
+      },
+    },
+    billing: {
+      title: "Historial de Facturación",
+      subtitle: "Revisa los pagos de publicación de solicitudes de seguridad.",
+      historyTitle: "Historial de Pagos",
+      emptyHistory:
+        "Aún no hay pagos. Las tarifas de publicación aparecerán aquí después de publicar una solicitud.",
+      paidOn: "Pagado el {date}",
+      leadPostingFee: "Tarifa de publicación de solicitud de seguridad",
+      paymentMethodsTitle: "Métodos de Pago",
+      paymentMethodsHelper:
+        "Los pagos se procesan de forma segura con Stripe Checkout al publicar una solicitud de seguridad.",
+    },
+    sidebar: {
+      portal: "PORTAL DEL CLIENTE",
+      account: "CUENTA",
+      help: "AYUDA",
+      mySecurityRequests: "Mis Solicitudes de Seguridad",
+      myLeadApplications: "Mis Solicitudes de Empresas",
+      messages: "Mensajes",
+      paymentMethods: "Métodos de Pago",
+      billingHistory: "Historial de Facturación",
+      helpCenter: "Centro de Ayuda",
+      contactSupport: "Contactar Soporte",
+      needHelpFast: "¿Necesitas Ayuda Rápida?",
+      needHelpDesc: "Nuestro equipo de soporte está aquí para ayudarte.",
     },
   },
 };

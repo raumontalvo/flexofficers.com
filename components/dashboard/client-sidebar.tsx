@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SignOutButton, useUser } from "@clerk/nextjs";
 import { FlexOfficersBadge } from "@/components/brand";
-import { getClientSidebarItems } from "@/lib/nav-items";
+import { getClientSidebarSections } from "@/lib/nav-items";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
-import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { ProfileAvatar, buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
 function isActive(pathname: string, href: string, match?: (pathname: string) => boolean) {
@@ -14,7 +14,8 @@ function isActive(pathname: string, href: string, match?: (pathname: string) => 
     return match(pathname);
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  const baseHref = href.split("#")[0];
+  return pathname === baseHref || pathname.startsWith(`${baseHref}/`);
 }
 
 export function ClientSidebar() {
@@ -22,7 +23,8 @@ export function ClientSidebar() {
   const { user } = useUser();
   const { t } = useLandingLanguage();
   const nav = t.appNav;
-  const sidebarItems = getClientSidebarItems(nav.clientSidebar);
+  const sidebarLabels = t.client.sidebar;
+  const sections = getClientSidebarSections(sidebarLabels, nav.clientSidebar);
 
   const displayName =
     user?.fullName?.trim() ||
@@ -50,32 +52,59 @@ export function ClientSidebar() {
 
       <nav
         aria-label="Client dashboard"
-        className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3"
+        className="flex-1 space-y-4 overflow-y-auto px-2.5 py-3"
       >
-        {sidebarItems.map((item) => {
-          const active = isActive(pathname, item.href, item.match);
-          const Icon = item.icon;
+        {sections.map((section) => (
+          <div key={section.title ?? "default"}>
+            {section.title ? (
+              <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                {section.title}
+              </p>
+            ) : null}
+            <div className="space-y-0.5">
+              {section.items.map((item) => {
+                const active = isActive(pathname, item.href, item.match);
+                const Icon = item.icon;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex min-h-9 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors",
-                active
-                  ? "fo-nav-pill-active text-white"
-                  : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              <span className="min-w-0 flex-1 truncate">{item.label}</span>
-            </Link>
-          );
-        })}
+                return (
+                  <Link
+                    key={`${section.title}-${item.href}-${item.label}`}
+                    href={item.href}
+                    className={cn(
+                      "flex min-h-9 items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium transition-colors",
+                      active
+                        ? "fo-nav-pill-active text-white"
+                        : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200"
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      <div className="mt-auto border-t border-white/[0.06] px-2.5 py-3">
-        <div className="mb-2 flex items-center gap-2.5 rounded-xl bg-white/[0.03] px-2.5 py-2.5">
+      <div className="mt-auto space-y-2 border-t border-white/[0.06] px-2.5 py-3">
+        <div className="fo-glass-card rounded-xl border border-blue-500/20 bg-blue-500/5 p-3">
+          <p className="text-[13px] font-semibold text-fo-text">{sidebarLabels.needHelpFast}</p>
+          <p className="mt-1 text-[11px] leading-snug text-fo-text-muted">
+            {sidebarLabels.needHelpDesc}
+          </p>
+          <Link
+            href="/contact"
+            className={buttonClassName({
+              size: "md",
+              className: "mt-3 w-full !min-h-9 !px-3 !py-2 !text-xs",
+            })}
+          >
+            {sidebarLabels.contactSupport}
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2.5 rounded-xl bg-white/[0.03] px-2.5 py-2.5">
           <ProfileAvatar name={displayName} src={imageUrl} size="sm" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-medium text-slate-200">

@@ -1,5 +1,6 @@
 import type { LandingLanguage } from "@/lib/landing-i18n";
 import { uiEn, uiEs, type UiTranslations } from "@/lib/i18n/ui-translations";
+import type { ProfileShiftTranslations } from "@/lib/i18n/profile-shift-translations";
 
 export type AppTranslations = {
   appNav: {
@@ -62,6 +63,7 @@ export type AppTranslations = {
       leads: string;
       create: string;
       applicants: string;
+      profile: string;
       settings: string;
     };
     clientSidebar: {
@@ -69,6 +71,7 @@ export type AppTranslations = {
       myLeads: string;
       createLead: string;
       applicants: string;
+      profile: string;
       settings: string;
     };
     clientFallback: string;
@@ -172,6 +175,10 @@ export type AppTranslations = {
         upcomingShiftsDesc: string;
         manageOfficers: string;
         manageOfficersDesc: string;
+        securityLeads: string;
+        securityLeadsDesc: string;
+        leadApplications: string;
+        leadApplicationsDesc: string;
         staff: string;
         staffDesc: string;
       };
@@ -225,8 +232,10 @@ export type AppTranslations = {
     companyProfileEdit: { title: string; subtitle: string };
     companyBilling: { title: string; subtitle: string };
     companyReports: { title: string; subtitle: string };
+    clientProfile: { title: string; subtitle: string };
   };
-} & UiTranslations;
+} & UiTranslations &
+  Pick<ProfileShiftTranslations, "client">;
 
 type AppCore = Omit<AppTranslations, keyof UiTranslations>;
 
@@ -292,6 +301,7 @@ const en: AppCore = {
       leads: "Leads",
       create: "Create",
       applicants: "Applicants",
+      profile: "Profile",
       settings: "Settings",
     },
     clientSidebar: {
@@ -299,6 +309,7 @@ const en: AppCore = {
       myLeads: "My Leads",
       createLead: "Create Lead",
       applicants: "Applicants",
+      profile: "Profile",
       settings: "Settings",
     },
   },
@@ -418,6 +429,12 @@ const en: AppCore = {
         upcomingShiftsDesc: "See confirmed shifts.",
         manageOfficers: "Manage Officers",
         manageOfficersDesc: "Search and review officer profiles.",
+        securityLeads: "Security Leads",
+        securityLeadsDesc:
+          "Browse client security requests and apply for new opportunities.",
+        leadApplications: "My Lead Applications",
+        leadApplicationsDesc:
+          "Track the security requests your company applied to.",
         staff: "Staff",
         staffDesc: "View your saved officers.",
       },
@@ -542,6 +559,10 @@ const en: AppCore = {
       title: "Reports",
       subtitle: "Operational reporting for your company will live here.",
     },
+    clientProfile: {
+      title: "My Profile",
+      subtitle: "Manage your personal information and preferences.",
+    },
   },
 };
 
@@ -607,6 +628,7 @@ const es: AppCore = {
       leads: "Leads",
       create: "Crear",
       applicants: "Solic.",
+      profile: "Perfil",
       settings: "Ajustes",
     },
     clientSidebar: {
@@ -614,6 +636,7 @@ const es: AppCore = {
       myLeads: "Mis Leads",
       createLead: "Crear Lead",
       applicants: "Solicitantes",
+      profile: "Perfil",
       settings: "Configuración",
     },
   },
@@ -736,6 +759,12 @@ const es: AppCore = {
         upcomingShiftsDesc: "Ver turnos confirmados.",
         manageOfficers: "Gestionar Oficiales",
         manageOfficersDesc: "Busca y revisa perfiles de oficiales.",
+        securityLeads: "Oportunidades de Seguridad",
+        securityLeadsDesc:
+          "Explora solicitudes de seguridad de clientes y postúlate a nuevas oportunidades.",
+        leadApplications: "Mis Solicitudes",
+        leadApplicationsDesc:
+          "Sigue las solicitudes de seguridad a las que se postuló tu empresa.",
         staff: "Personal",
         staffDesc: "Ver tus oficiales guardados.",
       },
@@ -864,6 +893,10 @@ const es: AppCore = {
       title: "Informes",
       subtitle:
         "Los informes operativos de tu empresa estarán disponibles aquí.",
+    },
+    clientProfile: {
+      title: "Mi Perfil",
+      subtitle: "Administra tu información personal y preferencias.",
     },
   },
 };
