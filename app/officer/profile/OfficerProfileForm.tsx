@@ -81,6 +81,11 @@ const fieldClassName =
 const compactFieldClassName =
   "min-h-8 w-full rounded-lg border border-fo-border/80 bg-fo-bg-elevated px-2 py-1.5 text-xs text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30 sm:text-sm";
 
+const licenseExpirationInputClassName = cn(
+  compactFieldClassName,
+  "officer-license-expiration-input"
+);
+
 function createEmptyLicense(): LicenseFormEntry {
   return {
     clientId:
@@ -450,7 +455,7 @@ export default function OfficerProfileForm({
                     />
                   </div>
 
-                  <div className="w-full space-y-1">
+                  <div className="min-w-0 w-full space-y-1">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
                       {pw.expiration}
                     </p>
@@ -468,7 +473,7 @@ export default function OfficerProfileForm({
                           expirationDate: e.target.value,
                         })
                       }
-                      className={compactFieldClassName}
+                      className={licenseExpirationInputClassName}
                     />
                   </div>
 
