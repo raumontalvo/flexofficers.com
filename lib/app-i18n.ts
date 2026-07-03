@@ -597,7 +597,8 @@ const en: AppCore = {
         acceptedShifts: "My Shifts",
         acceptedShiftsDesc: "View confirmed assignments.",
         upcomingShifts: "Upcoming Shifts",
-        upcomingShiftsDesc: "See shifts starting soon.",
+        upcomingShiftsDesc:
+          "See shifts starting soon, clock in and clock out. Once you clock out, it moves to My Shifts → Completed.",
       },
       sidebar: {
         upcomingShift: "Upcoming Shift",
@@ -1143,7 +1144,8 @@ const es: AppCore = {
         acceptedShifts: "Mis Turnos",
         acceptedShiftsDesc: "Ver asignaciones confirmadas.",
         upcomingShifts: "Próximos Turnos",
-        upcomingShiftsDesc: "Ver turnos que comienzan pronto.",
+        upcomingShiftsDesc:
+          "Ve turnos que comienzan pronto, marca entrada y salida. Al marcar salida, pasa a Mis Turnos → Completados.",
       },
       sidebar: {
         upcomingShift: "Próximo Turno",
