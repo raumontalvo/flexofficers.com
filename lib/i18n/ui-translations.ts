@@ -298,6 +298,8 @@ export type UiTranslations = {
     company: {
       phone: string;
       email: string;
+      website: string;
+      address: string;
       contactLocked: string;
       noPublicProfile: string;
     };
@@ -867,6 +869,8 @@ export const uiEn: UiTranslations = {
     company: {
       phone: "Phone",
       email: "Email",
+      website: "Website",
+      address: "Address",
       contactLocked:
         "Company contact details are shared after your application is accepted.",
       noPublicProfile: "This company has not published a public profile yet.",
@@ -1473,6 +1477,8 @@ export const uiEs: UiTranslations = {
     company: {
       phone: "Teléfono",
       email: "Correo",
+      website: "Sitio web",
+      address: "Dirección",
       contactLocked:
         "Los datos de contacto de la empresa se comparten después de que tu solicitud sea aceptada.",
       noPublicProfile: "Esta empresa aún no ha publicado un perfil público.",

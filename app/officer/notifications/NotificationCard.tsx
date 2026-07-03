@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 import { MobileListCard } from "@/components/ui/mobile";
@@ -17,7 +17,6 @@ import {
   getNotificationKindLabel,
 } from "@/lib/i18n/ui-labels";
 import { deleteNotification } from "./actions";
-import { hideNotificationFromList } from "./hidden-notifications";
 import { notifyNotificationsChanged } from "@/lib/notifications-changed";
 
 function CheckIcon() {
@@ -122,24 +121,31 @@ function NotificationIcon({
 
 type NotificationCardProps = {
   notification: OfficerNotificationData;
-  onDeleted: () => void;
+  onDeleted: (notificationId: string) => void;
 };
 
 export function NotificationCard({ notification, onDeleted }: NotificationCardProps) {
   const { t } = useLandingLanguage();
   const toneClasses = notificationToneClasses[notification.tone];
   const [isPending, startTransition] = useTransition();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   function handleDelete() {
-    hideNotificationFromList(notification.id);
-    onDeleted();
+    setErrorMessage(null);
 
     startTransition(async () => {
       try {
-        await deleteNotification(notification.id);
+        const result = await deleteNotification(notification.id);
+
+        if (!result.deleted) {
+          setErrorMessage("Unable to delete notification.");
+          return;
+        }
+
+        onDeleted(notification.id);
         notifyNotificationsChanged();
       } catch {
-        // Local hide remains if server delete fails.
+        setErrorMessage("Unable to delete notification.");
       }
     });
   }
@@ -204,6 +210,11 @@ export function NotificationCard({ notification, onDeleted }: NotificationCardPr
           >
             {t.browse.notifications.actions.delete}
           </button>
+          {errorMessage ? (
+            <p className="text-[11px] text-red-300" role="alert">
+              {errorMessage}
+            </p>
+          ) : null}
         </div>
       </div>
     </MobileListCard>

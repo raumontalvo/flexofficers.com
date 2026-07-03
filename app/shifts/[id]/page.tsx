@@ -170,11 +170,35 @@ export default async function ShiftDetailPage({
     state: shift.company.state,
     website: shift.company.website,
   });
-  const companyContactEmail =
-    sanitizeDisplayValue(shift.company.email) ||
-    sanitizeDisplayValue(shift.company.user.email);
-  const companyContactPhone = formatDisplayPhone(shift.company.phone);
-  const companyContactName = sanitizeDisplayValue(shift.company.contactName);
+  // Company contact information is only released to officers with an ACCEPTED
+  // application for this shift. Gating happens here on the server so the
+  // sensitive values are never sent to the browser for other viewers.
+  const companyContactEmail = isAcceptedOfficer
+    ? sanitizeDisplayValue(shift.company.email) ||
+      sanitizeDisplayValue(shift.company.user.email)
+    : null;
+  const companyContactPhone = isAcceptedOfficer
+    ? formatDisplayPhone(shift.company.phone)
+    : null;
+  const companyContactName = isAcceptedOfficer
+    ? sanitizeDisplayValue(shift.company.contactName)
+    : null;
+  const companyContactWebsite = isAcceptedOfficer
+    ? sanitizeDisplayValue(shift.company.website)
+    : null;
+  const companyContactAddress = isAcceptedOfficer
+    ? sanitizeDisplayValue(shift.company.address)
+    : null;
+  const companyContactLocationLabel = isAcceptedOfficer
+    ? formatShiftCityState({
+        city: shift.company.city,
+        state: shift.company.state,
+        location: "",
+      }) || null
+    : null;
+  const companyContactDescription = isAcceptedOfficer
+    ? companyDescription
+    : null;
   const jobPostingJsonLd =
     shift.visibility === ShiftVisibility.PUBLIC
       ? buildShiftJobPostingJsonLd({
@@ -239,6 +263,13 @@ export default async function ShiftDetailPage({
         isSignedIn={Boolean(clerkUser)}
         shiftAcceptingApplications={shiftAcceptingApplications}
         isAcceptedOfficer={isAcceptedOfficer}
+        companyContactName={companyContactName}
+        companyContactPhone={companyContactPhone}
+        companyContactEmail={companyContactEmail}
+        companyContactWebsite={companyContactWebsite}
+        companyContactAddress={companyContactAddress}
+        companyContactLocationLabel={companyContactLocationLabel}
+        companyContactDescription={companyContactDescription}
       />
 
       <ShiftDetailDesktop
@@ -269,6 +300,10 @@ export default async function ShiftDetailPage({
         companyContactName={companyContactName}
         companyContactPhone={companyContactPhone}
         companyContactEmail={companyContactEmail}
+        companyContactWebsite={companyContactWebsite}
+        companyContactAddress={companyContactAddress}
+        companyContactLocationLabel={companyContactLocationLabel}
+        companyContactDescription={companyContactDescription}
         canApply={canApply}
         profileIncomplete={profileIncomplete}
         officer={user?.officer ?? null}

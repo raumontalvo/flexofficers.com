@@ -18,7 +18,6 @@ import {
   type OfficerNotificationData,
 } from "@/lib/officer-notification-data";
 import { markAllNotificationsRead } from "./actions";
-import { getHiddenNotificationIds } from "./hidden-notifications";
 import { NotificationCard } from "./NotificationCard";
 import { notifyNotificationsChanged } from "@/lib/notifications-changed";
 
@@ -38,9 +37,6 @@ export function NotificationsBrowseList({
   const [notifications, setNotifications] = useState(initialNotifications);
   const [prevInitialNotifications, setPrevInitialNotifications] =
     useState(initialNotifications);
-  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
-    getHiddenNotificationIds()
-  );
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
 
@@ -52,19 +48,14 @@ export function NotificationsBrowseList({
   const tabs = getNotificationTabs(t);
   const copy = t.browse.notifications;
 
-  const visibleNotifications = useMemo(() => {
-    const hidden = new Set(hiddenIds);
-    return notifications.filter((notification) => !hidden.has(notification.id));
-  }, [notifications, hiddenIds]);
-
   const filteredNotifications = useMemo(
-    () => filterNotifications(visibleNotifications, activeTab),
-    [visibleNotifications, activeTab]
+    () => filterNotifications(notifications, activeTab),
+    [notifications, activeTab]
   );
 
   const unreadCount = useMemo(
-    () => countUnreadNotifications(visibleNotifications),
-    [visibleNotifications]
+    () => countUnreadNotifications(notifications),
+    [notifications]
   );
 
   const totalPages = Math.max(
@@ -108,8 +99,10 @@ export function NotificationsBrowseList({
     });
   }
 
-  function handleDeleted() {
-    setHiddenIds(getHiddenNotificationIds());
+  function handleDeleted(notificationId: string) {
+    setNotifications((current) =>
+      current.filter((notification) => notification.id !== notificationId)
+    );
   }
 
   function goToPage(page: number) {
@@ -123,10 +116,10 @@ export function NotificationsBrowseList({
     }
 
     if (tab === "all") {
-      return visibleNotifications.length;
+      return notifications.length;
     }
 
-    return filterNotifications(visibleNotifications, tab).length;
+    return filterNotifications(notifications, tab).length;
   }
 
   return (
@@ -187,7 +180,7 @@ export function NotificationsBrowseList({
         </div>
       </div>
 
-      {visibleNotifications.length === 0 ? (
+      {notifications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-10 text-center">
           <p className="text-lg font-semibold text-fo-text">{copy.empty.none}</p>
           <p className="mt-2 text-sm text-fo-text-muted">
@@ -196,7 +189,7 @@ export function NotificationsBrowseList({
         </Card>
       ) : null}
 
-      {visibleNotifications.length > 0 && filteredNotifications.length === 0 ? (
+      {notifications.length > 0 && filteredNotifications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-8 text-center">
           <p className="text-base font-medium text-fo-text">
             {copy.empty.noMatch}

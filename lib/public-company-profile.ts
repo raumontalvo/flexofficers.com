@@ -29,24 +29,38 @@ export type { SerializedCompanyProfile };
 
 export function serializePublicCompanyProfile(
   company: CompanyRecord,
-  shifts: { requirements: string[] }[] = []
+  shifts: { requirements: string[] }[] = [],
+  options: {
+    /**
+     * Only set true when the viewer is authorized (e.g. an officer with an
+     * ACCEPTED application for one of this company's shifts). Controls whether
+     * contact email/phone are released.
+     */
+    showContactDetails?: boolean;
+    /** Fallback contact email (company owner's account email). */
+    userEmail?: string;
+  } = {}
 ): SerializedCompanyProfile | null {
-  if (
-    !companyHasPublicProfile({
-      companyName: company.companyName,
-      description: stripCompanyProfileMeta(company.description),
-      city: sanitizeDisplayValue(company.city),
-      state: sanitizeDisplayValue(company.state),
-      website: sanitizeDisplayValue(company.website),
-    })
-  ) {
+  const { showContactDetails = false, userEmail } = options;
+
+  const hasPublicProfile = companyHasPublicProfile({
+    companyName: company.companyName,
+    description: stripCompanyProfileMeta(company.description),
+    city: sanitizeDisplayValue(company.city),
+    state: sanitizeDisplayValue(company.state),
+    website: sanitizeDisplayValue(company.website),
+  });
+
+  // Authorized officers can view the profile even when the company has not
+  // published a public profile, so they can still reach the contact details.
+  if (!hasPublicProfile && !showContactDetails) {
     return null;
   }
 
   return serializeCompanyProfile({
     company,
-    userEmail: company.email ?? "",
+    userEmail: userEmail ?? company.email ?? "",
     shifts,
-    showContactDetails: false,
+    showContactDetails,
   });
 }

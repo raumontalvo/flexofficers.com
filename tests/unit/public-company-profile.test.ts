@@ -45,4 +45,45 @@ describe("public company profile", () => {
       })
     ).toBeNull();
   });
+
+  it("releases contact details to authorized (accepted) officers", () => {
+    const profile = serializePublicCompanyProfile(
+      baseCompany,
+      [{ requirements: ["Armed Security"] }],
+      { showContactDetails: true, userEmail: "owner@example.com" }
+    );
+
+    expect(profile?.showContactDetails).toBe(true);
+    expect(profile?.details.contactEmail).toBe("private@example.com");
+    expect(profile?.details.phone).toBe("(239) 900-5653");
+    expect(profile?.support.email).toBe("private@example.com");
+  });
+
+  it("falls back to the owner account email when company email is empty", () => {
+    const profile = serializePublicCompanyProfile(
+      { ...baseCompany, email: null },
+      [],
+      { showContactDetails: true, userEmail: "owner@example.com" }
+    );
+
+    expect(profile?.details.contactEmail).toBe("owner@example.com");
+  });
+
+  it("still serializes for authorized officers when the profile is not public", () => {
+    const profile = serializePublicCompanyProfile(
+      {
+        ...baseCompany,
+        companyName: "Hidden Co",
+        description: null,
+        city: null,
+        state: null,
+        website: null,
+      },
+      [],
+      { showContactDetails: true, userEmail: "owner@example.com" }
+    );
+
+    expect(profile).not.toBeNull();
+    expect(profile?.details.phone).toBe("(239) 900-5653");
+  });
 });

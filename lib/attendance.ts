@@ -49,22 +49,37 @@ export function isClockInTooEarly(
 }
 
 export function isShiftClockEligible(
-  application: Pick<ClockableApplication, "status" | "shift">,
-  now = new Date()
+  application: Pick<ClockableApplication, "status" | "shift">
 ) {
   if (application.status !== ApplicationStatus.ACCEPTED) {
     return false;
   }
 
-  if (application.shift.status === ShiftStatus.CANCELLED) {
+  if (
+    application.shift.status === ShiftStatus.CANCELLED ||
+    application.shift.status === ShiftStatus.COMPLETED
+  ) {
     return false;
   }
 
-  return new Date(application.shift.endTime) > now;
+  return true;
 }
 
+export function isClockInWindowOpen(
+  shiftStartTime: Date | string,
+  now = new Date()
+) {
+  const start = new Date(shiftStartTime);
+  return now.getTime() >= start.getTime() - CLOCK_IN_OPEN_WINDOW_MS;
+}
+
+/**
+ * Clock-in opens one hour before the shift start and stays open until the
+ * officer clocks in or the shift is completed/cancelled. It intentionally does
+ * NOT close at shift start time so late-arriving officers can still clock in.
+ */
 export function canClockIn(application: ClockableApplication, now = new Date()) {
-  if (!isShiftClockEligible(application, now)) {
+  if (!isShiftClockEligible(application)) {
     return false;
   }
 
@@ -72,11 +87,7 @@ export function canClockIn(application: ClockableApplication, now = new Date()) 
     return false;
   }
 
-  if (isClockInTooEarly(application.shift.startTime, now)) {
-    return false;
-  }
-
-  return true;
+  return isClockInWindowOpen(application.shift.startTime, now);
 }
 
 export function canClockOut(application: ClockableApplication) {

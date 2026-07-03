@@ -27,6 +27,11 @@ type ShiftClockActionsProps = {
 
 type ModalMode = "clock-in" | "clock-out" | null;
 
+const LOCATION_REQUIRED_CLOCK_IN_ERROR =
+  "Location permission is required to clock in. Please enable location for flexofficers.com in your browser settings and try again.";
+const LOCATION_REQUIRED_CLOCK_OUT_ERROR =
+  "Location permission is required to clock out. Please enable location for flexofficers.com in your browser settings and try again.";
+
 export function ShiftClockActions({
   application,
   className,
@@ -72,8 +77,21 @@ export function ShiftClockActions({
     setIsSubmitting(true);
     setErrorMessage(null);
 
+    // Location is mandatory. Capture it before touching the API so a denied,
+    // failed, timed-out, or unavailable position never results in a clock-in/out.
+    const coordinates = await getBrowserGeolocation();
+
+    if (!coordinates) {
+      setErrorMessage(
+        action === "clock-in"
+          ? LOCATION_REQUIRED_CLOCK_IN_ERROR
+          : LOCATION_REQUIRED_CLOCK_OUT_ERROR
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      const coordinates = await getBrowserGeolocation();
       const response = await fetch(`/api/applications/${action}`, {
         method: "POST",
         headers: {
@@ -81,8 +99,8 @@ export function ShiftClockActions({
         },
         body: JSON.stringify({
           applicationId: application.id,
-          latitude: coordinates?.latitude ?? undefined,
-          longitude: coordinates?.longitude ?? undefined,
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
         }),
       });
 
@@ -102,6 +120,20 @@ export function ShiftClockActions({
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function openModal(mode: Exclude<ModalMode, null>) {
+    setErrorMessage(null);
+    setModalMode(mode);
+  }
+
+  function closeModal() {
+    if (isSubmitting) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setModalMode(null);
   }
 
   return (
@@ -204,7 +236,7 @@ export function ShiftClockActions({
       {attendanceStatus === "NOT_STARTED" && clockInAvailable ? (
         <button
           type="button"
-          onClick={() => setModalMode("clock-in")}
+          onClick={() => openModal("clock-in")}
           className={buttonClassName({
             size: "md",
             fullWidth: true,
@@ -219,7 +251,7 @@ export function ShiftClockActions({
       {attendanceStatus === "CLOCKED_IN" && clockOutAvailable ? (
         <button
           type="button"
-          onClick={() => setModalMode("clock-out")}
+          onClick={() => openModal("clock-out")}
           className={buttonClassName({
             variant: "danger",
             size: "md",
@@ -245,12 +277,6 @@ export function ShiftClockActions({
         </div>
       ) : null}
 
-      {errorMessage ? (
-        <p className="text-sm text-red-300" role="alert">
-          {errorMessage}
-        </p>
-      ) : null}
-
       <ClockConfirmationModal
         open={modalMode === "clock-in"}
         title="Clock In"
@@ -266,11 +292,8 @@ export function ShiftClockActions({
         confirmLabel="Yes, Clock In"
         confirmVariant="success"
         isSubmitting={isSubmitting}
-        onClose={() => {
-          if (!isSubmitting) {
-            setModalMode(null);
-          }
-        }}
+        errorMessage={modalMode === "clock-in" ? errorMessage : null}
+        onClose={closeModal}
         onConfirm={() => submitAttendance("clock-in")}
       />
 
@@ -291,11 +314,8 @@ export function ShiftClockActions({
         confirmLabel="Yes, Clock Out"
         confirmVariant="danger"
         isSubmitting={isSubmitting}
-        onClose={() => {
-          if (!isSubmitting) {
-            setModalMode(null);
-          }
-        }}
+        errorMessage={modalMode === "clock-out" ? errorMessage : null}
+        onClose={closeModal}
         onConfirm={() => submitAttendance("clock-out")}
       />
     </div>

@@ -255,6 +255,7 @@ model Application {
   appliedAt                  DateTime          @default(now())
   shift24HourReminderSentAt  DateTime?
   shift2HourReminderSentAt   DateTime?
+  clockInNotificationSentAt  DateTime?
   clockInAt                  DateTime?
   clockOutAt                 DateTime?
   clockInLatitude            Float?

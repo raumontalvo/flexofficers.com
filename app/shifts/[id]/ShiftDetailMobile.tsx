@@ -74,6 +74,13 @@ type ShiftDetailMobileProps = {
   isSignedIn: boolean;
   shiftAcceptingApplications: boolean;
   isAcceptedOfficer: boolean;
+  companyContactName: string | null;
+  companyContactPhone: string | null;
+  companyContactEmail: string | null;
+  companyContactWebsite: string | null;
+  companyContactAddress: string | null;
+  companyContactLocationLabel: string | null;
+  companyContactDescription: string | null;
 };
 
 function InfoRow({
@@ -166,9 +173,17 @@ export function ShiftDetailMobile({
   isSignedIn,
   shiftAcceptingApplications,
   isAcceptedOfficer,
+  companyContactName,
+  companyContactPhone,
+  companyContactEmail,
+  companyContactWebsite,
+  companyContactAddress,
+  companyContactLocationLabel,
+  companyContactDescription,
 }: ShiftDetailMobileProps) {
   const { t } = useLandingLanguage();
   const detail = t.shiftDetail;
+  const notProvided = t.commonExtras.notProvided;
   const schedule = formatShiftScheduleParts(shift.startTime, shift.endTime);
   const licenseRequirements = parseLicenseRequirementsFromShift({
     requirements: shift.requirements,
@@ -338,14 +353,94 @@ export function ShiftDetailMobile({
       <article className="fo-glass-card space-y-2.5 rounded-2xl border border-white/10 p-4">
         <h2 className="text-sm font-semibold text-fo-text">{detail.sections.company}</h2>
         <p className="text-base font-semibold text-fo-text">{displayCompanyName}</p>
-        {company.description ? (
-          <p className="text-sm leading-relaxed text-fo-text-muted">
-            {company.description}
-          </p>
-        ) : null}
-        <p className="text-xs leading-relaxed text-fo-text-muted">
-          {detail.company.contactLocked}
-        </p>
+        {isAcceptedOfficer ? (
+          <>
+            {companyContactDescription || company.description ? (
+              <p className="text-sm leading-relaxed text-fo-text-muted">
+                {companyContactDescription || company.description}
+              </p>
+            ) : null}
+            <dl className="space-y-2 text-sm text-fo-text-muted">
+              {companyContactName ? (
+                <div>
+                  <dt className="font-semibold text-fo-text">{detail.sections.contact}</dt>
+                  <dd>{companyContactName}</dd>
+                </div>
+              ) : null}
+              <div>
+                <dt className="font-semibold text-fo-text">{detail.company.email}</dt>
+                <dd>
+                  {companyContactEmail ? (
+                    <a
+                      href={`mailto:${companyContactEmail}`}
+                      className="text-fo-primary-bright hover:text-fo-primary-hover"
+                    >
+                      {companyContactEmail}
+                    </a>
+                  ) : (
+                    notProvided
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-fo-text">{detail.company.phone}</dt>
+                <dd>
+                  {companyContactPhone ? (
+                    <a
+                      href={`tel:${companyContactPhone}`}
+                      className="text-fo-primary-bright hover:text-fo-primary-hover"
+                    >
+                      {companyContactPhone}
+                    </a>
+                  ) : (
+                    notProvided
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-semibold text-fo-text">{detail.company.website}</dt>
+                <dd>
+                  {companyContactWebsite ? (
+                    <a
+                      href={companyContactWebsite}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-fo-primary-bright hover:text-fo-primary-hover"
+                    >
+                      {companyContactWebsite}
+                    </a>
+                  ) : (
+                    notProvided
+                  )}
+                </dd>
+              </div>
+              {companyContactAddress || companyContactLocationLabel ? (
+                <div>
+                  <dt className="font-semibold text-fo-text">{detail.company.address}</dt>
+                  <dd>
+                    {companyContactAddress ? (
+                      <span className="block">{companyContactAddress}</span>
+                    ) : null}
+                    {companyContactLocationLabel ? (
+                      <span className="block">{companyContactLocationLabel}</span>
+                    ) : null}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          </>
+        ) : (
+          <>
+            {company.description ? (
+              <p className="text-sm leading-relaxed text-fo-text-muted">
+                {company.description}
+              </p>
+            ) : null}
+            <p className="text-xs leading-relaxed text-fo-text-muted">
+              {detail.company.contactLocked}
+            </p>
+          </>
+        )}
         {hasPublicProfile ? (
           <Link
             href={`/companies/${shift.companyId}`}

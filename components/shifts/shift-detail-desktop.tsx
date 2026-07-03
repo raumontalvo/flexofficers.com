@@ -42,6 +42,10 @@ type ShiftDetailDesktopProps = {
   companyContactName: string | null;
   companyContactPhone: string | null;
   companyContactEmail: string | null;
+  companyContactWebsite: string | null;
+  companyContactAddress: string | null;
+  companyContactLocationLabel: string | null;
+  companyContactDescription: string | null;
   canApply: boolean;
   profileIncomplete: boolean;
   officer?: {
@@ -77,6 +81,10 @@ export function ShiftDetailDesktop({
   companyContactName,
   companyContactPhone,
   companyContactEmail,
+  companyContactWebsite,
+  companyContactAddress,
+  companyContactLocationLabel,
+  companyContactDescription,
   canApply,
   profileIncomplete,
   officer,
@@ -86,6 +94,7 @@ export function ShiftDetailDesktop({
 }: ShiftDetailDesktopProps) {
   const { t } = useLandingLanguage();
   const detail = t.shiftDetail;
+  const notProvided = t.commonExtras.notProvided;
   const earningsLabel = formatShiftEstimatedEarnings(t, estimatedPay);
 
   return (
@@ -258,33 +267,81 @@ export function ShiftDetailDesktop({
             <p className="text-base font-medium text-fo-text">{displayCompanyName}</p>
           )}
           {isAcceptedOfficer ? (
-            <dl className="space-y-2 text-sm text-fo-text-muted">
-              {companyContactName ? (
-                <div>
-                  <dt className="font-semibold text-fo-text">{detail.sections.contact}</dt>
-                  <dd>{companyContactName}</dd>
-                </div>
+            <>
+              {companyContactDescription ? (
+                <p className="text-sm leading-relaxed text-fo-text-muted">
+                  {companyContactDescription}
+                </p>
               ) : null}
-              {companyContactPhone ? (
-                <div>
-                  <dt className="font-semibold text-fo-text">{detail.company.phone}</dt>
-                  <dd>{companyContactPhone}</dd>
-                </div>
-              ) : null}
-              {companyContactEmail ? (
+              <dl className="space-y-2 text-sm text-fo-text-muted">
+                {companyContactName ? (
+                  <div>
+                    <dt className="font-semibold text-fo-text">{detail.sections.contact}</dt>
+                    <dd>{companyContactName}</dd>
+                  </div>
+                ) : null}
                 <div>
                   <dt className="font-semibold text-fo-text">{detail.company.email}</dt>
                   <dd>
-                    <a
-                      href={`mailto:${companyContactEmail}`}
-                      className="text-fo-primary-bright hover:text-fo-primary-hover"
-                    >
-                      {companyContactEmail}
-                    </a>
+                    {companyContactEmail ? (
+                      <a
+                        href={`mailto:${companyContactEmail}`}
+                        className="text-fo-primary-bright hover:text-fo-primary-hover"
+                      >
+                        {companyContactEmail}
+                      </a>
+                    ) : (
+                      notProvided
+                    )}
                   </dd>
                 </div>
-              ) : null}
-            </dl>
+                <div>
+                  <dt className="font-semibold text-fo-text">{detail.company.phone}</dt>
+                  <dd>
+                    {companyContactPhone ? (
+                      <a
+                        href={`tel:${companyContactPhone}`}
+                        className="text-fo-primary-bright hover:text-fo-primary-hover"
+                      >
+                        {companyContactPhone}
+                      </a>
+                    ) : (
+                      notProvided
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-fo-text">{detail.company.website}</dt>
+                  <dd>
+                    {companyContactWebsite ? (
+                      <a
+                        href={companyContactWebsite}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-fo-primary-bright hover:text-fo-primary-hover"
+                      >
+                        {companyContactWebsite}
+                      </a>
+                    ) : (
+                      notProvided
+                    )}
+                  </dd>
+                </div>
+                {companyContactAddress || companyContactLocationLabel ? (
+                  <div>
+                    <dt className="font-semibold text-fo-text">{detail.company.address}</dt>
+                    <dd>
+                      {companyContactAddress ? (
+                        <span className="block">{companyContactAddress}</span>
+                      ) : null}
+                      {companyContactLocationLabel ? (
+                        <span className="block">{companyContactLocationLabel}</span>
+                      ) : null}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </>
           ) : (
             <p className="text-sm leading-relaxed text-fo-text-muted">
               {detail.company.contactLocked}

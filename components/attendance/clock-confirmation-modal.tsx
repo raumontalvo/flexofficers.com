@@ -12,6 +12,7 @@ type ClockConfirmationModalProps = {
   confirmLabel: string;
   confirmVariant: "success" | "danger";
   isSubmitting?: boolean;
+  errorMessage?: string | null;
   onClose: () => void;
   onConfirm: () => void;
 };
@@ -24,6 +25,7 @@ export function ClockConfirmationModal({
   confirmLabel,
   confirmVariant,
   isSubmitting = false,
+  errorMessage = null,
   onClose,
   onConfirm,
 }: ClockConfirmationModalProps) {
@@ -80,6 +82,15 @@ export function ClockConfirmationModal({
             </div>
           ))}
         </dl>
+
+        {errorMessage ? (
+          <p
+            className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm leading-relaxed text-red-200"
+            role="alert"
+          >
+            {errorMessage}
+          </p>
+        ) : null}
 
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button

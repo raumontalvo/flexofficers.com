@@ -19,7 +19,6 @@ import {
 } from "@/lib/company-notification-data";
 import { markAllCompanyNotificationsRead } from "./actions";
 import { CompanyNotificationCard } from "./CompanyNotificationCard";
-import { getHiddenCompanyNotificationIds } from "./hidden-notifications";
 import { notifyNotificationsChanged } from "@/lib/notifications-changed";
 
 const PAGE_SIZE = 10;
@@ -38,9 +37,6 @@ export function CompanyNotificationsBrowseList({
   const [notifications, setNotifications] = useState(initialNotifications);
   const [prevInitialNotifications, setPrevInitialNotifications] =
     useState(initialNotifications);
-  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
-    getHiddenCompanyNotificationIds()
-  );
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
 
@@ -53,19 +49,14 @@ export function CompanyNotificationsBrowseList({
   const officerCopy = t.browse.notifications;
   const copy = t.browse.companyNotifications;
 
-  const visibleNotifications = useMemo(() => {
-    const hidden = new Set(hiddenIds);
-    return notifications.filter((notification) => !hidden.has(notification.id));
-  }, [notifications, hiddenIds]);
-
   const filteredNotifications = useMemo(
-    () => filterCompanyNotifications(visibleNotifications, activeTab),
-    [visibleNotifications, activeTab]
+    () => filterCompanyNotifications(notifications, activeTab),
+    [notifications, activeTab]
   );
 
   const unreadCount = useMemo(
-    () => countUnreadCompanyNotifications(visibleNotifications),
-    [visibleNotifications]
+    () => countUnreadCompanyNotifications(notifications),
+    [notifications]
   );
 
   const totalPages = Math.max(
@@ -109,8 +100,10 @@ export function CompanyNotificationsBrowseList({
     });
   }
 
-  function handleDeleted() {
-    setHiddenIds(getHiddenCompanyNotificationIds());
+  function handleDeleted(notificationId: string) {
+    setNotifications((current) =>
+      current.filter((notification) => notification.id !== notificationId)
+    );
   }
 
   function goToPage(page: number) {
@@ -124,10 +117,10 @@ export function CompanyNotificationsBrowseList({
     }
 
     if (tab === "all") {
-      return visibleNotifications.length;
+      return notifications.length;
     }
 
-    return filterCompanyNotifications(visibleNotifications, tab).length;
+    return filterCompanyNotifications(notifications, tab).length;
   }
 
   return (
@@ -188,7 +181,7 @@ export function CompanyNotificationsBrowseList({
         </div>
       </div>
 
-      {visibleNotifications.length === 0 ? (
+      {notifications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-10 text-center">
           <p className="text-lg font-semibold text-fo-text">{copy.empty.none}</p>
           <p className="mt-2 text-sm text-fo-text-muted">
@@ -197,7 +190,7 @@ export function CompanyNotificationsBrowseList({
         </Card>
       ) : null}
 
-      {visibleNotifications.length > 0 && filteredNotifications.length === 0 ? (
+      {notifications.length > 0 && filteredNotifications.length === 0 ? (
         <Card variant="muted" className="fo-glass-card py-8 text-center">
           <p className="text-base font-medium text-fo-text">
             {copy.empty.noMatch}

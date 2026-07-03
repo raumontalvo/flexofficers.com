@@ -95,6 +95,32 @@ describe("attendance helpers", () => {
     expect(canClockOut(completed)).toBe(false);
   });
 
+  it("keeps clock in open after shift start until the officer clocks in", () => {
+    const now = new Date("2099-06-11T18:30:00.000Z");
+    const application = createClockableApplication({
+      startTime: new Date("2099-06-11T18:00:00.000Z"),
+      endTime: new Date("2099-06-12T02:00:00.000Z"),
+    });
+
+    expect(isClockInTooEarly(application.shift.startTime, now)).toBe(false);
+    expect(canClockIn(application, now)).toBe(true);
+  });
+
+  it("blocks clock in for cancelled or completed shifts", () => {
+    const now = new Date("2099-06-11T17:30:00.000Z");
+    const cancelled = createClockableApplication({
+      startTime: new Date("2099-06-11T18:00:00.000Z"),
+      shiftStatus: ShiftStatus.CANCELLED,
+    });
+    const completed = createClockableApplication({
+      startTime: new Date("2099-06-11T18:00:00.000Z"),
+      shiftStatus: ShiftStatus.COMPLETED,
+    });
+
+    expect(canClockIn(cancelled, now)).toBe(false);
+    expect(canClockIn(completed, now)).toBe(false);
+  });
+
   it("allows clock out after shift end when still clocked in", () => {
     const now = new Date("2099-06-12T03:00:00.000Z");
     const application = createClockableApplication({
