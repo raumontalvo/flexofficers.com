@@ -12,6 +12,7 @@ type ClockConfirmationModalProps = {
   confirmLabel: string;
   confirmVariant: "success" | "danger";
   isSubmitting?: boolean;
+  statusMessage?: string | null;
   errorMessage?: string | null;
   onClose: () => void;
   onConfirm: () => void;
@@ -25,6 +26,7 @@ export function ClockConfirmationModal({
   confirmLabel,
   confirmVariant,
   isSubmitting = false,
+  statusMessage = null,
   errorMessage = null,
   onClose,
   onConfirm,
@@ -53,7 +55,7 @@ export function ClockConfirmationModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
         aria-label="Close dialog"
@@ -65,7 +67,7 @@ export function ClockConfirmationModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="clock-confirmation-title"
-        className="relative w-full max-w-md rounded-2xl border border-white/10 bg-slate-950/95 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-slate-950/95 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl"
       >
         <h2 id="clock-confirmation-title" className="text-lg font-semibold text-white">
           {title}
@@ -82,6 +84,20 @@ export function ClockConfirmationModal({
             </div>
           ))}
         </dl>
+
+        {statusMessage ? (
+          <p
+            className="mt-4 flex items-center gap-2 rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-sm leading-relaxed text-sky-100"
+            role="status"
+            aria-live="polite"
+          >
+            <span
+              aria-hidden="true"
+              className="h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-sky-200/40 border-t-sky-100"
+            />
+            {statusMessage}
+          </p>
+        ) : null}
 
         {errorMessage ? (
           <p
@@ -118,7 +134,11 @@ export function ClockConfirmationModal({
                 : "border-red-500/40 bg-red-600 text-white hover:bg-red-500"
             )}
           >
-            {isSubmitting ? "Saving..." : confirmLabel}
+            {isSubmitting
+              ? statusMessage
+                ? "Requesting…"
+                : "Saving..."
+              : confirmLabel}
           </button>
         </div>
       </div>

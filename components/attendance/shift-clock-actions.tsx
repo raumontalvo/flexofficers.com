@@ -27,10 +27,11 @@ type ShiftClockActionsProps = {
 
 type ModalMode = "clock-in" | "clock-out" | null;
 
+const LOCATION_REQUESTING_MESSAGE = "Requesting your location...";
 const LOCATION_REQUIRED_CLOCK_IN_ERROR =
-  "Location permission is required to clock in. Please enable location for flexofficers.com in your browser settings and try again.";
+  "Location permission is required to clock in. Please allow location access for flexofficers.com in your browser and try again.";
 const LOCATION_REQUIRED_CLOCK_OUT_ERROR =
-  "Location permission is required to clock out. Please enable location for flexofficers.com in your browser settings and try again.";
+  "Location permission is required to clock out. Please allow location access for flexofficers.com in your browser and try again.";
 
 export function ShiftClockActions({
   application,
@@ -39,6 +40,7 @@ export function ShiftClockActions({
   const router = useRouter();
   const [modalMode, setModalMode] = useState<ModalMode>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const now = useMemo(() => new Date(), []);
@@ -77,9 +79,12 @@ export function ShiftClockActions({
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    // Location is mandatory. Capture it before touching the API so a denied,
-    // failed, timed-out, or unavailable position never results in a clock-in/out.
+    // Location is mandatory. Trigger the browser's own permission prompt and
+    // capture the position before touching the API so a denied, blocked,
+    // timed-out, or unavailable position never results in a clock-in/out.
+    setStatusMessage(LOCATION_REQUESTING_MESSAGE);
     const coordinates = await getBrowserGeolocation();
+    setStatusMessage(null);
 
     if (!coordinates) {
       setErrorMessage(
@@ -124,6 +129,7 @@ export function ShiftClockActions({
 
   function openModal(mode: Exclude<ModalMode, null>) {
     setErrorMessage(null);
+    setStatusMessage(null);
     setModalMode(mode);
   }
 
@@ -133,6 +139,7 @@ export function ShiftClockActions({
     }
 
     setErrorMessage(null);
+    setStatusMessage(null);
     setModalMode(null);
   }
 
@@ -292,6 +299,7 @@ export function ShiftClockActions({
         confirmLabel="Yes, Clock In"
         confirmVariant="success"
         isSubmitting={isSubmitting}
+        statusMessage={modalMode === "clock-in" ? statusMessage : null}
         errorMessage={modalMode === "clock-in" ? errorMessage : null}
         onClose={closeModal}
         onConfirm={() => submitAttendance("clock-in")}
@@ -314,6 +322,7 @@ export function ShiftClockActions({
         confirmLabel="Yes, Clock Out"
         confirmVariant="danger"
         isSubmitting={isSubmitting}
+        statusMessage={modalMode === "clock-out" ? statusMessage : null}
         errorMessage={modalMode === "clock-out" ? errorMessage : null}
         onClose={closeModal}
         onConfirm={() => submitAttendance("clock-out")}
