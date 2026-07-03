@@ -294,8 +294,6 @@ export function ShiftDetailDesktop({
 
         <ShiftDetailActions
           shiftId={shift.id}
-          companyId={shift.companyId}
-          hasPublicProfile={hasPublicProfile}
           canApply={canApply}
           profileIncomplete={profileIncomplete}
           officer={officer}

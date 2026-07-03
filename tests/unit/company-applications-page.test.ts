@@ -4,6 +4,7 @@ import {
   ShiftStatus,
 } from "@/app/generated/prisma/enums";
 import {
+  applyShiftDisplayStatus,
   companyApplicationListSelect,
   filterCompanyApplicantsByShift,
   filterCompanyApplicantsByTab,
@@ -186,5 +187,22 @@ describe("company applications page helpers", () => {
       accepted: 1,
       rejected: 0,
     });
+  });
+
+  it("resolves shift display status from accepted counts", () => {
+    const rows = applyShiftDisplayStatus([
+      serializeCompanyApplicant({
+        ...baseApplication,
+        status: ApplicationStatus.ACCEPTED,
+        shift: {
+          ...baseApplication.shift,
+          status: ShiftStatus.PARTIALLY_FILLED,
+          positionsNeeded: 1,
+        },
+      }),
+    ]);
+
+    expect(rows[0]?.shiftStatus).toBe(ShiftStatus.FILLED);
+    expect(rows[0]?.appliedShift.status).toBe(ShiftStatus.FILLED);
   });
 });

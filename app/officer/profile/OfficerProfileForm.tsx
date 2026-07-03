@@ -362,9 +362,9 @@ export default function OfficerProfileForm({
             return (
               <div
                 key={license.clientId}
-                className="rounded-xl border border-fo-border bg-fo-bg-elevated/40 p-3"
+                className="min-w-0 rounded-xl border border-fo-border bg-fo-bg-elevated/40 p-3"
               >
-                <div className="grid gap-3 sm:grid-cols-[minmax(130px,1fr)_minmax(100px,0.9fr)_minmax(110px,1fr)_minmax(110px,0.9fr)_auto] sm:items-center">
+                <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(130px,1fr)_minmax(100px,0.9fr)_minmax(110px,1fr)_minmax(110px,0.9fr)_auto] sm:items-center">
                   <div className="space-y-1.5">
                     {license.licenseType ? (
                       <LicenseTypeBadge licenseType={license.licenseType} />
@@ -450,7 +450,7 @@ export default function OfficerProfileForm({
                     />
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="min-w-0 max-w-full space-y-1 overflow-hidden">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
                       {pw.expiration}
                     </p>
@@ -468,7 +468,10 @@ export default function OfficerProfileForm({
                           expirationDate: e.target.value,
                         })
                       }
-                      className={compactFieldClassName}
+                      className={cn(
+                        compactFieldClassName,
+                        "w-full max-w-full min-w-0"
+                      )}
                     />
                   </div>
 

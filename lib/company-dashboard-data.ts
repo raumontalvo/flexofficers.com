@@ -2,6 +2,7 @@ import {
   ApplicationStatus,
   ShiftStatus,
 } from "@/app/generated/prisma/enums";
+import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
 
 export type CompanyShiftRecord = {
   id: string;
@@ -270,6 +271,8 @@ export function filterSerializedShiftsByTab(
 export function serializeCompanyDashboardShift(
   shift: CompanyShiftRecord
 ): SerializedCompanyShift {
+  const filledCount = getShiftFilledCount(shift);
+
   return {
     id: shift.id,
     title: shift.title,
@@ -278,7 +281,11 @@ export function serializeCompanyDashboardShift(
     city: shift.city,
     state: shift.state,
     location: shift.location,
-    status: shift.status,
+    status: resolveShiftDisplayStatus({
+      storedStatus: shift.status,
+      acceptedCount: filledCount,
+      positionsNeeded: shift.positionsNeeded,
+    }),
     applicantCount: getShiftApplicantCount(shift),
     openPositions: getShiftOpenPositions(shift),
   };

@@ -2,7 +2,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { CompanyApplicantsPageContent } from "@/components/company/company-applicants-page-content";
 import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
 import { PageShell } from "@/components/ui";
-import { serializeCompanyApplicant, companyApplicationListSelect } from "@/lib/company-applications-page";
+import { serializeCompanyApplicant, applyShiftDisplayStatus, companyApplicationListSelect } from "@/lib/company-applications-page";
 import { requirePageRole } from "@/lib/page-rbac";
 import { prisma } from "@/lib/prisma";
 
@@ -27,7 +27,9 @@ export default async function CompanyApplicationsPage() {
     },
   });
 
-  const serializedApplications = applications.map(serializeCompanyApplicant);
+  const serializedApplications = applyShiftDisplayStatus(
+    applications.map(serializeCompanyApplicant)
+  );
 
   return (
     <PageShell nav="company" maxWidth="full" sidebar>

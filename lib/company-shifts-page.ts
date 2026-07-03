@@ -6,6 +6,7 @@ import {
   isActiveCompanyShiftStatus,
 } from "@/lib/company-dashboard-data";
 import { formatShiftCityState } from "@/lib/format-shift";
+import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
 
 export type CompanyShiftsPageTab = "all" | "open" | "filled" | "cancelled";
 
@@ -86,6 +87,7 @@ export function serializeCompanyShiftRow(
   shift: CompanyShiftRowRecord
 ): SerializedCompanyShiftRow {
   const { locationLabel, locationSubtext } = getShiftLocationParts(shift);
+  const filledCount = getShiftFilledCount(shift);
 
   return {
     id: shift.id,
@@ -98,9 +100,13 @@ export function serializeCompanyShiftRow(
     startTime: shift.startTime.toISOString(),
     endTime: shift.endTime.toISOString(),
     hourlyRate: shift.hourlyRate.toString(),
-    status: shift.status,
+    status: resolveShiftDisplayStatus({
+      storedStatus: shift.status,
+      acceptedCount: filledCount,
+      positionsNeeded: shift.positionsNeeded,
+    }),
     positionsNeeded: shift.positionsNeeded,
-    filledCount: getShiftFilledCount(shift),
+    filledCount,
     applicantCount: getShiftApplicantCount(shift),
     isRecurring: Boolean(shift.recurringScheduleId),
   };

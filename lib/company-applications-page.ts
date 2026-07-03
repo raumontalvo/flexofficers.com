@@ -29,6 +29,7 @@ import {
   fromShiftArmedRequirement,
   fromShiftWorkType,
 } from "@/lib/shift-form-options";
+import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
 
 /** Explicit select for /company/applications — avoids unmigrated Application columns. */
 export const companyApplicationListSelect = {
@@ -364,6 +365,44 @@ export function getUniqueApplicantShifts(
   return [...shifts.entries()]
     .map(([id, title]) => ({ id, title }))
     .sort((left, right) => left.title.localeCompare(right.title));
+}
+
+export function applyShiftDisplayStatus(
+  applications: SerializedCompanyApplicant[]
+): SerializedCompanyApplicant[] {
+  const acceptedByShift = new Map<string, number>();
+
+  for (const application of applications) {
+    if (application.status !== ApplicationStatus.ACCEPTED) {
+      continue;
+    }
+
+    acceptedByShift.set(
+      application.shiftId,
+      (acceptedByShift.get(application.shiftId) ?? 0) + 1
+    );
+  }
+
+  return applications.map((application) => {
+    const displayStatus = resolveShiftDisplayStatus({
+      storedStatus: application.shiftStatus,
+      acceptedCount: acceptedByShift.get(application.shiftId) ?? 0,
+      positionsNeeded: application.shiftPositionsNeeded,
+    });
+
+    if (displayStatus === application.shiftStatus) {
+      return application;
+    }
+
+    return {
+      ...application,
+      shiftStatus: displayStatus,
+      appliedShift: {
+        ...application.appliedShift,
+        status: displayStatus,
+      },
+    };
+  });
 }
 
 export function getShiftApplicantOverview(

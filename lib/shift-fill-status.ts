@@ -18,6 +18,25 @@ export function isInviteableShiftStatus(status: ShiftStatus) {
   return INVITEABLE_SHIFT_STATUSES.includes(status);
 }
 
+export function resolveShiftDisplayStatus({
+  storedStatus,
+  acceptedCount,
+  positionsNeeded,
+  pendingInviteCount = 0,
+}: {
+  storedStatus: ShiftStatus;
+  acceptedCount: number;
+  positionsNeeded: number;
+  pendingInviteCount?: number;
+}): ShiftStatus {
+  return computeShiftFillStatus({
+    acceptedCount,
+    pendingInviteCount,
+    positionsNeeded,
+    currentStatus: storedStatus,
+  });
+}
+
 export function computeShiftFillStatus({
   acceptedCount,
   pendingInviteCount,

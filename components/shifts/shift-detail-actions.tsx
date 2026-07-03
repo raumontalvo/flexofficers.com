@@ -11,8 +11,6 @@ import { cn } from "@/lib/cn";
 
 type ShiftDetailActionsProps = {
   shiftId: string;
-  companyId: string;
-  hasPublicProfile: boolean;
   canApply: boolean;
   profileIncomplete?: boolean;
   officer?: {
@@ -50,8 +48,6 @@ function actionButtonClassName(
 
 export function ShiftDetailActions({
   shiftId,
-  companyId,
-  hasPublicProfile,
   canApply,
   profileIncomplete = false,
   officer = null,
@@ -96,32 +92,6 @@ export function ShiftDetailActions({
     </button>
   );
 
-  const companyControl = hasPublicProfile ? (
-    <Link
-      href={`/companies/${companyId}`}
-      className={cn(
-        actionButtonClassName("secondary", mobile),
-        mobile &&
-          "border-white/15 bg-transparent text-fo-text hover:bg-white/[0.04]"
-      )}
-    >
-      {actions.viewCompanyProfile}
-    </Link>
-  ) : (
-    <button
-      type="button"
-      disabled
-      title={t.shiftDetail.company.noPublicProfile}
-      className={cn(
-        actionButtonClassName("secondary", mobile),
-        mobile &&
-          "border-white/15 bg-transparent text-fo-text hover:bg-white/[0.04]"
-      )}
-    >
-      {actions.viewCompanyProfile}
-    </button>
-  );
-
   if (mobile) {
     return (
       <div className="flex flex-col gap-2 pb-4">
@@ -129,7 +99,6 @@ export function ShiftDetailActions({
           <OfficerProfileApplyNotice officer={officer} compact />
         ) : null}
         {applyControl}
-        {companyControl}
         {canCancelAssignment && applicationId ? (
           <CancelAssignmentButton
             applicationId={applicationId}
@@ -146,7 +115,6 @@ export function ShiftDetailActions({
         <OfficerProfileApplyNotice officer={officer} />
       ) : null}
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-stretch">
-        {companyControl}
         {applyControl}
       </div>
     </div>

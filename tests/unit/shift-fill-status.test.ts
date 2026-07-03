@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
-import { computeShiftFillStatus } from "@/lib/shift-fill-status";
+import {
+  computeShiftFillStatus,
+  resolveShiftDisplayStatus,
+} from "@/lib/shift-fill-status";
 
 describe("shift fill status", () => {
   it("returns filled when accepted count reaches positions needed", () => {
@@ -45,5 +48,55 @@ describe("shift fill status", () => {
         currentStatus: ShiftStatus.INVITED,
       })
     ).toBe(ShiftStatus.OPEN);
+  });
+
+  it("returns partially filled for 1 accepted of 4 positions", () => {
+    expect(
+      resolveShiftDisplayStatus({
+        storedStatus: ShiftStatus.PARTIALLY_FILLED,
+        acceptedCount: 1,
+        positionsNeeded: 4,
+      })
+    ).toBe(ShiftStatus.PARTIALLY_FILLED);
+  });
+
+  it("returns filled after positions reduced to 1 with 1 accepted", () => {
+    expect(
+      resolveShiftDisplayStatus({
+        storedStatus: ShiftStatus.PARTIALLY_FILLED,
+        acceptedCount: 1,
+        positionsNeeded: 1,
+      })
+    ).toBe(ShiftStatus.FILLED);
+  });
+
+  it("returns partially filled after positions set to 2 with 1 accepted", () => {
+    expect(
+      resolveShiftDisplayStatus({
+        storedStatus: ShiftStatus.PARTIALLY_FILLED,
+        acceptedCount: 1,
+        positionsNeeded: 2,
+      })
+    ).toBe(ShiftStatus.PARTIALLY_FILLED);
+  });
+
+  it("returns open when no officers are accepted", () => {
+    expect(
+      resolveShiftDisplayStatus({
+        storedStatus: ShiftStatus.PARTIALLY_FILLED,
+        acceptedCount: 0,
+        positionsNeeded: 4,
+      })
+    ).toBe(ShiftStatus.OPEN);
+  });
+
+  it("returns filled when accepted count exceeds positions needed", () => {
+    expect(
+      resolveShiftDisplayStatus({
+        storedStatus: ShiftStatus.PARTIALLY_FILLED,
+        acceptedCount: 2,
+        positionsNeeded: 1,
+      })
+    ).toBe(ShiftStatus.FILLED);
   });
 });

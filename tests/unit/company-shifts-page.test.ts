@@ -45,12 +45,23 @@ describe("company shifts page helpers", () => {
       startTime: baseShift.startTime.toISOString(),
       endTime: baseShift.endTime.toISOString(),
       hourlyRate: "20",
-      status: ShiftStatus.OPEN,
+      status: ShiftStatus.PARTIALLY_FILLED,
       positionsNeeded: 3,
       filledCount: 1,
       applicantCount: 2,
       isRecurring: false,
     });
+  });
+
+  it("resolves display status when positions are reduced below stored status", () => {
+    expect(
+      serializeCompanyShiftRow({
+        ...baseShift,
+        status: ShiftStatus.PARTIALLY_FILLED,
+        positionsNeeded: 1,
+        applications: [{ status: ApplicationStatus.ACCEPTED }],
+      }).status
+    ).toBe(ShiftStatus.FILLED);
   });
 
   it("marks recurring shifts during serialization", () => {
@@ -82,6 +93,11 @@ describe("company shifts page helpers", () => {
         ...baseShift,
         id: "shift-2",
         status: ShiftStatus.FILLED,
+        applications: [
+          { status: ApplicationStatus.ACCEPTED },
+          { status: ApplicationStatus.ACCEPTED },
+          { status: ApplicationStatus.ACCEPTED },
+        ],
       }),
       serializeCompanyShiftRow({
         ...baseShift,

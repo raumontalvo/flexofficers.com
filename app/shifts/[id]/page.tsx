@@ -31,6 +31,7 @@ import { applicationIdOnlySelect, applicationIdStatusSelect } from "@/lib/applic
 import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
 import { isAcceptedShiftPastOrClosed } from "@/lib/officer-application-delete";
 import { buildShiftJobPostingJsonLd } from "@/lib/shift-job-posting-json-ld";
+import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
 import { ShiftDetailMobile } from "./ShiftDetailMobile";
 
 export const dynamic = "force-dynamic";
@@ -127,6 +128,11 @@ export default async function ShiftDetailPage({
 
   const filledCount = shift.applications.length;
   const openPositions = Math.max(shift.positionsNeeded - filledCount, 0);
+  const displayStatus = resolveShiftDisplayStatus({
+    storedStatus: shift.status,
+    acceptedCount: filledCount,
+    positionsNeeded: shift.positionsNeeded,
+  });
   const officerApplication = user?.officer?.applications[0] ?? null;
   const applicationId = officerApplication?.id ?? null;
   const applicationStatus = officerApplication?.status ?? null;
@@ -134,11 +140,11 @@ export default async function ShiftDetailPage({
   const canCancelAssignment =
     isAcceptedOfficer &&
     applicationId !== null &&
-    !isAcceptedShiftPastOrClosed(shift.status, shift.endTime);
+    !isAcceptedShiftPastOrClosed(displayStatus, shift.endTime);
   const hasBlockingApplication =
     applicationStatus === ApplicationStatus.PENDING ||
     applicationStatus === ApplicationStatus.ACCEPTED;
-  const shiftAcceptingApplications = shift.status === ShiftStatus.OPEN;
+  const shiftAcceptingApplications = displayStatus === ShiftStatus.OPEN;
   const officerWouldApply =
     user?.role === UserRole.OFFICER &&
     shiftAcceptingApplications &&
@@ -208,7 +214,7 @@ export default async function ShiftDetailPage({
           startTime: shift.startTime,
           endTime: shift.endTime,
           positionsNeeded: shift.positionsNeeded,
-          status: shift.status,
+          status: displayStatus,
           requirements: shift.requirements,
           otherRequirements: shift.otherRequirements,
           specialRequirements: shift.specialRequirements,
@@ -248,7 +254,7 @@ export default async function ShiftDetailPage({
           startTime: shift.startTime,
           endTime: shift.endTime,
           positionsNeeded: shift.positionsNeeded,
-          status: shift.status,
+          status: displayStatus,
           specialRequirements: shift.specialRequirements,
           reportingInstructions: shift.reportingInstructions,
         }}

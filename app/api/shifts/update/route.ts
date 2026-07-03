@@ -4,6 +4,7 @@ import { ApplicationStatus } from "@/app/generated/prisma/enums";
 import { createNotificationsWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { syncShiftFillStatus } from "@/lib/shift-fill-status";
 import { parseShiftPayload, type ShiftPayload } from "../validation";
 
 type UpdateShiftPayload = ShiftPayload & {
@@ -83,28 +84,38 @@ export async function POST(req: Request) {
       );
     }
 
-    const updatedShift = await prisma.shift.update({
-      where: {
-        id: shift.id,
-      },
-      data: {
-        title: parsed.data.title,
-        description: parsed.data.description,
-        location: parsed.data.location,
-        city: parsed.data.city,
-        state: parsed.data.state,
-        hourlyRate: parsed.data.hourlyRate,
-        startTime: parsed.data.startTime,
-        endTime: parsed.data.endTime,
-        workType: parsed.data.workType,
-        shiftTimeType: parsed.data.shiftTimeType,
-        armedRequirement: parsed.data.armedRequirement,
-        requirements: parsed.data.requirements,
-        otherRequirements: parsed.data.otherRequirements,
-        specialRequirements: parsed.data.specialRequirements,
-        reportingInstructions: parsed.data.reportingInstructions,
-        positionsNeeded: parsed.data.positionsNeeded,
-      },
+    const updatedShift = await prisma.$transaction(async (tx) => {
+      await tx.shift.update({
+        where: {
+          id: shift.id,
+        },
+        data: {
+          title: parsed.data.title,
+          description: parsed.data.description,
+          location: parsed.data.location,
+          city: parsed.data.city,
+          state: parsed.data.state,
+          hourlyRate: parsed.data.hourlyRate,
+          startTime: parsed.data.startTime,
+          endTime: parsed.data.endTime,
+          workType: parsed.data.workType,
+          shiftTimeType: parsed.data.shiftTimeType,
+          armedRequirement: parsed.data.armedRequirement,
+          requirements: parsed.data.requirements,
+          otherRequirements: parsed.data.otherRequirements,
+          specialRequirements: parsed.data.specialRequirements,
+          reportingInstructions: parsed.data.reportingInstructions,
+          positionsNeeded: parsed.data.positionsNeeded,
+        },
+      });
+
+      await syncShiftFillStatus(tx, shift.id);
+
+      return tx.shift.findUniqueOrThrow({
+        where: {
+          id: shift.id,
+        },
+      });
     });
 
     if (shift.applications.length > 0) {
