@@ -115,6 +115,16 @@ describe("company shifts page helpers", () => {
     });
   });
 
+  function completedAttendance(offsetMinutes: number) {
+    return {
+      status: ApplicationStatus.ACCEPTED,
+      clockInAt: new Date("2026-07-01T09:00:00.000Z"),
+      clockOutAt: new Date(
+        `2026-07-01T17:${String(offsetMinutes).padStart(2, "0")}:00.000Z`
+      ),
+    };
+  }
+
   it("marks a shift completed once every accepted officer has clocked out", () => {
     const row = serializeCompanyShiftRow({
       ...baseShift,
@@ -122,14 +132,8 @@ describe("company shifts page helpers", () => {
       status: ShiftStatus.FILLED,
       positionsNeeded: 2,
       applications: [
-        {
-          status: ApplicationStatus.ACCEPTED,
-          clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
-        },
-        {
-          status: ApplicationStatus.ACCEPTED,
-          clockOutAt: new Date("2026-07-01T17:10:00.000Z"),
-        },
+        completedAttendance(5),
+        completedAttendance(10),
         { status: ApplicationStatus.PENDING },
       ],
     });
@@ -144,11 +148,56 @@ describe("company shifts page helpers", () => {
       status: ShiftStatus.FILLED,
       positionsNeeded: 2,
       applications: [
+        completedAttendance(5),
         {
           status: ApplicationStatus.ACCEPTED,
+          clockInAt: new Date("2026-07-01T09:00:00.000Z"),
+          clockOutAt: null,
+        },
+      ],
+    });
+
+    expect(row.status).toBe(ShiftStatus.FILLED);
+  });
+
+  it("only completes a 4-officer shift when all four accepted officers clock out", () => {
+    function buildFourOfficerShift(completedCount: number) {
+      const applications = Array.from({ length: 4 }, (_, index) =>
+        index < completedCount
+          ? completedAttendance(10 + index)
+          : {
+              status: ApplicationStatus.ACCEPTED,
+              clockInAt: new Date("2026-07-01T09:00:00.000Z"),
+              clockOutAt: null,
+            }
+      );
+
+      return serializeCompanyShiftRow({
+        ...baseShift,
+        id: `four-officer-${completedCount}`,
+        status: ShiftStatus.FILLED,
+        positionsNeeded: 4,
+        applications,
+      });
+    }
+
+    expect(buildFourOfficerShift(1).status).toBe(ShiftStatus.FILLED);
+    expect(buildFourOfficerShift(3).status).toBe(ShiftStatus.FILLED);
+    expect(buildFourOfficerShift(4).status).toBe(ShiftStatus.COMPLETED);
+  });
+
+  it("does not complete a shift when an officer clocked out without clocking in", () => {
+    const row = serializeCompanyShiftRow({
+      ...baseShift,
+      id: "shift-clockout-only",
+      status: ShiftStatus.FILLED,
+      positionsNeeded: 1,
+      applications: [
+        {
+          status: ApplicationStatus.ACCEPTED,
+          clockInAt: null,
           clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
         },
-        { status: ApplicationStatus.ACCEPTED, clockOutAt: null },
       ],
     });
 
@@ -160,12 +209,7 @@ describe("company shifts page helpers", () => {
       ...baseShift,
       id: "shift-cancelled-clockout",
       status: ShiftStatus.CANCELLED,
-      applications: [
-        {
-          status: ApplicationStatus.ACCEPTED,
-          clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
-        },
-      ],
+      applications: [completedAttendance(5)],
     });
 
     expect(row.status).toBe(ShiftStatus.CANCELLED);
@@ -185,12 +229,7 @@ describe("company shifts page helpers", () => {
         id: "completed-shift",
         status: ShiftStatus.FILLED,
         positionsNeeded: 1,
-        applications: [
-          {
-            status: ApplicationStatus.ACCEPTED,
-            clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
-          },
-        ],
+        applications: [completedAttendance(5)],
       }),
     ];
 

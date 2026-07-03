@@ -17,7 +17,11 @@ export type CompanyShiftRecord = {
   endTime: Date;
   status: ShiftStatus;
   positionsNeeded: number;
-  applications: { status: ApplicationStatus; clockOutAt?: Date | null }[];
+  applications: {
+    status: ApplicationStatus;
+    clockInAt?: Date | null;
+    clockOutAt?: Date | null;
+  }[];
 };
 
 export type CompanyApplicationRecord = {
@@ -163,9 +167,16 @@ export function isActiveCompanyShiftStatus(status: ShiftStatus) {
 }
 
 /**
- * A shift is considered completed once every accepted officer has clocked out.
- * This is derived from attendance (clockOutAt) rather than a stored status so it
- * reflects officer clock-out immediately and preserves completed shift history.
+ * A shift is considered completed only when EVERY accepted officer assigned to
+ * it has a completed attendance record (clocked in and clocked out).
+ *
+ * Multi-officer rule: a shift with multiple accepted officers stays Filled/In
+ * Progress until the last accepted officer clocks out. If a shift needs 4
+ * officers and only 1 (or 3) have clocked out, it is not completed; only once
+ * all 4 accepted officers have clocked out does it move to Completed.
+ *
+ * Derived from attendance rather than a stored status so it reflects officer
+ * clock-out immediately and preserves completed shift history.
  */
 export function isShiftAttendanceCompleted(
   shift: Pick<CompanyShiftRecord, "applications">
@@ -178,8 +189,9 @@ export function isShiftAttendanceCompleted(
     return false;
   }
 
-  return acceptedApplications.every((application) =>
-    Boolean(application.clockOutAt)
+  return acceptedApplications.every(
+    (application) =>
+      Boolean(application.clockInAt) && Boolean(application.clockOutAt)
   );
 }
 
