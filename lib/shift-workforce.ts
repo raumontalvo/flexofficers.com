@@ -1,4 +1,5 @@
 import { ApplicationStatus, type InviteStatus } from "@/app/generated/prisma/enums";
+import { getRemainingOpenPositions } from "@/lib/shift-fill-status";
 
 export type ShiftAssignmentSource = "invitation" | "application";
 
@@ -80,9 +81,9 @@ export function serializeShiftWorkforce(
       detailLabel: "Pending Response",
     }));
 
-  const openPositionsRemaining = Math.max(
-    shift.positionsNeeded - acceptedOfficers.length,
-    0
+  const openPositionsRemaining = getRemainingOpenPositions(
+    shift.positionsNeeded,
+    acceptedOfficers.length
   );
 
   return {

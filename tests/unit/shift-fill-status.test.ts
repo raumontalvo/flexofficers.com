@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
 import {
   computeShiftFillStatus,
+  getRemainingOpenPositions,
+  getShiftStaffingMetrics,
   resolveShiftDisplayStatus,
 } from "@/lib/shift-fill-status";
 
@@ -98,5 +100,41 @@ describe("shift fill status", () => {
         positionsNeeded: 1,
       })
     ).toBe(ShiftStatus.FILLED);
+  });
+});
+
+describe("shift staffing metrics", () => {
+  it("reports partially filled with 3 of 4 open when 4 needed and 1 accepted", () => {
+    const metrics = getShiftStaffingMetrics({
+      storedStatus: ShiftStatus.PARTIALLY_FILLED,
+      acceptedCount: 1,
+      positionsNeeded: 4,
+    });
+
+    expect(metrics.displayStatus).toBe(ShiftStatus.PARTIALLY_FILLED);
+    expect(metrics.remainingOpen).toBe(3);
+    expect(getRemainingOpenPositions(4, 1)).toBe(3);
+  });
+
+  it("reports filled with 0 of 1 open after edit to 1 needed and 1 accepted", () => {
+    const metrics = getShiftStaffingMetrics({
+      storedStatus: ShiftStatus.PARTIALLY_FILLED,
+      acceptedCount: 1,
+      positionsNeeded: 1,
+    });
+
+    expect(metrics.displayStatus).toBe(ShiftStatus.FILLED);
+    expect(metrics.remainingOpen).toBe(0);
+  });
+
+  it("reports partially filled with 1 of 2 open after edit to 2 needed and 1 accepted", () => {
+    const metrics = getShiftStaffingMetrics({
+      storedStatus: ShiftStatus.PARTIALLY_FILLED,
+      acceptedCount: 1,
+      positionsNeeded: 2,
+    });
+
+    expect(metrics.displayStatus).toBe(ShiftStatus.PARTIALLY_FILLED);
+    expect(metrics.remainingOpen).toBe(1);
   });
 });

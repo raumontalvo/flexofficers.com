@@ -2,6 +2,7 @@ import {
   ShiftStatus,
   ShiftVisibility,
 } from "@/app/generated/prisma/enums";
+import { getRemainingOpenPositions } from "@/lib/shift-fill-status";
 
 type PublicJobShiftEligibility = {
   status: ShiftStatus;
@@ -26,6 +27,8 @@ export function isShiftEligibleForPublicJobPage(
 }
 
 export function getPublicJobShiftOpenPositions(shift: PublicJobShiftPositions) {
-  const filledCount = shift.applications.length;
-  return Math.max(shift.positionsNeeded - filledCount, 0);
+  return getRemainingOpenPositions(
+    shift.positionsNeeded,
+    shift.applications.length
+  );
 }

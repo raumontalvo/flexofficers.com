@@ -203,6 +203,26 @@ describe("company applications page helpers", () => {
     ]);
 
     expect(rows[0]?.shiftStatus).toBe(ShiftStatus.FILLED);
+    expect(rows[0]?.shiftOpenPositions).toBe(0);
     expect(rows[0]?.appliedShift.status).toBe(ShiftStatus.FILLED);
+    expect(rows[0]?.appliedShift.openPositions).toBe(0);
+  });
+
+  it("keeps remaining open positions after positions are reduced", () => {
+    const rows = applyShiftDisplayStatus([
+      serializeCompanyApplicant({
+        ...baseApplication,
+        status: ApplicationStatus.ACCEPTED,
+        shift: {
+          ...baseApplication.shift,
+          status: ShiftStatus.PARTIALLY_FILLED,
+          positionsNeeded: 2,
+        },
+      }),
+    ]);
+
+    expect(rows[0]?.shiftStatus).toBe(ShiftStatus.PARTIALLY_FILLED);
+    expect(rows[0]?.shiftOpenPositions).toBe(1);
+    expect(rows[0]?.appliedShift.openPositions).toBe(1);
   });
 });

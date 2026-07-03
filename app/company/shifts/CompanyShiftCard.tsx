@@ -6,6 +6,7 @@ import {
   ShiftStatusBadge,
   StatusBadge,
 } from "@/components/ui";
+import { getRemainingOpenPositions } from "@/lib/shift-fill-status";
 import { formatHourlyRate, formatShiftDateTime } from "@/lib/format-shift";
 import CancelShiftButton from "./CancelShiftButton";
 import DeleteShiftButton from "./DeleteShiftButton";
@@ -35,7 +36,7 @@ export function CompanyShiftCard({
   specialRequirements,
   status,
 }: CompanyShiftCardProps) {
-  const openPositions = Math.max(positionsNeeded - filledCount, 0);
+  const openPositions = getRemainingOpenPositions(positionsNeeded, filledCount);
 
   return (
     <Card variant="elevated" className="space-y-4">

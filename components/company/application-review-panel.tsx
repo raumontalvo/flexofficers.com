@@ -10,7 +10,7 @@ import {
   getShiftApplicantOverview,
   type SerializedCompanyApplicant,
 } from "@/lib/company-applications-page";
-import { getShiftStatusLabel, translateProfileOptionLabel } from "@/lib/i18n/ui-labels";
+import { formatShiftPositionsOpen, getShiftStatusLabel, translateProfileOptionLabel } from "@/lib/i18n/ui-labels";
 import type { AppTranslations } from "@/lib/app-i18n";
 
 type ApplicationReviewPanelProps = {
@@ -183,7 +183,12 @@ function MobileShiftDetailsSection({
           <CompactInfoRow
             icon="👥"
             label={shared.openPositions}
-            value={String(application.appliedShift.openPositions)}
+            value={formatShiftPositionsOpen(
+              t,
+              application.appliedShift.openPositions,
+              application.shiftPositionsNeeded,
+              "open"
+            )}
           />
         </div>
       </section>
@@ -505,7 +510,12 @@ export function ApplicationReviewPanel({
                   />
                   <DetailField
                     label={shared.openPositions}
-                    value={String(application.appliedShift.openPositions)}
+                    value={formatShiftPositionsOpen(
+                      t,
+                      application.appliedShift.openPositions,
+                      application.shiftPositionsNeeded,
+                      "open"
+                    )}
                     notProvided={notProvided}
                   />
                 </dl>

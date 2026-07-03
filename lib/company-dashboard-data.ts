@@ -2,7 +2,10 @@ import {
   ApplicationStatus,
   ShiftStatus,
 } from "@/app/generated/prisma/enums";
-import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
+import {
+  getRemainingOpenPositions,
+  resolveShiftDisplayStatus,
+} from "@/lib/shift-fill-status";
 
 export type CompanyShiftRecord = {
   id: string;
@@ -59,7 +62,10 @@ export function getShiftFilledCount(shift: CompanyShiftRecord) {
 }
 
 export function getShiftOpenPositions(shift: CompanyShiftRecord) {
-  return Math.max(shift.positionsNeeded - getShiftFilledCount(shift), 0);
+  return getRemainingOpenPositions(
+    shift.positionsNeeded,
+    getShiftFilledCount(shift)
+  );
 }
 
 export function filterShiftsByTab(

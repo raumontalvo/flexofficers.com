@@ -8,6 +8,7 @@ import {
 } from "@/lib/format-shift";
 import { fromShiftWorkType } from "@/lib/shift-form-options";
 import type { ShiftCardData } from "@/lib/shift-card-data";
+import { getRemainingOpenPositions } from "@/lib/shift-fill-status";
 
 type ShiftCardProps = {
   shift: ShiftCardData;
@@ -61,7 +62,10 @@ export function ShiftCard({ shift }: ShiftCardProps) {
   const startTime = new Date(shift.startTime);
   const endTime = new Date(shift.endTime);
   const hourlyRate = { toString: () => shift.hourlyRate };
-  const openPositions = Math.max(shift.positionsNeeded - shift.filledCount, 0);
+  const openPositions = getRemainingOpenPositions(
+    shift.positionsNeeded,
+    shift.filledCount
+  );
   const estimatedPay = formatEstimatedShiftPay(hourlyRate, startTime, endTime);
   const schedule = formatShiftScheduleParts(startTime, endTime);
   const locationLabel = formatShiftCityState(shift);

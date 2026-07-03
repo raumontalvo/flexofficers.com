@@ -11,6 +11,7 @@ import {
   type SerializedCompanyShiftRow,
 } from "@/lib/company-shifts-page";
 import { formatHourlyRate, formatShiftTime } from "@/lib/format-shift";
+import { getRemainingOpenPositions } from "@/lib/shift-fill-status";
 import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
 
 function RecurringShiftBadge() {
@@ -68,7 +69,10 @@ export function MyShiftMobileCard({
   const endTime = new Date(shift.endTime);
   const dateBadge = formatShiftDateBadgeParts(startTime);
   const duration = formatShiftDurationLabel(startTime, endTime);
-  const openPositions = Math.max(shift.positionsNeeded - shift.filledCount, 0);
+  const openPositions = getRemainingOpenPositions(
+    shift.positionsNeeded,
+    shift.filledCount
+  );
   const location = shift.locationSubtext
     ? `${shift.locationLabel} · ${shift.locationSubtext}`
     : shift.locationLabel;

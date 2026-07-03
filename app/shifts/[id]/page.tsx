@@ -31,7 +31,7 @@ import { applicationIdOnlySelect, applicationIdStatusSelect } from "@/lib/applic
 import { isOfficerProfileComplete } from "@/lib/officer-profile-completion";
 import { isAcceptedShiftPastOrClosed } from "@/lib/officer-application-delete";
 import { buildShiftJobPostingJsonLd } from "@/lib/shift-job-posting-json-ld";
-import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
+import { getShiftStaffingMetrics } from "@/lib/shift-fill-status";
 import { ShiftDetailMobile } from "./ShiftDetailMobile";
 
 export const dynamic = "force-dynamic";
@@ -126,11 +126,9 @@ export default async function ShiftDetailPage({
     notFound();
   }
 
-  const filledCount = shift.applications.length;
-  const openPositions = Math.max(shift.positionsNeeded - filledCount, 0);
-  const displayStatus = resolveShiftDisplayStatus({
+  const { remainingOpen: openPositions, displayStatus } = getShiftStaffingMetrics({
     storedStatus: shift.status,
-    acceptedCount: filledCount,
+    acceptedCount: shift.applications.length,
     positionsNeeded: shift.positionsNeeded,
   });
   const officerApplication = user?.officer?.applications[0] ?? null;

@@ -29,7 +29,7 @@ import {
   fromShiftArmedRequirement,
   fromShiftWorkType,
 } from "@/lib/shift-form-options";
-import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
+import { resolveShiftDisplayStatus, getRemainingOpenPositions } from "@/lib/shift-fill-status";
 
 /** Explicit select for /company/applications — avoids unmigrated Application columns. */
 export const companyApplicationListSelect = {
@@ -155,6 +155,7 @@ export type SerializedCompanyApplicant = {
   shiftStatus: ShiftStatus;
   shiftHourlyRate: string;
   shiftPositionsNeeded: number;
+  shiftOpenPositions: number;
   officerProfile: SerializedApplicationOfficerProfile;
   appliedShift: SerializedApplicationShiftDetails;
 };
@@ -221,7 +222,7 @@ function serializeAppliedShift(
     locationLabel: locationParts.join(" · ") || shift.location,
     payRateLabel: `${formatHourlyRate(shift.hourlyRate)}/hr`,
     workTypeLabel: workType ? getWorkTypeLabel(workType) : "Not provided",
-    openPositions: shift.positionsNeeded,
+    openPositions: 0,
     requiredLicenses: parseLicenseRequirementsFromShift({
       requirements: shift.requirements,
       otherRequirements: shift.otherRequirements,
@@ -269,6 +270,7 @@ export function serializeCompanyApplicant(
     shiftStatus: application.shift.status,
     shiftHourlyRate: application.shift.hourlyRate.toString(),
     shiftPositionsNeeded: application.shift.positionsNeeded,
+    shiftOpenPositions: 0,
     officerProfile,
     appliedShift: serializeAppliedShift(application.shift),
   };
@@ -384,22 +386,26 @@ export function applyShiftDisplayStatus(
   }
 
   return applications.map((application) => {
+    const acceptedCount = acceptedByShift.get(application.shiftId) ?? 0;
+    const positionsNeeded = application.shiftPositionsNeeded;
     const displayStatus = resolveShiftDisplayStatus({
       storedStatus: application.shiftStatus,
-      acceptedCount: acceptedByShift.get(application.shiftId) ?? 0,
-      positionsNeeded: application.shiftPositionsNeeded,
+      acceptedCount,
+      positionsNeeded,
     });
-
-    if (displayStatus === application.shiftStatus) {
-      return application;
-    }
+    const remainingOpen = getRemainingOpenPositions(
+      positionsNeeded,
+      acceptedCount
+    );
 
     return {
       ...application,
       shiftStatus: displayStatus,
+      shiftOpenPositions: remainingOpen,
       appliedShift: {
         ...application.appliedShift,
         status: displayStatus,
+        openPositions: remainingOpen,
       },
     };
   });

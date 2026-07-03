@@ -25,6 +25,7 @@ const sampleShift: ShiftCardData = {
   createdAt: "2026-06-01T10:00:00.000Z",
   positionsNeeded: 2,
   filledCount: 0,
+  remainingOpen: 2,
   workType: "GIG",
   shiftTimeType: "DAY_SHIFT",
   armedRequirement: "ARMED",

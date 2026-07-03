@@ -18,6 +18,7 @@ export type ShiftCardData = {
   createdAt: string;
   positionsNeeded: number;
   filledCount: number;
+  remainingOpen: number;
   workType?: ShiftWorkType | null;
   shiftTimeType?: ShiftTimeType | null;
   armedRequirement?: ShiftArmedRequirement | null;

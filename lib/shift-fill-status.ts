@@ -18,6 +18,44 @@ export function isInviteableShiftStatus(status: ShiftStatus) {
   return INVITEABLE_SHIFT_STATUSES.includes(status);
 }
 
+export function getRemainingOpenPositions(
+  positionsNeeded: number,
+  acceptedCount: number
+): number {
+  return Math.max(positionsNeeded - acceptedCount, 0);
+}
+
+export type ShiftStaffingMetrics = {
+  acceptedCount: number;
+  positionsNeeded: number;
+  remainingOpen: number;
+  displayStatus: ShiftStatus;
+};
+
+export function getShiftStaffingMetrics({
+  storedStatus,
+  positionsNeeded,
+  acceptedCount,
+  pendingInviteCount = 0,
+}: {
+  storedStatus: ShiftStatus;
+  positionsNeeded: number;
+  acceptedCount: number;
+  pendingInviteCount?: number;
+}): ShiftStaffingMetrics {
+  return {
+    acceptedCount,
+    positionsNeeded,
+    remainingOpen: getRemainingOpenPositions(positionsNeeded, acceptedCount),
+    displayStatus: resolveShiftDisplayStatus({
+      storedStatus,
+      acceptedCount,
+      positionsNeeded,
+      pendingInviteCount,
+    }),
+  };
+}
+
 export function resolveShiftDisplayStatus({
   storedStatus,
   acceptedCount,

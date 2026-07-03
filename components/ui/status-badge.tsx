@@ -79,7 +79,7 @@ const shiftStatusMap = {
   OPEN: "success",
   INVITED: "pending",
   PARTIALLY_FILLED: "info",
-  FILLED: "neutral",
+  FILLED: "success",
   CANCELLED: "rejected",
   COMPLETED: "neutral",
 } as const satisfies Record<string, StatusBadgeVariant>;

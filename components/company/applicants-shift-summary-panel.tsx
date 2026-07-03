@@ -10,7 +10,7 @@ import {
   type SerializedCompanyApplicant,
 } from "@/lib/company-applications-page";
 import { formatHourlyRate } from "@/lib/format-shift";
-import { getShiftStatusLabel } from "@/lib/i18n/ui-labels";
+import { formatShiftPositionsOpen, getShiftStatusLabel } from "@/lib/i18n/ui-labels";
 import { cn } from "@/lib/cn";
 
 type ApplicantsShiftSummaryPanelProps = {
@@ -70,7 +70,7 @@ function ShiftStatusBadge({
     [ShiftStatus.INVITED]: "border-amber-500/25 bg-amber-500/10 text-amber-200",
     [ShiftStatus.PARTIALLY_FILLED]:
       "border-blue-500/25 bg-blue-500/10 text-blue-100",
-    [ShiftStatus.FILLED]: "border-blue-500/25 bg-blue-500/10 text-blue-100",
+    [ShiftStatus.FILLED]: "border-green-500/25 bg-green-500/10 text-green-200",
     [ShiftStatus.CANCELLED]: "border-red-500/20 bg-white/[0.04] text-fo-text-muted",
     [ShiftStatus.COMPLETED]: "border-blue-500/20 bg-white/[0.04] text-fo-text-muted",
   } as const;
@@ -145,7 +145,12 @@ export function ApplicantsShiftSummaryPanel({
           />
           <SummaryRow
             label={shared.openPositions}
-            value={String(selectedApplication.shiftPositionsNeeded)}
+            value={formatShiftPositionsOpen(
+              t,
+              selectedApplication.shiftOpenPositions,
+              selectedApplication.shiftPositionsNeeded,
+              "open"
+            )}
           />
         </dl>
       </section>

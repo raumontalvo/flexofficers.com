@@ -5,6 +5,7 @@ import { PageShell } from "@/components/ui";
 import { applicationIdOnlySelect, officerBrowseShiftSelect } from "@/lib/application-fields";
 import { prisma } from "@/lib/prisma";
 import type { ShiftCardData } from "@/lib/shift-card-data";
+import { getShiftStaffingMetrics } from "@/lib/shift-fill-status";
 import { ShiftsBrowseList } from "./ShiftsBrowseList";
 import { currentUser } from "@clerk/nextjs/server";
 import { UserRole } from "@/app/generated/prisma/enums";
@@ -46,27 +47,36 @@ export default async function ShiftsPage() {
       : Promise.resolve(null),
   ]);
 
-  const browseShifts: ShiftCardData[] = shifts.map((shift) => ({
-    id: shift.id,
-    title: shift.title,
-    hourlyRate: shift.hourlyRate.toString(),
-    companyName: shift.company.companyName,
-    location: shift.location,
-    city: shift.city,
-    state: shift.state,
-    startTime: shift.startTime.toISOString(),
-    endTime: shift.endTime.toISOString(),
-    createdAt: shift.createdAt.toISOString(),
-    positionsNeeded: shift.positionsNeeded,
-    filledCount: shift.applications.length,
-    workType: shift.workType,
-    shiftTimeType: shift.shiftTimeType,
-    armedRequirement: shift.armedRequirement,
-    requirements: shift.requirements,
-    otherRequirements: shift.otherRequirements,
-    specialRequirements: shift.specialRequirements,
-    status: shift.status,
-  }));
+  const browseShifts: ShiftCardData[] = shifts.map((shift) => {
+    const staffing = getShiftStaffingMetrics({
+      storedStatus: shift.status,
+      acceptedCount: shift.applications.length,
+      positionsNeeded: shift.positionsNeeded,
+    });
+
+    return {
+      id: shift.id,
+      title: shift.title,
+      hourlyRate: shift.hourlyRate.toString(),
+      companyName: shift.company.companyName,
+      location: shift.location,
+      city: shift.city,
+      state: shift.state,
+      startTime: shift.startTime.toISOString(),
+      endTime: shift.endTime.toISOString(),
+      createdAt: shift.createdAt.toISOString(),
+      positionsNeeded: staffing.positionsNeeded,
+      filledCount: staffing.acceptedCount,
+      remainingOpen: staffing.remainingOpen,
+      workType: shift.workType,
+      shiftTimeType: shift.shiftTimeType,
+      armedRequirement: shift.armedRequirement,
+      requirements: shift.requirements,
+      otherRequirements: shift.otherRequirements,
+      specialRequirements: shift.specialRequirements,
+      status: staffing.displayStatus,
+    };
+  });
 
   const showProfileApplyNotice =
     user?.role === UserRole.OFFICER &&
