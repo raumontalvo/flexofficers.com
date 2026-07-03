@@ -27,8 +27,11 @@ function countByTab(
 ) {
   return applications.filter(
     (application) =>
-      getAcceptedShiftTab(application.shift.status, application.shift.endTime) ===
-      tab
+      getAcceptedShiftTab(
+        application.shift.status,
+        application.shift.endTime,
+        application.attendance.clockOutAt
+      ) === tab
   ).length;
 }
 
@@ -58,7 +61,8 @@ export function AcceptedShiftsBrowseList({
         (application) =>
           getAcceptedShiftTab(
             application.shift.status,
-            application.shift.endTime
+            application.shift.endTime,
+            application.attendance.clockOutAt
           ) === activeTab
       ),
     [visibleApplications, activeTab]

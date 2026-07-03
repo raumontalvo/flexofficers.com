@@ -85,6 +85,26 @@ describe("officer accepted shift data helpers", () => {
     );
   });
 
+  it("treats clocked-out shifts as completed even before the end time", () => {
+    expect(
+      getAcceptedShiftTab(
+        "FILLED",
+        "2099-12-01T00:00:00.000Z",
+        "2026-07-03T20:00:00.000Z"
+      )
+    ).toBe("completed");
+    expect(
+      getAcceptedShiftTab("FILLED", "2099-12-01T00:00:00.000Z", null)
+    ).toBe("upcoming");
+    expect(
+      getAcceptedShiftTab(
+        "CANCELLED",
+        "2099-12-01T00:00:00.000Z",
+        "2026-07-03T20:00:00.000Z"
+      )
+    ).toBe("cancelled");
+  });
+
   it("formats pagination and detects company contact", () => {
     expect(formatAcceptedShiftsPaginationRange(1, 10, 12)).toBe(
       "Showing 1–10 of 12 accepted shifts"

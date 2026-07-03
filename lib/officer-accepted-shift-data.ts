@@ -142,10 +142,17 @@ export const ACCEPTED_SHIFT_TABS: {
 
 export function getAcceptedShiftTab(
   shiftStatus: ShiftStatus,
-  endTime: string
+  endTime: string,
+  clockOutAt?: string | null
 ): AcceptedShiftTab {
   if (shiftStatus === "CANCELLED") {
     return "cancelled";
+  }
+
+  // Once the officer clocks out, the shift is completed for them regardless of
+  // the scheduled end time, so it lands under the Completed tab in My Shifts.
+  if (clockOutAt) {
+    return "completed";
   }
 
   if (shiftStatus === "COMPLETED") {

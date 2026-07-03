@@ -594,7 +594,7 @@ const en: AppCore = {
         browseShiftsDesc: "Explore open assignments.",
         applications: "Applications",
         applicationsDesc: "Track your applications.",
-        acceptedShifts: "Accepted Shifts",
+        acceptedShifts: "My Shifts",
         acceptedShiftsDesc: "View confirmed assignments.",
         upcomingShifts: "Upcoming Shifts",
         upcomingShiftsDesc: "See shifts starting soon.",
@@ -913,7 +913,7 @@ const en: AppCore = {
       subtitle: "Shifts you've applied to.",
     },
     officerAcceptedShifts: {
-      title: "Accepted Shifts",
+      title: "My Shifts",
       subtitle: "Company contact details unlock after acceptance.",
     },
     officerUpcomingShifts: {
@@ -1140,7 +1140,7 @@ const es: AppCore = {
         browseShiftsDesc: "Explora asignaciones abiertas.",
         applications: "Solicitudes",
         applicationsDesc: "Sigue tus solicitudes.",
-        acceptedShifts: "Turnos Aceptados",
+        acceptedShifts: "Mis Turnos",
         acceptedShiftsDesc: "Ver asignaciones confirmadas.",
         upcomingShifts: "Próximos Turnos",
         upcomingShiftsDesc: "Ver turnos que comienzan pronto.",
@@ -1460,7 +1460,7 @@ const es: AppCore = {
       subtitle: "Turnos a los que has solicitado.",
     },
     officerAcceptedShifts: {
-      title: "Turnos Aceptados",
+      title: "Mis Turnos",
       subtitle:
         "Los datos de contacto de la empresa se desbloquean tras la aceptación.",
     },

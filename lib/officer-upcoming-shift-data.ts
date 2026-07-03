@@ -29,22 +29,23 @@ export function isUpcomingFutureShift(
   application: OfficerAcceptedShiftData,
   now = new Date()
 ) {
+  // Clocking out completes the shift for the officer, so it leaves Upcoming
+  // Shifts and moves to My Shifts → Completed.
+  if (application.attendance.clockOutAt) {
+    return false;
+  }
+
+  // Currently on the shift (clocked in, not out) — keep it visible even if the
+  // scheduled end time has already passed.
+  if (application.attendance.clockInAt) {
+    return true;
+  }
+
   if (
     getAcceptedShiftTab(application.shift.status, application.shift.endTime) !==
     "upcoming"
   ) {
-    if (
-      application.attendance.clockInAt &&
-      !application.attendance.clockOutAt
-    ) {
-      return true;
-    }
-
     return false;
-  }
-
-  if (application.attendance.clockInAt && !application.attendance.clockOutAt) {
-    return true;
   }
 
   return new Date(application.shift.endTime) > now;
