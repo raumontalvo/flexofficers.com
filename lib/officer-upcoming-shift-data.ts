@@ -33,10 +33,21 @@ export function isUpcomingFutureShift(
     getAcceptedShiftTab(application.shift.status, application.shift.endTime) !==
     "upcoming"
   ) {
+    if (
+      application.attendance.clockInAt &&
+      !application.attendance.clockOutAt
+    ) {
+      return true;
+    }
+
     return false;
   }
 
-  return new Date(application.shift.startTime) > now;
+  if (application.attendance.clockInAt && !application.attendance.clockOutAt) {
+    return true;
+  }
+
+  return new Date(application.shift.endTime) > now;
 }
 
 export function getDaysUntilStart(startTime: string, now = new Date()) {

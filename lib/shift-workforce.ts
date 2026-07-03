@@ -1,13 +1,31 @@
 import { ApplicationStatus, type InviteStatus } from "@/app/generated/prisma/enums";
+import {
+  getAttendanceStatus,
+  getAttendanceStatusLabel,
+  type AttendanceStatus,
+} from "@/lib/attendance";
 import { getRemainingOpenPositions } from "@/lib/shift-fill-status";
 
 export type ShiftAssignmentSource = "invitation" | "application";
+
+export type ShiftWorkforceAttendance = {
+  applicationId: string;
+  status: AttendanceStatus;
+  statusLabel: string;
+  clockInAt: string | null;
+  clockOutAt: string | null;
+  clockInLatitude: number | null;
+  clockInLongitude: number | null;
+  clockOutLatitude: number | null;
+  clockOutLongitude: number | null;
+};
 
 export type ShiftWorkforceMember = {
   officerId: string;
   fullName: string;
   source: ShiftAssignmentSource;
   detailLabel: string;
+  attendance: ShiftWorkforceAttendance;
 };
 
 export type ShiftPendingInviteMember = {
@@ -28,7 +46,14 @@ type ShiftWorkforceRecord = {
   id: string;
   positionsNeeded: number;
   applications: {
+    id: string;
     status: ApplicationStatus;
+    clockInAt: Date | null;
+    clockOutAt: Date | null;
+    clockInLatitude: number | null;
+    clockInLongitude: number | null;
+    clockOutLatitude: number | null;
+    clockOutLongitude: number | null;
     officer: {
       id: string;
       firstName: string;
@@ -62,6 +87,7 @@ export function serializeShiftWorkforce(
     .filter((application) => application.status === ApplicationStatus.ACCEPTED)
     .map((application) => {
       const viaInvitation = acceptedInvites.has(application.officer.id);
+      const attendanceStatus = getAttendanceStatus(application);
 
       return {
         officerId: application.officer.id,
@@ -70,6 +96,17 @@ export function serializeShiftWorkforce(
         detailLabel: viaInvitation
           ? "Accepted by Invitation"
           : "Accepted by Application",
+        attendance: {
+          applicationId: application.id,
+          status: attendanceStatus,
+          statusLabel: getAttendanceStatusLabel(attendanceStatus),
+          clockInAt: application.clockInAt?.toISOString() ?? null,
+          clockOutAt: application.clockOutAt?.toISOString() ?? null,
+          clockInLatitude: application.clockInLatitude,
+          clockInLongitude: application.clockInLongitude,
+          clockOutLatitude: application.clockOutLatitude,
+          clockOutLongitude: application.clockOutLongitude,
+        },
       };
     });
 

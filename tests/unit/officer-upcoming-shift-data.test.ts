@@ -15,6 +15,14 @@ function createShift(
 ): OfficerAcceptedShiftData {
   return {
     id: "app-1",
+    attendance: {
+      clockInAt: null,
+      clockOutAt: null,
+      clockInLatitude: null,
+      clockInLongitude: null,
+      clockOutLatitude: null,
+      clockOutLongitude: null,
+    },
     shift: {
       id: "shift-1",
       title: "Warehouse Security",
@@ -71,24 +79,29 @@ describe("officer upcoming shift data helpers", () => {
     });
     const pastStart = createShift({
       id: "shift-past",
-      startTime: "2099-05-30T18:00:00.000Z",
-      endTime: "2099-06-02T02:00:00.000Z",
+      startTime: "2099-06-01T06:00:00.000Z",
+      endTime: "2099-06-01T14:00:00.000Z",
+    });
+    const ended = createShift({
+      id: "shift-ended",
+      startTime: "2099-05-20T18:00:00.000Z",
+      endTime: "2099-05-25T02:00:00.000Z",
     });
 
-    const upcoming = [soon, later, pastStart].filter((application) =>
+    const upcoming = [soon, later, pastStart, ended].filter((application) =>
       isUpcomingFutureShift(application, now)
     );
 
-    expect(upcoming).toHaveLength(2);
-    expect(filterUpcomingShifts([soon, later], "next7", now)).toHaveLength(1);
+    expect(upcoming).toHaveLength(3);
+    expect(filterUpcomingShifts([soon, later, pastStart, ended], "next7", now)).toHaveLength(2);
     expect(sortUpcomingShifts([later, soon], "soonest")[0].shift.id).toBe(
       "shift-soon"
     );
 
-    const summary = buildUpcomingShiftSummary([soon, later, pastStart], now);
-    expect(summary.count).toBe(2);
-    expect(summary.expectedEarnings).toBe(320);
-    expect(summary.scheduledHours).toBe(16);
-    expect(summary.nextShiftStartsIn).toBe("Starts in 2 days");
+    const summary = buildUpcomingShiftSummary([soon, later, pastStart, ended], now);
+    expect(summary.count).toBe(3);
+    expect(summary.expectedEarnings).toBe(480);
+    expect(summary.scheduledHours).toBe(24);
+    expect(summary.nextShiftStartsIn).toBe("Starts today");
   });
 });

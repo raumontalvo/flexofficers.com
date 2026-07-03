@@ -9,7 +9,14 @@ describe("shift workforce", () => {
       positionsNeeded: 3,
       applications: [
         {
+          id: "app-1",
           status: ApplicationStatus.ACCEPTED,
+          clockInAt: null,
+          clockOutAt: null,
+          clockInLatitude: null,
+          clockInLongitude: null,
+          clockOutLatitude: null,
+          clockOutLongitude: null,
           officer: {
             id: "officer-1",
             firstName: "Raul",
@@ -17,7 +24,14 @@ describe("shift workforce", () => {
           },
         },
         {
+          id: "app-2",
           status: ApplicationStatus.ACCEPTED,
+          clockInAt: null,
+          clockOutAt: null,
+          clockInLatitude: null,
+          clockInLongitude: null,
+          clockOutLatitude: null,
+          clockOutLongitude: null,
           officer: {
             id: "officer-2",
             firstName: "Michael",
@@ -51,12 +65,34 @@ describe("shift workforce", () => {
         fullName: "Raul Martinez",
         source: "invitation",
         detailLabel: "Accepted by Invitation",
+        attendance: {
+          applicationId: "app-1",
+          status: "NOT_STARTED",
+          statusLabel: "Not Started",
+          clockInAt: null,
+          clockOutAt: null,
+          clockInLatitude: null,
+          clockInLongitude: null,
+          clockOutLatitude: null,
+          clockOutLongitude: null,
+        },
       },
       {
         officerId: "officer-2",
         fullName: "Michael Johnson",
         source: "application",
         detailLabel: "Accepted by Application",
+        attendance: {
+          applicationId: "app-2",
+          status: "NOT_STARTED",
+          statusLabel: "Not Started",
+          clockInAt: null,
+          clockOutAt: null,
+          clockInLatitude: null,
+          clockInLongitude: null,
+          clockOutLatitude: null,
+          clockOutLongitude: null,
+        },
       },
     ]);
     expect(workforce.pendingInvites).toEqual([

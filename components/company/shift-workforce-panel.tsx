@@ -1,8 +1,35 @@
+import {
+  formatAttendanceTime,
+  formatGoogleMapsUrl,
+} from "@/lib/attendance";
 import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
 
 type ShiftWorkforcePanelProps = {
   workforce: SerializedShiftWorkforce;
 };
+
+function AttendanceLocationLink({
+  latitude,
+  longitude,
+}: {
+  latitude: number | null;
+  longitude: number | null;
+}) {
+  if (latitude === null || longitude === null) {
+    return <span className="text-fo-text-muted">—</span>;
+  }
+
+  return (
+    <a
+      href={formatGoogleMapsUrl(latitude, longitude)}
+      target="_blank"
+      rel="noreferrer"
+      className="text-fo-primary-bright hover:underline"
+    >
+      View Map
+    </a>
+  );
+}
 
 export function ShiftWorkforcePanel({ workforce }: ShiftWorkforcePanelProps) {
   return (
@@ -72,6 +99,76 @@ export function ShiftWorkforcePanel({ workforce }: ShiftWorkforcePanelProps) {
           </p>
         ) : null}
       </div>
+
+      {workforce.acceptedOfficers.length > 0 ? (
+        <div className="md:col-span-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-fo-text-subtle">
+            Attendance
+          </p>
+          <ul className="mt-2 space-y-3">
+            {workforce.acceptedOfficers.map((officer) => (
+              <li
+                key={`attendance-${officer.officerId}`}
+                className="rounded-xl border border-white/10 bg-slate-900/60 p-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-fo-text">
+                    {officer.fullName}
+                  </p>
+                  <span
+                    className={
+                      officer.attendance.status === "COMPLETED"
+                        ? "rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-200"
+                        : officer.attendance.status === "CLOCKED_IN"
+                          ? "rounded-full border border-green-500/30 bg-green-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-green-200"
+                          : "rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted"
+                    }
+                  >
+                    {officer.attendance.statusLabel}
+                  </span>
+                </div>
+
+                <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+                  <div>
+                    <dt className="text-fo-text-subtle">Clock In</dt>
+                    <dd className="mt-0.5 font-medium text-fo-text">
+                      {officer.attendance.clockInAt
+                        ? formatAttendanceTime(officer.attendance.clockInAt)
+                        : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-fo-text-subtle">Clock Out</dt>
+                    <dd className="mt-0.5 font-medium text-fo-text">
+                      {officer.attendance.clockOutAt
+                        ? formatAttendanceTime(officer.attendance.clockOutAt)
+                        : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-fo-text-subtle">Clock In Location</dt>
+                    <dd className="mt-0.5">
+                      <AttendanceLocationLink
+                        latitude={officer.attendance.clockInLatitude}
+                        longitude={officer.attendance.clockInLongitude}
+                      />
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-fo-text-subtle">Clock Out Location</dt>
+                    <dd className="mt-0.5">
+                      <AttendanceLocationLink
+                        latitude={officer.attendance.clockOutLatitude}
+                        longitude={officer.attendance.clockOutLongitude}
+                      />
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

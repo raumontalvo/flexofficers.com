@@ -48,7 +48,14 @@ export default async function CompanyShiftsPage() {
       recurringScheduleId: true,
       applications: {
         select: {
+          id: true,
           status: true,
+          clockInAt: true,
+          clockOutAt: true,
+          clockInLatitude: true,
+          clockInLongitude: true,
+          clockOutLatitude: true,
+          clockOutLongitude: true,
           officer: {
             select: {
               id: true,

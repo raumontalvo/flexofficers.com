@@ -1,6 +1,7 @@
 "use client";
 
 import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
+import { ShiftClockActions } from "@/components/attendance/shift-clock-actions";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { StatusBadge, ProfileAvatar, buttonClassName } from "@/components/ui";
@@ -22,6 +23,7 @@ import {
   formatStartsInLabel,
   translateShiftFormLabel,
 } from "@/lib/i18n/ui-labels";
+import { getAttendanceStatus } from "@/lib/attendance";
 
 const urgencyToneClasses = {
   urgent: "border-red-500/40 bg-red-500/10 text-red-200",
@@ -87,6 +89,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
   const urgencyLabel = formatUrgencyBadgeLabel(formatStartsInLabel(t, daysUntilStart));
   const urgencyTone = getUpcomingUrgencyTone(daysUntilStart);
   const contactName = company.contactName?.trim() || company.companyName;
+  const attendanceStatus = getAttendanceStatus(application.attendance);
 
   return (
     <>
@@ -107,6 +110,22 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
             >
               {card.confirmed}
             </StatusBadge>
+            {attendanceStatus === "CLOCKED_IN" ? (
+              <StatusBadge
+                variant="success"
+                className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
+              >
+                CLOCKED IN
+              </StatusBadge>
+            ) : null}
+            {attendanceStatus === "COMPLETED" ? (
+              <StatusBadge
+                variant="rejected"
+                className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
+              >
+                COMPLETED
+              </StatusBadge>
+            ) : null}
           </div>
 
           <div className="space-y-0.5">
@@ -148,6 +167,8 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
             ) : null}
           </div>
 
+          <ShiftClockActions application={application} />
+
           <ShiftDetailLink
             shiftId={shift.id}
             className={buttonClassName({
@@ -180,6 +201,22 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
               >
                 {card.confirmed}
               </StatusBadge>
+              {attendanceStatus === "CLOCKED_IN" ? (
+                <StatusBadge
+                  variant="success"
+                  className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
+                >
+                  CLOCKED IN
+                </StatusBadge>
+              ) : null}
+              {attendanceStatus === "COMPLETED" ? (
+                <StatusBadge
+                  variant="rejected"
+                  className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
+                >
+                  COMPLETED
+                </StatusBadge>
+              ) : null}
             </div>
 
             <div className="space-y-1.5">
@@ -266,6 +303,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
             </div>
 
             <div className="flex flex-col gap-2">
+              <ShiftClockActions application={application} />
               <ShiftDetailLink
                 shiftId={shift.id}
                 className={buttonClassName({

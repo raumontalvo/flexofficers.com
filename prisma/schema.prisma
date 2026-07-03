@@ -255,6 +255,12 @@ model Application {
   appliedAt                  DateTime          @default(now())
   shift24HourReminderSentAt  DateTime?
   shift2HourReminderSentAt   DateTime?
+  clockInAt                  DateTime?
+  clockOutAt                 DateTime?
+  clockInLatitude            Float?
+  clockInLongitude           Float?
+  clockOutLatitude           Float?
+  clockOutLongitude          Float?
 
   shift   Shift   @relation(fields: [shiftId], references: [id], onDelete: Cascade)
   officer Officer @relation(fields: [officerId], references: [id], onDelete: Cascade)

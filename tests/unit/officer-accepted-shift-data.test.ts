@@ -11,6 +11,12 @@ describe("officer accepted shift data helpers", () => {
   it("uses an explicit application select without reminder tracking columns", () => {
     expect(officerAcceptedShiftListSelect).toEqual({
       id: true,
+      clockInAt: true,
+      clockOutAt: true,
+      clockInLatitude: true,
+      clockInLongitude: true,
+      clockOutLatitude: true,
+      clockOutLongitude: true,
       shift: expect.any(Object),
     });
     expect("shift24HourReminderSentAt" in officerAcceptedShiftListSelect).toBe(
@@ -27,6 +33,12 @@ describe("officer accepted shift data helpers", () => {
   it("maps accepted shift applications for officer pages", () => {
     const mapped = mapOfficerAcceptedShiftApplication({
       id: "app-1",
+      clockInAt: null,
+      clockOutAt: null,
+      clockInLatitude: null,
+      clockInLongitude: null,
+      clockOutLatitude: null,
+      clockOutLongitude: null,
       shift: {
         id: "shift-1",
         title: "Warehouse Security",

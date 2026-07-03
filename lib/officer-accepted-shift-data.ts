@@ -5,6 +5,14 @@ export type AcceptedShiftTab = "upcoming" | "completed" | "cancelled";
 
 export type OfficerAcceptedShiftData = {
   id: string;
+  attendance: {
+    clockInAt: string | null;
+    clockOutAt: string | null;
+    clockInLatitude: number | null;
+    clockInLongitude: number | null;
+    clockOutLatitude: number | null;
+    clockOutLongitude: number | null;
+  };
   shift: {
     id: string;
     title: string;
@@ -32,6 +40,12 @@ export type OfficerAcceptedShiftData = {
 /** Explicit select for officer accepted/upcoming shift lists. */
 export const officerAcceptedShiftListSelect = {
   id: true,
+  clockInAt: true,
+  clockOutAt: true,
+  clockInLatitude: true,
+  clockInLongitude: true,
+  clockOutLatitude: true,
+  clockOutLongitude: true,
   shift: {
     select: {
       id: true,
@@ -81,6 +95,14 @@ export function mapOfficerAcceptedShiftApplication(
 ): OfficerAcceptedShiftData {
   return {
     id: application.id,
+    attendance: {
+      clockInAt: application.clockInAt?.toISOString() ?? null,
+      clockOutAt: application.clockOutAt?.toISOString() ?? null,
+      clockInLatitude: application.clockInLatitude,
+      clockInLongitude: application.clockInLongitude,
+      clockOutLatitude: application.clockOutLatitude,
+      clockOutLongitude: application.clockOutLongitude,
+    },
     shift: {
       id: application.shift.id,
       title: application.shift.title,

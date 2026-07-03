@@ -18,6 +18,8 @@ export type NotificationEmailType =
   | "shift_canceled"
   | "shift_reminder_24h"
   | "shift_reminder_2h"
+  | "officer_clocked_in"
+  | "officer_clocked_out"
   | "new_lead_application"
   | "lead_application_accepted"
   | "lead_application_rejected";
@@ -35,6 +37,8 @@ export const NOTIFICATION_EMAIL_SUBJECTS: Record<NotificationEmailType, string> 
   shift_canceled: "Shift canceled",
   shift_reminder_24h: "Upcoming shift reminder",
   shift_reminder_2h: "Shift starts soon",
+  officer_clocked_in: "Officer clocked in",
+  officer_clocked_out: "Officer clocked out",
   new_lead_application: "New lead application",
   lead_application_accepted: "Lead application accepted",
   lead_application_rejected: "Lead application rejected",
@@ -53,6 +57,8 @@ const NOTIFICATION_LINK_PATHS: Record<NotificationEmailType, string> = {
   shift_canceled: "/officer/upcoming-shifts",
   shift_reminder_24h: "/officer/accepted-shifts",
   shift_reminder_2h: "/officer/accepted-shifts",
+  officer_clocked_in: "/company/shifts",
+  officer_clocked_out: "/company/shifts",
   new_lead_application: "/client/leads",
   lead_application_accepted: "/company/lead-applications",
   lead_application_rejected: "/company/lead-applications",

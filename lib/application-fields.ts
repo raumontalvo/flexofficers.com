@@ -86,8 +86,18 @@ export const officerBrowseShiftSelect = {
   },
 } satisfies Prisma.ShiftSelect;
 
+export const applicationAttendanceSelect = {
+  clockInAt: true,
+  clockOutAt: true,
+  clockInLatitude: true,
+  clockInLongitude: true,
+  clockOutLatitude: true,
+  clockOutLongitude: true,
+} satisfies Prisma.ApplicationSelect;
+
 export const companyWorkforceApplicationSelect = {
   id: true,
+  ...applicationAttendanceSelect,
   shift: {
     select: companyWorkforceShiftSelect,
   },

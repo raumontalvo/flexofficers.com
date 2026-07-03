@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "Application" ADD COLUMN "clockInAt" TIMESTAMP(3),
+ADD COLUMN "clockOutAt" TIMESTAMP(3),
+ADD COLUMN "clockInLatitude" DOUBLE PRECISION,
+ADD COLUMN "clockInLongitude" DOUBLE PRECISION,
+ADD COLUMN "clockOutLatitude" DOUBLE PRECISION,
+ADD COLUMN "clockOutLongitude" DOUBLE PRECISION;
