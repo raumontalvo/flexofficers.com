@@ -1,9 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { US_STATES } from "@/lib/license-options";
+import { formatSecurityLeadFieldErrors } from "@/lib/security-lead-validation";
 import { buttonClassName, Card } from "@/components/ui";
+
+type LeadCreateResponse = {
+  error?: string;
+  details?: { field: string; message: string }[];
+  url?: string;
+};
+
+function formatLeadCreateError(data: LeadCreateResponse) {
+  if (Array.isArray(data.details) && data.details.length > 0) {
+    return formatSecurityLeadFieldErrors(data.details).join(" ");
+  }
+
+  return data.error || "Failed to create lead.";
+}
 
 const SECURITY_LEAD_PRICE_CENTS = 500;
 
@@ -11,7 +25,6 @@ const fieldClassName =
   "min-h-11 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2.5 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20";
 
 export function CreateSecurityLeadForm() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,21 +43,21 @@ export function CreateSecurityLeadForm() {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as LeadCreateResponse;
 
       if (!response.ok) {
-        setError(data.error ?? "Failed to create lead.");
+        setError(formatLeadCreateError(data));
         setIsSubmitting(false);
         return;
       }
 
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+      if (data.url) {
+        window.location.href = data.url;
         return;
       }
 
-      router.push("/client/leads");
-      router.refresh();
+      setError("Missing Stripe checkout URL");
+      setIsSubmitting(false);
     } catch {
       setError("Failed to create lead.");
       setIsSubmitting(false);

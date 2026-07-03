@@ -211,6 +211,7 @@ export type LandingTranslations = {
       deleteAccount: string;
       officerDeleteDescription: string;
       companyDeleteDescription: string;
+      adminDeleteDescription: string;
       deleteButton: string;
     };
     signOut: {
@@ -643,6 +644,8 @@ const en: LandingContent = {
         "This action will permanently delete your account and all associated data, including your profile and applications. This action cannot be undone.",
       companyDeleteDescription:
         "This action will permanently delete your account and all associated data, including your company profile, shifts, and applicant records. This action cannot be undone.",
+      adminDeleteDescription:
+        "This action will permanently delete your admin account and revoke your access to the FlexOfficers admin console. This action cannot be undone.",
       deleteButton: "Delete Account",
     },
     signOut: {
@@ -1076,6 +1079,8 @@ const es: LandingContent = {
         "Esta acción eliminará permanentemente tu cuenta y todos los datos asociados, incluyendo tu perfil y solicitudes. Esta acción no se puede deshacer.",
       companyDeleteDescription:
         "Esta acción eliminará permanentemente tu cuenta y todos los datos asociados, incluyendo el perfil de tu empresa, turnos y registros de solicitantes. Esta acción no se puede deshacer.",
+      adminDeleteDescription:
+        "Esta acción eliminará permanentemente tu cuenta de administrador y revocará tu acceso a la consola de administración de FlexOfficers. Esta acción no se puede deshacer.",
       deleteButton: "Eliminar Cuenta",
     },
     signOut: {

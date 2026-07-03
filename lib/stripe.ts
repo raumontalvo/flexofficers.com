@@ -27,8 +27,25 @@ export function getStripeWebhookSecret() {
   return readEnv(process.env.STRIPE_WEBHOOK_SECRET);
 }
 
+function readAppUrlEnv() {
+  return readEnv(process.env.NEXT_PUBLIC_APP_URL) ?? readEnv(process.env.APP_URL);
+}
+
 export function getAppUrl() {
-  return readEnv(process.env.NEXT_PUBLIC_APP_URL) || "http://localhost:3000";
+  const configuredUrl = readAppUrlEnv();
+
+  if (process.env.NODE_ENV === "development") {
+    if (
+      configuredUrl &&
+      (configuredUrl.includes("localhost") || configuredUrl.includes("127.0.0.1"))
+    ) {
+      return configuredUrl.replace(/\/$/, "");
+    }
+
+    return "http://localhost:3000";
+  }
+
+  return (configuredUrl ?? "http://localhost:3000").replace(/\/$/, "");
 }
 
 type StripeEnvInput = {
@@ -71,10 +88,22 @@ export function getStripeClient() {
   }
 
   if (!stripeClient) {
+    console.log("Stripe secret prefix:", process.env.STRIPE_SECRET_KEY?.slice(0, 20));
+    console.log("Price ID:", process.env.STRIPE_SECURITY_LEAD_PRICE_ID);
     stripeClient = new Stripe(secretKey);
+    void logStripeAccountDebug(stripeClient);
   }
 
   return stripeClient;
+}
+
+export async function logStripeAccountDebug(stripe: Stripe) {
+  try {
+    const account = await stripe.accounts.retrieve();
+    console.log("Stripe Account ID:", account.id);
+  } catch (error) {
+    console.error("Stripe account retrieve failed:", error);
+  }
 }
 
 export function getRequestOrigin(request: Request) {

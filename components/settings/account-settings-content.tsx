@@ -81,7 +81,7 @@ function SignOutRow({
 }
 
 type AccountSettingsContentProps = {
-  role: "officer" | "company";
+  role: "officer" | "company" | "admin";
 };
 
 export function AccountSettingsContent({ role }: AccountSettingsContentProps) {
@@ -100,7 +100,9 @@ export function AccountSettingsContent({ role }: AccountSettingsContentProps) {
   const deleteDescription =
     role === "officer"
       ? settings.danger.officerDeleteDescription
-      : settings.danger.companyDeleteDescription;
+      : role === "admin"
+        ? settings.danger.adminDeleteDescription
+        : settings.danger.companyDeleteDescription;
 
   const email =
     user?.primaryEmailAddress?.emailAddress ??

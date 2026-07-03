@@ -5,6 +5,7 @@ import {
   getAppUrl,
   getStripeClient,
   getStripeSecurityLeadPriceId,
+  logStripeAccountDebug,
 } from "@/lib/stripe";
 
 export function isStripeLeadPaymentReady() {
@@ -22,6 +23,8 @@ export async function createSecurityLeadCheckoutSession(input: {
   if (!stripe) {
     return { error: "Stripe is not configured." as const };
   }
+
+  await logStripeAccountDebug(stripe);
 
   const priceId = getStripeSecurityLeadPriceId();
 

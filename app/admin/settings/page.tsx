@@ -1,10 +1,7 @@
-import { AdminPlaceholderPage } from "@/components/admin/admin-placeholder-page";
+import { AdminSettingsPageContent } from "@/components/admin/admin-settings-page-content";
+
+export const dynamic = "force-dynamic";
 
 export default function AdminSettingsPage() {
-  return (
-    <AdminPlaceholderPage
-      title="Settings"
-      description="Platform configuration and admin preferences will live here."
-    />
-  );
+  return <AdminSettingsPageContent />;
 }

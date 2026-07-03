@@ -21,6 +21,31 @@ export type FieldError = {
   message: string;
 };
 
+const SECURITY_LEAD_FIELD_LABELS: Record<string, string> = {
+  contactName: "Contact Name",
+  companyName: "Company Name",
+  email: "Email",
+  phone: "Phone",
+  serviceNeeded: "Service Needed",
+  city: "City",
+  state: "State",
+  address: "Address",
+  dateNeeded: "Date Needed",
+  startTime: "Start Time",
+  endTime: "End Time",
+  officersNeeded: "Officers Needed",
+  budgetOffer: "Budget Offer",
+  description: "Description",
+  urgency: "Urgency",
+};
+
+export function formatSecurityLeadFieldErrors(errors: FieldError[]) {
+  return errors.map((error) => {
+    const label = SECURITY_LEAD_FIELD_LABELS[error.field] ?? error.field;
+    return `${label}: ${error.message}`;
+  });
+}
+
 export type ParsedSecurityLead = {
   contactName: string;
   companyName: string | null;

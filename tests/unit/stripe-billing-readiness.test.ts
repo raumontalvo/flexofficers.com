@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  getAppUrl,
   getStripeBillingReadiness,
   isStripeBillingReady,
   isStripeConfigured,
@@ -52,5 +53,54 @@ describe("stripe billing readiness", () => {
         priceId: "price_123",
       }).billingReady
     ).toBe(false);
+  });
+});
+
+describe("getAppUrl", () => {
+  const originalEnv = process.env;
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("defaults to localhost during development", () => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: "development",
+      NEXT_PUBLIC_APP_URL: "https://flexofficers.com",
+    };
+
+    expect(getAppUrl()).toBe("http://localhost:3000");
+  });
+
+  it("uses localhost env override during development", () => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: "development",
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000",
+    };
+
+    expect(getAppUrl()).toBe("http://localhost:3000");
+  });
+
+  it("uses production app url outside development", () => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: "production",
+      NEXT_PUBLIC_APP_URL: "https://flexofficers.com",
+    };
+
+    expect(getAppUrl()).toBe("https://flexofficers.com");
+  });
+
+  it("falls back to APP_URL when NEXT_PUBLIC_APP_URL is missing", () => {
+    process.env = {
+      ...originalEnv,
+      NODE_ENV: "production",
+      NEXT_PUBLIC_APP_URL: undefined,
+      APP_URL: "https://app.flexofficers.com",
+    };
+
+    expect(getAppUrl()).toBe("https://app.flexofficers.com");
   });
 });
