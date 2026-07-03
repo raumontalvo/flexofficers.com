@@ -17,7 +17,7 @@ export type CompanyShiftRecord = {
   endTime: Date;
   status: ShiftStatus;
   positionsNeeded: number;
-  applications: { status: ApplicationStatus }[];
+  applications: { status: ApplicationStatus; clockOutAt?: Date | null }[];
 };
 
 export type CompanyApplicationRecord = {
@@ -159,6 +159,27 @@ export function isActiveCompanyShiftStatus(status: ShiftStatus) {
     status === ShiftStatus.OPEN ||
     status === ShiftStatus.INVITED ||
     status === ShiftStatus.PARTIALLY_FILLED
+  );
+}
+
+/**
+ * A shift is considered completed once every accepted officer has clocked out.
+ * This is derived from attendance (clockOutAt) rather than a stored status so it
+ * reflects officer clock-out immediately and preserves completed shift history.
+ */
+export function isShiftAttendanceCompleted(
+  shift: Pick<CompanyShiftRecord, "applications">
+) {
+  const acceptedApplications = shift.applications.filter(
+    (application) => application.status === ApplicationStatus.ACCEPTED
+  );
+
+  if (acceptedApplications.length === 0) {
+    return false;
+  }
+
+  return acceptedApplications.every((application) =>
+    Boolean(application.clockOutAt)
   );
 }
 

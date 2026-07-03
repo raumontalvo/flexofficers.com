@@ -134,7 +134,13 @@ export type UiTranslations = {
       results: { oneOpenShift: string; manyOpenShifts: string };
     };
     companyShifts: {
-      tabs: { all: string; open: string; filled: string; cancelled: string };
+      tabs: {
+        all: string;
+        open: string;
+        filled: string;
+        completed: string;
+        cancelled: string;
+      };
       searchPlaceholder: string;
       searchAria: string;
       empty: { none: string; noneDescription: string; noMatch: string };
@@ -668,7 +674,13 @@ export const uiEn: UiTranslations = {
       results: { oneOpenShift: "1 Open Shift", manyOpenShifts: "{count} Open Shifts" },
     },
     companyShifts: {
-      tabs: { all: "All Shifts", open: "Open", filled: "Filled", cancelled: "Cancelled" },
+      tabs: {
+        all: "All Shifts",
+        open: "Open",
+        filled: "Filled",
+        completed: "Completed",
+        cancelled: "Cancelled",
+      },
       searchPlaceholder: "Search shifts...",
       searchAria: "Search shifts",
       empty: {
@@ -1276,7 +1288,13 @@ export const uiEs: UiTranslations = {
       results: { oneOpenShift: "1 Turno Abierto", manyOpenShifts: "{count} Turnos Abiertos" },
     },
     companyShifts: {
-      tabs: { all: "Todos los Turnos", open: "Abiertos", filled: "Cubiertos", cancelled: "Cancelados" },
+      tabs: {
+        all: "Todos los Turnos",
+        open: "Abiertos",
+        filled: "Cubiertos",
+        completed: "Completados",
+        cancelled: "Cancelados",
+      },
       searchPlaceholder: "Buscar turnos...",
       searchAria: "Buscar turnos",
       empty: {

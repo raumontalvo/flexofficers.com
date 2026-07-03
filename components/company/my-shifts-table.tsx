@@ -46,6 +46,10 @@ const MOBILE_TAB_STYLES: Record<
     selected: "border-blue-500/45 bg-blue-500/20 text-blue-100",
     unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
   },
+  completed: {
+    selected: "border-sky-500/45 bg-sky-500/20 text-sky-100",
+    unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
+  },
   cancelled: {
     selected: "border-red-500/45 bg-red-500/20 text-red-100",
     unselected: "border-white/10 bg-white/[0.03] text-fo-text-muted",
@@ -276,7 +280,7 @@ export function MyShiftsTable({
     <>
       <section className="mt-4 space-y-4 pb-24 md:hidden">
         <div className="fo-glass-card space-y-3 rounded-2xl border border-white/10 p-3.5 shadow-[0_12px_40px_-16px_rgba(0,0,0,0.65)]">
-          <div className="grid w-full min-w-0 grid-cols-4 gap-1.5">
+          <div className="grid w-full min-w-0 grid-cols-5 gap-1.5">
               {tabs.map((tab) => {
                 const count = tabCounts[tab.id];
                 const isActive = activeTab === tab.id;

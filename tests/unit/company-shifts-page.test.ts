@@ -110,8 +110,97 @@ describe("company shifts page helpers", () => {
       all: 3,
       open: 1,
       filled: 1,
+      completed: 0,
       cancelled: 1,
     });
+  });
+
+  it("marks a shift completed once every accepted officer has clocked out", () => {
+    const row = serializeCompanyShiftRow({
+      ...baseShift,
+      id: "shift-completed",
+      status: ShiftStatus.FILLED,
+      positionsNeeded: 2,
+      applications: [
+        {
+          status: ApplicationStatus.ACCEPTED,
+          clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
+        },
+        {
+          status: ApplicationStatus.ACCEPTED,
+          clockOutAt: new Date("2026-07-01T17:10:00.000Z"),
+        },
+        { status: ApplicationStatus.PENDING },
+      ],
+    });
+
+    expect(row.status).toBe(ShiftStatus.COMPLETED);
+  });
+
+  it("keeps a shift filled while any accepted officer has not clocked out", () => {
+    const row = serializeCompanyShiftRow({
+      ...baseShift,
+      id: "shift-partial-clockout",
+      status: ShiftStatus.FILLED,
+      positionsNeeded: 2,
+      applications: [
+        {
+          status: ApplicationStatus.ACCEPTED,
+          clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
+        },
+        { status: ApplicationStatus.ACCEPTED, clockOutAt: null },
+      ],
+    });
+
+    expect(row.status).toBe(ShiftStatus.FILLED);
+  });
+
+  it("does not mark cancelled shifts as completed even after clock-out", () => {
+    const row = serializeCompanyShiftRow({
+      ...baseShift,
+      id: "shift-cancelled-clockout",
+      status: ShiftStatus.CANCELLED,
+      applications: [
+        {
+          status: ApplicationStatus.ACCEPTED,
+          clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
+        },
+      ],
+    });
+
+    expect(row.status).toBe(ShiftStatus.CANCELLED);
+  });
+
+  it("separates completed shifts from the filled tab", () => {
+    const rows = [
+      serializeCompanyShiftRow({
+        ...baseShift,
+        id: "filled-shift",
+        status: ShiftStatus.FILLED,
+        positionsNeeded: 1,
+        applications: [{ status: ApplicationStatus.ACCEPTED }],
+      }),
+      serializeCompanyShiftRow({
+        ...baseShift,
+        id: "completed-shift",
+        status: ShiftStatus.FILLED,
+        positionsNeeded: 1,
+        applications: [
+          {
+            status: ApplicationStatus.ACCEPTED,
+            clockOutAt: new Date("2026-07-01T17:05:00.000Z"),
+          },
+        ],
+      }),
+    ];
+
+    expect(filterCompanyShiftsByTab(rows, "filled")).toHaveLength(1);
+    expect(filterCompanyShiftsByTab(rows, "filled")[0].id).toBe("filled-shift");
+    expect(filterCompanyShiftsByTab(rows, "completed")).toHaveLength(1);
+    expect(filterCompanyShiftsByTab(rows, "completed")[0].id).toBe(
+      "completed-shift"
+    );
+    expect(filterCompanyShiftsByTab(rows, "all")).toHaveLength(2);
   });
 
   it("filters and searches shifts", () => {

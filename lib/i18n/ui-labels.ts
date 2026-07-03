@@ -291,6 +291,7 @@ export function getCompanyShiftsTabs(t: AppTranslations) {
     { id: "all" as CompanyShiftsPageTab, label: tabs.all },
     { id: "open" as const, label: tabs.open },
     { id: "filled" as const, label: tabs.filled },
+    { id: "completed" as const, label: tabs.completed },
     { id: "cancelled" as const, label: tabs.cancelled },
   ];
 }

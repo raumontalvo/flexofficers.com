@@ -4,11 +4,17 @@ import {
   getShiftApplicantCount,
   getShiftFilledCount,
   isActiveCompanyShiftStatus,
+  isShiftAttendanceCompleted,
 } from "@/lib/company-dashboard-data";
 import { formatShiftCityState } from "@/lib/format-shift";
 import { resolveShiftDisplayStatus } from "@/lib/shift-fill-status";
 
-export type CompanyShiftsPageTab = "all" | "open" | "filled" | "cancelled";
+export type CompanyShiftsPageTab =
+  | "all"
+  | "open"
+  | "filled"
+  | "completed"
+  | "cancelled";
 
 export const COMPANY_SHIFTS_PAGE_SIZE = 7;
 
@@ -89,6 +95,21 @@ export function serializeCompanyShiftRow(
   const { locationLabel, locationSubtext } = getShiftLocationParts(shift);
   const filledCount = getShiftFilledCount(shift);
 
+  const displayStatus = resolveShiftDisplayStatus({
+    storedStatus: shift.status,
+    acceptedCount: filledCount,
+    positionsNeeded: shift.positionsNeeded,
+  });
+
+  // Once every accepted officer has clocked out, surface the shift as completed
+  // (unless it was cancelled or already marked completed upstream).
+  const status =
+    displayStatus !== ShiftStatus.CANCELLED &&
+    displayStatus !== ShiftStatus.COMPLETED &&
+    isShiftAttendanceCompleted(shift)
+      ? ShiftStatus.COMPLETED
+      : displayStatus;
+
   return {
     id: shift.id,
     title: shift.title,
@@ -100,11 +121,7 @@ export function serializeCompanyShiftRow(
     startTime: shift.startTime.toISOString(),
     endTime: shift.endTime.toISOString(),
     hourlyRate: shift.hourlyRate.toString(),
-    status: resolveShiftDisplayStatus({
-      storedStatus: shift.status,
-      acceptedCount: filledCount,
-      positionsNeeded: shift.positionsNeeded,
-    }),
+    status,
     positionsNeeded: shift.positionsNeeded,
     filledCount,
     applicantCount: getShiftApplicantCount(shift),
@@ -118,6 +135,9 @@ export function getCompanyShiftsTabCounts(shifts: SerializedCompanyShiftRow[]) {
     open: shifts.filter((shift) => isActiveCompanyShiftStatus(shift.status))
       .length,
     filled: shifts.filter((shift) => shift.status === ShiftStatus.FILLED).length,
+    completed: shifts.filter(
+      (shift) => shift.status === ShiftStatus.COMPLETED
+    ).length,
     cancelled: shifts.filter(
       (shift) => shift.status === ShiftStatus.CANCELLED
     ).length,
@@ -133,6 +153,8 @@ export function filterCompanyShiftsByTab(
       return shifts.filter((shift) => isActiveCompanyShiftStatus(shift.status));
     case "filled":
       return shifts.filter((shift) => shift.status === ShiftStatus.FILLED);
+    case "completed":
+      return shifts.filter((shift) => shift.status === ShiftStatus.COMPLETED);
     case "cancelled":
       return shifts.filter((shift) => shift.status === ShiftStatus.CANCELLED);
     case "all":
