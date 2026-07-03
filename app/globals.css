@@ -529,21 +529,3 @@ html {
     min-height: 3rem;
   }
 }
-
-/* Officer profile license expiration — WebKit date inputs ignore w-full without min-width: 0 */
-.officer-license-expiration-input {
-  box-sizing: border-box;
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}
-
-.officer-license-expiration-input::-webkit-date-and-time-value {
-  min-width: 0;
-  text-align: left;
-}
-
-.officer-license-expiration-input::-webkit-calendar-picker-indicator {
-  margin-left: 0;
-}

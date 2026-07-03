@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { RequirementsMultiSelectPicker } from "@/components/shifts/requirements-multi-select-picker";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
@@ -81,10 +81,75 @@ const fieldClassName =
 const compactFieldClassName =
   "min-h-8 w-full rounded-lg border border-fo-border/80 bg-fo-bg-elevated px-2 py-1.5 text-xs text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/30 sm:text-sm";
 
-const licenseExpirationInputClassName = cn(
-  compactFieldClassName,
-  "officer-license-expiration-input"
-);
+function LicenseExpirationInput({
+  value,
+  onChange,
+  ariaLabel,
+  placeholder,
+}: {
+  value: string;
+  onChange: (nextValue: string) => void;
+  ariaLabel: string;
+  placeholder: string;
+}) {
+  const pickerRef = useRef<HTMLInputElement>(null);
+
+  function openDatePicker() {
+    const picker = pickerRef.current;
+    if (!picker) {
+      return;
+    }
+
+    picker.focus();
+
+    if (typeof picker.showPicker === "function") {
+      try {
+        picker.showPicker();
+        return;
+      } catch {
+        // showPicker can throw if not triggered by a user gesture in some browsers.
+      }
+    }
+
+    picker.click();
+  }
+
+  return (
+    <>
+      <input
+        ref={pickerRef}
+        type="date"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
+      <input
+        type="text"
+        aria-label={ariaLabel}
+        readOnly
+        value={value ? formatLicenseExpiration(value) : ""}
+        placeholder={placeholder}
+        className={cn(compactFieldClassName, "sm:hidden")}
+        onClick={openDatePicker}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openDatePicker();
+          }
+        }}
+      />
+      <input
+        type="date"
+        aria-label={ariaLabel}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className={cn(compactFieldClassName, "hidden sm:block")}
+      />
+    </>
+  );
+}
 
 function createEmptyLicense(): LicenseFormEntry {
   return {
@@ -455,7 +520,7 @@ export default function OfficerProfileForm({
                     />
                   </div>
 
-                  <div className="min-w-0 w-full space-y-1">
+                  <div className="space-y-1">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
                       {pw.expiration}
                     </p>
@@ -464,16 +529,15 @@ export default function OfficerProfileForm({
                         {formatLicenseExpiration(license.expirationDate)}
                       </p>
                     ) : null}
-                    <input
-                      aria-label={pw.expiration}
-                      type="date"
+                    <LicenseExpirationInput
+                      ariaLabel={pw.expiration}
+                      placeholder="MM/DD/YYYY"
                       value={license.expirationDate}
-                      onChange={(e) =>
+                      onChange={(expirationDate) =>
                         updateLicense(license.clientId, {
-                          expirationDate: e.target.value,
+                          expirationDate,
                         })
                       }
-                      className={licenseExpirationInputClassName}
                     />
                   </div>
 
