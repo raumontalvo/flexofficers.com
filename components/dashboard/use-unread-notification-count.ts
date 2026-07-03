@@ -1,54 +1,83 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { NOTIFICATIONS_CHANGED_EVENT } from "@/lib/notifications-changed";
 
-export function useUnreadNotificationCount() {
-  const [count, setCount] = useState(0);
+const unreadCountListeners = new Set<() => void>();
+let unreadCountSnapshot = 0;
 
-  const refresh = useCallback(async () => {
-    try {
-      const response = await fetch("/api/notifications/unread-count", {
-        cache: "no-store",
-      });
+function subscribeUnreadCount(onStoreChange: () => void) {
+  unreadCountListeners.add(onStoreChange);
+  return () => {
+    unreadCountListeners.delete(onStoreChange);
+  };
+}
 
-      if (!response.ok) {
-        return;
-      }
+function getUnreadCountSnapshot() {
+  return unreadCountSnapshot;
+}
 
-      const data = (await response.json()) as { count?: number };
-      setCount(typeof data.count === "number" ? data.count : 0);
-    } catch {
-      // Ignore transient network errors.
+function getUnreadCountServerSnapshot() {
+  return 0;
+}
+
+function notifyUnreadCountListeners() {
+  unreadCountListeners.forEach((listener) => listener());
+}
+
+async function refreshUnreadCount() {
+  try {
+    const response = await fetch("/api/notifications/unread-count", {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return;
     }
-  }, []);
+
+    const data = (await response.json()) as { count?: number };
+    unreadCountSnapshot = typeof data.count === "number" ? data.count : 0;
+    notifyUnreadCountListeners();
+  } catch {
+    // Ignore transient network errors.
+  }
+}
+
+export function useUnreadNotificationCount() {
+  const count = useSyncExternalStore(
+    subscribeUnreadCount,
+    getUnreadCountSnapshot,
+    getUnreadCountServerSnapshot
+  );
 
   useEffect(() => {
-    refresh();
+    void refreshUnreadCount();
 
     function handleFocus() {
-      refresh();
+      void refreshUnreadCount();
     }
 
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
-        refresh();
+        void refreshUnreadCount();
       }
     }
 
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, refresh);
+    window.addEventListener(NOTIFICATIONS_CHANGED_EVENT, handleFocus);
 
-    const interval = window.setInterval(refresh, 60_000);
+    const interval = window.setInterval(() => {
+      void refreshUnreadCount();
+    }, 60_000);
 
     return () => {
       window.removeEventListener("focus", handleFocus);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, refresh);
+      window.removeEventListener(NOTIFICATIONS_CHANGED_EVENT, handleFocus);
       window.clearInterval(interval);
     };
-  }, [refresh]);
+  }, []);
 
   return count;
 }

@@ -72,7 +72,7 @@ export default async function OfficerDashboard({
         })
       : Promise.resolve(0),
     prisma.shift.count({
-      where: buildOfficerBrowseShiftsWhere(officerId),
+      where: buildOfficerBrowseShiftsWhere(),
     }),
   ]);
 

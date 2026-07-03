@@ -46,9 +46,6 @@ const officerFeatureIcons = [
   IconSpark,
 ] as const;
 
-const landingCardClass =
-  "landing-card-lift border-white/[0.04] bg-fo-surface/35 p-8 shadow-[0_16px_48px_-28px_rgba(0,0,0,0.65)]";
-
 const pricingCardClass = cn(
   "landing-card-lift flex h-full min-h-0 min-w-0 flex-col rounded-2xl",
   "border border-blue-500/20 bg-gradient-to-b from-[#0c1424]/95 via-fo-bg-elevated/85 to-[#070d18]/95",

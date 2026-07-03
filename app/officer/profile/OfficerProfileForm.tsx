@@ -43,7 +43,6 @@ import { ProfileWizardTips } from "./ProfileWizardTips";
 import {
   getWizardSectionProgress,
 } from "./profile-wizard-progress";
-import type { ProfileWizardStepId } from "./profile-wizard-steps";
 import { StepRequiredBadge } from "./profile-wizard-ui";
 
 type LicenseFormEntry = {

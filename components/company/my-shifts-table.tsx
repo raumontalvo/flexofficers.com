@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { MyShiftMobileCard } from "@/components/company/my-shift-mobile-card";
@@ -89,6 +89,16 @@ function PeopleIcon({ className }: { className?: string }) {
       <circle cx="13.5" cy="8" r="1.75" />
       <path d="M12 16c.3-1.6 1.5-2.5 3-2.5" />
     </svg>
+  );
+}
+
+function RecurringShiftBadge() {
+  const { t } = useLandingLanguage();
+
+  return (
+    <span className="inline-flex items-center rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-200">
+      {t.shiftForm.recurring.badge}
+    </span>
   );
 }
 
@@ -239,15 +249,15 @@ export function MyShiftsTable({
     [filteredShifts, page]
   );
 
-  useEffect(() => {
+  function handleTabChange(tab: CompanyShiftsPageTab) {
+    setActiveTab(tab);
     setPage(1);
-  }, [activeTab, searchQuery]);
+  }
 
-  useEffect(() => {
-    if (page > pagination.totalPages) {
-      setPage(pagination.totalPages);
-    }
-  }, [page, pagination.totalPages]);
+  function handleSearchChange(value: string) {
+    setSearchQuery(value);
+    setPage(1);
+  }
 
   if (shifts.length === 0) {
     return (
@@ -276,7 +286,7 @@ export function MyShiftsTable({
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabChange(tab.id)}
                     aria-label={tab.label}
                     aria-pressed={isActive}
                     className={cn(
@@ -298,7 +308,7 @@ export function MyShiftsTable({
             <input
               type="search"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => handleSearchChange(event.target.value)}
               placeholder={copy.searchPlaceholder}
               className="min-h-10 w-full rounded-xl border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
             />
@@ -343,7 +353,7 @@ export function MyShiftsTable({
                   <button
                     key={tab.id}
                     type="button"
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => handleTabChange(tab.id)}
                     className={cn(
                       "rounded-full px-3 py-1.5 text-xs font-semibold transition",
                       activeTab === tab.id
@@ -366,7 +376,7 @@ export function MyShiftsTable({
             <input
               type="search"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => handleSearchChange(event.target.value)}
               placeholder={copy.searchPlaceholder}
               className="min-h-10 w-full rounded-lg border border-fo-border bg-fo-bg/80 px-3 py-2 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
             />
@@ -406,7 +416,10 @@ export function MyShiftsTable({
                     <Fragment key={shift.id}>
                       <tr className="border-b border-white/[0.04] transition hover:bg-white/[0.03]">
                         <td className="px-4 py-4 align-middle">
-                          <MyShiftStatusBadge status={shift.status} />
+                          <div className="flex flex-wrap items-center gap-2">
+                            <MyShiftStatusBadge status={shift.status} />
+                            {shift.isRecurring ? <RecurringShiftBadge /> : null}
+                          </div>
                         </td>
                         <td className="px-4 py-4 align-middle">
                           <p className="font-semibold text-fo-text">{shift.title}</p>

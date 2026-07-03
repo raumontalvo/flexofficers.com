@@ -49,7 +49,17 @@ describe("company shifts page helpers", () => {
       positionsNeeded: 3,
       filledCount: 1,
       applicantCount: 2,
+      isRecurring: false,
     });
+  });
+
+  it("marks recurring shifts during serialization", () => {
+    expect(
+      serializeCompanyShiftRow({
+        ...baseShift,
+        recurringScheduleId: "schedule-1",
+      }).isRecurring
+    ).toBe(true);
   });
 
   it("builds location labels from city/state when no pipe separator exists", () => {

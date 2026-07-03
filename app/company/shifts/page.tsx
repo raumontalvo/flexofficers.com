@@ -45,6 +45,7 @@ export default async function CompanyShiftsPage() {
       hourlyRate: true,
       status: true,
       positionsNeeded: true,
+      recurringScheduleId: true,
       applications: {
         select: {
           status: true,

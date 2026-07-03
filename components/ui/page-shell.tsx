@@ -68,7 +68,7 @@ export function PageShell({
               contentClassName
             )}
           >
-            <div className={cn("mx-auto w-full", maxWidthClasses[maxWidth])}>
+            <div className={cn("mx-auto w-full min-w-0", maxWidthClasses[maxWidth])}>
               {children}
             </div>
           </main>

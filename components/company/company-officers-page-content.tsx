@@ -167,7 +167,6 @@ type CompanyOfficersPageContentProps = {
 export function CompanyOfficersPageContent({
   officers,
   filters,
-  hasActiveFilters: _hasActiveFilters,
   openShifts,
   invites: initialInvites,
   acceptedAssignments,

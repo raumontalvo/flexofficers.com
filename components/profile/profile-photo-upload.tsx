@@ -41,14 +41,10 @@ function UploadPreview({
   imageUrl: string;
   previewShape: "circle" | "rounded";
 }) {
-  const [hasError, setHasError] = useState(false);
-  const showImage = imageUrl.trim().length > 0 && !hasError;
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const showImage = imageUrl.trim().length > 0 && failedUrl !== imageUrl;
   const shapeClassName =
     previewShape === "circle" ? "rounded-full" : "rounded-2xl";
-
-  useEffect(() => {
-    setHasError(false);
-  }, [imageUrl]);
 
   if (!showImage) {
     if (previewShape === "circle") {
@@ -80,7 +76,7 @@ function UploadPreview({
         src={imageUrl}
         alt={name ? `${name} photo` : "Profile photo preview"}
         className="h-full w-full object-cover"
-        onError={() => setHasError(true)}
+        onError={() => setFailedUrl(imageUrl)}
       />
     </div>
   );

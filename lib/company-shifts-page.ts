@@ -26,10 +26,12 @@ export type SerializedCompanyShiftRow = {
   positionsNeeded: number;
   filledCount: number;
   applicantCount: number;
+  isRecurring: boolean;
 };
 
 export type CompanyShiftRowRecord = CompanyShiftRecord & {
   hourlyRate: { toString: () => string };
+  recurringScheduleId?: string | null;
 };
 
 export function getShiftLocationParts(
@@ -100,6 +102,7 @@ export function serializeCompanyShiftRow(
     positionsNeeded: shift.positionsNeeded,
     filledCount: getShiftFilledCount(shift),
     applicantCount: getShiftApplicantCount(shift),
+    isRecurring: Boolean(shift.recurringScheduleId),
   };
 }
 

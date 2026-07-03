@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { IconShield } from "@/components/landing/icons";
 import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
 import { NotificationsIcon, SearchIcon } from "@/components/nav/icons";
@@ -312,15 +312,15 @@ export function CompanySecurityLeadsPage({
     pagination.totalItems
   );
 
-  useEffect(() => {
+  function handleTabChange(tab: CompanyLeadsPageTab) {
+    setActiveTab(tab);
     setPage(1);
-  }, [activeTab, searchQuery]);
+  }
 
-  useEffect(() => {
-    if (page > pagination.totalPages) {
-      setPage(pagination.totalPages);
-    }
-  }, [page, pagination.totalPages]);
+  function handleSearchChange(value: string) {
+    setSearchQuery(value);
+    setPage(1);
+  }
 
   const hasAnyLeads = leads.length > 0;
   const showFilteredEmpty = hasAnyLeads && pagination.totalItems === 0;
@@ -366,7 +366,7 @@ export function CompanySecurityLeadsPage({
                   <button
                     key={tab}
                     type="button"
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => handleTabChange(tab)}
                     className={cn(
                       "border-b-2 pb-2.5 text-sm font-semibold transition",
                       isActive
@@ -391,7 +391,7 @@ export function CompanySecurityLeadsPage({
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 placeholder={copy.searchPlaceholder}
                 className="min-h-10 w-full rounded-xl border border-fo-border bg-fo-bg/80 py-2 pr-3 pl-10 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
               />

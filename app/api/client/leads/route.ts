@@ -73,13 +73,14 @@ export async function POST(req: Request) {
     const parsed = parseSecurityLeadPayload(body as Record<string, unknown>);
 
     if ("errors" in parsed) {
-      const messages = formatSecurityLeadFieldErrors(parsed.errors);
+      const validationErrors = parsed.errors ?? [];
+      const messages = formatSecurityLeadFieldErrors(validationErrors);
       const responseBody = {
         error: messages[0] ?? "Invalid request payload",
-        details: parsed.errors,
+        details: validationErrors,
       };
 
-      console.log("VALIDATION ERROR", parsed.errors);
+      console.log("VALIDATION ERROR", validationErrors);
       console.log("400 RESPONSE", responseBody);
 
       return NextResponse.json(responseBody, { status: 400 });

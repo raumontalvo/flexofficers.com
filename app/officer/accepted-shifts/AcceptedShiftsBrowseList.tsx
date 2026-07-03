@@ -43,12 +43,14 @@ export function AcceptedShiftsBrowseList({
   const listTopRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<AcceptedShiftTab>("upcoming");
   const [currentPage, setCurrentPage] = useState(1);
-  const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
+    getHiddenAcceptedShiftIds()
+  );
 
   const visibleApplications = useMemo(() => {
-    const hiddenIds = new Set(getHiddenAcceptedShiftIds());
-    return applications.filter((application) => !hiddenIds.has(application.id));
-  }, [applications, hiddenVersion]);
+    const hiddenIdSet = new Set(hiddenIds);
+    return applications.filter((application) => !hiddenIdSet.has(application.id));
+  }, [applications, hiddenIds]);
 
   const filteredApplications = useMemo(
     () =>
@@ -105,7 +107,7 @@ export function AcceptedShiftsBrowseList({
   }
 
   function handleListChange() {
-    setHiddenVersion((version) => version + 1);
+    setHiddenIds(getHiddenAcceptedShiftIds());
     setCurrentPage(1);
   }
 

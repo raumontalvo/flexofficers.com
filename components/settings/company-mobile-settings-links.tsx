@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { BillingIcon } from "@/components/nav/icons";
 import { MobileActionCard } from "@/components/ui/mobile";

@@ -10,6 +10,7 @@ import {
   PageShell,
 } from "@/components/ui";
 import { serializeCompanyBillingPageData } from "@/lib/company-billing-page-data";
+import type { CompanyBillingPageData } from "@/lib/company-billing-page-data";
 import { resolveCompanyStripeCustomer } from "@/lib/company-billing-customer";
 import { fetchCompanyStripeBillingDetails } from "@/lib/company-billing-stripe";
 import { companyDashboardSelect } from "@/lib/officer-fields";
@@ -19,85 +20,97 @@ import { getStripeBillingReadiness } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 
+type BillingPageResult =
+  | { status: "no-company" }
+  | { status: "error" }
+  | { status: "success"; billing: CompanyBillingPageData };
+
+async function loadBillingPageData(
+  clerkId: string
+): Promise<BillingPageResult> {
+  const user = await prisma.user.findUnique({
+    where: {
+      clerkId,
+    },
+    select: {
+      company: {
+        select: companyDashboardSelect,
+      },
+    },
+  });
+
+  const company = user?.company;
+
+  if (!company) {
+    return { status: "no-company" };
+  }
+
+  const { configured: stripeConnected, billingReady: stripeBillingReady } =
+    getStripeBillingReadiness({
+      secretKey: process.env.STRIPE_SECRET_KEY,
+      publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+      priceId: process.env.STRIPE_PRICE_ID,
+    });
+
+  const stripeCustomer = await resolveCompanyStripeCustomer({
+    companyId: company.id,
+    stripeCustomerId: company.stripeCustomerId,
+  });
+
+  const stripeDetails =
+    stripeCustomer.isValid && stripeCustomer.customerId
+      ? await fetchCompanyStripeBillingDetails(stripeCustomer.customerId)
+      : null;
+
+  const billing = serializeCompanyBillingPageData({
+    company,
+    stripeConnected,
+    stripeBillingReady,
+    hasValidStripeCustomer: stripeCustomer.isValid,
+    paymentMethod: stripeDetails?.paymentMethod ?? null,
+    invoices: stripeDetails?.invoices ?? [],
+  });
+
+  return { status: "success", billing };
+}
+
 export default async function CompanyBillingPage() {
   const clerkUser = await requirePageRole(UserRole.COMPANY);
 
+  let result: BillingPageResult;
+
   try {
-    const user = await prisma.user.findUnique({
-      where: {
-        clerkId: clerkUser.id,
-      },
-      select: {
-        company: {
-          select: companyDashboardSelect,
-        },
-      },
-    });
+    result = await loadBillingPageData(clerkUser.id);
+  } catch (error) {
+    console.error("Failed to load company billing page:", error);
+    result = { status: "error" };
+  }
 
-    const company = user?.company;
-
-    if (!company) {
-      return (
-        <PageShell nav="company" maxWidth="full" sidebar>
-          <TranslatedSectionHeading page="companyBilling" />
-
-          <Card
-            variant="muted"
-            className="fo-glass-card mt-8 border border-white/10 text-center"
-          >
-            <CardTitle className="text-lg">Complete your company profile</CardTitle>
-            <CardDescription className="mt-2">
-              Add your company details before managing billing.
-            </CardDescription>
-            <Link
-              href="/company/profile"
-              className={buttonClassName({ className: "mt-6" })}
-            >
-              Complete Company Profile
-            </Link>
-          </Card>
-        </PageShell>
-      );
-    }
-
-    const { configured: stripeConnected, billingReady: stripeBillingReady } =
-      getStripeBillingReadiness({
-        secretKey: process.env.STRIPE_SECRET_KEY,
-        publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-        priceId: process.env.STRIPE_PRICE_ID,
-      });
-
-    const stripeCustomer = await resolveCompanyStripeCustomer({
-      companyId: company.id,
-      stripeCustomerId: company.stripeCustomerId,
-    });
-
-    const stripeDetails =
-      stripeCustomer.isValid && stripeCustomer.customerId
-        ? await fetchCompanyStripeBillingDetails(stripeCustomer.customerId)
-        : null;
-
-    const billing = serializeCompanyBillingPageData({
-      company,
-      stripeConnected,
-      stripeBillingReady,
-      hasValidStripeCustomer: stripeCustomer.isValid,
-      paymentMethod: stripeDetails?.paymentMethod ?? null,
-      invoices: stripeDetails?.invoices ?? [],
-    });
-
+  if (result.status === "no-company") {
     return (
       <PageShell nav="company" maxWidth="full" sidebar>
         <TranslatedSectionHeading page="companyBilling" />
 
-        <div className="mt-4 md:mt-8">
-          <CompanyBillingPageContent billing={billing} />
-        </div>
+        <Card
+          variant="muted"
+          className="fo-glass-card mt-8 border border-white/10 text-center"
+        >
+          <CardTitle className="text-lg">Complete your company profile</CardTitle>
+          <CardDescription className="mt-2">
+            Add your company details before managing billing.
+          </CardDescription>
+          <Link
+            href="/company/profile"
+            className={buttonClassName({ className: "mt-6" })}
+          >
+            Complete Company Profile
+          </Link>
+        </Card>
       </PageShell>
     );
-  } catch (error) {
-    console.error("Failed to load company billing page:", error);
+  }
 
+  if (result.status === "error") {
     return (
       <PageShell nav="company" maxWidth="full" sidebar>
         <TranslatedSectionHeading page="companyBilling" />
@@ -115,4 +128,14 @@ export default async function CompanyBillingPage() {
       </PageShell>
     );
   }
+
+  return (
+    <PageShell nav="company" maxWidth="full" sidebar>
+      <TranslatedSectionHeading page="companyBilling" />
+
+      <div className="mt-4 md:mt-8">
+        <CompanyBillingPageContent billing={result.billing} />
+      </div>
+    </PageShell>
+  );
 }

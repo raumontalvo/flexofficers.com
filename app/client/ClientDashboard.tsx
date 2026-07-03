@@ -107,19 +107,19 @@ export default async function ClientDashboard() {
 
   return (
     <PageShell nav="client" sidebar maxWidth="full">
-      <div className="space-y-5 pb-3 lg:pb-0">
+      <div className="min-w-0 space-y-5">
         <ClientDashboardHeader />
 
         <ClientSummaryCards stats={stats} postingFeeLabel={postingFeeLabel} />
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0 space-y-5">
             <ClientRecentLeads leads={serializedRecentLeads} />
-            <ClientDashboardCta />
           </div>
 
-          <aside className="min-w-0 space-y-5 xl:sticky xl:top-4 xl:self-start">
+          <aside className="flex min-w-0 flex-col gap-5 xl:sticky xl:top-4 xl:self-start">
             <ClientApplicantsOverviewCard overview={overview} />
+            <ClientDashboardCta />
             <ClientQuickActions />
           </aside>
         </div>

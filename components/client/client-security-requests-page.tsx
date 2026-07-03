@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { IconClipboard, IconShield } from "@/components/landing/icons";
 import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
 import { NotificationsIcon, SearchIcon, UpcomingIcon } from "@/components/nav/icons";
@@ -191,8 +191,8 @@ function MobileRequestCard({ request }: { request: SerializedClientSecurityReque
           <IconShield className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="font-semibold text-fo-text">{request.title}</p>
+          <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <p className="min-w-0 break-words font-semibold text-fo-text">{request.title}</p>
             <RequestStatusBadge status={request.displayStatus} />
           </div>
           <p className="mt-0.5 text-xs text-fo-text-muted">{request.subtitle}</p>
@@ -215,14 +215,16 @@ function MobileRequestCard({ request }: { request: SerializedClientSecurityReque
             {request.dateLabel} · {request.timeLabel}
           </span>
         </div>
-        <div className="flex items-center justify-between gap-3 pt-1">
-          <span className="inline-flex items-center gap-1.5">
-            <PeopleIcon className="h-3.5 w-3.5" />
+        <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-3 sm:gap-3">
+          <span className="inline-flex min-w-0 items-center gap-1.5 break-words">
+            <PeopleIcon className="h-3.5 w-3.5 shrink-0" />
             {request.officersNeeded} {copy.officersLabel}
           </span>
-          <span className="font-semibold text-fo-text">{request.budgetOffer}</span>
-          <span className="inline-flex items-center gap-1.5">
-            <PeopleIcon className="h-3.5 w-3.5" />
+          <span className="min-w-0 break-words font-semibold text-fo-text">
+            {request.budgetOffer}
+          </span>
+          <span className="inline-flex min-w-0 items-center gap-1.5 break-words">
+            <PeopleIcon className="h-3.5 w-3.5 shrink-0" />
             {request.applicantCount}
           </span>
         </div>
@@ -268,21 +270,21 @@ export function ClientSecurityRequestsPage({
     pagination.totalItems
   );
 
-  useEffect(() => {
+  function handleTabChange(tab: ClientLeadsPageTab) {
+    setActiveTab(tab);
     setPage(1);
-  }, [activeTab, searchQuery]);
+  }
 
-  useEffect(() => {
-    if (page > pagination.totalPages) {
-      setPage(pagination.totalPages);
-    }
-  }, [page, pagination.totalPages]);
+  function handleSearchChange(value: string) {
+    setSearchQuery(value);
+    setPage(1);
+  }
 
   const hasAnyRequests = requests.length > 0;
   const showFilteredEmpty = hasAnyRequests && pagination.totalItems === 0;
 
   return (
-    <div className="space-y-5 pb-3 lg:pb-0">
+    <div className="space-y-5">
       <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight text-fo-text sm:text-3xl">{copy.title}</h1>
@@ -313,8 +315,8 @@ export function ClientSecurityRequestsPage({
 
       <div className="space-y-3">
         <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-1 lg:flex-row lg:items-end lg:justify-between">
-          <div className="overflow-x-auto">
-            <div className="flex min-w-max gap-5">
+          <div className="fo-scrollbar-hide overflow-x-auto">
+            <div className="flex min-w-max gap-3 sm:gap-5">
               {TAB_ORDER.map((tab) => {
                 const isActive = activeTab === tab;
 
@@ -322,7 +324,7 @@ export function ClientSecurityRequestsPage({
                   <button
                     key={tab}
                     type="button"
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => handleTabChange(tab)}
                     className={cn(
                       "border-b-2 pb-2.5 text-sm font-semibold transition",
                       isActive
@@ -344,7 +346,7 @@ export function ClientSecurityRequestsPage({
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 placeholder={copy.searchPlaceholder}
                 className="min-h-10 w-full rounded-xl border border-fo-border bg-fo-bg/80 py-2 pr-3 pl-10 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
               />
@@ -367,7 +369,7 @@ export function ClientSecurityRequestsPage({
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard
           label={copy.stats.total}
           hint={copy.stats.totalHint}
@@ -542,21 +544,26 @@ export function ClientSecurityRequestsPage({
         padding="none"
         className="fo-glass-card fo-glass-card-hover border border-white/10 p-4 sm:p-5"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4">
           <div className="flex min-w-0 items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-blue-300 shadow-[0_0_20px_-6px_rgba(59,130,246,0.35)]">
               <IconShield className="h-5 w-5" />
             </div>
-            <div className="min-w-0">
-              <h2 className="text-base font-bold text-fo-text sm:text-lg">{copy.ctaTitle}</h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-fo-text-muted">
+            <div className="min-w-0 flex-1">
+              <h2 className="break-words text-base font-bold text-fo-text sm:text-lg">
+                {copy.ctaTitle}
+              </h2>
+              <p className="mt-1.5 break-words text-sm leading-relaxed text-fo-text-muted">
                 {copy.ctaDescription}
               </p>
             </div>
           </div>
           <Link
             href="/client/leads/new"
-            className={buttonClassName({ size: "md", className: "shrink-0 self-start sm:self-center" })}
+            className={buttonClassName({
+              size: "md",
+              className: "w-full sm:w-auto sm:self-start",
+            })}
           >
             {copy.createLead}
           </Link>

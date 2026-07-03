@@ -83,9 +83,9 @@ function DetailField({
 
 function StatBlock({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 text-center">
+    <div className="min-w-0 rounded-xl border border-blue-500/20 bg-blue-500/5 px-3 py-3 text-center sm:px-4">
       <p className="text-2xl font-bold text-fo-text">{value}</p>
-      <p className="mt-1 text-xs text-fo-text-muted">{label}</p>
+      <p className="mt-1 break-words text-xs leading-snug text-fo-text-muted">{label}</p>
     </div>
   );
 }
@@ -246,7 +246,6 @@ export function ClientProfileView({ profile: initialProfile }: ClientProfileView
   const router = useRouter();
   const { t } = useLandingLanguage();
   const labels = t.client.clientProfile.view;
-  const editLabels = t.client.clientProfile.edit;
   const notProvided = t.commonExtras.notProvided;
   const [profile, setProfile] = useState(initialProfile);
   const [prefs, setPrefs] = useState(profile.notifications);
@@ -301,7 +300,7 @@ export function ClientProfileView({ profile: initialProfile }: ClientProfileView
   }
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-fo-text">{labels.title}</h1>
@@ -309,7 +308,10 @@ export function ClientProfileView({ profile: initialProfile }: ClientProfileView
         </div>
         <Link
           href="/client/profile/edit"
-          className={buttonClassName({ size: "md", className: "shrink-0 self-start" })}
+          className={buttonClassName({
+            size: "md",
+            className: "w-full shrink-0 self-stretch sm:w-auto sm:self-start",
+          })}
         >
           {labels.editProfile}
         </Link>
@@ -341,7 +343,7 @@ export function ClientProfileView({ profile: initialProfile }: ClientProfileView
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:min-w-[320px]">
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
             <StatBlock label={labels.statSecurityRequests} value={profile.stats.securityRequests} />
             <StatBlock label={labels.statApplications} value={profile.stats.applications} />
             <StatBlock label={labels.statCompleted} value={profile.stats.completed} />

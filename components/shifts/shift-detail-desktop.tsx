@@ -8,7 +8,6 @@ import { ShiftDetailActions } from "@/components/shifts/shift-detail-actions";
 import { ShiftDetailBackLink } from "@/components/shifts/shift-detail-back-link";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { Card, ShiftStatusBadge, StatusBadge } from "@/components/ui";
-import { interpolate } from "@/lib/app-i18n";
 import { formatHourlyRate, formatShiftDateTime } from "@/lib/format-shift";
 import {
   formatShiftEstimatedEarnings,

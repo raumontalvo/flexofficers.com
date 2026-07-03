@@ -49,13 +49,19 @@ function DetailField({
 }
 
 export function OfficerDetailPanel({ officer, onClose }: OfficerDetailPanelProps) {
+  const [panelOfficerId, setPanelOfficerId] = useState<string | null>(
+    officer?.id ?? null
+  );
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
 
-  useEffect(() => {
-    if (officer) {
-      setActiveTab("overview");
-    }
-  }, [officer?.id]);
+  if (officer && officer.id !== panelOfficerId) {
+    setPanelOfficerId(officer.id);
+    setActiveTab("overview");
+  }
+
+  if (!officer && panelOfficerId !== null) {
+    setPanelOfficerId(null);
+  }
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {

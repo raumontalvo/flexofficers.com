@@ -3,6 +3,7 @@
 import { ShiftStatus } from "@/app/generated/prisma/enums";
 import { ShiftActionsMenu } from "@/components/company/shift-actions-menu";
 import { ShiftWorkforcePanel } from "@/components/company/shift-workforce-panel";
+import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
 import {
   formatShiftDateBadgeParts,
@@ -11,6 +12,16 @@ import {
 } from "@/lib/company-shifts-page";
 import { formatHourlyRate, formatShiftTime } from "@/lib/format-shift";
 import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
+
+function RecurringShiftBadge() {
+  const { t } = useLandingLanguage();
+
+  return (
+    <span className="inline-flex max-w-full items-center justify-center rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-violet-200">
+      {t.shiftForm.recurring.badge}
+    </span>
+  );
+}
 
 function MyShiftStatusBadge({ status }: { status: ShiftStatus }) {
   const styles = {
@@ -91,7 +102,10 @@ export function MyShiftMobileCard({
         </div>
 
         <div className="flex shrink-0 flex-col items-end gap-2">
-          <MyShiftStatusBadge status={shift.status} />
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
+            <MyShiftStatusBadge status={shift.status} />
+            {shift.isRecurring ? <RecurringShiftBadge /> : null}
+          </div>
           <p className="text-sm font-bold leading-none text-fo-primary-bright">
             {formatHourlyRate(shift.hourlyRate)}
             <span className="text-[10px] font-semibold text-fo-text-muted">/hr</span>

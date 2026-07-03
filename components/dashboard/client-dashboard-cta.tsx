@@ -23,14 +23,16 @@ export function ClientDashboardCta({ className }: ClientDashboardCtaProps) {
         className
       )}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4">
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-blue-300 shadow-[0_0_20px_-6px_rgba(59,130,246,0.35)]">
             <IconShield className="h-5 w-5" />
           </div>
-          <div className="min-w-0">
-            <h2 className="text-base font-bold text-fo-text sm:text-lg">{copy.ctaTitle}</h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-fo-text-muted">
+          <div className="min-w-0 flex-1">
+            <h2 className="break-words text-base font-bold text-fo-text sm:text-lg">
+              {copy.ctaTitle}
+            </h2>
+            <p className="mt-1.5 break-words text-sm leading-relaxed text-fo-text-muted">
               {copy.ctaDescription}
             </p>
           </div>
@@ -40,7 +42,7 @@ export function ClientDashboardCta({ className }: ClientDashboardCtaProps) {
           href="/client/leads/new"
           className={buttonClassName({
             size: "md",
-            className: "shrink-0 self-start sm:self-center",
+            className: "w-full sm:w-auto sm:self-start",
           })}
         >
           {copy.createLead}

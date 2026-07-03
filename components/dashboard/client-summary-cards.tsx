@@ -65,7 +65,7 @@ function ClientDashboardStatCard({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-fo-text-muted">{label}</p>
-            <p className="mt-1 text-2xl font-bold leading-none tracking-tight text-fo-text sm:text-3xl">
+            <p className="mt-1 break-words text-2xl font-bold leading-none tracking-tight text-fo-text sm:text-3xl">
               {value}
             </p>
             <p className="mt-1.5 text-xs leading-snug text-fo-text-subtle">{hint}</p>

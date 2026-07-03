@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import type { ClientApplicantsOverview } from "@/lib/client-dashboard-data";
-import { cn } from "@/lib/cn";
+import { buildDonutGradientStops } from "@/lib/donut-gradient-stops";
 
 type ClientApplicantsOverviewProps = {
   overview: ClientApplicantsOverview;
@@ -35,16 +35,7 @@ function DonutChart({
     );
   }
 
-  let cumulative = 0;
-  const gradientStops = segments
-    .filter((segment) => segment.value > 0)
-    .map((segment) => {
-      const start = (cumulative / total) * 100;
-      cumulative += segment.value;
-      const end = (cumulative / total) * 100;
-      return `${segment.color} ${start}% ${end}%`;
-    })
-    .join(", ");
+  const gradientStops = buildDonutGradientStops(segments, total);
 
   return (
     <div
@@ -105,22 +96,19 @@ export function ClientApplicantsOverviewCard({
       padding="none"
       className="fo-glass-card border border-white/10 p-4 sm:p-5"
     >
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-bold text-fo-text">{copy.applicantsOverview}</h2>
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <h2 className="min-w-0 break-words text-base font-bold text-fo-text">
+          {copy.applicantsOverview}
+        </h2>
         <Link
           href="/client/applicants"
-          className="text-xs font-semibold text-fo-primary-hover hover:underline"
+          className="shrink-0 text-xs font-semibold text-fo-primary-hover hover:underline"
         >
           {copy.viewAll}
         </Link>
       </div>
 
-      <div
-        className={cn(
-          "mt-4 flex flex-col items-center gap-4 sm:flex-row sm:items-center",
-          overview.total === 0 && "sm:flex-col"
-        )}
-      >
+      <div className="mt-4 flex w-full min-w-0 flex-col items-center gap-4">
         <DonutChart
           segments={segments}
           total={overview.total}
@@ -129,11 +117,13 @@ export function ClientApplicantsOverviewCard({
         />
 
         {overview.total === 0 ? (
-          <p className="text-center text-sm leading-relaxed text-fo-text-muted sm:text-left">
+          <p className="w-full max-w-sm break-words text-center text-sm leading-relaxed text-fo-text-muted">
             {copy.applicantsEmpty}
           </p>
         ) : (
-          <DonutLegend segments={segments} />
+          <div className="w-full min-w-0">
+            <DonutLegend segments={segments} />
+          </div>
         )}
       </div>
     </Card>

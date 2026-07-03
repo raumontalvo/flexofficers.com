@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { buttonClassName } from "@/components/ui";
@@ -73,7 +74,24 @@ function formatShiftOptionLabel(
   return `${shift.title}${location ? ` · ${location}` : ""} · ${date}${visibilityLabel}`;
 }
 
-export function InviteOfficerModal({
+function getDefaultShiftId(
+  officerId: string,
+  openShifts: CompanyOpenShiftOption[],
+  invites: CompanyOfficerInviteRecord[],
+  acceptedAssignments: CompanyOfficerShiftAssignment[]
+) {
+  const openShiftIds = openShifts.map((shift) => shift.id);
+  const inviteableShiftIds = getInviteableShiftIdsForOfficer(
+    officerId,
+    openShiftIds,
+    invites,
+    acceptedAssignments
+  );
+
+  return inviteableShiftIds[0] ?? openShifts[0]?.id ?? "";
+}
+
+function InviteOfficerModalContent({
   officerId,
   officerName,
   openShifts,
@@ -81,65 +99,20 @@ export function InviteOfficerModal({
   acceptedAssignments = [],
   onClose,
   onInviteSent,
-}: InviteOfficerModalProps) {
+}: InviteOfficerModalProps & { officerId: string }) {
   const { language, t } = useLandingLanguage();
   const copy = t.company.invite;
   const locale = getDateLocale(language);
-  const isOpen = Boolean(officerId);
-  const [shiftId, setShiftId] = useState(openShifts[0]?.id ?? "");
+  const [shiftId, setShiftId] = useState(() =>
+    getDefaultShiftId(officerId, openShifts, invites, acceptedAssignments)
+  );
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isOpen || !officerId) {
-      return;
-    }
-
-    const openShiftIds = openShifts.map((shift) => shift.id);
-    const inviteableShiftIds = getInviteableShiftIdsForOfficer(
-      officerId,
-      openShiftIds,
-      invites,
-      acceptedAssignments
-    );
-
-    setShiftId(inviteableShiftIds[0] ?? openShifts[0]?.id ?? "");
-    setMessage("");
-    setError(null);
-  }, [acceptedAssignments, isOpen, officerId, openShifts, invites]);
-
-  useEffect(() => {
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
-    }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "";
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen || !officerId) {
-    return null;
-  }
-
-  const selectedShiftState =
-    shiftId && officerId
-      ? getInviteStateForShift(
-          officerId,
-          shiftId,
-          invites,
-          acceptedAssignments
-        )
-      : null;
+  const selectedShiftState = shiftId
+    ? getInviteStateForShift(officerId, shiftId, invites, acceptedAssignments)
+    : null;
   const canSendInvite = Boolean(shiftId) && selectedShiftState?.kind === "invite";
 
   async function handleSendInvite() {
@@ -153,7 +126,7 @@ export function InviteOfficerModal({
     const result = await createInvite(
       {
         shiftId,
-        officerId: officerId!,
+        officerId,
         message,
       },
       copy.sendFailed
@@ -197,7 +170,7 @@ export function InviteOfficerModal({
                 {interpolate(copy.postBeforeInvite, { name: officerName })}
               </p>
               <div className="mt-5 flex gap-2">
-                <a
+                <Link
                   href="/shifts/create"
                   className={buttonClassName({
                     size: "md",
@@ -205,7 +178,7 @@ export function InviteOfficerModal({
                   })}
                 >
                   {copy.postShift}
-                </a>
+                </Link>
                 <button
                   type="button"
                   onClick={onClose}
@@ -343,5 +316,52 @@ export function InviteOfficerModal({
         </div>
       </div>
     </>
+  );
+}
+
+export function InviteOfficerModal({
+  officerId,
+  officerName,
+  openShifts,
+  invites,
+  acceptedAssignments = [],
+  onClose,
+  onInviteSent,
+}: InviteOfficerModalProps) {
+  const isOpen = Boolean(officerId);
+
+  useEffect(() => {
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("keydown", handleEscape);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !officerId) {
+    return null;
+  }
+
+  return (
+    <InviteOfficerModalContent
+      key={officerId}
+      officerId={officerId}
+      officerName={officerName}
+      openShifts={openShifts}
+      invites={invites}
+      acceptedAssignments={acceptedAssignments}
+      onClose={onClose}
+      onInviteSent={onInviteSent}
+    />
   );
 }

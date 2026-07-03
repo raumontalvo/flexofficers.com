@@ -18,10 +18,14 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
+  function handleClose() {
+    setErrorMessage(null);
+    setIsDeleting(false);
+    onClose();
+  }
+
   useEffect(() => {
     if (!open) {
-      setErrorMessage(null);
-      setIsDeleting(false);
       return;
     }
 
@@ -29,6 +33,8 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        setErrorMessage(null);
+        setIsDeleting(false);
         onClose();
       }
     }
@@ -59,7 +65,7 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
         return;
       }
 
-      onClose();
+      handleClose();
       await signOut({ redirectUrl: "/" });
     } catch {
       setErrorMessage(copy.error);
@@ -74,7 +80,7 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
         type="button"
         aria-label={copy.closeAria}
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={handleClose}
       />
 
       <div
@@ -98,7 +104,7 @@ export function DeleteAccountDialog({ open, onClose }: DeleteAccountDialogProps)
           <button
             ref={cancelRef}
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isDeleting}
             className={buttonClassName({
               variant: "secondary",

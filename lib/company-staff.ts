@@ -33,7 +33,7 @@ export type SerializedCompanyStaffMember = ReturnType<
   typeof serializeCompanyStaffMember
 >;
 
-export function buildOfficerBrowseShiftsWhere(_officerId: string | null) {
+export function buildOfficerBrowseShiftsWhere() {
   return {
     status: ShiftStatus.OPEN,
     visibility: ShiftVisibility.PUBLIC,

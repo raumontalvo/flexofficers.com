@@ -1,9 +1,17 @@
 import {
-  SHIFT_TIME_TYPE_OPTIONS,
   SHIFT_WORK_TYPE_OPTIONS,
   type ShiftTimeTypeFormValue,
 } from "@/lib/shift-form-options";
 import { ShiftVisibility } from "@/app/generated/prisma/enums";
+import {
+  emptyRecurringShiftConfig,
+  recurringConfigToPayload,
+  validateRecurringShiftForm,
+  type RecurringShiftConfig,
+} from "@/lib/recurring-shifts";
+
+export type { RecurringShiftConfig };
+export { emptyRecurringShiftConfig };
 
 export type ShiftPostVisibility = "PUBLIC" | "STAFF_ONLY";
 
@@ -62,6 +70,7 @@ export type PostShiftFormValues = {
   otherRequirements: string;
   positionsNeeded: number;
   visibility: ShiftPostVisibility;
+  recurring: RecurringShiftConfig;
 };
 
 export const emptyPostShiftForm: PostShiftFormValues = {
@@ -83,6 +92,7 @@ export const emptyPostShiftForm: PostShiftFormValues = {
   otherRequirements: "",
   positionsNeeded: 1,
   visibility: "PUBLIC",
+  recurring: emptyRecurringShiftConfig,
 };
 
 export function combineDateAndTime(date: string, time: string) {
@@ -263,6 +273,11 @@ export function buildShiftApiPayload(
     return { error: "Open positions must be at least 1." } as const;
   }
 
+  const recurringError = validateRecurringShiftForm(form);
+  if (recurringError) {
+    return { error: recurringError } as const;
+  }
+
   const licenseMapping = mapLicenseRequirements(form.licenseRequirements);
   const certificationMapping = mapCertificationRequirements(
     form.certificationRequirements
@@ -287,6 +302,8 @@ export function buildShiftApiPayload(
     ]),
   ];
 
+  const recurring = recurringConfigToPayload(form.recurring);
+
   return {
     payload: {
       title: form.title.trim(),
@@ -310,6 +327,7 @@ export function buildShiftApiPayload(
         form.visibility === "STAFF_ONLY"
           ? ShiftVisibility.STAFF_ONLY
           : ShiftVisibility.PUBLIC,
+      ...(recurring ? { recurring } : {}),
     },
   };
 }
@@ -606,6 +624,7 @@ export function shiftToPostShiftFormValues(input: {
     otherRequirements: parseFreeformOtherRequirements(input.otherRequirements),
     positionsNeeded: Math.max(1, input.positionsNeeded),
     visibility: input.visibility ?? "PUBLIC",
+    recurring: emptyRecurringShiftConfig,
   };
 }
 

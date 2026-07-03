@@ -12,6 +12,7 @@ import {
   getShiftWorkTypeSelectOptions,
 } from "@/lib/i18n/ui-labels";
 import { LicenseRequirementsPicker } from "@/components/shifts/license-requirements-picker";
+import { RecurringShiftOptions } from "@/components/shifts/recurring-shift-options";
 import { RequirementsMultiSelectPicker } from "@/components/shifts/requirements-multi-select-picker";
 import { cn } from "@/lib/cn";
 
@@ -351,19 +352,13 @@ export function PostShiftForm({
           </div>
         </div>
 
-        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
-          <label className="flex items-start gap-3 opacity-60">
-            <input type="checkbox" disabled className="mt-1 rounded border-fo-border" />
-            <span>
-              <span className="block text-sm font-medium text-fo-text">
-                {sf.recurring.title}
-              </span>
-              <span className="mt-0.5 block text-xs text-fo-text-muted">
-                {sf.recurring.description}
-              </span>
-            </span>
-          </label>
-        </div>
+        <RecurringShiftOptions
+          startDate={form.startDate}
+          startTime={form.startTime}
+          endTime={form.endTime}
+          recurring={form.recurring}
+          onChange={(recurring) => updateField("recurring", recurring)}
+        />
       </SectionCard>
 
       <SectionCard number={3} title={sf.sections.location}>

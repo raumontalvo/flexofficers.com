@@ -88,22 +88,10 @@ export function getStripeClient() {
   }
 
   if (!stripeClient) {
-    console.log("Stripe secret prefix:", process.env.STRIPE_SECRET_KEY?.slice(0, 20));
-    console.log("Price ID:", process.env.STRIPE_SECURITY_LEAD_PRICE_ID);
     stripeClient = new Stripe(secretKey);
-    void logStripeAccountDebug(stripeClient);
   }
 
   return stripeClient;
-}
-
-export async function logStripeAccountDebug(stripe: Stripe) {
-  try {
-    const account = await stripe.accounts.retrieve();
-    console.log("Stripe Account ID:", account.id);
-  } catch (error) {
-    console.error("Stripe account retrieve failed:", error);
-  }
 }
 
 export function getRequestOrigin(request: Request) {

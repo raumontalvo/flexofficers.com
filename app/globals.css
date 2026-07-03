@@ -493,7 +493,7 @@ html {
 /* Mobile dashboard utilities — desktop unchanged above md */
 @media (max-width: 767px) {
   .fo-mobile-nav-scroll-padding {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   .fo-scrollbar-hide {

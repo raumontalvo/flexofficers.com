@@ -32,10 +32,12 @@ export function CompanyWorkforceBrowseList({
   const router = useRouter();
   const [shiftFilter, setShiftFilter] = useState<WorkforceShiftFilter>("");
   const [officerSearch, setOfficerSearch] = useState("");
-  const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
+    getHiddenCompanyWorkforceIds()
+  );
 
   const visibleGroups = useMemo(() => {
-    const hidden = new Set(getHiddenCompanyWorkforceIds());
+    const hidden = new Set(hiddenIds);
 
     return groups
       .map((group) => ({
@@ -48,7 +50,7 @@ export function CompanyWorkforceBrowseList({
         ).length,
       }))
       .filter((group) => group.officers.length > 0);
-  }, [groups, hiddenVersion]);
+  }, [groups, hiddenIds]);
 
   const filteredAcceptedGroups = useMemo(
     () => filterWorkforceGroups(visibleGroups, shiftFilter, officerSearch),
@@ -80,7 +82,7 @@ export function CompanyWorkforceBrowseList({
   }
 
   function handleHidden() {
-    setHiddenVersion((version) => version + 1);
+    setHiddenIds(getHiddenCompanyWorkforceIds());
   }
 
   return (

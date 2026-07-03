@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SecurityLeadCard } from "@/components/security-leads/security-lead-card";
 import type { SerializedSecurityLeadCard } from "@/lib/security-lead-data";
@@ -11,7 +10,6 @@ type CompanyLeadsBrowseProps = {
 };
 
 export function CompanyLeadsBrowse({ leads, appliedLeadIds }: CompanyLeadsBrowseProps) {
-  const router = useRouter();
   const [appliedIds, setAppliedIds] = useState(new Set(appliedLeadIds));
   const [error, setError] = useState<string | null>(null);
 

@@ -188,6 +188,31 @@ export type ProfileShiftTranslations = {
     recurring: {
       title: string;
       description: string;
+      frequencyLabel: string;
+      frequencyDaily: string;
+      frequencyWeekly: string;
+      repeatDaysLabel: string;
+      endConditionLabel: string;
+      endAfterOccurrences: string;
+      endOnDate: string;
+      previewWillCreate: string;
+      previewDaily: string;
+      previewEveryDay: string;
+      previewEveryPrefix: string;
+      previewConjunction: string;
+      previewUntilDate: string;
+      previewOccurrenceCount: string;
+      previewShift: string;
+      previewShifts: string;
+      badge: string;
+      weekdays: Record<
+        "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun",
+        string
+      >;
+      weekdaysShort: Record<
+        "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun",
+        string
+      >;
     };
     select: {
       workType: string;
@@ -861,7 +886,42 @@ export const profileShiftEn: ProfileShiftTranslations = {
     },
     recurring: {
       title: "Recurring Shift",
-      description: "This shift repeats on specific days. Coming soon.",
+      description: "Create multiple shifts on a repeating schedule.",
+      frequencyLabel: "Repeat frequency",
+      frequencyDaily: "Daily",
+      frequencyWeekly: "Weekly",
+      repeatDaysLabel: "Repeat days",
+      endConditionLabel: "End condition",
+      endAfterOccurrences: "End after number of occurrences",
+      endOnDate: "End on date",
+      previewWillCreate: "This will create {count} {shiftWord}",
+      previewDaily: "every day",
+      previewEveryDay: "every day",
+      previewEveryPrefix: "every ",
+      previewConjunction: " and ",
+      previewUntilDate: "until {date}",
+      previewOccurrenceCount: "for {count} occurrences",
+      previewShift: "shift",
+      previewShifts: "shifts",
+      badge: "Recurring",
+      weekdays: {
+        mon: "Monday",
+        tue: "Tuesday",
+        wed: "Wednesday",
+        thu: "Thursday",
+        fri: "Friday",
+        sat: "Saturday",
+        sun: "Sunday",
+      },
+      weekdaysShort: {
+        mon: "Mon",
+        tue: "Tue",
+        wed: "Wed",
+        thu: "Thu",
+        fri: "Fri",
+        sat: "Sat",
+        sun: "Sun",
+      },
     },
     select: {
       workType: "Select work type",
@@ -1543,7 +1603,42 @@ export const profileShiftEs: ProfileShiftTranslations = {
     },
     recurring: {
       title: "Turno Recurrente",
-      description: "Este turno se repite en días específicos. Próximamente.",
+      description: "Crea varios turnos con un horario repetitivo.",
+      frequencyLabel: "Frecuencia de repetición",
+      frequencyDaily: "Diario",
+      frequencyWeekly: "Semanal",
+      repeatDaysLabel: "Días de repetición",
+      endConditionLabel: "Condición de fin",
+      endAfterOccurrences: "Finalizar después de un número de ocurrencias",
+      endOnDate: "Finalizar en una fecha",
+      previewWillCreate: "Esto creará {count} {shiftWord}",
+      previewDaily: "todos los días",
+      previewEveryDay: "todos los días",
+      previewEveryPrefix: "cada ",
+      previewConjunction: " y ",
+      previewUntilDate: "hasta el {date}",
+      previewOccurrenceCount: "por {count} ocurrencias",
+      previewShift: "turno",
+      previewShifts: "turnos",
+      badge: "Recurrente",
+      weekdays: {
+        mon: "lunes",
+        tue: "martes",
+        wed: "miércoles",
+        thu: "jueves",
+        fri: "viernes",
+        sat: "sábado",
+        sun: "domingo",
+      },
+      weekdaysShort: {
+        mon: "Lun",
+        tue: "Mar",
+        wed: "Mié",
+        thu: "Jue",
+        fri: "Vie",
+        sat: "Sáb",
+        sun: "Dom",
+      },
     },
     select: {
       workType: "Seleccionar tipo de trabajo",

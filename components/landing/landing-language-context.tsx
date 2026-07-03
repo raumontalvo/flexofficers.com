@@ -6,7 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -25,15 +25,47 @@ type LandingLanguageContextValue = {
 
 const LandingLanguageContext = createContext<LandingLanguageContextValue | null>(null);
 
-export function LandingLanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<LandingLanguage>("en");
+const languageListeners = new Set<() => void>();
 
-  useEffect(() => {
-    const saved = localStorage.getItem(LANDING_LANGUAGE_STORAGE_KEY);
-    if (isLandingLanguage(saved)) {
-      setLanguageState(saved);
-    }
-  }, []);
+function readStoredLanguage(): LandingLanguage {
+  if (typeof window === "undefined") {
+    return "en";
+  }
+
+  const saved = localStorage.getItem(LANDING_LANGUAGE_STORAGE_KEY);
+  return isLandingLanguage(saved) ? saved : "en";
+}
+
+function subscribeLanguage(onStoreChange: () => void) {
+  languageListeners.add(onStoreChange);
+  return () => {
+    languageListeners.delete(onStoreChange);
+  };
+}
+
+function getLanguageSnapshot(): LandingLanguage {
+  return readStoredLanguage();
+}
+
+function getLanguageServerSnapshot(): LandingLanguage {
+  return "en";
+}
+
+function notifyLanguageListeners() {
+  languageListeners.forEach((listener) => listener());
+}
+
+function setStoredLanguage(language: LandingLanguage) {
+  localStorage.setItem(LANDING_LANGUAGE_STORAGE_KEY, language);
+  notifyLanguageListeners();
+}
+
+export function LandingLanguageProvider({ children }: { children: ReactNode }) {
+  const language = useSyncExternalStore(
+    subscribeLanguage,
+    getLanguageSnapshot,
+    getLanguageServerSnapshot
+  );
 
   useEffect(() => {
     function handleStorage(event: StorageEvent) {
@@ -41,7 +73,7 @@ export function LandingLanguageProvider({ children }: { children: ReactNode }) {
         event.key === LANDING_LANGUAGE_STORAGE_KEY &&
         isLandingLanguage(event.newValue)
       ) {
-        setLanguageState(event.newValue);
+        notifyLanguageListeners();
       }
     }
 
@@ -54,8 +86,7 @@ export function LandingLanguageProvider({ children }: { children: ReactNode }) {
   }, [language]);
 
   const setLanguage = useCallback((next: LandingLanguage) => {
-    setLanguageState(next);
-    localStorage.setItem(LANDING_LANGUAGE_STORAGE_KEY, next);
+    setStoredLanguage(next);
   }, []);
 
   const t = useMemo(() => getLandingTranslations(language), [language]);

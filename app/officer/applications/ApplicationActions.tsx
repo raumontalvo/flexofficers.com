@@ -76,7 +76,6 @@ export function ApplicationActions({
   status,
   shiftStatus,
   shiftEndTime,
-  onListChange,
   onDeleted,
   layout = "compact",
 }: ApplicationActionsProps) {

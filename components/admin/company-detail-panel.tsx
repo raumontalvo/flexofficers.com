@@ -54,6 +54,9 @@ export function CompanyDetailPanel({
   onClose,
   onUpdated,
 }: CompanyDetailPanelProps) {
+  const [panelCompanyId, setPanelCompanyId] = useState<string | null>(
+    company?.id ?? null
+  );
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [customDays, setCustomDays] = useState("30");
   const [reason, setReason] = useState("");
@@ -61,15 +64,18 @@ export function CompanyDetailPanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (company) {
-      setActiveTab("overview");
-      setCustomDays("30");
-      setReason("");
-      setSelectedPreset(null);
-      setError(null);
-    }
-  }, [company?.id]);
+  if (company && company.id !== panelCompanyId) {
+    setPanelCompanyId(company.id);
+    setActiveTab("overview");
+    setCustomDays("30");
+    setReason("");
+    setSelectedPreset(null);
+    setError(null);
+  }
+
+  if (!company && panelCompanyId !== null) {
+    setPanelCompanyId(null);
+  }
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {

@@ -236,12 +236,15 @@ model Shift {
   positionsNeeded       Int                    @default(1)
   visibility            ShiftVisibility        @default(PUBLIC)
   status                ShiftStatus            @default(OPEN)
+  recurringScheduleId   String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
 
   company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   applications Application[]
   shiftInvites ShiftInvite[]
+
+  @@index([recurringScheduleId])
 }
 
 model Application {

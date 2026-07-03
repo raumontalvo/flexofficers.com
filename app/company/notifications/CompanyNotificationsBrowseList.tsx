@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
 import { TranslatedPageHeader } from "@/components/i18n/translated-page-header";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
@@ -36,22 +36,27 @@ export function CompanyNotificationsBrowseList({
   const listTopRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<CompanyNotificationTab>("all");
   const [notifications, setNotifications] = useState(initialNotifications);
-  const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [prevInitialNotifications, setPrevInitialNotifications] =
+    useState(initialNotifications);
+  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
+    getHiddenCompanyNotificationIds()
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
+  if (initialNotifications !== prevInitialNotifications) {
+    setPrevInitialNotifications(initialNotifications);
     setNotifications(initialNotifications);
-  }, [initialNotifications]);
+  }
 
   const tabs = getCompanyNotificationTabs(t);
   const officerCopy = t.browse.notifications;
   const copy = t.browse.companyNotifications;
 
   const visibleNotifications = useMemo(() => {
-    const hidden = new Set(getHiddenCompanyNotificationIds());
+    const hidden = new Set(hiddenIds);
     return notifications.filter((notification) => !hidden.has(notification.id));
-  }, [notifications, hiddenVersion]);
+  }, [notifications, hiddenIds]);
 
   const filteredNotifications = useMemo(
     () => filterCompanyNotifications(visibleNotifications, activeTab),
@@ -83,9 +88,10 @@ export function CompanyNotificationsBrowseList({
     filteredNotifications.length
   );
 
-  useEffect(() => {
+  function handleTabChange(tab: CompanyNotificationTab) {
+    setActiveTab(tab);
     setCurrentPage(1);
-  }, [activeTab]);
+  }
 
   function handleMarkAllRead() {
     if (unreadCount === 0) {
@@ -104,7 +110,7 @@ export function CompanyNotificationsBrowseList({
   }
 
   function handleDeleted() {
-    setHiddenVersion((version) => version + 1);
+    setHiddenIds(getHiddenCompanyNotificationIds());
   }
 
   function goToPage(page: number) {
@@ -159,7 +165,7 @@ export function CompanyNotificationsBrowseList({
               <button
                 key={tab.value}
                 type="button"
-                onClick={() => setActiveTab(tab.value)}
+                onClick={() => handleTabChange(tab.value)}
                 className={cn(
                   "relative shrink-0 px-3 py-2.5 text-sm font-medium transition",
                   active

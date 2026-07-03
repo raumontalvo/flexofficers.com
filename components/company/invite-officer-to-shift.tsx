@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { buttonClassName, StatusToast } from "@/components/ui";
 
@@ -142,7 +143,7 @@ function LinkFallback({ message }: { message: string }) {
   return (
     <div className="space-y-2">
       <p className="text-xs text-fo-text-muted">{message}</p>
-      <a
+      <Link
         href="/shifts/create"
         className={buttonClassName({
           variant: "secondary",
@@ -151,7 +152,7 @@ function LinkFallback({ message }: { message: string }) {
         })}
       >
         Post a Shift
-      </a>
+      </Link>
     </div>
   );
 }

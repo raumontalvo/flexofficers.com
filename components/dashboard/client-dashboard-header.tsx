@@ -26,10 +26,10 @@ export function ClientDashboardHeader({ className }: ClientDashboardHeaderProps)
         )}
       >
         <div className="min-w-0">
-          <h1 className="text-xl font-extrabold tracking-tight text-fo-text">
+          <h1 className="break-words text-xl font-extrabold tracking-tight text-fo-text">
             {copy.title}
           </h1>
-          <p className="mt-1.5 text-xs leading-relaxed text-fo-text-muted">
+          <p className="mt-1.5 break-words text-xs leading-relaxed text-fo-text-muted">
             {copy.subtitle}
           </p>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
   MobileBottomSheet,
@@ -62,25 +62,49 @@ type ShiftSearchSheetProps = {
   onApply: (filters: ShiftBrowseFilters) => void;
 };
 
+function shiftFiltersKey(filters: ShiftBrowseFilters) {
+  return JSON.stringify(filters);
+}
+
 export function ShiftSearchSheet({
   open,
   filters,
   onClose,
   onApply,
 }: ShiftSearchSheetProps) {
+  const { t } = useLandingLanguage();
+
+  return (
+    <MobileBottomSheet open={open} onClose={onClose} title={t.browse.shifts.searchTitle}>
+      {open ? (
+        <ShiftSearchSheetForm
+          key={shiftFiltersKey(filters)}
+          filters={filters}
+          onClose={onClose}
+          onApply={onApply}
+        />
+      ) : null}
+    </MobileBottomSheet>
+  );
+}
+
+function ShiftSearchSheetForm({
+  filters,
+  onClose,
+  onApply,
+}: {
+  filters: ShiftBrowseFilters;
+  onClose: () => void;
+  onApply: (filters: ShiftBrowseFilters) => void;
+}) {
   const { t, language } = useLandingLanguage();
   const shiftFilters = t.filters.shifts;
   const shiftOptions = t.filters.shiftOptions;
   const workTypeOptions = getShiftWorkTypeOptions(t);
-  const [draft, setDraft] = useState<ShiftBrowseFilters>(filters);
-  const [showMoreFilters, setShowMoreFilters] = useState(false);
-
-  useEffect(() => {
-    if (open) {
-      setDraft(filters);
-      setShowMoreFilters(hasMoreShiftFilters(filters));
-    }
-  }, [open, filters]);
+  const [draft, setDraft] = useState<ShiftBrowseFilters>(() => ({ ...filters }));
+  const [showMoreFilters, setShowMoreFilters] = useState(() =>
+    hasMoreShiftFilters(filters)
+  );
 
   function updateDraft<K extends keyof ShiftBrowseFilters>(
     key: K,
@@ -102,8 +126,7 @@ export function ShiftSearchSheet({
   }
 
   return (
-    <MobileBottomSheet open={open} onClose={onClose} title={t.browse.shifts.searchTitle}>
-      <div className="space-y-2.5">
+    <div className="space-y-2.5">
         <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2">
           <div className="space-y-1">
             <FilterLabel htmlFor="shift-sheet-city">{shiftFilters.city}</FilterLabel>
@@ -232,6 +255,5 @@ export function ShiftSearchSheet({
           </button>
         </div>
       </div>
-    </MobileBottomSheet>
   );
 }

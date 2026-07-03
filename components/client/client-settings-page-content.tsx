@@ -9,11 +9,11 @@ export function ClientSettingsPageContent() {
 
   return (
     <PageShell nav="client" maxWidth="2xl" sidebar>
-      <SectionHeading
-        title={t.settings.pageTitle}
-        subtitle={t.settings.pageSubtitle}
-      />
-      <div className="mt-8">
+      <div className="min-w-0 space-y-8">
+        <SectionHeading
+          title={t.settings.pageTitle}
+          subtitle={t.settings.pageSubtitle}
+        />
         <AccountSettingsContent role="company" />
       </div>
     </PageShell>

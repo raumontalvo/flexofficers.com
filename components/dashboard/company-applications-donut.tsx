@@ -3,6 +3,7 @@
 import { Card } from "@/components/ui";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { cn } from "@/lib/cn";
+import { buildDonutGradientStops } from "@/lib/donut-gradient-stops";
 
 type DonutSegment = {
   label: string;
@@ -46,16 +47,7 @@ function DonutChart({
     );
   }
 
-  let cumulative = 0;
-  const gradientStops = segments
-    .filter((segment) => segment.value > 0)
-    .map((segment) => {
-      const start = (cumulative / total) * 100;
-      cumulative += segment.value;
-      const end = (cumulative / total) * 100;
-      return `${segment.color} ${start}% ${end}%`;
-    })
-    .join(", ");
+  const gradientStops = buildDonutGradientStops(segments, total);
 
   return (
     <div

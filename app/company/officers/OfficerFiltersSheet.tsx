@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import {
@@ -113,17 +113,31 @@ export function OfficerFiltersSheet({
   filters,
   onClose,
 }: OfficerFiltersSheetProps) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <OfficerFiltersSheetForm
+      key={buildOfficerSearchQuery(filters).toString()}
+      filters={filters}
+      onClose={onClose}
+    />
+  );
+}
+
+function OfficerFiltersSheetForm({
+  filters,
+  onClose,
+}: {
+  filters: OfficerSearchFilters;
+  onClose: () => void;
+}) {
   const router = useRouter();
   const { t } = useLandingLanguage();
   const officersCopy = t.company.officers;
   const sheetCopy = t.company.filtersSheet;
   const [draft, setDraft] = useState<DraftFilters>(() => toDraft(filters));
-
-  useEffect(() => {
-    if (open) {
-      setDraft(toDraft(filters));
-    }
-  }, [open, filters]);
 
   function applyDraft() {
     const nextFilters: OfficerSearchFilters = {};
@@ -171,7 +185,7 @@ export function OfficerFiltersSheet({
   }
 
   return (
-    <MobileBottomSheet open={open} onClose={onClose} title={officersCopy.filters}>
+    <MobileBottomSheet open onClose={onClose} title={officersCopy.filters}>
       <div className="space-y-4 pb-2">
         <div className="grid grid-cols-2 gap-2">
           <div className="space-y-1">

@@ -475,7 +475,6 @@ export function CompanyApplicantsPageContent({
 }: CompanyApplicantsPageContentProps) {
   const { t } = useLandingLanguage();
   const copy = t.browse.companyApplicants;
-  const tabs = getCompanyApplicantsTabs(t);
   const [activeTab, setActiveTab] = useState<CompanyApplicantsTab>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [shiftFilter, setShiftFilter] = useState<string | null>(null);
@@ -485,7 +484,9 @@ export function CompanyApplicantsPageContent({
   const [reviewApplicationId, setReviewApplicationId] = useState<string | null>(
     null
   );
-  const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
+    getHiddenCompanyApplicantIds()
+  );
 
   const tabCounts = useMemo(
     () => getCompanyApplicantsTabCounts(applications),
@@ -503,14 +504,14 @@ export function CompanyApplicantsPageContent({
   }, [activeTab, applications, searchQuery, shiftFilter]);
 
   const mobileVisibleApplications = useMemo(() => {
-    const hidden = new Set(getHiddenCompanyApplicantIds());
+    const hidden = new Set(hiddenIds);
     return filteredApplications.filter(
       (application) => !hidden.has(application.id)
     );
-  }, [filteredApplications, hiddenVersion]);
+  }, [filteredApplications, hiddenIds]);
 
   function handleApplicantHidden() {
-    setHiddenVersion((version) => version + 1);
+    setHiddenIds(getHiddenCompanyApplicantIds());
   }
 
   const selectedApplication = useMemo(() => {
@@ -529,19 +530,6 @@ export function CompanyApplicantsPageContent({
       null
     );
   }, [applications, reviewApplicationId]);
-
-  useEffect(() => {
-    if (
-      selectedApplicationId &&
-      filteredApplications.some(
-        (application) => application.id === selectedApplicationId
-      )
-    ) {
-      return;
-    }
-
-    setSelectedApplicationId(filteredApplications[0]?.id ?? null);
-  }, [filteredApplications, selectedApplicationId]);
 
   if (applications.length === 0) {
     return (

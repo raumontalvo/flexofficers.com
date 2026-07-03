@@ -65,9 +65,9 @@ export function CreateSecurityLeadForm() {
   }
 
   return (
-    <Card className="fo-glass-card border border-white/10 p-4 sm:p-6">
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid gap-4 sm:grid-cols-2">
+    <Card className="fo-glass-card min-w-0 border border-white/10 p-4 sm:p-6">
+      <form onSubmit={handleSubmit} className="min-w-0 space-y-5">
+        <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="block space-y-1.5 sm:col-span-1">
             <span className="text-sm font-medium text-fo-text">Contact Name</span>
             <input name="contactName" required className={fieldClassName} />

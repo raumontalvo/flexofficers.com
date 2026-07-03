@@ -19,7 +19,7 @@ export default async function ShiftsPage() {
 
   const [shifts, user] = await Promise.all([
     prisma.shift.findMany({
-      where: buildOfficerBrowseShiftsWhere(null),
+      where: buildOfficerBrowseShiftsWhere(),
       select: {
         ...officerBrowseShiftSelect,
         applications: {

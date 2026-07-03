@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
 import { TranslatedPageHeader } from "@/components/i18n/translated-page-header";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
@@ -36,21 +36,26 @@ export function NotificationsBrowseList({
   const listTopRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<NotificationTab>("all");
   const [notifications, setNotifications] = useState(initialNotifications);
-  const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [prevInitialNotifications, setPrevInitialNotifications] =
+    useState(initialNotifications);
+  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
+    getHiddenNotificationIds()
+  );
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
+  if (initialNotifications !== prevInitialNotifications) {
+    setPrevInitialNotifications(initialNotifications);
     setNotifications(initialNotifications);
-  }, [initialNotifications]);
+  }
 
   const tabs = getNotificationTabs(t);
   const copy = t.browse.notifications;
 
   const visibleNotifications = useMemo(() => {
-    const hidden = new Set(getHiddenNotificationIds());
+    const hidden = new Set(hiddenIds);
     return notifications.filter((notification) => !hidden.has(notification.id));
-  }, [notifications, hiddenVersion]);
+  }, [notifications, hiddenIds]);
 
   const filteredNotifications = useMemo(
     () => filterNotifications(visibleNotifications, activeTab),
@@ -82,9 +87,10 @@ export function NotificationsBrowseList({
     filteredNotifications.length
   );
 
-  useEffect(() => {
+  function handleTabChange(tab: NotificationTab) {
+    setActiveTab(tab);
     setCurrentPage(1);
-  }, [activeTab]);
+  }
 
   function handleMarkAllRead() {
     if (unreadCount === 0) {
@@ -103,7 +109,7 @@ export function NotificationsBrowseList({
   }
 
   function handleDeleted() {
-    setHiddenVersion((version) => version + 1);
+    setHiddenIds(getHiddenNotificationIds());
   }
 
   function goToPage(page: number) {
@@ -158,7 +164,7 @@ export function NotificationsBrowseList({
               <button
                 key={tab.value}
                 type="button"
-                onClick={() => setActiveTab(tab.value)}
+                onClick={() => handleTabChange(tab.value)}
                 className={cn(
                   "relative shrink-0 px-3 py-2.5 text-sm font-medium transition",
                   active

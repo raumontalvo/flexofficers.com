@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { IconShield } from "@/components/landing/icons";
 import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
 import { ApplicantsIcon, NotificationsIcon, SearchIcon } from "@/components/nav/icons";
@@ -188,8 +188,10 @@ function MobileApplicationCard({ application }: { application: SerializedClientL
       <div className="flex items-start gap-3">
         <ProfileAvatar name={application.companyName} src={application.logoUrl} size="md" />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="font-semibold text-fo-text">{application.companyName}</p>
+          <div className="flex min-w-0 flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <p className="min-w-0 break-words font-semibold text-fo-text">
+              {application.companyName}
+            </p>
             <ApplicationStatusBadge status={application.displayStatus} />
           </div>
           <p className="mt-2 text-sm font-medium text-fo-text">{application.leadTitle}</p>
@@ -203,13 +205,17 @@ function MobileApplicationCard({ application }: { application: SerializedClientL
         </div>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3 border-t border-white/[0.06] pt-3 text-xs text-fo-text-muted">
-        <span className="inline-flex items-center gap-1.5">
-          <CalendarIcon className="h-3.5 w-3.5" />
+      <div className="mt-3 grid grid-cols-1 gap-2 border-t border-white/[0.06] pt-3 text-xs text-fo-text-muted sm:grid-cols-3 sm:gap-3">
+        <span className="inline-flex min-w-0 items-center gap-1.5 break-words">
+          <CalendarIcon className="h-3.5 w-3.5 shrink-0" />
           {application.appliedDateLabel} · {application.appliedTimeLabel}
         </span>
-        <span className="font-semibold text-fo-text">{application.offerLabel}</span>
-        <span className="font-semibold text-fo-primary-hover">{copy.viewProfile} ›</span>
+        <span className="min-w-0 break-words font-semibold text-fo-text">
+          {application.offerLabel}
+        </span>
+        <span className="min-w-0 break-words font-semibold text-fo-primary-hover">
+          {copy.viewProfile} ›
+        </span>
       </div>
     </Link>
   );
@@ -253,21 +259,21 @@ export function ClientLeadApplicationsPage({
     pagination.totalItems
   );
 
-  useEffect(() => {
+  function handleTabChange(tab: ClientApplicationPageTab) {
+    setActiveTab(tab);
     setPage(1);
-  }, [activeTab, searchQuery]);
+  }
 
-  useEffect(() => {
-    if (page > pagination.totalPages) {
-      setPage(pagination.totalPages);
-    }
-  }, [page, pagination.totalPages]);
+  function handleSearchChange(value: string) {
+    setSearchQuery(value);
+    setPage(1);
+  }
 
   const hasAnyApplications = applications.length > 0;
   const showFilteredEmpty = hasAnyApplications && pagination.totalItems === 0;
 
   return (
-    <div className="space-y-5 pb-3 lg:pb-0">
+    <div className="space-y-5">
       <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <h1 className="text-2xl font-bold tracking-tight text-fo-text sm:text-3xl">{copy.title}</h1>
@@ -298,8 +304,8 @@ export function ClientLeadApplicationsPage({
 
       <div className="space-y-3">
         <div className="flex flex-col gap-3 border-b border-white/[0.06] pb-1 lg:flex-row lg:items-end lg:justify-between">
-          <div className="overflow-x-auto">
-            <div className="flex min-w-max gap-4">
+          <div className="fo-scrollbar-hide overflow-x-auto">
+            <div className="flex min-w-max gap-3 sm:gap-4">
               {TAB_ORDER.map((tab) => {
                 const isActive = activeTab === tab;
                 const count = tabCounts[tab];
@@ -308,7 +314,7 @@ export function ClientLeadApplicationsPage({
                   <button
                     key={tab}
                     type="button"
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => handleTabChange(tab)}
                     className={cn(
                       "flex items-center gap-2 border-b-2 pb-2.5 text-sm font-semibold transition",
                       isActive
@@ -340,7 +346,7 @@ export function ClientLeadApplicationsPage({
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => handleSearchChange(event.target.value)}
                 placeholder={copy.searchPlaceholder}
                 className="min-h-10 w-full rounded-xl border border-fo-border bg-fo-bg/80 py-2 pr-3 pl-10 text-sm text-fo-text placeholder:text-fo-text-subtle focus:border-fo-primary-bright/50 focus:outline-none focus:ring-2 focus:ring-fo-primary-bright/20"
               />
@@ -363,7 +369,7 @@ export function ClientLeadApplicationsPage({
         </Link>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label={copy.stats.total}
           hint={copy.stats.totalHint}
@@ -501,21 +507,26 @@ export function ClientLeadApplicationsPage({
         padding="none"
         className="fo-glass-card fo-glass-card-hover border border-white/10 p-4 sm:p-5"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4">
           <div className="flex min-w-0 items-start gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-500/20 text-blue-300 shadow-[0_0_20px_-6px_rgba(59,130,246,0.35)]">
               <IconShield className="h-5 w-5" />
             </div>
-            <div className="min-w-0">
-              <h2 className="text-base font-bold text-fo-text sm:text-lg">{copy.ctaTitle}</h2>
-              <p className="mt-1.5 text-sm leading-relaxed text-fo-text-muted">
+            <div className="min-w-0 flex-1">
+              <h2 className="break-words text-base font-bold text-fo-text sm:text-lg">
+                {copy.ctaTitle}
+              </h2>
+              <p className="mt-1.5 break-words text-sm leading-relaxed text-fo-text-muted">
                 {copy.ctaDescription}
               </p>
             </div>
           </div>
           <Link
             href="/client/leads/new"
-            className={buttonClassName({ size: "md", className: "shrink-0 self-start sm:self-center" })}
+            className={buttonClassName({
+              size: "md",
+              className: "w-full sm:w-auto sm:self-start",
+            })}
           >
             {copy.createLead}
           </Link>

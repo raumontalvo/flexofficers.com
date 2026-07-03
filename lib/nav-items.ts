@@ -278,14 +278,7 @@ export function getClientNavItems(
       icon: ShiftsIcon,
       match: (pathname) =>
         pathname === "/client/leads" ||
-        (pathname.startsWith("/client/leads/") &&
-          !pathname.startsWith("/client/leads/new")),
-    },
-    {
-      href: "/client/leads/new",
-      label: labels.create,
-      icon: BrowseIcon,
-      match: (pathname) => pathname.startsWith("/client/leads/new"),
+        pathname.startsWith("/client/leads/"),
     },
     {
       href: "/client/applicants",

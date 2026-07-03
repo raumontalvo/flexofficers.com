@@ -56,7 +56,9 @@ export function ApplicationsBrowseList({
   const listTopRef = useRef<HTMLDivElement>(null);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [hiddenVersion, setHiddenVersion] = useState(0);
+  const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
+    getHiddenApplicationIds()
+  );
   const [deletedIds, setDeletedIds] = useState<Set<string>>(() => new Set());
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -64,12 +66,12 @@ export function ApplicationsBrowseList({
   const copy = t.browse.applications;
 
   const visibleApplications = useMemo(() => {
-    const hiddenIds = new Set(getHiddenApplicationIds());
+    const hiddenIdSet = new Set(hiddenIds);
     return applications.filter(
       (application) =>
-        !hiddenIds.has(application.id) && !deletedIds.has(application.id)
+        !hiddenIdSet.has(application.id) && !deletedIds.has(application.id)
     );
-  }, [applications, hiddenVersion, deletedIds]);
+  }, [applications, hiddenIds, deletedIds]);
 
   const filteredApplications = useMemo(() => {
     if (!statusFilter) {
@@ -123,7 +125,7 @@ export function ApplicationsBrowseList({
   }
 
   function handleListChange() {
-    setHiddenVersion((version) => version + 1);
+    setHiddenIds(getHiddenApplicationIds());
     setCurrentPage(1);
   }
 

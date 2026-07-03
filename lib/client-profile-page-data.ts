@@ -231,7 +231,13 @@ export function buildClientRecentActivity(
   return items
     .sort((a, b) => b.sortAt - a.sortAt)
     .slice(0, 12)
-    .map(({ sortAt: _sortAt, ...item }) => item);
+    .map(({ id, title, subtitle, timestampLabel, createdAt }) => ({
+      id,
+      title,
+      subtitle,
+      timestampLabel,
+      createdAt,
+    }));
 }
 
 export type ClientProfileEditFormState = {

@@ -8,12 +8,7 @@ import {
 
 describe("company staff helpers", () => {
   it("limits officer browse to public open shifts", () => {
-    expect(buildOfficerBrowseShiftsWhere(null)).toEqual({
-      status: ShiftStatus.OPEN,
-      visibility: ShiftVisibility.PUBLIC,
-    });
-
-    expect(buildOfficerBrowseShiftsWhere("officer-1")).toEqual({
+    expect(buildOfficerBrowseShiftsWhere()).toEqual({
       status: ShiftStatus.OPEN,
       visibility: ShiftVisibility.PUBLIC,
     });
