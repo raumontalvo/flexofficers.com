@@ -450,7 +450,7 @@ export default function OfficerProfileForm({
                     />
                   </div>
 
-                  <div className="w-full max-w-full space-y-1 overflow-hidden">
+                  <div className="w-full space-y-1">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-subtle sm:hidden">
                       {pw.expiration}
                     </p>
@@ -468,10 +468,7 @@ export default function OfficerProfileForm({
                           expirationDate: e.target.value,
                         })
                       }
-                      className={cn(
-                        compactFieldClassName,
-                        "box-border block w-full max-w-full min-w-0 overflow-hidden [&::-webkit-date-and-time-value]:max-w-full [&::-webkit-date-and-time-value]:min-w-0"
-                      )}
+                      className={compactFieldClassName}
                     />
                   </div>
 
