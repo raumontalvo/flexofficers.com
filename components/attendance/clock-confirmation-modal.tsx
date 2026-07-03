@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { buttonClassName } from "@/components/ui";
 import { cn } from "@/lib/cn";
 
@@ -50,11 +51,30 @@ export function ClockConfirmationModal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, isSubmitting, onClose]);
 
-  if (!open) {
+  // Lock body scroll only while the modal is open, and always restore the
+  // previous value on close/unmount so the page never gets stuck.
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open]);
+
+  if (!open || typeof document === "undefined") {
     return null;
   }
 
-  return (
+  // Render in a portal on <body> so the overlay escapes any ancestor that
+  // creates a containing block for fixed elements (e.g. `fo-glass-card` uses
+  // `backdrop-filter`). Nesting a backdrop-filtered overlay inside another
+  // backdrop-filter leaves a ghost overlay that only clears on repaint.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
@@ -142,6 +162,7 @@ export function ClockConfirmationModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

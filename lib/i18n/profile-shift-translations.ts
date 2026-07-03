@@ -267,6 +267,8 @@ export type ProfileShiftTranslations = {
       completedOn: string;
       removeFromList: string;
       removeConfirm: string;
+      deleteCompleted: string;
+      deleteCompletedConfirm: string;
       companyContact: string;
       phoneNotProvided: string;
       emailNotProvided: string;
@@ -983,6 +985,9 @@ export const profileShiftEn: ProfileShiftTranslations = {
       removeFromList: "Remove from List",
       removeConfirm:
         "Remove this assignment from your list? This only hides it from your view.",
+      deleteCompleted: "Delete",
+      deleteCompletedConfirm:
+        "Are you sure you want to delete this completed shift? This cannot be undone.",
       companyContact: "Company contact",
       phoneNotProvided: "Phone not provided",
       emailNotProvided: "Email not provided",
@@ -1164,7 +1169,7 @@ export const profileShiftEn: ProfileShiftTranslations = {
         "Are you sure you want to cancel this shift? It will be removed from Available Shifts but kept in your company history.",
       cancelFailed: "Failed to cancel shift",
       deleteConfirm:
-        "Are you sure you want to delete this shift? This cannot be undone.",
+        "Are you sure you want to delete this completed shift? This cannot be undone.",
       deleteFailed: "Failed to delete shift",
       viewShiftAria: "View shift",
       editShiftAria: "Edit shift",
@@ -1701,6 +1706,9 @@ export const profileShiftEs: ProfileShiftTranslations = {
       removeFromList: "Eliminar de la Lista",
       removeConfirm:
         "¿Eliminar esta asignación de tu lista? Solo se oculta de tu vista.",
+      deleteCompleted: "Eliminar",
+      deleteCompletedConfirm:
+        "¿Estás seguro de que deseas eliminar este turno completado? Esta acción no se puede deshacer.",
       companyContact: "Contacto de la empresa",
       phoneNotProvided: "Teléfono no proporcionado",
       emailNotProvided: "Correo no proporcionado",
@@ -1885,7 +1893,7 @@ export const profileShiftEs: ProfileShiftTranslations = {
         "¿Estás seguro de que deseas cancelar este turno? Se eliminará de Turnos Disponibles pero se conservará en el historial de tu empresa.",
       cancelFailed: "No se pudo cancelar el turno",
       deleteConfirm:
-        "¿Estás seguro de que deseas eliminar este turno? Esta acción no se puede deshacer.",
+        "¿Estás seguro de que deseas eliminar este turno completado? Esta acción no se puede deshacer.",
       deleteFailed: "No se pudo eliminar el turno",
       viewShiftAria: "Ver turno",
       editShiftAria: "Editar turno",

@@ -82,6 +82,17 @@ export function AcceptedShiftActions({
               className={cn(mobileActionClass, "border-fo-border text-fo-text-muted hover:text-fo-text")}
             />
           ) : null}
+
+          {tab === "completed" ? (
+            <RemoveFromAcceptedListButton
+              applicationId={applicationId}
+              onRemoved={onListChange}
+              label={card.deleteCompleted}
+              confirmMessage={card.deleteCompletedConfirm}
+              tone="danger"
+              className={mobileActionClass}
+            />
+          ) : null}
         </div>
       </div>
     );
@@ -98,17 +109,27 @@ export function AcceptedShiftActions({
       ) : null}
 
       {tab === "completed" ? (
-        <div
-          className={cn(
-            "leading-tight text-fo-text-muted",
-            desktop ? "text-xs" : "text-[10px]"
-          )}
-        >
-          <p className="font-medium uppercase tracking-wide text-fo-text-subtle">
-            {card.completedOn}
-          </p>
-          <p className="mt-0.5 font-semibold text-fo-success">{completedDateLabel}</p>
-        </div>
+        <>
+          <div
+            className={cn(
+              "leading-tight text-fo-text-muted",
+              desktop ? "text-xs" : "text-[10px]"
+            )}
+          >
+            <p className="font-medium uppercase tracking-wide text-fo-text-subtle">
+              {card.completedOn}
+            </p>
+            <p className="mt-0.5 font-semibold text-fo-success">{completedDateLabel}</p>
+          </div>
+          <RemoveFromAcceptedListButton
+            applicationId={applicationId}
+            onRemoved={onListChange}
+            label={card.deleteCompleted}
+            confirmMessage={card.deleteCompletedConfirm}
+            tone="danger"
+            className={desktop ? "min-h-10 w-full text-sm" : undefined}
+          />
+        </>
       ) : null}
 
       {tab === "cancelled" ? (

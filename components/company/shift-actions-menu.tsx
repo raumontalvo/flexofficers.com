@@ -96,6 +96,7 @@ export function ShiftActionsMenu({
   const copy = getShiftActionMessages(t);
   const [open, setOpen] = useState(false);
   const isCancelled = status === ShiftStatus.CANCELLED;
+  const isCompleted = status === ShiftStatus.COMPLETED;
 
   function closeMenu() {
     setOpen(false);
@@ -166,16 +167,18 @@ export function ShiftActionsMenu({
             {copy.cancel}
           </button>
 
-          <button
-            type="button"
-            className={cn(menuItemClassName, "border-red-500/20 text-red-200")}
-            onClick={() => {
-              closeMenu();
-              void deleteCompanyShift(shiftId, copy);
-            }}
-          >
-            {copy.delete}
-          </button>
+          {isCompleted ? (
+            <button
+              type="button"
+              className={cn(menuItemClassName, "border-red-500/20 text-red-200")}
+              onClick={() => {
+                closeMenu();
+                void deleteCompanyShift(shiftId, copy);
+              }}
+            >
+              {copy.delete}
+            </button>
+          ) : null}
         </div>
       </MobileBottomSheet>
     </>

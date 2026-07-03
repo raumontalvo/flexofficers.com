@@ -86,6 +86,7 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
   const { t } = useLandingLanguage();
   const copy = getShiftActionMessages(t);
   const isCancelled = status === ShiftStatus.CANCELLED;
+  const isCompleted = status === ShiftStatus.COMPLETED;
 
   if (stacked) {
     return (
@@ -104,12 +105,14 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
         >
           {copy.cancel}
         </MobileSecondaryButton>
-        <MobilePrimaryButton
-          onClick={() => void deleteCompanyShift(shiftId, copy)}
-          variant="danger"
-        >
-          {copy.delete}
-        </MobilePrimaryButton>
+        {isCompleted ? (
+          <MobilePrimaryButton
+            onClick={() => void deleteCompanyShift(shiftId, copy)}
+            variant="danger"
+          >
+            {copy.delete}
+          </MobilePrimaryButton>
+        ) : null}
       </div>
     );
   }
@@ -166,18 +169,20 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
         <CancelIcon className="h-4 w-4" />
       </button>
 
-      <button
-        type="button"
-        onClick={() => void deleteCompanyShift(shiftId, copy)}
-        className={cn(
-          iconButtonClassName,
-          "border-red-500/30 text-red-200 hover:bg-red-500/10"
-        )}
-        aria-label={copy.deleteShiftAria}
-        title={copy.delete}
-      >
-        <DeleteIcon className="h-4 w-4" />
-      </button>
+      {isCompleted ? (
+        <button
+          type="button"
+          onClick={() => void deleteCompanyShift(shiftId, copy)}
+          className={cn(
+            iconButtonClassName,
+            "border-red-500/30 text-red-200 hover:bg-red-500/10"
+          )}
+          aria-label={copy.deleteShiftAria}
+          title={copy.delete}
+        >
+          <DeleteIcon className="h-4 w-4" />
+        </button>
+      ) : null}
     </div>
   );
 }

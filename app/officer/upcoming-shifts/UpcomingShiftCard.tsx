@@ -183,13 +183,13 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
         </div>
       </article>
 
-      <article className="fo-glass-card fo-glass-card-hover hidden min-h-[220px] rounded-xl border border-white/10 lg:block">
-        <div className="grid h-full grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-5 p-5">
-          <div className="flex min-w-0 flex-col gap-3 border-r border-white/[0.06] pr-5">
-            <div className="flex flex-wrap items-center gap-2">
+      <article className="fo-glass-card fo-glass-card-hover hidden rounded-xl border border-white/10 lg:block">
+        <div className="grid grid-cols-[minmax(0,1.8fr)_minmax(0,0.85fr)_minmax(0,1.5fr)] items-start gap-4 p-4">
+          <div className="flex min-w-0 flex-col gap-2.5 border-r border-white/[0.06] pr-4">
+            <div className="flex flex-wrap items-center gap-1.5">
               <span
                 className={cn(
-                  "inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold",
+                  "inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold",
                   urgencyToneClasses[urgencyTone]
                 )}
               >
@@ -211,7 +211,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
               ) : null}
               {attendanceStatus === "COMPLETED" ? (
                 <StatusBadge
-                  variant="rejected"
+                  variant="info"
                   className="!min-h-5 !w-fit !px-2 !py-0.5 !text-[10px]"
                 >
                   COMPLETED
@@ -219,14 +219,14 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
               ) : null}
             </div>
 
-            <div className="space-y-1.5">
-              <h2 className="text-xl font-bold leading-tight text-fo-text">{shift.title}</h2>
-              <p className="text-base font-semibold text-fo-primary-bright">
+            <div className="space-y-1">
+              <h2 className="text-lg font-bold leading-tight text-fo-text">{shift.title}</h2>
+              <p className="text-sm font-semibold text-fo-primary-bright">
                 {company.companyName}
               </p>
             </div>
 
-            <div className="space-y-2 text-sm text-fo-text-muted">
+            <div className="space-y-1.5 text-sm text-fo-text-muted">
               <p className="flex items-center gap-2">
                 <LocationIcon className="h-4 w-4 shrink-0 text-red-400" />
                 <span className="min-w-0 truncate">{locationLabel}</span>
@@ -247,32 +247,32 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-col justify-center gap-2 border-r border-white/[0.06] px-1 pr-5">
-            <p className="text-3xl font-bold leading-none text-fo-primary-bright">
+          <div className="flex min-w-0 flex-col gap-1 border-r border-white/[0.06] pr-4">
+            <p className="text-2xl font-bold leading-none text-fo-primary-bright">
               {formatHourlyRate(hourlyRate)}
-              <span className="ml-1 text-base font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
+              <span className="ml-1 text-sm font-semibold text-fo-text-muted">{t.shiftDetail.perHour}</span>
             </p>
             {estimatedPay ? (
-              <p className="text-sm text-fo-text-muted">
+              <p className="text-xs text-fo-text-muted">
                 {interpolate(card.estEarnings, { pay: estimatedPay })}
               </p>
             ) : (
-              <p className="text-sm text-fo-text-subtle">{card.estEarningsUnavailable}</p>
+              <p className="text-xs text-fo-text-subtle">{card.estEarningsUnavailable}</p>
             )}
           </div>
 
-          <div className="flex min-w-0 flex-col justify-between gap-4">
-            <div className="space-y-3">
+          <div className="flex min-w-0 flex-col gap-3">
+            <div className="space-y-2">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-fo-text-muted">
                 {card.companyContact}
               </p>
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-2.5">
                 <ProfileAvatar
                   name={company.companyName}
                   size="sm"
-                  className="!h-10 !w-10 shrink-0 !text-xs"
+                  className="!h-9 !w-9 shrink-0 !text-xs"
                 />
-                <div className="min-w-0 space-y-1">
+                <div className="min-w-0 space-y-0.5">
                   <p className="truncate text-sm font-semibold text-fo-text">{contactName}</p>
                   {contactAvailable && company.phone ? (
                     <p className="truncate text-xs text-fo-text-muted">
@@ -315,7 +315,9 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
               >
                 {card.viewDetails}
               </ShiftDetailLink>
-              <CancelAssignmentButton applicationId={application.id} />
+              {attendanceStatus !== "COMPLETED" ? (
+                <CancelAssignmentButton applicationId={application.id} />
+              ) : null}
             </div>
           </div>
         </div>

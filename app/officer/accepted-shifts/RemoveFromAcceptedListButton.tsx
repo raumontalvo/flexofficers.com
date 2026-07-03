@@ -35,18 +35,26 @@ type RemoveFromAcceptedListButtonProps = {
   applicationId: string;
   onRemoved: () => void;
   className?: string;
+  label?: string;
+  confirmMessage?: string;
+  tone?: "default" | "danger";
 };
 
 export function RemoveFromAcceptedListButton({
   applicationId,
   onRemoved,
   className,
+  label,
+  confirmMessage,
+  tone = "default",
 }: RemoveFromAcceptedListButtonProps) {
   const { t } = useLandingLanguage();
   const card = t.acceptedShifts.card;
+  const buttonLabel = label ?? card.removeFromList;
+  const confirmCopy = confirmMessage ?? card.removeConfirm;
 
   function handleRemove() {
-    const confirmed = window.confirm(card.removeConfirm);
+    const confirmed = window.confirm(confirmCopy);
 
     if (!confirmed) {
       return;
@@ -61,11 +69,14 @@ export function RemoveFromAcceptedListButton({
       type="button"
       onClick={handleRemove}
       className={cn(
-        "inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-border px-3 py-1.5 text-xs font-semibold text-fo-text-muted transition hover:border-fo-border-strong hover:text-fo-text",
+        "inline-flex min-h-8 items-center justify-center rounded-lg border px-3 py-1.5 text-xs font-semibold transition",
+        tone === "danger"
+          ? "border-red-500/35 text-red-300 hover:border-red-500/50 hover:bg-red-500/10"
+          : "border-fo-border text-fo-text-muted hover:border-fo-border-strong hover:text-fo-text",
         className
       )}
     >
-      {card.removeFromList}
+      {buttonLabel}
     </button>
   );
 }
