@@ -84,6 +84,8 @@ export async function POST(req: Request) {
       status: existing.status,
       shiftStatus: existing.shift.status,
       shiftEndTime: existing.shift.endTime,
+      clockInAt: existing.clockInAt,
+      clockOutAt: existing.clockOutAt,
     });
 
     if (!cancellationCheck.allowed) {

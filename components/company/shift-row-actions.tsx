@@ -87,6 +87,8 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
   const copy = getShiftActionMessages(t);
   const isCancelled = status === ShiftStatus.CANCELLED;
   const isCompleted = status === ShiftStatus.COMPLETED;
+  const showDelete = isCancelled || isCompleted;
+  const deleteConfirmMessage = isCancelled ? copy.deleteCancelledConfirm : undefined;
 
   if (stacked) {
     return (
@@ -105,9 +107,9 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
         >
           {copy.cancel}
         </MobileSecondaryButton>
-        {isCompleted ? (
+        {showDelete ? (
           <MobilePrimaryButton
-            onClick={() => void deleteCompanyShift(shiftId, copy)}
+            onClick={() => void deleteCompanyShift(shiftId, copy, deleteConfirmMessage)}
             variant="danger"
           >
             {copy.delete}
@@ -169,10 +171,10 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
         <CancelIcon className="h-4 w-4" />
       </button>
 
-      {isCompleted ? (
+      {showDelete ? (
         <button
           type="button"
-          onClick={() => void deleteCompanyShift(shiftId, copy)}
+          onClick={() => void deleteCompanyShift(shiftId, copy, deleteConfirmMessage)}
           className={cn(
             iconButtonClassName,
             "border-red-500/30 text-red-200 hover:bg-red-500/10"

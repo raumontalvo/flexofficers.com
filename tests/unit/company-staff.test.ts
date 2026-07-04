@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { ShiftStatus, ShiftVisibility } from "@/app/generated/prisma/enums";
+import {
+  ApplicationStatus,
+  ShiftStatus,
+  ShiftVisibility,
+} from "@/app/generated/prisma/enums";
 import {
   buildOfficerBrowseShiftsWhere,
   getShiftVisibilityLabel,
@@ -11,6 +15,23 @@ describe("company staff helpers", () => {
     expect(buildOfficerBrowseShiftsWhere()).toEqual({
       status: ShiftStatus.OPEN,
       visibility: ShiftVisibility.PUBLIC,
+    });
+  });
+
+  it("excludes shifts the officer is already accepted/clocked-in/completed for", () => {
+    expect(buildOfficerBrowseShiftsWhere("officer-1")).toEqual({
+      status: ShiftStatus.OPEN,
+      visibility: ShiftVisibility.PUBLIC,
+      applications: {
+        none: {
+          officerId: "officer-1",
+          OR: [
+            { status: ApplicationStatus.ACCEPTED },
+            { clockInAt: { not: null } },
+            { clockOutAt: { not: null } },
+          ],
+        },
+      },
     });
   });
 

@@ -315,7 +315,7 @@ export function UpcomingShiftCard({ application }: UpcomingShiftCardProps) {
               >
                 {card.viewDetails}
               </ShiftDetailLink>
-              {attendanceStatus !== "COMPLETED" ? (
+              {attendanceStatus === "NOT_STARTED" ? (
                 <CancelAssignmentButton applicationId={application.id} />
               ) : null}
             </div>

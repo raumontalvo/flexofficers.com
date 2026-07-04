@@ -18,34 +18,38 @@ export const dynamic = "force-dynamic";
 export default async function ShiftsPage() {
   const clerkUser = await currentUser();
 
-  const [shifts, user] = await Promise.all([
-    prisma.shift.findMany({
-      where: buildOfficerBrowseShiftsWhere(),
-      select: {
-        ...officerBrowseShiftSelect,
-        applications: {
-          where: {
-            status: ApplicationStatus.ACCEPTED,
-          },
-          select: applicationIdOnlySelect,
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-    clerkUser
-      ? prisma.user.findUnique({
-          where: { clerkId: clerkUser.id },
-          select: {
-            role: true,
-            officer: {
-              select: officerProfileCompletionSelect,
+  const user = clerkUser
+    ? await prisma.user.findUnique({
+        where: { clerkId: clerkUser.id },
+        select: {
+          role: true,
+          officer: {
+            select: {
+              id: true,
+              ...officerProfileCompletionSelect,
             },
           },
-        })
-      : Promise.resolve(null),
-  ]);
+        },
+      })
+    : null;
+
+  const officerId = user?.officer?.id ?? null;
+
+  const shifts = await prisma.shift.findMany({
+    where: buildOfficerBrowseShiftsWhere(officerId),
+    select: {
+      ...officerBrowseShiftSelect,
+      applications: {
+        where: {
+          status: ApplicationStatus.ACCEPTED,
+        },
+        select: applicationIdOnlySelect,
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   const browseShifts: ShiftCardData[] = shifts.map((shift) => {
     const staffing = getShiftStaffingMetrics({

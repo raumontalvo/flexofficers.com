@@ -4,7 +4,11 @@ import { CancelAssignmentButton } from "@/app/officer/CancelAssignmentButton";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { ShiftDetailLink } from "@/components/shifts/shift-detail-link";
 import { cn } from "@/lib/cn";
-import type { AcceptedShiftTab } from "@/lib/officer-accepted-shift-data";
+import type {
+  AcceptedShiftTab,
+  OfficerAcceptedShiftData,
+} from "@/lib/officer-accepted-shift-data";
+import { ClockInDetailsButton } from "./ClockInDetailsButton";
 import { RemoveFromAcceptedListButton } from "./RemoveFromAcceptedListButton";
 
 type AcceptedShiftActionsProps = {
@@ -12,6 +16,7 @@ type AcceptedShiftActionsProps = {
   shiftId: string;
   tab: AcceptedShiftTab;
   completedDateLabel: string;
+  attendance?: OfficerAcceptedShiftData["attendance"];
   onListChange: () => void;
   layout?: "compact" | "desktop" | "mobile-row";
 };
@@ -24,6 +29,7 @@ export function AcceptedShiftActions({
   shiftId,
   tab,
   completedDateLabel,
+  attendance,
   onListChange,
   layout = "compact",
 }: AcceptedShiftActionsProps) {
@@ -67,7 +73,7 @@ export function AcceptedShiftActions({
             {card.viewShift}
           </ShiftDetailLink>
 
-          {tab === "upcoming" ? (
+          {tab === "upcoming" && !attendance?.clockInAt ? (
             <CancelAssignmentButton
               applicationId={applicationId}
               label={card.cancel}
@@ -80,6 +86,13 @@ export function AcceptedShiftActions({
               applicationId={applicationId}
               onRemoved={onListChange}
               className={cn(mobileActionClass, "border-fo-border text-fo-text-muted hover:text-fo-text")}
+            />
+          ) : null}
+
+          {tab === "completed" && attendance ? (
+            <ClockInDetailsButton
+              attendance={attendance}
+              className={cn(mobileActionClass, "border-fo-primary-bright/40 text-fo-primary-bright hover:border-fo-primary-bright hover:bg-fo-primary/10")}
             />
           ) : null}
 
@@ -104,7 +117,7 @@ export function AcceptedShiftActions({
         {card.viewShift}
       </ShiftDetailLink>
 
-      {tab === "upcoming" ? (
+      {tab === "upcoming" && !attendance?.clockInAt ? (
         <CancelAssignmentButton applicationId={applicationId} className={cancelClassName} />
       ) : null}
 
@@ -121,6 +134,12 @@ export function AcceptedShiftActions({
             </p>
             <p className="mt-0.5 font-semibold text-fo-success">{completedDateLabel}</p>
           </div>
+          {attendance ? (
+            <ClockInDetailsButton
+              attendance={attendance}
+              className={desktop ? "min-h-10 w-full text-sm" : "w-full"}
+            />
+          ) : null}
           <RemoveFromAcceptedListButton
             applicationId={applicationId}
             onRemoved={onListChange}

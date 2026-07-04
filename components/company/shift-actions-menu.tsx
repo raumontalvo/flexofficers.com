@@ -57,9 +57,10 @@ export async function cancelCompanyShift(
 
 export async function deleteCompanyShift(
   shiftId: string,
-  messages: ShiftActionMessages
+  messages: ShiftActionMessages,
+  confirmMessage?: string
 ) {
-  const confirmed = window.confirm(messages.deleteConfirm);
+  const confirmed = window.confirm(confirmMessage ?? messages.deleteConfirm);
 
   if (!confirmed) {
     return false;
@@ -97,6 +98,8 @@ export function ShiftActionsMenu({
   const [open, setOpen] = useState(false);
   const isCancelled = status === ShiftStatus.CANCELLED;
   const isCompleted = status === ShiftStatus.COMPLETED;
+  const showDelete = isCancelled || isCompleted;
+  const deleteConfirmMessage = isCancelled ? copy.deleteCancelledConfirm : undefined;
 
   function closeMenu() {
     setOpen(false);
@@ -167,13 +170,13 @@ export function ShiftActionsMenu({
             {copy.cancel}
           </button>
 
-          {isCompleted ? (
+          {showDelete ? (
             <button
               type="button"
               className={cn(menuItemClassName, "border-red-500/20 text-red-200")}
               onClick={() => {
                 closeMenu();
-                void deleteCompanyShift(shiftId, copy);
+                void deleteCompanyShift(shiftId, copy, deleteConfirmMessage);
               }}
             >
               {copy.delete}

@@ -145,6 +145,7 @@ export function AcceptedShiftCard({
             shiftId={shift.id}
             tab={tab}
             completedDateLabel={completedDateLabel}
+            attendance={application.attendance}
             onListChange={onListChange}
             layout="mobile-row"
           />
@@ -244,6 +245,7 @@ export function AcceptedShiftCard({
               shiftId={shift.id}
               tab={tab}
               completedDateLabel={completedDateLabel}
+              attendance={application.attendance}
               onListChange={onListChange}
               layout="desktop"
             />

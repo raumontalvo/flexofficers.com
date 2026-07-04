@@ -128,6 +128,8 @@ export function ApplicationCard({
             status={application.status}
             shiftStatus={shift.status}
             shiftEndTime={shift.endTime}
+            clockInAt={application.clockInAt}
+            clockOutAt={application.clockOutAt}
             onListChange={onListChange}
             onDeleted={onDeleted}
             layout="mobile-row"
@@ -203,6 +205,8 @@ export function ApplicationCard({
               status={application.status}
               shiftStatus={shift.status}
               shiftEndTime={shift.endTime}
+              clockInAt={application.clockInAt}
+              clockOutAt={application.clockOutAt}
               onListChange={onListChange}
               onDeleted={onDeleted}
               layout="desktop"

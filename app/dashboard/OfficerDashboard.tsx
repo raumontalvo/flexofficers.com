@@ -8,7 +8,7 @@ import { QuickActionsRow } from "@/components/dashboard/quick-actions-row";
 import { RecommendedNextStepsCard } from "@/components/dashboard/recommended-next-steps-card";
 import { prisma } from "@/lib/prisma";
 import { buildOfficerBrowseShiftsWhere } from "@/lib/company-staff";
-import { ApplicationStatus } from "@/app/generated/prisma/enums";
+import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
 
 type OfficerDashboardProps = {
   firstName?: string | null;
@@ -59,20 +59,33 @@ export default async function OfficerDashboard({
         })
       : Promise.resolve(0),
     officerId
-      ? prisma.application.count({
+      ? // Mirror the Upcoming Shifts page logic (isUpcomingFutureShift): exclude
+        // shifts the officer clocked out of, plus cancelled/completed shifts, so
+        // this count never shows an "upcoming" shift the page renders as empty.
+        prisma.application.count({
           where: {
             officerId,
             status: ApplicationStatus.ACCEPTED,
-            shift: {
-              startTime: {
-                gte: now,
+            clockOutAt: null,
+            OR: [
+              { clockInAt: { not: null } },
+              {
+                clockInAt: null,
+                shift: {
+                  status: {
+                    notIn: [ShiftStatus.CANCELLED, ShiftStatus.COMPLETED],
+                  },
+                  endTime: {
+                    gt: now,
+                  },
+                },
               },
-            },
+            ],
           },
         })
       : Promise.resolve(0),
     prisma.shift.count({
-      where: buildOfficerBrowseShiftsWhere(),
+      where: buildOfficerBrowseShiftsWhere(officerId),
     }),
   ]);
 

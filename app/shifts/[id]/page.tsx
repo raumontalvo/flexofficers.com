@@ -112,7 +112,11 @@ export default async function ShiftDetailPage({
                   where: {
                     shiftId: id,
                   },
-                  select: applicationIdStatusSelect,
+                  select: {
+                    ...applicationIdStatusSelect,
+                    clockInAt: true,
+                    clockOutAt: true,
+                  },
                   take: 1,
                 },
               },
@@ -135,9 +139,15 @@ export default async function ShiftDetailPage({
   const applicationId = officerApplication?.id ?? null;
   const applicationStatus = officerApplication?.status ?? null;
   const isAcceptedOfficer = applicationStatus === ApplicationStatus.ACCEPTED;
+  // Once the officer clocks in (on the shift) or clocks out (completed), the
+  // assignment can no longer be cancelled from the shift detail page.
+  const officerClockedIn = Boolean(officerApplication?.clockInAt);
+  const officerCompletedShift = Boolean(officerApplication?.clockOutAt);
   const canCancelAssignment =
     isAcceptedOfficer &&
     applicationId !== null &&
+    !officerClockedIn &&
+    !officerCompletedShift &&
     !isAcceptedShiftPastOrClosed(displayStatus, shift.endTime);
   const hasBlockingApplication =
     applicationStatus === ApplicationStatus.PENDING ||
@@ -206,7 +216,7 @@ export default async function ShiftDetailPage({
           description: shift.description,
           createdAt: shift.createdAt,
           startTime: shift.startTime,
-          hourlyRate: shift.hourlyRate,
+          hourlyRate: Number(shift.hourlyRate),
           companyName: shift.company.companyName,
           city: shift.city,
           state: shift.state,
@@ -232,7 +242,7 @@ export default async function ShiftDetailPage({
           title: shift.title,
           description: shift.description,
           location: shift.location,
-          hourlyRate: shift.hourlyRate,
+          hourlyRate: Number(shift.hourlyRate),
           startTime: shift.startTime,
           endTime: shift.endTime,
           positionsNeeded: shift.positionsNeeded,
@@ -279,7 +289,7 @@ export default async function ShiftDetailPage({
           title: shift.title,
           description: shift.description,
           location: shift.location,
-          hourlyRate: shift.hourlyRate,
+          hourlyRate: Number(shift.hourlyRate),
           startTime: shift.startTime,
           endTime: shift.endTime,
           positionsNeeded: shift.positionsNeeded,

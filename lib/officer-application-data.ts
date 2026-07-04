@@ -10,6 +10,8 @@ export type OfficerApplicationData = {
   id: string;
   status: ApplicationStatus;
   appliedAt: string;
+  clockInAt: string | null;
+  clockOutAt: string | null;
   shift: {
     id: string;
     title: string;
@@ -39,6 +41,8 @@ export function mapOfficerApplication(
     id: application.id,
     status: application.status,
     appliedAt: application.appliedAt.toISOString(),
+    clockInAt: application.clockInAt?.toISOString() ?? null,
+    clockOutAt: application.clockOutAt?.toISOString() ?? null,
     shift: {
       id: application.shift.id,
       title: application.shift.title,

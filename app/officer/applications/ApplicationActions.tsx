@@ -15,6 +15,8 @@ type ApplicationActionsProps = {
   status: ApplicationStatus;
   shiftStatus: ShiftStatus;
   shiftEndTime: string;
+  clockInAt?: string | null;
+  clockOutAt?: string | null;
   onListChange: () => void;
   onDeleted?: (applicationId: string) => void;
   layout?: "compact" | "mobile-row" | "desktop";
@@ -76,6 +78,8 @@ export function ApplicationActions({
   status,
   shiftStatus,
   shiftEndTime,
+  clockInAt = null,
+  clockOutAt = null,
   onDeleted,
   layout = "compact",
 }: ApplicationActionsProps) {
@@ -90,6 +94,9 @@ export function ApplicationActions({
     shiftStatus,
     shiftEndTime,
   });
+  // Once the officer has clocked in or completed the shift, the assignment can
+  // no longer be cancelled.
+  const canCancel = !clockInAt && !clockOutAt;
 
   function handleDeleted(applicationId: string) {
     onDeleted?.(applicationId);
@@ -135,7 +142,7 @@ export function ApplicationActions({
           />
         ) : null}
 
-        {status === "ACCEPTED" && !showDelete ? (
+        {status === "ACCEPTED" && !showDelete && canCancel ? (
           <CancelAssignmentButton
             applicationId={applicationId}
             label={cancelLabel}
@@ -171,7 +178,7 @@ export function ApplicationActions({
         />
       ) : null}
 
-      {status === "ACCEPTED" && !showDelete ? (
+      {status === "ACCEPTED" && !showDelete && canCancel ? (
         <CancelAssignmentButton
           applicationId={applicationId}
           className={cn(actionButtonClass, deleteButtonClass)}

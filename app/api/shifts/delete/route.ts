@@ -57,15 +57,17 @@ export async function POST(req: Request) {
       );
     }
 
-    // Only completed shifts may be manually deleted. Completion is either the
-    // stored status or derived from every accepted officer having clocked out.
-    const isCompleted =
+    // Only cancelled or completed shifts may be manually deleted. Completion is
+    // either the stored status or derived from every accepted officer having
+    // clocked out. Open/filled/active shifts must be cancelled first.
+    const isDeletable =
+      shift.status === ShiftStatus.CANCELLED ||
       shift.status === ShiftStatus.COMPLETED ||
       isShiftAttendanceCompleted(shift);
 
-    if (!isCompleted) {
+    if (!isDeletable) {
       return NextResponse.json(
-        { error: "Only completed shifts can be deleted." },
+        { error: "Only cancelled or completed shifts can be deleted." },
         { status: 400 }
       );
     }

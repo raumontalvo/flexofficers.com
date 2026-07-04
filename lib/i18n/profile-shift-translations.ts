@@ -269,6 +269,18 @@ export type ProfileShiftTranslations = {
       removeConfirm: string;
       deleteCompleted: string;
       deleteCompletedConfirm: string;
+      clockInDetails: string;
+      attendanceTitle: string;
+      attendanceClockIn: string;
+      attendanceClockOut: string;
+      attendanceClockInLocation: string;
+      attendanceClockOutLocation: string;
+      attendanceTotalHours: string;
+      attendanceHoursUnit: string;
+      attendanceMinutesUnit: string;
+      attendanceViewMap: string;
+      attendanceNotAvailable: string;
+      attendanceClose: string;
       companyContact: string;
       phoneNotProvided: string;
       emailNotProvided: string;
@@ -445,6 +457,7 @@ export type ProfileShiftTranslations = {
       cancelConfirm: string;
       cancelFailed: string;
       deleteConfirm: string;
+      deleteCancelledConfirm: string;
       deleteFailed: string;
       viewShiftAria: string;
       editShiftAria: string;
@@ -988,6 +1001,18 @@ export const profileShiftEn: ProfileShiftTranslations = {
       deleteCompleted: "Delete",
       deleteCompletedConfirm:
         "Are you sure you want to delete this completed shift? This cannot be undone.",
+      clockInDetails: "Clock In Details",
+      attendanceTitle: "Attendance Details",
+      attendanceClockIn: "Clock In",
+      attendanceClockOut: "Clock Out",
+      attendanceClockInLocation: "Clock-in location",
+      attendanceClockOutLocation: "Clock-out location",
+      attendanceTotalHours: "Total hours worked",
+      attendanceHoursUnit: "{hours} hr",
+      attendanceMinutesUnit: "{minutes} min",
+      attendanceViewMap: "View Map",
+      attendanceNotAvailable: "Not available",
+      attendanceClose: "Close",
       companyContact: "Company contact",
       phoneNotProvided: "Phone not provided",
       emailNotProvided: "Email not provided",
@@ -1170,6 +1195,8 @@ export const profileShiftEn: ProfileShiftTranslations = {
       cancelFailed: "Failed to cancel shift",
       deleteConfirm:
         "Are you sure you want to delete this completed shift? This cannot be undone.",
+      deleteCancelledConfirm:
+        "Are you sure you want to delete this cancelled shift?",
       deleteFailed: "Failed to delete shift",
       viewShiftAria: "View shift",
       editShiftAria: "Edit shift",
@@ -1709,6 +1736,18 @@ export const profileShiftEs: ProfileShiftTranslations = {
       deleteCompleted: "Eliminar",
       deleteCompletedConfirm:
         "¿Estás seguro de que deseas eliminar este turno completado? Esta acción no se puede deshacer.",
+      clockInDetails: "Detalles de Entrada",
+      attendanceTitle: "Detalles de Asistencia",
+      attendanceClockIn: "Entrada",
+      attendanceClockOut: "Salida",
+      attendanceClockInLocation: "Ubicación de entrada",
+      attendanceClockOutLocation: "Ubicación de salida",
+      attendanceTotalHours: "Horas totales trabajadas",
+      attendanceHoursUnit: "{hours} h",
+      attendanceMinutesUnit: "{minutes} min",
+      attendanceViewMap: "Ver Mapa",
+      attendanceNotAvailable: "No disponible",
+      attendanceClose: "Cerrar",
       companyContact: "Contacto de la empresa",
       phoneNotProvided: "Teléfono no proporcionado",
       emailNotProvided: "Correo no proporcionado",
@@ -1894,6 +1933,8 @@ export const profileShiftEs: ProfileShiftTranslations = {
       cancelFailed: "No se pudo cancelar el turno",
       deleteConfirm:
         "¿Estás seguro de que deseas eliminar este turno completado? Esta acción no se puede deshacer.",
+      deleteCancelledConfirm:
+        "¿Estás seguro de que deseas eliminar este turno cancelado?",
       deleteFailed: "No se pudo eliminar el turno",
       viewShiftAria: "Ver turno",
       editShiftAria: "Editar turno",

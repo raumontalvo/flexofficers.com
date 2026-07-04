@@ -1,5 +1,9 @@
 import type { Prisma } from "@/app/generated/prisma/client";
-import { ShiftStatus, ShiftVisibility } from "@/app/generated/prisma/enums";
+import {
+  ApplicationStatus,
+  ShiftStatus,
+  ShiftVisibility,
+} from "@/app/generated/prisma/enums";
 import { officerSearchCardSelect, officerUserSummarySelect } from "@/lib/officer-fields";
 import { serializeOfficerSearchResult } from "@/lib/company-officers-page";
 
@@ -33,11 +37,35 @@ export type SerializedCompanyStaffMember = ReturnType<
   typeof serializeCompanyStaffMember
 >;
 
-export function buildOfficerBrowseShiftsWhere() {
-  return {
+export function buildOfficerBrowseShiftsWhere(
+  officerId?: string | null
+): Prisma.ShiftWhereInput {
+  const base: Prisma.ShiftWhereInput = {
     status: ShiftStatus.OPEN,
     visibility: ShiftVisibility.PUBLIC,
-  } satisfies Prisma.ShiftWhereInput;
+  };
+
+  if (!officerId) {
+    return base;
+  }
+
+  // Hide shifts where this officer already has a committed relationship: an
+  // accepted application, an in-progress clock-in, or a completed clock-out.
+  // This keeps completed assignments out of open shifts and stops the officer
+  // from re-applying to a shift they already worked or are assigned to.
+  return {
+    ...base,
+    applications: {
+      none: {
+        officerId,
+        OR: [
+          { status: ApplicationStatus.ACCEPTED },
+          { clockInAt: { not: null } },
+          { clockOutAt: { not: null } },
+        ],
+      },
+    },
+  };
 }
 
 export function getShiftVisibilityLabel(visibility: ShiftVisibility) {

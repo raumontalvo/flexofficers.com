@@ -48,4 +48,33 @@ describe("validateApplicationCancellation", () => {
     expect(result.allowed).toBe(false);
     expect(result.message).toBe("This assignment can no longer be cancelled.");
   });
+
+  it("blocks cancellation once the officer has clocked in", () => {
+    const result = validateApplicationCancellation({
+      status: ApplicationStatus.ACCEPTED,
+      shiftStatus: ShiftStatus.OPEN,
+      shiftEndTime: "2099-01-01T00:00:00.000Z",
+      clockInAt: "2099-01-01T00:00:00.000Z",
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.message).toBe(
+      "You have already clocked in and can no longer cancel this assignment."
+    );
+  });
+
+  it("blocks cancellation once the officer has completed the shift", () => {
+    const result = validateApplicationCancellation({
+      status: ApplicationStatus.ACCEPTED,
+      shiftStatus: ShiftStatus.OPEN,
+      shiftEndTime: "2099-01-01T00:00:00.000Z",
+      clockInAt: "2099-01-01T00:00:00.000Z",
+      clockOutAt: "2099-01-01T02:00:00.000Z",
+    });
+
+    expect(result.allowed).toBe(false);
+    expect(result.message).toBe(
+      "This assignment is already completed and can no longer be cancelled."
+    );
+  });
 });

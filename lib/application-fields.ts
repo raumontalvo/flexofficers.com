@@ -43,6 +43,8 @@ export const officerApplicationShiftSelect = {
 
 export const officerApplicationListSelect = {
   ...applicationListCoreSelect,
+  clockInAt: true,
+  clockOutAt: true,
   shift: {
     select: officerApplicationShiftSelect,
   },
