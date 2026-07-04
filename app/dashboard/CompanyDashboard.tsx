@@ -44,6 +44,7 @@ export default async function CompanyDashboard({
     prisma.shift.findMany({
       where: {
         companyId: company.id,
+        hiddenForCompanyAt: null,
       },
       select: {
         id: true,
@@ -69,6 +70,7 @@ export default async function CompanyDashboard({
       where: {
         shift: {
           companyId: company.id,
+          hiddenForCompanyAt: null,
         },
       },
       select: {
@@ -80,6 +82,7 @@ export default async function CompanyDashboard({
         status: "PENDING",
         shift: {
           companyId: company.id,
+          hiddenForCompanyAt: null,
         },
       },
     }),

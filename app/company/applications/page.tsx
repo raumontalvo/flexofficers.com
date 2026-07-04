@@ -14,6 +14,7 @@ export default async function CompanyApplicationsPage() {
   const applications = await prisma.application.findMany({
     where: {
       shift: {
+        hiddenForCompanyAt: null,
         company: {
           user: {
             clerkId: clerkUser.id,

@@ -15,6 +15,7 @@ export default async function CompanyAcceptedOfficersPage() {
     where: {
       status: ApplicationStatus.ACCEPTED,
       shift: {
+        hiddenForCompanyAt: null,
         company: {
           user: {
             clerkId: clerkUser.id,

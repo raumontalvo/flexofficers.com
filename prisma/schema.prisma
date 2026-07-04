@@ -237,6 +237,10 @@ model Shift {
   visibility            ShiftVisibility        @default(PUBLIC)
   status                ShiftStatus            @default(OPEN)
   recurringScheduleId   String?
+  // Soft-delete for the owning company only. When set, the shift is hidden from
+  // the company's own shift lists but the row (and all officer applications /
+  // attendance history) is preserved so officers and existing links still work.
+  hiddenForCompanyAt    DateTime?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
 

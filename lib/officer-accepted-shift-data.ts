@@ -142,24 +142,22 @@ export const ACCEPTED_SHIFT_TABS: {
 
 export function getAcceptedShiftTab(
   shiftStatus: ShiftStatus,
-  endTime: string,
+  _endTime: string,
   clockOutAt?: string | null
 ): AcceptedShiftTab {
   if (shiftStatus === "CANCELLED") {
     return "cancelled";
   }
 
-  // Once the officer clocks out, the shift is completed for them regardless of
-  // the scheduled end time, so it lands under the Completed tab in My Shifts.
+  // A shift is only completed once the assignment is finished: the officer has
+  // clocked out, or the shift itself has been marked COMPLETED (which happens
+  // when every accepted officer clocks out). The scheduled end time passing on
+  // its own must NOT complete a shift — officers may still clock in/out late.
   if (clockOutAt) {
     return "completed";
   }
 
   if (shiftStatus === "COMPLETED") {
-    return "completed";
-  }
-
-  if (new Date(endTime) < new Date()) {
     return "completed";
   }
 

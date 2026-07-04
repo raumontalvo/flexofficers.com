@@ -57,7 +57,7 @@ describe("officer upcoming shift data helpers", () => {
       endTime: "2099-06-12T02:00:00.000Z",
     });
 
-    expect(isUpcomingFutureShift(shift, now)).toBe(true);
+    expect(isUpcomingFutureShift(shift)).toBe(true);
     expect(getDaysUntilStart(shift.shift.startTime, now)).toBe(0);
     expect(formatStartsInLabel(0)).toBe("Starts today");
     expect(getUpcomingUrgencyTone(2)).toBe("urgent");
@@ -82,6 +82,9 @@ describe("officer upcoming shift data helpers", () => {
       startTime: "2099-06-01T06:00:00.000Z",
       endTime: "2099-06-01T14:00:00.000Z",
     });
+    // Scheduled end time already passed, but the officer never clocked out, so
+    // the assignment is not complete — it must remain in Upcoming (late clock-in
+    // is still allowed).
     const ended = createShift({
       id: "shift-ended",
       startTime: "2099-05-20T18:00:00.000Z",
@@ -89,19 +92,19 @@ describe("officer upcoming shift data helpers", () => {
     });
 
     const upcoming = [soon, later, pastStart, ended].filter((application) =>
-      isUpcomingFutureShift(application, now)
+      isUpcomingFutureShift(application)
     );
 
-    expect(upcoming).toHaveLength(3);
+    expect(upcoming).toHaveLength(4);
     expect(filterUpcomingShifts([soon, later, pastStart, ended], "next7", now)).toHaveLength(2);
     expect(sortUpcomingShifts([later, soon], "soonest")[0].shift.id).toBe(
       "shift-soon"
     );
 
     const summary = buildUpcomingShiftSummary([soon, later, pastStart, ended], now);
-    expect(summary.count).toBe(3);
-    expect(summary.expectedEarnings).toBe(480);
-    expect(summary.scheduledHours).toBe(24);
+    expect(summary.count).toBe(4);
+    expect(summary.expectedEarnings).toBe(2560);
+    expect(summary.scheduledHours).toBe(128);
     expect(summary.nextShiftStartsIn).toBe("Starts today");
   });
 });

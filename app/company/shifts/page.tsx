@@ -28,6 +28,7 @@ export default async function CompanyShiftsPage() {
 
   const shifts = await prisma.shift.findMany({
     where: {
+      hiddenForCompanyAt: null,
       company: {
         user: {
           clerkId: clerkUser.id,

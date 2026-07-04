@@ -37,7 +37,6 @@ export default async function OfficerDashboard({
   officer,
 }: OfficerDashboardProps) {
   const officerId = officer?.id ?? null;
-  const now = new Date();
 
   const [
     applicationsCount,
@@ -59,28 +58,20 @@ export default async function OfficerDashboard({
         })
       : Promise.resolve(0),
     officerId
-      ? // Mirror the Upcoming Shifts page logic (isUpcomingFutureShift): exclude
-        // shifts the officer clocked out of, plus cancelled/completed shifts, so
-        // this count never shows an "upcoming" shift the page renders as empty.
+      ? // Mirror the Upcoming Shifts page logic (isUpcomingFutureShift): an
+        // accepted shift stays "upcoming" until the officer clocks out or the
+        // shift is cancelled/completed. The scheduled end time no longer removes
+        // it, so this count matches what the Upcoming Shifts page renders.
         prisma.application.count({
           where: {
             officerId,
             status: ApplicationStatus.ACCEPTED,
             clockOutAt: null,
-            OR: [
-              { clockInAt: { not: null } },
-              {
-                clockInAt: null,
-                shift: {
-                  status: {
-                    notIn: [ShiftStatus.CANCELLED, ShiftStatus.COMPLETED],
-                  },
-                  endTime: {
-                    gt: now,
-                  },
-                },
+            shift: {
+              status: {
+                notIn: [ShiftStatus.CANCELLED, ShiftStatus.COMPLETED],
               },
-            ],
+            },
           },
         })
       : Promise.resolve(0),

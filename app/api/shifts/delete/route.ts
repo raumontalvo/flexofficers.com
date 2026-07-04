@@ -72,9 +72,15 @@ export async function POST(req: Request) {
       );
     }
 
-    await prisma.shift.delete({
+    // Soft delete: hide the shift from the owning company's lists only. The row
+    // and every officer application / attendance record are preserved so
+    // officers keep their history and existing View Shift links still resolve.
+    await prisma.shift.update({
       where: {
         id: shift.id,
+      },
+      data: {
+        hiddenForCompanyAt: new Date(),
       },
     });
 

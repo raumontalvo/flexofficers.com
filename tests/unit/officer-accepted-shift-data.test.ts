@@ -70,7 +70,7 @@ describe("officer accepted shift data helpers", () => {
     expect(mapped.shift.hourlyRate).toBe("20");
   });
 
-  it("categorizes shifts by status and end time", () => {
+  it("categorizes shifts by status, not by scheduled end time", () => {
     expect(getAcceptedShiftTab("CANCELLED", "2026-12-01T00:00:00.000Z")).toBe(
       "cancelled"
     );
@@ -80,8 +80,10 @@ describe("officer accepted shift data helpers", () => {
     expect(getAcceptedShiftTab("OPEN", "2099-12-01T00:00:00.000Z")).toBe(
       "upcoming"
     );
+    // A past end time must NOT complete a shift on its own; only clock-out or a
+    // COMPLETED status does, so an accepted (not clocked-out) shift stays upcoming.
     expect(getAcceptedShiftTab("OPEN", "2020-01-01T00:00:00.000Z")).toBe(
-      "completed"
+      "upcoming"
     );
   });
 

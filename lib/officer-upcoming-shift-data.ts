@@ -25,30 +25,22 @@ function startOfDay(date: Date) {
   return value;
 }
 
-export function isUpcomingFutureShift(
-  application: OfficerAcceptedShiftData,
-  now = new Date()
-) {
-  // Clocking out completes the shift for the officer, so it leaves Upcoming
-  // Shifts and moves to My Shifts → Completed.
+export function isUpcomingFutureShift(application: OfficerAcceptedShiftData) {
+  // A shift stays in Upcoming from the moment the officer is accepted until the
+  // assignment is finished. It only leaves Upcoming when the officer clocks out
+  // (completed) or the shift is cancelled/completed. The scheduled end time
+  // passing does NOT remove it — officers may still clock in/out late.
   if (application.attendance.clockOutAt) {
     return false;
   }
 
-  // Currently on the shift (clocked in, not out) — keep it visible even if the
-  // scheduled end time has already passed.
-  if (application.attendance.clockInAt) {
-    return true;
-  }
-
-  if (
-    getAcceptedShiftTab(application.shift.status, application.shift.endTime) !==
-    "upcoming"
-  ) {
-    return false;
-  }
-
-  return new Date(application.shift.endTime) > now;
+  return (
+    getAcceptedShiftTab(
+      application.shift.status,
+      application.shift.endTime,
+      application.attendance.clockOutAt
+    ) === "upcoming"
+  );
 }
 
 export function getDaysUntilStart(startTime: string, now = new Date()) {
@@ -118,7 +110,7 @@ export function filterUpcomingShifts(
   now = new Date()
 ) {
   const upcoming = applications.filter((application) =>
-    isUpcomingFutureShift(application, now)
+    isUpcomingFutureShift(application)
   );
 
   if (!filter) {
@@ -162,7 +154,7 @@ export function buildUpcomingShiftSummary(
   now = new Date()
 ): UpcomingShiftSummary {
   const upcoming = applications.filter((application) =>
-    isUpcomingFutureShift(application, now)
+    isUpcomingFutureShift(application)
   );
 
   let expectedEarnings = 0;

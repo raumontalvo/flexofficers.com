@@ -126,6 +126,12 @@ export default async function ShiftDetailPage({
       : Promise.resolve(null),
   ]);
 
+  // The only reason this page 404s is a shift row that does not exist. The
+  // detail page is intentionally viewable for EVERY shift status (open, filled,
+  // completed, cancelled) and for every viewer (signed-out, the officer who
+  // owns/has an application, and the company that owns the shift). Do not add a
+  // status/visibility/ownership guard here — completed and cancelled shifts must
+  // still open so officers and companies can review finished/cancelled work.
   if (!shift) {
     notFound();
   }

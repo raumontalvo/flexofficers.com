@@ -1,6 +1,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { UserRole } from "@/app/generated/prisma/enums";
+import {
+  ApplicationStatus,
+  ShiftStatus,
+  UserRole,
+} from "@/app/generated/prisma/enums";
 import { buildClockOutNotificationMessage } from "@/lib/attendance";
 import { officerWithUserSelect } from "@/lib/officer-fields";
 import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
@@ -129,14 +133,54 @@ export async function POST(req: Request) {
     const coordinates = parseCoordinates(body.latitude, body.longitude);
     const clockOutAt = new Date();
 
-    const updatedApplication = await prisma.application.update({
-      where: {
-        id: applicationId,
-      },
-      data: {
-        clockOutAt,
-        ...coordinates,
-      },
+    const updatedApplication = await prisma.$transaction(async (tx) => {
+      const application = await tx.application.update({
+        where: {
+          id: applicationId,
+        },
+        data: {
+          clockOutAt,
+          ...coordinates,
+        },
+      });
+
+      // Once every accepted officer for this shift has completed their
+      // attendance (clocked in and out), persist the shift as COMPLETED. This
+      // keeps the shift out of open/available shifts permanently and blocks it
+      // from being cancelled — completed shifts can never revert to open.
+      const acceptedApplications = await tx.application.findMany({
+        where: {
+          shiftId: existing.shiftId,
+          status: ApplicationStatus.ACCEPTED,
+        },
+        select: {
+          clockInAt: true,
+          clockOutAt: true,
+        },
+      });
+
+      const allAcceptedCompleted =
+        acceptedApplications.length > 0 &&
+        acceptedApplications.every(
+          (record) => Boolean(record.clockInAt) && Boolean(record.clockOutAt)
+        );
+
+      if (
+        allAcceptedCompleted &&
+        existing.shift.status !== ShiftStatus.CANCELLED &&
+        existing.shift.status !== ShiftStatus.COMPLETED
+      ) {
+        await tx.shift.update({
+          where: {
+            id: existing.shiftId,
+          },
+          data: {
+            status: ShiftStatus.COMPLETED,
+          },
+        });
+      }
+
+      return application;
     });
 
     const officerName =

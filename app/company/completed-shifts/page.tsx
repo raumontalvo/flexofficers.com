@@ -15,6 +15,7 @@ export default async function CompanyCompletedShiftsPage() {
     where: {
       status: ApplicationStatus.ACCEPTED,
       shift: {
+        hiddenForCompanyAt: null,
         company: {
           user: {
             clerkId: clerkUser.id,

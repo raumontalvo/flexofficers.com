@@ -99,6 +99,8 @@ export function ShiftActionsMenu({
   const isCancelled = status === ShiftStatus.CANCELLED;
   const isCompleted = status === ShiftStatus.COMPLETED;
   const showDelete = isCancelled || isCompleted;
+  // Completed shifts can no longer be cancelled.
+  const cannotCancel = isCancelled || isCompleted;
   const deleteConfirmMessage = isCancelled ? copy.deleteCancelledConfirm : undefined;
 
   function closeMenu() {
@@ -156,11 +158,11 @@ export function ShiftActionsMenu({
 
           <button
             type="button"
-            disabled={isCancelled}
+            disabled={cannotCancel}
             className={cn(
               menuItemClassName,
               "text-amber-200",
-              isCancelled && "opacity-40"
+              cannotCancel && "opacity-40"
             )}
             onClick={() => {
               closeMenu();

@@ -1,6 +1,7 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
+import { isShiftAttendanceCompleted } from "@/lib/company-dashboard-data";
 import { createNotificationsWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -64,6 +65,18 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "Shift not found or you do not own this shift" },
         { status: 404 }
+      );
+    }
+
+    // Completed shifts (already marked complete, or every accepted officer has
+    // clocked in and out) can never be cancelled.
+    if (
+      shift.status === ShiftStatus.COMPLETED ||
+      isShiftAttendanceCompleted(shift)
+    ) {
+      return NextResponse.json(
+        { error: "Completed shifts cannot be cancelled." },
+        { status: 400 }
       );
     }
 

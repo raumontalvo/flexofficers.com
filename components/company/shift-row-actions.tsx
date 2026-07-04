@@ -88,6 +88,8 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
   const isCancelled = status === ShiftStatus.CANCELLED;
   const isCompleted = status === ShiftStatus.COMPLETED;
   const showDelete = isCancelled || isCompleted;
+  // Completed shifts can no longer be cancelled.
+  const cannotCancel = isCancelled || isCompleted;
   const deleteConfirmMessage = isCancelled ? copy.deleteCancelledConfirm : undefined;
 
   if (stacked) {
@@ -103,7 +105,7 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
         )}
         <MobileSecondaryButton
           onClick={() => void cancelCompanyShift(shiftId, copy)}
-          disabled={isCancelled}
+          disabled={cannotCancel}
         >
           {copy.cancel}
         </MobileSecondaryButton>
@@ -160,7 +162,7 @@ export function ShiftRowActions({ shiftId, status, stacked = false }: ShiftRowAc
       <button
         type="button"
         onClick={() => void cancelCompanyShift(shiftId, copy)}
-        disabled={isCancelled}
+        disabled={cannotCancel}
         className={cn(
           iconButtonClassName,
           "border-amber-500/30 text-amber-200 hover:bg-amber-500/10"
