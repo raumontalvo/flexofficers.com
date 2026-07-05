@@ -195,8 +195,8 @@ export function CompaniesControlCenter({ companies }: CompaniesControlCenterProp
         ) : null}
       </div>
 
-      <div className="fo-glass-card overflow-hidden rounded-xl border border-white/10">
-        <div className="overflow-x-auto">
+      <div className="fo-glass-card min-w-0 overflow-hidden rounded-xl border border-white/10">
+        <div className="min-w-0 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-white/[0.06] bg-white/[0.02] text-xs uppercase tracking-wide text-fo-text-muted">
               <tr>

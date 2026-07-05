@@ -23,8 +23,7 @@ export function HeroBadge({
     <div
       className={cn(
         "hero-badge-scene",
-        variant === "desktop" &&
-          "hero-badge-scene--desktop lg:h-[520px] lg:w-[520px] xl:h-[620px] xl:w-[620px] 2xl:h-[700px] 2xl:w-[700px]"
+        variant === "desktop" && "hero-badge-scene--desktop"
       )}
       aria-hidden="true"
     >

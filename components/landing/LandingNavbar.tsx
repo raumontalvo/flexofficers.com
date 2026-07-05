@@ -78,33 +78,33 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
 
   return (
     <>
-      <header className="landing-header sticky top-0 z-[100] border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl lg:z-40 lg:border-white/[0.04] lg:bg-fo-bg/80">
+      <header className="landing-header sticky top-0 z-[100] border-b border-white/[0.06] bg-fo-bg/90 backdrop-blur-xl min-[1200px]:z-40 min-[1200px]:border-white/[0.04] min-[1200px]:bg-fo-bg/80">
         <nav
           className={cn(
-            "relative z-[110] mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-2 px-4 py-3.5 sm:px-6 sm:py-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:items-center lg:px-8 lg:py-5",
-            language === "es" ? "lg:gap-2" : "lg:gap-4"
+            "relative z-[110] mx-auto flex max-w-7xl min-w-0 items-center justify-between gap-1.5 px-3 py-3 min-[360px]:gap-2 min-[360px]:px-4 sm:px-6 sm:py-3.5 min-[768px]:py-4 min-[1200px]:grid min-[1200px]:grid-cols-[auto_minmax(0,1fr)_auto] min-[1200px]:items-center min-[1200px]:gap-4 min-[1200px]:px-8 min-[1200px]:py-5",
+            language === "es" && "min-[1200px]:gap-3 min-[1400px]:gap-4"
           )}
         >
-          <div className="flex max-w-[130px] shrink-0 items-center sm:max-w-[150px] lg:min-w-fit lg:max-w-none">
-            <Link href="/" className="flex shrink-0 items-center">
+          <div className="flex shrink-0 items-center">
+            <Link href="/" className="landing-nav-logo-clip shrink-0">
               <Image
                 src="/branding/concepts/flexofficers-logo-concept.png"
                 alt="FlexOfficers"
                 width={448}
                 height={112}
                 priority
-                sizes="(max-width: 1023px) 150px, 448px"
-                className="h-20 w-auto object-contain lg:h-28"
+                sizes="(max-width: 389px) 104px, (max-width: 767px) 126px, (max-width: 1199px) 172px, (max-width: 1399px) 210px, 260px"
+                className="landing-nav-logo-image"
               />
             </Link>
           </div>
 
           <div
             className={cn(
-              "hidden items-center justify-center whitespace-nowrap text-fo-text-muted lg:flex",
+              "hidden min-w-0 items-center justify-center whitespace-nowrap text-fo-text-muted min-[1200px]:flex",
               language === "es"
-                ? "gap-2.5 text-sm tracking-tight xl:gap-3"
-                : "gap-6 text-sm lg:gap-7 xl:gap-8"
+                ? "gap-2 text-xs tracking-tight min-[1400px]:gap-3 min-[1400px]:text-sm"
+                : "gap-3 text-xs tracking-tight min-[1400px]:gap-6 min-[1400px]:text-sm"
             )}
           >
             {sectionLinks.map((link) => (
@@ -119,15 +119,15 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
             <LanguageToggle
               className={cn(
                 "shrink-0",
-                language === "es" ? "ml-1.5 text-xs" : "ml-5 mr-5"
+                language === "es" ? "ml-1 text-xs" : "ml-2 min-[1400px]:ml-5 min-[1400px]:mr-5"
               )}
             />
           </div>
 
           <div
             className={cn(
-              "relative z-10 flex min-w-0 shrink-0 items-center gap-2 lg:col-start-3 lg:justify-end",
-              language === "es" ? "lg:gap-2" : "lg:gap-3"
+              "relative z-10 flex min-w-0 shrink-0 items-center gap-1.5 min-[360px]:gap-2 min-[1200px]:justify-end min-[1200px]:gap-3",
+              language === "es" && "min-[1200px]:gap-2"
             )}
           >
             <Link
@@ -135,8 +135,11 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
               className={buttonClassName({
                 size: "md",
                 className: cn(
-                  "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:min-h-11 lg:text-sm",
-                  language === "es" ? "lg:px-3.5" : "lg:px-5"
+                  "hidden shrink-0 whitespace-nowrap min-[360px]:inline-flex",
+                  "max-[1199px]:min-h-9 max-[1199px]:px-2.5 max-[1199px]:text-[11px]",
+                  "min-[768px]:max-[1199px]:min-h-10 min-[768px]:max-[1199px]:px-3 min-[768px]:max-[1199px]:text-xs",
+                  "min-[1200px]:min-h-11 min-[1200px]:px-5 min-[1200px]:text-sm",
+                  language === "es" && "min-[1200px]:px-3.5"
                 ),
               })}
             >
@@ -148,8 +151,9 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
                 variant: "secondary",
                 size: "md",
                 className: cn(
-                  "inline-flex shrink-0 whitespace-nowrap max-lg:min-h-9 max-lg:px-2.5 max-lg:text-[11px] lg:border-transparent lg:bg-transparent lg:font-semibold lg:text-fo-text-muted lg:hover:bg-fo-surface lg:hover:text-fo-text",
-                  language === "es" ? "lg:px-3 lg:text-sm" : "lg:px-5"
+                  "hidden shrink-0 whitespace-nowrap min-[1200px]:inline-flex",
+                  "min-[1200px]:min-h-11 min-[1200px]:border-transparent min-[1200px]:bg-transparent min-[1200px]:font-semibold min-[1200px]:text-fo-text-muted min-[1200px]:hover:bg-fo-surface min-[1200px]:hover:text-fo-text",
+                  language === "es" ? "min-[1200px]:px-3 min-[1200px]:text-sm" : "min-[1200px]:px-5 min-[1200px]:text-sm"
                 ),
               })}
             >
@@ -162,7 +166,7 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
                   variant: "secondary",
                   size: "md",
                   className:
-                    "inline-flex min-h-9 min-w-9 shrink-0 touch-manipulation px-2 lg:hidden",
+                    "inline-flex min-h-8 min-w-8 shrink-0 touch-manipulation px-1.5 min-[360px]:min-h-9 min-[360px]:min-w-9 min-[360px]:px-2 min-[768px]:min-h-10 min-[768px]:min-w-10 min-[1200px]:hidden",
                 })
               )}
               aria-label={open ? "Close menu" : "Open menu"}
@@ -177,7 +181,7 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
       </header>
 
       {open ? (
-        <div className="fixed inset-0 z-[90] lg:hidden">
+        <div className="fixed inset-0 z-[90] min-[1200px]:hidden">
           <button
             type="button"
             className="absolute inset-0 bg-fo-bg/80 backdrop-blur-sm"

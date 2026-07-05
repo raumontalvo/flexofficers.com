@@ -221,28 +221,28 @@ export function LandingPageContent() {
   const { t } = useLandingLanguage();
 
   return (
-    <main className="min-h-screen overflow-x-clip bg-fo-bg text-fo-text">
+    <main className="min-h-[100svh] overflow-x-hidden bg-fo-bg text-fo-text">
       <LandingNavbar />
 
       {/* Hero */}
       <section className="relative overflow-x-hidden">
         <div className="landing-hero-glow absolute inset-0" aria-hidden="true" />
-        <div className="relative mx-auto max-w-7xl px-5 pb-28 max-lg:pt-[calc(var(--landing-header-h)+1.75rem)] sm:px-8 sm:pb-36 sm:max-lg:pt-[calc(var(--landing-header-h)+2rem)] lg:px-8 lg:py-28 xl:py-36">
+        <div className="landing-hero-inner relative mx-auto max-w-7xl px-4 pb-12 max-lg:pt-[calc(var(--landing-header-h)+1rem)] min-[390px]:px-5 sm:px-8 sm:pb-16 sm:max-lg:pt-[calc(var(--landing-header-h)+1.25rem)] lg:px-8 lg:py-16 xl:py-24">
           {/* Mobile — original centered hero layout */}
-          <div className="landing-fade-up relative z-10 mx-auto w-full max-w-4xl lg:hidden">
+          <div className="landing-hero-mobile landing-fade-up relative z-10 mx-auto w-full max-w-4xl lg:hidden">
             <HeroBadge />
             <LandingEyebrow>{t.hero.badge}</LandingEyebrow>
-            <h1 className="mt-6 text-[2.75rem] font-bold leading-[1.04] tracking-tight sm:text-6xl sm:leading-[1.02]">
+            <h1 className="mt-4 text-[1.75rem] font-bold leading-[1.08] tracking-tight min-[360px]:text-[2rem] min-[390px]:text-[2.25rem] sm:text-5xl sm:leading-[1.04]">
               <span className="block">{t.hero.titleLine1}</span>
               <span className="block">{t.hero.titleLine2}</span>
               <span className="mt-1 block bg-gradient-to-r from-fo-primary-bright via-blue-400 to-sky-300 bg-clip-text text-transparent">
                 {t.hero.titleHighlight}
               </span>
             </h1>
-            <p className="mt-8 max-w-2xl text-lg leading-8 text-fo-text-muted/90 sm:mt-9 sm:text-xl sm:leading-9">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-fo-text-muted/90 min-[390px]:text-lg min-[390px]:leading-8 sm:mt-7 sm:text-xl sm:leading-9">
               {t.hero.subtitle}
             </p>
-            <div className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row sm:items-center">
+            <div className="mt-7 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
               <Link
                 href="/onboarding?force=1"
                 className={buttonClassName({
@@ -270,22 +270,22 @@ export function LandingPageContent() {
           </div>
 
           {/* Desktop — two-column hero layout */}
-          <div className="relative z-10 hidden min-w-0 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,520px)] lg:items-center lg:gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,620px)] xl:gap-10 2xl:grid-cols-[minmax(0,1fr)_minmax(0,700px)]">
+          <div className="landing-hero-desktop relative z-10 hidden min-w-0 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-center lg:gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,460px)] xl:gap-10 2xl:grid-cols-[minmax(0,1fr)_minmax(0,520px)]">
             <div className="landing-fade-up min-w-0">
               <span className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-fo-primary-hover">
                 {t.hero.badge}
               </span>
-              <h1 className="mt-6 text-6xl font-bold leading-[1.03] tracking-tight xl:text-[3.75rem]">
+              <h1 className="mt-5 text-5xl font-bold leading-[1.04] tracking-tight xl:text-6xl 2xl:text-[3.75rem]">
                 <span className="block">{t.hero.titleLine1}</span>
                 <span className="block">{t.hero.titleLine2}</span>
                 <span className="mt-1 block bg-gradient-to-r from-fo-primary-bright via-blue-400 to-sky-300 bg-clip-text text-transparent">
                   {t.hero.titleHighlight}
                 </span>
               </h1>
-              <p className="mt-7 max-w-2xl text-xl leading-9 text-fo-text-muted/90">
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-fo-text-muted/90 xl:text-xl xl:leading-9">
                 {t.hero.subtitle}
               </p>
-              <div className="mt-12 flex flex-wrap items-center gap-3">
+              <div className="mt-8 flex flex-wrap items-center gap-3 xl:mt-10">
                 <Link
                   href="/onboarding?force=1"
                   className={buttonClassName({
@@ -310,7 +310,7 @@ export function LandingPageContent() {
               </div>
             </div>
 
-            <div className="flex min-w-0 flex-1 items-center justify-center overflow-hidden">
+            <div className="flex min-w-0 flex-1 items-center justify-center">
               <HeroBadge variant="desktop" />
             </div>
           </div>

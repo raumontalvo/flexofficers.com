@@ -29,24 +29,45 @@
 
 @media (min-width: 390px) {
   :root {
-    --landing-header-h: 5.5rem;
+    --landing-header-h: 5rem;
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 1199px) {
   :root {
-    --landing-header-h: 6rem;
+    --landing-header-h: 4.75rem;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
   :root {
     --landing-header-h: 5.25rem;
   }
 }
 
+@media (max-width: 389px) {
+  :root {
+    --landing-header-h: 4.25rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 720px) {
+  :root {
+    --landing-header-h: 4.5rem;
+  }
+}
+
 html {
   scroll-padding-top: var(--landing-header-h);
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+html,
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 @theme inline {
@@ -148,10 +169,6 @@ body {
     0 4px 16px -4px rgba(37, 99, 235, 0.35);
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 @keyframes landing-fade-up {
   from {
     opacity: 0;
@@ -191,7 +208,7 @@ html {
   -webkit-backdrop-filter: blur(16px);
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1199px) {
   .landing-header {
     background-color: rgba(2, 6, 23, 0.9);
     border-bottom-color: rgba(255, 255, 255, 0.06);
@@ -199,56 +216,56 @@ html {
   }
 }
 
-/* Landing navbar logo — clipped wordmark on mobile/tablet, full desktop treatment */
+/* Landing navbar logo — scales by breakpoint; never squeezed or clipped */
 .landing-nav-logo-clip {
-  --landing-nav-logo-h: 48px;
-  --landing-nav-logo-w: calc(var(--landing-nav-logo-h) * 1.5 / 0.72);
+  --landing-nav-logo-h: 40px;
+  --landing-nav-logo-max-w: 104px;
   display: inline-flex;
   flex-shrink: 0;
-  overflow: hidden;
   line-height: 0;
-  height: var(--landing-nav-logo-h);
-  width: var(--landing-nav-logo-w);
-  max-width: min(130px, var(--landing-nav-logo-w));
+  align-items: center;
 }
 
 .landing-nav-logo-image {
   display: block !important;
-  width: var(--landing-nav-logo-w) !important;
-  height: auto !important;
-  max-width: none !important;
+  height: var(--landing-nav-logo-h) !important;
+  width: auto !important;
+  max-width: var(--landing-nav-logo-max-w) !important;
   object-fit: contain;
 }
 
-@media (min-width: 390px) and (max-width: 1023px) {
+@media (min-width: 360px) {
+  .landing-nav-logo-clip {
+    --landing-nav-logo-h: 44px;
+    --landing-nav-logo-max-w: 114px;
+  }
+}
+
+@media (min-width: 390px) {
+  .landing-nav-logo-clip {
+    --landing-nav-logo-h: 48px;
+    --landing-nav-logo-max-w: 126px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
   .landing-nav-logo-clip {
     --landing-nav-logo-h: 52px;
-    max-width: min(150px, var(--landing-nav-logo-w));
+    --landing-nav-logo-max-w: 172px;
   }
 }
 
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 1200px) {
   .landing-nav-logo-clip {
-    --landing-nav-logo-h: 72px;
-    max-width: min(42vw, var(--landing-nav-logo-w));
+    --landing-nav-logo-h: 56px;
+    --landing-nav-logo-max-w: 210px;
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1400px) {
   .landing-nav-logo-clip {
-    --landing-nav-logo-w: 280px;
-    flex-shrink: 0;
-    overflow: hidden;
-    width: var(--landing-nav-logo-w);
-    height: calc(var(--landing-nav-logo-w) / 1.5 * 0.72);
-    max-height: none;
-  }
-
-  .landing-nav-logo-image {
-    width: var(--landing-nav-logo-w) !important;
-    height: auto !important;
-    max-width: none !important;
-    object-fit: unset;
+    --landing-nav-logo-h: 64px;
+    --landing-nav-logo-max-w: 260px;
   }
 }
 
@@ -276,30 +293,54 @@ html {
 
 /* Hero decorative badge */
 .hero-badge-scene {
-  --hero-badge-w: 200px;
+  --hero-badge-w: 132px;
   display: flex;
   width: 100%;
   justify-content: center;
-  margin-top: -20px;
-  margin-bottom: 12px;
+  margin-top: -8px;
+  margin-bottom: 8px;
   transform: translateZ(0);
+}
+
+@media (min-width: 360px) {
+  .hero-badge-scene {
+    --hero-badge-w: 148px;
+    margin-top: -10px;
+  }
+}
+
+@media (min-width: 390px) {
+  .hero-badge-scene {
+    --hero-badge-w: 168px;
+    margin-top: -12px;
+  }
+}
+
+@media (min-width: 640px) {
+  .hero-badge-scene {
+    --hero-badge-w: 200px;
+    margin-top: -16px;
+  }
 }
 
 @media (min-width: 768px) {
   .hero-badge-scene {
-    --hero-badge-w: 250px;
-    margin-top: -24px;
+    --hero-badge-w: 220px;
+    margin-top: -18px;
   }
 }
 
 @media (min-width: 1024px) {
   .hero-badge-scene--desktop {
-    --hero-badge-w: 300px;
+    --hero-badge-w: 240px;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
     margin-top: 0;
     margin-bottom: 0;
+    height: auto;
+    width: auto;
+    max-width: 100%;
   }
 
   .hero-badge-scene--desktop .hero-badge-particle {
@@ -311,7 +352,7 @@ html {
 
 @media (min-width: 1280px) {
   .hero-badge-scene--desktop {
-    --hero-badge-w: 380px;
+    --hero-badge-w: 300px;
   }
 
   .hero-badge-scene--desktop .hero-badge-particle {
@@ -323,7 +364,40 @@ html {
 
 @media (min-width: 1536px) {
   .hero-badge-scene--desktop {
-    --hero-badge-w: 440px;
+    --hero-badge-w: 360px;
+  }
+}
+
+/* Short-height viewports: shrink hero spacing and badge so content is not clipped */
+@media (max-height: 720px) {
+  .landing-hero-inner {
+    padding-top: calc(var(--landing-header-h) + 0.75rem) !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  .hero-badge-scene:not(.hero-badge-scene--desktop) {
+    --hero-badge-w: 112px;
+    margin-top: 0;
+    margin-bottom: 6px;
+  }
+}
+
+@media (min-width: 1024px) and (max-height: 720px) {
+  .landing-hero-desktop {
+    display: none !important;
+  }
+
+  .landing-hero-mobile {
+    display: block !important;
+  }
+
+  .landing-hero-inner {
+    padding-top: calc(var(--landing-header-h) + 1rem) !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .hero-badge-scene--desktop {
+    --hero-badge-w: 160px;
   }
 }
 
