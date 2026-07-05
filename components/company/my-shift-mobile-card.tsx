@@ -56,6 +56,7 @@ type MyShiftMobileCardProps = {
   shift: SerializedCompanyShiftRow;
   workforce?: SerializedShiftWorkforce;
   rosterExpanded: boolean;
+  highlightOfficerId?: string | null;
   onToggleRoster: () => void;
 };
 
@@ -63,6 +64,7 @@ export function MyShiftMobileCard({
   shift,
   workforce,
   rosterExpanded,
+  highlightOfficerId = null,
   onToggleRoster,
 }: MyShiftMobileCardProps) {
   const startTime = new Date(shift.startTime);
@@ -125,7 +127,10 @@ export function MyShiftMobileCard({
 
       {rosterExpanded && workforce ? (
         <div className="mt-3 border-t border-white/[0.06] pt-3">
-          <ShiftWorkforcePanel workforce={workforce} />
+          <ShiftWorkforcePanel
+            workforce={workforce}
+            highlightOfficerId={highlightOfficerId}
+          />
         </div>
       ) : null}
     </article>

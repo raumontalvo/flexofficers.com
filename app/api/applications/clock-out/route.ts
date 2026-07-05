@@ -6,6 +6,10 @@ import {
   UserRole,
 } from "@/app/generated/prisma/enums";
 import { buildClockOutNotificationMessage } from "@/lib/attendance";
+import {
+  appendAttendanceNotificationLink,
+  buildCompanyAttendanceRosterHref,
+} from "@/lib/company-attendance-notification-link";
 import { officerWithUserSelect } from "@/lib/officer-fields";
 import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
@@ -189,14 +193,21 @@ export async function POST(req: Request) {
     await createNotificationWithEmail(prisma, {
       userId: existing.shift.company.user.id,
       title: "Officer Clocked Out",
-      message: buildClockOutNotificationMessage({
-        officerName,
-        shiftTitle: existing.shift.title,
-        clockInAt,
-        clockOutAt,
-      }),
+      message: appendAttendanceNotificationLink(
+        buildClockOutNotificationMessage({
+          officerName,
+          shiftTitle: existing.shift.title,
+          clockInAt,
+          clockOutAt,
+        }),
+        existing.shiftId,
+        existing.officerId
+      ),
       type: "officer_clocked_out",
-      linkUrl: "/company/shifts",
+      linkUrl: buildCompanyAttendanceRosterHref(
+        existing.shiftId,
+        existing.officerId
+      ),
     });
 
     return NextResponse.json(updatedApplication);

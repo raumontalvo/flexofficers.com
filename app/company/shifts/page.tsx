@@ -13,8 +13,13 @@ import { requirePageRole } from "@/lib/page-rbac";
 
 export const dynamic = "force-dynamic";
 
-export default async function CompanyShiftsPage() {
+export default async function CompanyShiftsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ shiftId?: string; officerId?: string }>;
+}) {
   const clerkUser = await requirePageRole(UserRole.COMPANY);
+  const { shiftId, officerId } = await searchParams;
 
   const company = await prisma.company.findFirst({
     where: {
@@ -102,6 +107,8 @@ export default async function CompanyShiftsPage() {
           shifts={serializedShifts}
           workforceByShiftId={workforceByShiftId}
           canPostShifts={canPostShifts}
+          focusShiftId={shiftId ?? null}
+          focusOfficerId={officerId ?? null}
         />
       </div>
     </PageShell>

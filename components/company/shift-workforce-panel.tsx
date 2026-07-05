@@ -2,10 +2,12 @@ import {
   formatAttendanceTime,
   formatGoogleMapsUrl,
 } from "@/lib/attendance";
+import { cn } from "@/lib/cn";
 import type { SerializedShiftWorkforce } from "@/lib/shift-workforce";
 
 type ShiftWorkforcePanelProps = {
   workforce: SerializedShiftWorkforce;
+  highlightOfficerId?: string | null;
 };
 
 function AttendanceLocationLink({
@@ -31,7 +33,10 @@ function AttendanceLocationLink({
   );
 }
 
-export function ShiftWorkforcePanel({ workforce }: ShiftWorkforcePanelProps) {
+export function ShiftWorkforcePanel({
+  workforce,
+  highlightOfficerId = null,
+}: ShiftWorkforcePanelProps) {
   return (
     <div className="grid gap-4 border-t border-white/[0.06] bg-white/[0.02] px-4 py-4 md:grid-cols-2">
       <div>
@@ -109,7 +114,13 @@ export function ShiftWorkforcePanel({ workforce }: ShiftWorkforcePanelProps) {
             {workforce.acceptedOfficers.map((officer) => (
               <li
                 key={`attendance-${officer.officerId}`}
-                className="rounded-xl border border-white/10 bg-slate-900/60 p-3"
+                id={`shift-attendance-${officer.officerId}`}
+                className={cn(
+                  "rounded-xl border bg-slate-900/60 p-3 transition",
+                  highlightOfficerId === officer.officerId
+                    ? "border-fo-primary-bright/50 ring-2 ring-fo-primary-bright/40"
+                    : "border-white/10"
+                )}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-fo-text">

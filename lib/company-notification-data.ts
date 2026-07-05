@@ -5,6 +5,10 @@ import {
   type NotificationIconVariant,
   type NotificationTone,
 } from "@/lib/officer-notification-data";
+import {
+  parseAttendanceNotificationLink,
+  stripAttendanceNotificationLink,
+} from "@/lib/company-attendance-notification-link";
 
 export type CompanyNotificationTab =
   | "all"
@@ -22,6 +26,8 @@ export type CompanyNotificationKind =
   | "application_withdrawn"
   | "shift_update"
   | "shift_cancelled"
+  | "officer_clocked_in"
+  | "officer_clocked_out"
   | "system_update"
   | "general";
 
@@ -57,6 +63,8 @@ const KIND_LABELS: Record<CompanyNotificationKind, string> = {
   application_withdrawn: "APPLICATION WITHDRAWN",
   shift_update: "SHIFT UPDATE",
   shift_cancelled: "SHIFT CANCELLED",
+  officer_clocked_in: "OFFICER CLOCKED IN",
+  officer_clocked_out: "OFFICER CLOCKED OUT",
   system_update: "SYSTEM UPDATE",
   general: "SYSTEM UPDATE",
 };
@@ -68,6 +76,8 @@ const KIND_TONES: Record<CompanyNotificationKind, NotificationTone> = {
   application_withdrawn: "purple",
   shift_update: "warning",
   shift_cancelled: "danger",
+  officer_clocked_in: "success",
+  officer_clocked_out: "info",
   system_update: "system",
   general: "system",
 };
@@ -80,6 +90,8 @@ const KIND_ICON_VARIANTS: Record<CompanyNotificationKind, NotificationIconVarian
     application_withdrawn: "document",
     shift_update: "bell",
     shift_cancelled: "x",
+    officer_clocked_in: "check",
+    officer_clocked_out: "calendar",
     system_update: "megaphone",
     general: "megaphone",
   };
@@ -92,6 +104,16 @@ function inferNotificationMeta(
   title: string,
   message: string
 ): { category: CompanyNotificationCategory; kind: CompanyNotificationKind } {
+  const normalizedTitle = title.trim().toLowerCase();
+
+  if (normalizedTitle === "officer clocked in") {
+    return { category: "shifts", kind: "officer_clocked_in" };
+  }
+
+  if (normalizedTitle === "officer clocked out") {
+    return { category: "shifts", kind: "officer_clocked_out" };
+  }
+
   const text = `${title} ${message}`.toLowerCase();
 
   if (includesAny(text, ["invitation accepted", "accepted your invitation"])) {
@@ -126,8 +148,18 @@ function inferNotificationMeta(
 
 function inferPrimaryAction(
   kind: CompanyNotificationKind,
-  category: CompanyNotificationCategory
+  category: CompanyNotificationCategory,
+  message: string
 ): CompanyNotificationData["primaryAction"] {
+  if (kind === "officer_clocked_in" || kind === "officer_clocked_out") {
+    const rosterHref = parseAttendanceNotificationLink(message);
+
+    return {
+      label: "View Details",
+      href: rosterHref ?? "/company/shifts",
+    };
+  }
+
   if (category === "applicants") {
     return { label: "View Applicants", href: "/company/applications" };
   }
@@ -154,7 +186,7 @@ export function mapCompanyNotification(notification: {
   return {
     id: notification.id,
     title: notification.title,
-    message: notification.message,
+    message: stripAttendanceNotificationLink(notification.message),
     read: notification.read,
     createdAt: notification.createdAt.toISOString(),
     category,
@@ -162,7 +194,7 @@ export function mapCompanyNotification(notification: {
     tone: KIND_TONES[kind],
     iconVariant: KIND_ICON_VARIANTS[kind],
     typeLabel: KIND_LABELS[kind],
-    primaryAction: inferPrimaryAction(kind, category),
+    primaryAction: inferPrimaryAction(kind, category, notification.message),
   };
 }
 

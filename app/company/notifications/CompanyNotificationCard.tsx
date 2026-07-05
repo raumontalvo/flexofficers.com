@@ -201,7 +201,7 @@ export function CompanyNotificationCard({
         <div className="flex shrink-0 flex-col gap-1.5 sm:flex-row md:flex-col">
           <Link
             href={notification.primaryAction.href}
-            className="inline-flex min-h-8 items-center justify-center rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10"
+            className="inline-flex min-h-8 w-full items-center justify-center whitespace-nowrap rounded-lg border border-fo-primary-bright/40 bg-transparent px-3 py-1.5 text-xs font-semibold text-fo-primary-bright transition hover:border-fo-primary-bright hover:bg-fo-primary/10 sm:w-auto"
           >
             {getCompanyNotificationActionLabel(t, notification.primaryAction.label)}
           </Link>

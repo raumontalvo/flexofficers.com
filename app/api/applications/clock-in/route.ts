@@ -2,6 +2,10 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { buildClockInNotificationMessage } from "@/lib/attendance";
+import {
+  appendAttendanceNotificationLink,
+  buildCompanyAttendanceRosterHref,
+} from "@/lib/company-attendance-notification-link";
 import { officerWithUserSelect } from "@/lib/officer-fields";
 import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
@@ -136,13 +140,20 @@ export async function POST(req: Request) {
     await createNotificationWithEmail(prisma, {
       userId: existing.shift.company.user.id,
       title: "Officer Clocked In",
-      message: buildClockInNotificationMessage({
-        officerName,
-        shiftTitle: existing.shift.title,
-        clockInAt,
-      }),
+      message: appendAttendanceNotificationLink(
+        buildClockInNotificationMessage({
+          officerName,
+          shiftTitle: existing.shift.title,
+          clockInAt,
+        }),
+        existing.shiftId,
+        existing.officerId
+      ),
       type: "officer_clocked_in",
-      linkUrl: "/company/shifts",
+      linkUrl: buildCompanyAttendanceRosterHref(
+        existing.shiftId,
+        existing.officerId
+      ),
     });
 
     return NextResponse.json(updatedApplication);

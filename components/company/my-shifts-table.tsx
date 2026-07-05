@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { ShiftStatus } from "@/app/generated/prisma/enums";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { MyShiftMobileCard } from "@/components/company/my-shift-mobile-card";
@@ -60,7 +60,34 @@ type MyShiftsTableProps = {
   shifts: SerializedCompanyShiftRow[];
   workforceByShiftId: Record<string, SerializedShiftWorkforce>;
   canPostShifts: boolean;
+  focusShiftId?: string | null;
+  focusOfficerId?: string | null;
 };
+
+function getRosterFocusState(
+  shifts: SerializedCompanyShiftRow[],
+  focusShiftId: string | null
+) {
+  if (!focusShiftId || !shifts.some((shift) => shift.id === focusShiftId)) {
+    return {
+      activeTab: "all" as CompanyShiftsPageTab,
+      page: 1,
+      expandedShiftId: null as string | null,
+    };
+  }
+
+  const allShifts = filterCompanyShiftsByTab(shifts, "all");
+  const shiftIndex = allShifts.findIndex((shift) => shift.id === focusShiftId);
+
+  return {
+    activeTab: "all" as CompanyShiftsPageTab,
+    page:
+      shiftIndex >= 0
+        ? Math.floor(shiftIndex / COMPANY_SHIFTS_PAGE_SIZE) + 1
+        : 1,
+    expandedShiftId: focusShiftId,
+  };
+}
 
 function LocationIcon({ className }: { className?: string }) {
   return (
@@ -231,15 +258,25 @@ export function MyShiftsTable({
   shifts,
   workforceByShiftId,
   canPostShifts,
+  focusShiftId = null,
+  focusOfficerId = null,
 }: MyShiftsTableProps) {
   const { t } = useLandingLanguage();
   const copy = t.browse.companyShifts;
   const table = copy.table;
   const tabs = getCompanyShiftsTabs(t);
-  const [activeTab, setActiveTab] = useState<CompanyShiftsPageTab>("all");
+  const initialRosterFocus = useMemo(
+    () => getRosterFocusState(shifts, focusShiftId),
+    [focusShiftId, shifts]
+  );
+  const [activeTab, setActiveTab] = useState<CompanyShiftsPageTab>(
+    initialRosterFocus.activeTab
+  );
   const [searchQuery, setSearchQuery] = useState("");
-  const [page, setPage] = useState(1);
-  const [expandedShiftId, setExpandedShiftId] = useState<string | null>(null);
+  const [page, setPage] = useState(initialRosterFocus.page);
+  const [expandedShiftId, setExpandedShiftId] = useState<string | null>(
+    initialRosterFocus.expandedShiftId
+  );
 
   const tabCounts = useMemo(() => getCompanyShiftsTabCounts(shifts), [shifts]);
 
@@ -252,6 +289,21 @@ export function MyShiftsTable({
     () => paginateCompanyShifts(filteredShifts, page, COMPANY_SHIFTS_PAGE_SIZE),
     [filteredShifts, page]
   );
+
+  useEffect(() => {
+    if (!focusOfficerId || expandedShiftId !== focusShiftId) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(
+        `shift-attendance-${focusOfficerId}`
+      );
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [expandedShiftId, focusOfficerId, focusShiftId, page]);
 
   function handleTabChange(tab: CompanyShiftsPageTab) {
     setActiveTab(tab);
@@ -331,6 +383,9 @@ export function MyShiftsTable({
                 shift={shift}
                 workforce={workforceByShiftId[shift.id]}
                 rosterExpanded={expandedShiftId === shift.id}
+                highlightOfficerId={
+                  expandedShiftId === shift.id ? focusOfficerId : null
+                }
                 onToggleRoster={() =>
                   setExpandedShiftId((current) =>
                     current === shift.id ? null : shift.id
@@ -486,6 +541,7 @@ export function MyShiftsTable({
                           <td colSpan={7} className="p-0">
                             <ShiftWorkforcePanel
                               workforce={workforceByShiftId[shift.id]}
+                              highlightOfficerId={focusOfficerId}
                             />
                           </td>
                         </tr>

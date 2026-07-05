@@ -121,6 +121,8 @@ export type UiTranslations = {
         application_withdrawn: string;
         shift_update: string;
         shift_cancelled: string;
+        officer_clocked_in: string;
+        officer_clocked_out: string;
         system_update: string;
         general: string;
       };
@@ -651,6 +653,8 @@ export const uiEn: UiTranslations = {
         application_withdrawn: "APPLICATION WITHDRAWN",
         shift_update: "SHIFT UPDATE",
         shift_cancelled: "SHIFT CANCELLED",
+        officer_clocked_in: "OFFICER CLOCKED IN",
+        officer_clocked_out: "OFFICER CLOCKED OUT",
         system_update: "SYSTEM UPDATE",
         general: "SYSTEM UPDATE",
       },
@@ -1265,6 +1269,8 @@ export const uiEs: UiTranslations = {
         application_withdrawn: "SOLICITUD RETIRADA",
         shift_update: "ACTUALIZACIÓN DE TURNO",
         shift_cancelled: "TURNO CANCELADO",
+        officer_clocked_in: "OFICIAL ENTRÓ",
+        officer_clocked_out: "OFICIAL SALIÓ",
         system_update: "ACTUALIZACIÓN DEL SISTEMA",
         general: "ACTUALIZACIÓN DEL SISTEMA",
       },
