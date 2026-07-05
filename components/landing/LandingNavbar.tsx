@@ -56,6 +56,13 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
 
   const closeMenu = useCallback(() => setOpen(false), []);
 
+  const headerActionSizeClass = cn(
+    "max-[1199px]:min-h-9 max-[1199px]:px-2.5 max-[1199px]:text-[11px]",
+    "min-[768px]:max-[1199px]:min-h-10 min-[768px]:max-[1199px]:px-3 min-[768px]:max-[1199px]:text-xs",
+    "min-[1200px]:min-h-11 min-[1200px]:text-sm",
+    language === "es" ? "min-[1200px]:px-3.5" : "min-[1200px]:px-5"
+  );
+
   useEffect(() => {
     if (!open) {
       return;
@@ -136,10 +143,7 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
                 size: "md",
                 className: cn(
                   "hidden shrink-0 whitespace-nowrap min-[360px]:inline-flex",
-                  "max-[1199px]:min-h-9 max-[1199px]:px-2.5 max-[1199px]:text-[11px]",
-                  "min-[768px]:max-[1199px]:min-h-10 min-[768px]:max-[1199px]:px-3 min-[768px]:max-[1199px]:text-xs",
-                  "min-[1200px]:min-h-11 min-[1200px]:px-5 min-[1200px]:text-sm",
-                  language === "es" && "min-[1200px]:px-3.5"
+                  headerActionSizeClass
                 ),
               })}
             >
@@ -148,12 +152,11 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
             <Link
               href="/sign-in"
               className={buttonClassName({
-                variant: "secondary",
+                variant: "success",
                 size: "md",
                 className: cn(
-                  "hidden shrink-0 whitespace-nowrap min-[1200px]:inline-flex",
-                  "min-[1200px]:min-h-11 min-[1200px]:border-transparent min-[1200px]:bg-transparent min-[1200px]:font-semibold min-[1200px]:text-fo-text-muted min-[1200px]:hover:bg-fo-surface min-[1200px]:hover:text-fo-text",
-                  language === "es" ? "min-[1200px]:px-3 min-[1200px]:text-sm" : "min-[1200px]:px-5 min-[1200px]:text-sm"
+                  "hidden shrink-0 whitespace-nowrap min-[360px]:inline-flex",
+                  headerActionSizeClass
                 ),
               })}
             >
@@ -234,7 +237,7 @@ export function LandingNavbar({ useHomeAnchors = false }: { useHomeAnchors?: boo
                 <Link
                   href="/sign-in"
                   className={buttonClassName({
-                    variant: "secondary",
+                    variant: "success",
                     size: "lg",
                     fullWidth: true,
                     className: "w-full",

@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/cn";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "success";
 export type ButtonSize = "md" | "lg";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -19,6 +19,8 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-transparent text-fo-text-muted hover:bg-fo-surface hover:text-fo-text",
   danger:
     "bg-fo-rejected text-white hover:bg-red-500 active:scale-[0.98]",
+  success:
+    "bg-fo-success text-white hover:bg-green-400 active:scale-[0.98]",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
