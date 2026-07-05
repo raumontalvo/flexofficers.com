@@ -24,6 +24,7 @@ export type CompanyNotificationKind =
   | "invite_declined"
   | "new_application"
   | "application_withdrawn"
+  | "officer_cancelled_assignment"
   | "shift_update"
   | "shift_cancelled"
   | "officer_clocked_in"
@@ -61,6 +62,7 @@ const KIND_LABELS: Record<CompanyNotificationKind, string> = {
   invite_declined: "INVITE DECLINED",
   new_application: "NEW APPLICATION",
   application_withdrawn: "APPLICATION WITHDRAWN",
+  officer_cancelled_assignment: "OFFICER CANCELLED ASSIGNMENT",
   shift_update: "SHIFT UPDATE",
   shift_cancelled: "SHIFT CANCELLED",
   officer_clocked_in: "OFFICER CLOCKED IN",
@@ -74,6 +76,7 @@ const KIND_TONES: Record<CompanyNotificationKind, NotificationTone> = {
   invite_declined: "danger",
   new_application: "info",
   application_withdrawn: "purple",
+  officer_cancelled_assignment: "purple",
   shift_update: "warning",
   shift_cancelled: "danger",
   officer_clocked_in: "success",
@@ -88,6 +91,7 @@ const KIND_ICON_VARIANTS: Record<CompanyNotificationKind, NotificationIconVarian
     invite_declined: "x",
     new_application: "document",
     application_withdrawn: "document",
+    officer_cancelled_assignment: "document",
     shift_update: "bell",
     shift_cancelled: "x",
     officer_clocked_in: "check",
@@ -112,6 +116,10 @@ function inferNotificationMeta(
 
   if (normalizedTitle === "officer clocked out") {
     return { category: "shifts", kind: "officer_clocked_out" };
+  }
+
+  if (normalizedTitle === "officer cancelled assignment") {
+    return { category: "shifts", kind: "officer_cancelled_assignment" };
   }
 
   const text = `${title} ${message}`.toLowerCase();
@@ -157,6 +165,15 @@ function inferPrimaryAction(
     return {
       label: "View Details",
       href: rosterHref ?? "/company/shifts",
+    };
+  }
+
+  if (kind === "officer_cancelled_assignment") {
+    const shiftsHref = parseAttendanceNotificationLink(message);
+
+    return {
+      label: "View Details",
+      href: shiftsHref ?? "/company/shifts",
     };
   }
 

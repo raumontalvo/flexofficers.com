@@ -10,8 +10,17 @@ import { AcceptedShiftsBrowseList } from "./AcceptedShiftsBrowseList";
 
 export const dynamic = "force-dynamic";
 
-export default async function OfficerAcceptedShiftsPage() {
+export default async function OfficerAcceptedShiftsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; shiftId?: string }>;
+}) {
   const clerkUser = await requirePageRole(UserRole.OFFICER);
+  const { tab, shiftId } = await searchParams;
+  const initialTab =
+    tab === "upcoming" || tab === "completed" || tab === "cancelled"
+      ? tab
+      : undefined;
 
   const applications = await prisma.application.findMany({
     where: {
@@ -32,7 +41,11 @@ export default async function OfficerAcceptedShiftsPage() {
 
   return (
     <PageShell nav="officer" maxWidth="6xl" sidebar>
-      <AcceptedShiftsBrowseList applications={acceptedShiftData} />
+      <AcceptedShiftsBrowseList
+        applications={acceptedShiftData}
+        initialTab={initialTab}
+        focusShiftId={shiftId ?? null}
+      />
     </PageShell>
   );
 }

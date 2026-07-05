@@ -37,6 +37,24 @@ describe("officer notification data helpers", () => {
     expect(shift.iconVariant).toBe("bell");
     expect(shift.primaryAction.label).toBe("View Shift");
     expect(shift.primaryAction.href).toBe("/officer/upcoming-shifts");
+
+    const cancelled = mapOfficerNotification({
+      id: "n-3",
+      title: "Shift cancelled",
+      message:
+        'The shift "Warehouse Security" was cancelled by the company.<!--fo-my-shifts:/officer/accepted-shifts?tab=cancelled&shiftId=shift-1-->',
+      read: false,
+      createdAt: new Date("2026-06-02T12:00:00.000Z"),
+    });
+
+    expect(cancelled.kind).toBe("shift_cancelled");
+    expect(cancelled.message).toBe(
+      'The shift "Warehouse Security" was cancelled by the company.'
+    );
+    expect(cancelled.primaryAction).toEqual({
+      label: "View Shift",
+      href: "/officer/accepted-shifts?tab=cancelled&shiftId=shift-1",
+    });
   });
 
   it("filters tabs and formats time ago", () => {

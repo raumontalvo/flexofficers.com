@@ -56,6 +56,7 @@ type MyShiftMobileCardProps = {
   shift: SerializedCompanyShiftRow;
   workforce?: SerializedShiftWorkforce;
   rosterExpanded: boolean;
+  highlighted?: boolean;
   highlightOfficerId?: string | null;
   onToggleRoster: () => void;
 };
@@ -64,6 +65,7 @@ export function MyShiftMobileCard({
   shift,
   workforce,
   rosterExpanded,
+  highlighted = false,
   highlightOfficerId = null,
   onToggleRoster,
 }: MyShiftMobileCardProps) {
@@ -80,7 +82,15 @@ export function MyShiftMobileCard({
     : shift.locationLabel;
 
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-3.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.55)]">
+    <article
+      id={`company-shift-${shift.id}`}
+      className={cn(
+        "rounded-2xl border bg-white/[0.03] p-3.5 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.55)] transition",
+        highlighted
+          ? "border-fo-primary-bright/50 ring-2 ring-fo-primary-bright/40"
+          : "border-white/10"
+      )}
+    >
       <div className="flex items-start gap-3">
         <div className="flex w-[3.25rem] shrink-0 flex-col items-center justify-center rounded-xl border border-fo-primary-bright/20 bg-fo-primary-bright/10 px-2 py-2 text-center">
           <span className="text-[10px] font-bold tracking-wide text-fo-primary-hover">

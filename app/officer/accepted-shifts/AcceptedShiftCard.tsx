@@ -3,6 +3,7 @@
 import { StatusBadge, ProfileAvatar } from "@/components/ui";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
 import { interpolate } from "@/lib/app-i18n";
+import { cn } from "@/lib/cn";
 import {
   formatEstimatedShiftPay,
   formatHourlyRate,
@@ -26,6 +27,7 @@ import { AcceptedShiftActions } from "./AcceptedShiftActions";
 type AcceptedShiftCardProps = {
   application: OfficerAcceptedShiftData;
   tab: AcceptedShiftTab;
+  highlighted?: boolean;
   onListChange: () => void;
 };
 
@@ -85,6 +87,7 @@ function desktopStatusBadgeForTab(t: AppTranslations, tab: AcceptedShiftTab) {
 export function AcceptedShiftCard({
   application,
   tab,
+  highlighted = false,
   onListChange,
 }: AcceptedShiftCardProps) {
   const { t } = useLandingLanguage();
@@ -101,10 +104,19 @@ export function AcceptedShiftCard({
   const contactAvailable = hasCompanyContact(company);
   const contactName = company.contactName?.trim() || company.companyName;
   const dateTimeLabel = `${schedule.weekday} ${schedule.monthDay} · ${schedule.timeRange}`;
+  const cardHighlightClass = highlighted
+    ? "border-fo-primary-bright/50 ring-2 ring-fo-primary-bright/40"
+    : "border-white/10";
 
   return (
     <>
-      <article className="fo-glass-card fo-glass-card-hover overflow-hidden rounded-xl border border-white/10 transition lg:hidden">
+      <article
+        id={`officer-my-shift-${shift.id}`}
+        className={cn(
+          "fo-glass-card fo-glass-card-hover overflow-hidden rounded-xl border transition lg:hidden",
+          cardHighlightClass
+        )}
+      >
         <div className="space-y-2 p-3">
           <div className="flex items-start justify-between gap-3">
             {statusBadgeForTab(t, tab)}
@@ -152,7 +164,13 @@ export function AcceptedShiftCard({
         </div>
       </article>
 
-      <article className="fo-glass-card fo-glass-card-hover hidden min-h-[150px] rounded-xl border border-white/10 lg:block">
+      <article
+        id={`officer-my-shift-${shift.id}`}
+        className={cn(
+          "fo-glass-card fo-glass-card-hover hidden min-h-[150px] rounded-xl border lg:block",
+          cardHighlightClass
+        )}
+      >
         <div className="grid h-full min-h-[150px] grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.5fr)] gap-5 p-5">
           <div className="flex min-w-0 flex-col justify-center gap-3 border-r border-white/[0.06] pr-5">
             <div>{desktopStatusBadgeForTab(t, tab)}</div>

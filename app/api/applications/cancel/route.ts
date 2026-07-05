@@ -1,6 +1,10 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { officerWithUserSelect } from "@/lib/officer-fields";
+import {
+  appendCompanyShiftNotificationLink,
+  buildCompanyShiftsHref,
+} from "@/lib/company-attendance-notification-link";
 import { createNotificationWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -113,14 +117,17 @@ export async function POST(req: Request) {
     const officerName =
       `${existing.officer.firstName} ${existing.officer.lastName}`.trim();
     const title = "Officer cancelled assignment";
-    const message = `${officerName} cancelled their assignment for ${existing.shift.title}.`;
+    const message = appendCompanyShiftNotificationLink(
+      `${officerName} cancelled their assignment for ${existing.shift.title}.`,
+      existing.shiftId
+    );
 
     await createNotificationWithEmail(prisma, {
       userId: existing.shift.company.user.id,
       title,
       message,
       type: "application_withdrawn",
-      linkUrl: "/company/applications",
+      linkUrl: buildCompanyShiftsHref(existing.shiftId),
     });
 
     return NextResponse.json(updatedApplication);

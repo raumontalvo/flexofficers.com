@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrowseListPagination } from "@/components/i18n/browse-list-pagination";
 import { TranslatedPageHeader } from "@/components/i18n/translated-page-header";
 import { useLandingLanguage } from "@/components/landing/landing-language-context";
@@ -21,6 +21,40 @@ import { getHiddenAcceptedShiftIds } from "./RemoveFromAcceptedListButton";
 
 const PAGE_SIZE = 10;
 
+function getMyShiftsFocusState(
+  applications: OfficerAcceptedShiftData[],
+  initialTab?: AcceptedShiftTab,
+  focusShiftId?: string | null
+) {
+  const activeTab = initialTab ?? "upcoming";
+  const tabApplications = applications.filter(
+    (application) =>
+      getAcceptedShiftTab(
+        application.shift.status,
+        application.shift.endTime,
+        application.attendance.clockOutAt
+      ) === activeTab
+  );
+
+  let page = 1;
+
+  if (focusShiftId) {
+    const shiftIndex = tabApplications.findIndex(
+      (application) => application.shift.id === focusShiftId
+    );
+
+    if (shiftIndex >= 0) {
+      page = Math.floor(shiftIndex / PAGE_SIZE) + 1;
+    }
+  }
+
+  return {
+    activeTab,
+    page,
+    focusShiftId: focusShiftId ?? null,
+  };
+}
+
 function countByTab(
   applications: OfficerAcceptedShiftData[],
   tab: AcceptedShiftTab
@@ -37,15 +71,25 @@ function countByTab(
 
 type AcceptedShiftsBrowseListProps = {
   applications: OfficerAcceptedShiftData[];
+  initialTab?: AcceptedShiftTab;
+  focusShiftId?: string | null;
 };
 
 export function AcceptedShiftsBrowseList({
   applications,
+  initialTab,
+  focusShiftId = null,
 }: AcceptedShiftsBrowseListProps) {
   const { t } = useLandingLanguage();
   const listTopRef = useRef<HTMLDivElement>(null);
-  const [activeTab, setActiveTab] = useState<AcceptedShiftTab>("upcoming");
-  const [currentPage, setCurrentPage] = useState(1);
+  const initialFocus = useMemo(
+    () => getMyShiftsFocusState(applications, initialTab, focusShiftId),
+    [applications, focusShiftId, initialTab]
+  );
+  const [activeTab, setActiveTab] = useState<AcceptedShiftTab>(
+    initialFocus.activeTab
+  );
+  const [currentPage, setCurrentPage] = useState(initialFocus.page);
   const [hiddenIds, setHiddenIds] = useState<string[]>(() =>
     getHiddenAcceptedShiftIds()
   );
@@ -94,6 +138,19 @@ export function AcceptedShiftsBrowseList({
     completed: copy.empty.completed,
     cancelled: copy.empty.cancelled,
   };
+
+  useEffect(() => {
+    if (!focusShiftId) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(`officer-my-shift-${focusShiftId}`);
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeTab, currentPage, focusShiftId]);
 
   function scrollToListTop() {
     listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -176,6 +233,7 @@ export function AcceptedShiftsBrowseList({
                 key={application.id}
                 application={application}
                 tab={activeTab}
+                highlighted={application.shift.id === focusShiftId}
                 onListChange={handleListChange}
               />
             ))}

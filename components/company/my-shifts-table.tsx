@@ -66,7 +66,8 @@ type MyShiftsTableProps = {
 
 function getRosterFocusState(
   shifts: SerializedCompanyShiftRow[],
-  focusShiftId: string | null
+  focusShiftId: string | null,
+  focusOfficerId: string | null
 ) {
   if (!focusShiftId || !shifts.some((shift) => shift.id === focusShiftId)) {
     return {
@@ -85,7 +86,7 @@ function getRosterFocusState(
       shiftIndex >= 0
         ? Math.floor(shiftIndex / COMPANY_SHIFTS_PAGE_SIZE) + 1
         : 1,
-    expandedShiftId: focusShiftId,
+    expandedShiftId: focusOfficerId ? focusShiftId : null,
   };
 }
 
@@ -266,8 +267,8 @@ export function MyShiftsTable({
   const table = copy.table;
   const tabs = getCompanyShiftsTabs(t);
   const initialRosterFocus = useMemo(
-    () => getRosterFocusState(shifts, focusShiftId),
-    [focusShiftId, shifts]
+    () => getRosterFocusState(shifts, focusShiftId, focusOfficerId),
+    [focusOfficerId, focusShiftId, shifts]
   );
   const [activeTab, setActiveTab] = useState<CompanyShiftsPageTab>(
     initialRosterFocus.activeTab
@@ -304,6 +305,19 @@ export function MyShiftsTable({
 
     return () => window.cancelAnimationFrame(frame);
   }, [expandedShiftId, focusOfficerId, focusShiftId, page]);
+
+  useEffect(() => {
+    if (!focusShiftId || focusOfficerId) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(`company-shift-${focusShiftId}`);
+      target?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [focusOfficerId, focusShiftId, page, activeTab]);
 
   function handleTabChange(tab: CompanyShiftsPageTab) {
     setActiveTab(tab);
@@ -383,6 +397,7 @@ export function MyShiftsTable({
                 shift={shift}
                 workforce={workforceByShiftId[shift.id]}
                 rosterExpanded={expandedShiftId === shift.id}
+                highlighted={shift.id === focusShiftId}
                 highlightOfficerId={
                   expandedShiftId === shift.id ? focusOfficerId : null
                 }
@@ -473,7 +488,14 @@ export function MyShiftsTable({
 
                   return (
                     <Fragment key={shift.id}>
-                      <tr className="border-b border-white/[0.04] transition hover:bg-white/[0.03]">
+                      <tr
+                        id={`company-shift-${shift.id}`}
+                        className={cn(
+                          "border-b border-white/[0.04] transition hover:bg-white/[0.03]",
+                          shift.id === focusShiftId &&
+                            "bg-fo-primary/5 ring-1 ring-inset ring-fo-primary-bright/40"
+                        )}
+                      >
                         <td className="px-4 py-4 align-middle">
                           <div className="flex flex-wrap items-center gap-2">
                             <MyShiftStatusBadge status={shift.status} />

@@ -119,6 +119,7 @@ export type UiTranslations = {
         invite_declined: string;
         new_application: string;
         application_withdrawn: string;
+        officer_cancelled_assignment: string;
         shift_update: string;
         shift_cancelled: string;
         officer_clocked_in: string;
@@ -651,6 +652,7 @@ export const uiEn: UiTranslations = {
         invite_declined: "INVITE DECLINED",
         new_application: "NEW APPLICATION",
         application_withdrawn: "APPLICATION WITHDRAWN",
+        officer_cancelled_assignment: "OFFICER CANCELLED ASSIGNMENT",
         shift_update: "SHIFT UPDATE",
         shift_cancelled: "SHIFT CANCELLED",
         officer_clocked_in: "OFFICER CLOCKED IN",
@@ -1267,6 +1269,7 @@ export const uiEs: UiTranslations = {
         invite_declined: "INVITACIÓN RECHAZADA",
         new_application: "NUEVA SOLICITUD",
         application_withdrawn: "SOLICITUD RETIRADA",
+        officer_cancelled_assignment: "ASIGNACIÓN CANCELADA POR OFICIAL",
         shift_update: "ACTUALIZACIÓN DE TURNO",
         shift_cancelled: "TURNO CANCELADO",
         officer_clocked_in: "OFICIAL ENTRÓ",

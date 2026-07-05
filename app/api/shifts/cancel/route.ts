@@ -2,6 +2,10 @@ import { currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { ApplicationStatus, ShiftStatus } from "@/app/generated/prisma/enums";
 import { isShiftAttendanceCompleted } from "@/lib/company-dashboard-data";
+import {
+  appendOfficerShiftNotificationLink,
+  buildOfficerMyShiftsHref,
+} from "@/lib/officer-shift-notification-link";
 import { createNotificationsWithEmail } from "@/lib/notifications/create-notification-with-email";
 import { prisma } from "@/lib/prisma";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -90,7 +94,14 @@ export async function POST(req: Request) {
     });
 
     const title = "Shift cancelled";
-    const message = `The shift "${shift.title}" was cancelled by the company.`;
+    const message = appendOfficerShiftNotificationLink(
+      `The shift "${shift.title}" was cancelled by the company.`,
+      { tab: "cancelled", shiftId: shift.id }
+    );
+    const linkUrl = buildOfficerMyShiftsHref({
+      tab: "cancelled",
+      shiftId: shift.id,
+    });
 
     await createNotificationsWithEmail(
       prisma,
@@ -99,6 +110,7 @@ export async function POST(req: Request) {
         title,
         message,
         type: "shift_canceled" as const,
+        linkUrl,
       }))
     );
 

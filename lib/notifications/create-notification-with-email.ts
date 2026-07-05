@@ -62,7 +62,7 @@ const NOTIFICATION_LINK_PATHS: Record<NotificationEmailType, string> = {
   invite_accepted: "/company/applications",
   invite_declined: "/company/applications",
   shift_update: "/officer/upcoming-shifts",
-  shift_canceled: "/officer/upcoming-shifts",
+  shift_canceled: "/officer/accepted-shifts?tab=cancelled",
   shift_reminder_24h: "/officer/accepted-shifts",
   shift_reminder_2h: "/officer/accepted-shifts",
   clock_in_available: "/officer/upcoming-shifts",

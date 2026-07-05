@@ -1,3 +1,9 @@
+import {
+  buildOfficerMyShiftsHref,
+  parseOfficerShiftNotificationLink,
+  stripOfficerShiftNotificationLink,
+} from "@/lib/officer-shift-notification-link";
+
 export type NotificationTab = "all" | "unread" | "applications" | "shifts" | "system";
 
 export type NotificationCategory = "applications" | "shifts" | "system";
@@ -221,6 +227,15 @@ function inferPrimaryAction(
     return { label: "View Shift", href: "/shifts" };
   }
 
+  if (kind === "shift_cancelled") {
+    const myShiftsHref = parseOfficerShiftNotificationLink(message);
+
+    return {
+      label: "View Shift",
+      href: myShiftsHref ?? buildOfficerMyShiftsHref({ tab: "cancelled" }),
+    };
+  }
+
   if (
     includesAny(text, ["upcoming shift tomorrow", "shift starts soon", "begins in about 2 hours"])
   ) {
@@ -229,7 +244,9 @@ function inferPrimaryAction(
 
   if (
     kind === "upcoming_shift_reminder" ||
-    kind.startsWith("shift_")
+    kind === "shift_starts_tomorrow" ||
+    kind === "shift_starts_soon" ||
+    kind === "shift_schedule_changed"
   ) {
     return { label: "View Shift", href: "/officer/upcoming-shifts" };
   }
@@ -260,7 +277,7 @@ export function mapOfficerNotification(notification: {
   return {
     id: notification.id,
     title: notification.title,
-    message: notification.message,
+    message: stripOfficerShiftNotificationLink(notification.message),
     read: notification.read,
     createdAt: notification.createdAt.toISOString(),
     category,
@@ -268,7 +285,12 @@ export function mapOfficerNotification(notification: {
     tone: KIND_TONES[kind],
     iconVariant: KIND_ICON_VARIANTS[kind],
     typeLabel: KIND_LABELS[kind],
-    primaryAction: inferPrimaryAction(kind, category, notification.title, notification.message),
+    primaryAction: inferPrimaryAction(
+      kind,
+      category,
+      notification.title,
+      notification.message
+    ),
   };
 }
 

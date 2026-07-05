@@ -1,15 +1,31 @@
 const ROSTER_LINK_PATTERN = /<!--fo-roster:([^>]+)-->/;
 
+export function buildCompanyShiftsHref(shiftId: string, officerId?: string) {
+  const params = new URLSearchParams({
+    shiftId,
+  });
+
+  if (officerId) {
+    params.set("officerId", officerId);
+  }
+
+  return `/company/shifts?${params.toString()}`;
+}
+
 export function buildCompanyAttendanceRosterHref(
   shiftId: string,
   officerId: string
 ) {
-  const params = new URLSearchParams({
-    shiftId,
-    officerId,
-  });
+  return buildCompanyShiftsHref(shiftId, officerId);
+}
 
-  return `/company/shifts?${params.toString()}`;
+export function appendCompanyShiftNotificationLink(
+  message: string,
+  shiftId: string,
+  officerId?: string
+) {
+  const href = buildCompanyShiftsHref(shiftId, officerId);
+  return `${message}<!--fo-roster:${href}-->`;
 }
 
 export function appendAttendanceNotificationLink(
@@ -17,8 +33,7 @@ export function appendAttendanceNotificationLink(
   shiftId: string,
   officerId: string
 ) {
-  const href = buildCompanyAttendanceRosterHref(shiftId, officerId);
-  return `${message}<!--fo-roster:${href}-->`;
+  return appendCompanyShiftNotificationLink(message, shiftId, officerId);
 }
 
 export function parseAttendanceNotificationLink(message: string) {

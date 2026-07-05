@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   appendAttendanceNotificationLink,
+  appendCompanyShiftNotificationLink,
   buildCompanyAttendanceRosterHref,
   parseAttendanceNotificationLink,
   stripAttendanceNotificationLink,
@@ -68,6 +69,29 @@ describe("company attendance notification links", () => {
     expect(clockedOut.primaryAction).toEqual({
       label: "View Details",
       href: "/company/shifts?shiftId=shift-2&officerId=officer-2",
+    });
+  });
+
+  it("maps officer cancelled assignment notifications to company My Shifts", () => {
+    const cancelledAssignment = mapCompanyNotification({
+      id: "n-3",
+      title: "Officer cancelled assignment",
+      message: appendCompanyShiftNotificationLink(
+        "Alex cancelled their assignment for Warehouse Security.",
+        "shift-3"
+      ),
+      read: false,
+      createdAt: new Date("2026-06-03T12:00:00.000Z"),
+    });
+
+    expect(cancelledAssignment.kind).toBe("officer_cancelled_assignment");
+    expect(cancelledAssignment.category).toBe("shifts");
+    expect(cancelledAssignment.message).toBe(
+      "Alex cancelled their assignment for Warehouse Security."
+    );
+    expect(cancelledAssignment.primaryAction).toEqual({
+      label: "View Details",
+      href: "/company/shifts?shiftId=shift-3",
     });
   });
 });
