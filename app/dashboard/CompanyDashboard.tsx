@@ -1,6 +1,7 @@
 import type { Prisma } from "@/app/generated/prisma/client";
+import Link from "next/link";
 import { companyDashboardSelect } from "@/lib/officer-fields";
-import { PageShell } from "@/components/ui";
+import { buttonClassName, Card, PageShell } from "@/components/ui";
 import { CompanyApplicationsDonut } from "@/components/dashboard/company-applications-donut";
 import { CompanyDashboardHeader } from "@/components/dashboard/company-dashboard-header";
 import { CompanyProfileCompletionBanner } from "@/components/dashboard/company-profile-completion-banner";
@@ -9,7 +10,10 @@ import { CompanyQuickActions } from "@/components/dashboard/company-quick-action
 import { CompanySummaryCards } from "@/components/dashboard/company-summary-cards";
 import { CompanyUpcomingShifts } from "@/components/dashboard/company-upcoming-shifts";
 import { ApplicationStatus } from "@/app/generated/prisma/enums";
-import { canCompanyPostNewShifts } from "@/lib/company-access";
+import {
+  canCompanyPostNewShifts,
+  getCompanyPostingBlockMessage,
+} from "@/lib/company-access";
 import {
   getCompanyApplicationStats,
   getCompanyApplicationsSummary,
@@ -34,6 +38,7 @@ export default async function CompanyDashboard({
   profileCompletion,
 }: CompanyDashboardProps) {
   const canPostShifts = canCompanyPostNewShifts(company);
+  const postingBlockMessage = getCompanyPostingBlockMessage(company);
   const displayName = profileCompletion.isComplete
     ? company.companyName.trim()
     : company.companyName?.trim() || firstName?.trim() || "there";
@@ -133,6 +138,21 @@ export default async function CompanyDashboard({
             completionPercent={profileCompletion.completionPercent}
             missingFieldIds={profileCompletion.missingFieldIds}
           />
+        ) : null}
+
+        {!canPostShifts ? (
+          <Card className="fo-glass-card border border-blue-500/20 bg-blue-500/10 p-4">
+            <p className="text-sm leading-relaxed text-fo-text">
+              {postingBlockMessage ??
+                "An active subscription or trial is required to post new shifts."}
+            </p>
+            <Link
+              href="/company/billing"
+              className={buttonClassName({ size: "md", className: "mt-4" })}
+            >
+              View Billing
+            </Link>
+          </Card>
         ) : null}
 
         <CompanyDashboardHeader

@@ -1,7 +1,12 @@
+import Link from "next/link";
 import { UserRole, ApplicationStatus } from "@/app/generated/prisma/enums";
 import { CompanyOfficersPageContent } from "@/components/company/company-officers-page-content";
 import { TranslatedSectionHeading } from "@/components/i18n/translated-section-heading";
-import { PageShell } from "@/components/ui";
+import { buttonClassName, Card, PageShell } from "@/components/ui";
+import {
+  canCompanyPostNewShifts,
+  getCompanyPostingBlockMessage,
+} from "@/lib/company-access";
 import { serializeOfficerSearchResult } from "@/lib/company-officers-page";
 import { officerSearchCardSelect, officerUserSummarySelect } from "@/lib/officer-fields";
 import {
@@ -24,6 +29,47 @@ export default async function CompanyOfficersPage({
   const clerkUser = await requirePageRole(UserRole.COMPANY);
   const params = await searchParams;
   const filters = parseOfficerSearchFilters(params);
+
+  const company = await prisma.company.findFirst({
+    where: {
+      user: {
+        clerkId: clerkUser.id,
+      },
+    },
+    select: {
+      id: true,
+      accessStatus: true,
+      trialEndsAt: true,
+      subscriptionStatus: true,
+      subscriptionCurrentPeriodEnd: true,
+    },
+  });
+
+  const canSearchOfficers = company ? canCompanyPostNewShifts(company) : false;
+  const searchBlockMessage = company
+    ? getCompanyPostingBlockMessage(company)
+    : null;
+
+  if (!canSearchOfficers) {
+    return (
+      <PageShell nav="company" maxWidth="full" sidebar>
+        <TranslatedSectionHeading page="companyOfficers" />
+
+        <Card className="fo-glass-card border border-blue-500/20 bg-blue-500/10 p-4">
+          <p className="text-sm leading-relaxed text-fo-text">
+            {searchBlockMessage ??
+              "An active subscription or trial is required to search officers."}
+          </p>
+          <Link
+            href="/company/billing"
+            className={buttonClassName({ size: "md", className: "mt-4" })}
+          >
+            View Billing
+          </Link>
+        </Card>
+      </PageShell>
+    );
+  }
 
   const [officers, openShifts, invites, staffMembers, acceptedAssignments] =
     await Promise.all([

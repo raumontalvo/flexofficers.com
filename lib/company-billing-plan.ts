@@ -8,6 +8,7 @@ export const COMPANY_ANNUAL_PLAN = {
 } as const;
 
 export const COMPANY_ANNUAL_PLAN_FEATURES = [
+  "Access to all features",
   "Unlimited Shift Posts",
   "Search Officers",
   "View Officer Profiles",

@@ -93,6 +93,7 @@ describe("company billing page data", () => {
     expect(billing.autoRenewalEnabled).toBe(true);
     expect(billing.nextRenewal).toBe("June 25, 2027");
     expect(billing.nextCharge).toBe("$599.00");
+    expect(billing.features).toContain("Access to all features");
     expect(billing.features).toContain("Unlimited Shift Posts");
   });
 

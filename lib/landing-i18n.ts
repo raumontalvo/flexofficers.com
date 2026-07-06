@@ -534,6 +534,7 @@ const en: LandingContent = {
       "Your trial starts after your company profile is complete. You won't be charged when the trial ends.",
     trialSubscribeNote: "Subscribe when ready to re-unlock company features.",
     features: [
+      "Access to all features",
       "Unlimited Shift Postings",
       "Unlimited Officer Applications",
       "Unlimited Hiring",
@@ -969,6 +970,7 @@ const es: LandingContent = {
     trialSubscribeNote:
       "Suscríbete cuando estés listo para volver a desbloquear funciones empresariales.",
     features: [
+      "Acceso a todas las funciones",
       "Publicaciones Ilimitadas de Turnos",
       "Solicitudes Ilimitadas de Oficiales",
       "Contratación Ilimitada",
