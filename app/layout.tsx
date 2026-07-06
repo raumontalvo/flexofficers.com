@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
+import { indexableRobotsMetadata } from "@/lib/seo-robots";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.flexofficers.com"),
   title: "FlexOfficers",
   description:
     "A marketplace connecting security companies with licensed security officers.",
+  robots: indexableRobotsMetadata,
   icons: {
     icon: [
       { url: "/favicon.ico" },

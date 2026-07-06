@@ -18,6 +18,7 @@ import { buildShiftJobPostingJsonLd } from "@/lib/shift-job-posting-json-ld";
 import { fromShiftWorkType } from "@/lib/shift-form-options";
 import { getShiftRequirementChips } from "@/lib/shift-requirements";
 import { SITEMAP_BASE_URL } from "@/lib/sitemap-data";
+import { indexableRobotsMetadata } from "@/lib/seo-robots";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +89,7 @@ export async function generateMetadata({
     },
     openGraph: metadata.openGraph,
     twitter: metadata.twitter,
+    robots: indexableRobotsMetadata,
   };
 }
 

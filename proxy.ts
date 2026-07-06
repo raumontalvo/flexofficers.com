@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { resolveRobotsTagHeader } from "@/lib/seo-robots";
 
 const isPublicApi = createRouteMatcher(["/api/stripe/webhook"]);
 
@@ -19,35 +20,48 @@ const isPrivatePage = createRouteMatcher([
 
 const isPrivateApi = createRouteMatcher(["/api(.*)"]);
 
+function withRobotsTag(response: NextResponse, req: NextRequest) {
+  const isPrivateRoute =
+    isPrivatePage(req) ||
+    isPrivateApi(req) ||
+    (req.nextUrl.pathname.startsWith("/client") && isClientPublicPage(req));
+
+  response.headers.set(
+    "X-Robots-Tag",
+    resolveRobotsTagHeader(isPrivateRoute)
+  );
+
+  return response;
+}
+
+function continueWithPathname(req: NextRequest, requestHeaders: Headers) {
+  return withRobotsTag(
+    NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    }),
+    req
+  );
+}
+
 export default clerkMiddleware(async (auth, req) => {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-pathname", req.nextUrl.pathname);
 
   if (isPublicApi(req)) {
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
+    return continueWithPathname(req, requestHeaders);
   }
 
   if (isPrivatePage(req) || isPrivateApi(req)) {
     if (req.nextUrl.pathname.startsWith("/client") && isClientPublicPage(req)) {
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      });
+      return continueWithPathname(req, requestHeaders);
     }
 
     await auth.protect();
   }
 
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders,
-    },
-  });
+  return continueWithPathname(req, requestHeaders);
 });
 
 export const config = {
