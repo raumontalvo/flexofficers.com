@@ -8,7 +8,6 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 import Link from "next/link";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import {
-  IconBell,
   IconCalendar,
   IconCheck,
   IconClock,
@@ -36,7 +35,6 @@ const companyFeatureIcons = [
   IconSearch,
   IconZap,
   IconMapPin,
-  IconBell,
   IconShield,
   IconShield,
 ] as const;

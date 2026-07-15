@@ -110,15 +110,6 @@ export function IconMapPin(props: IconProps) {
   );
 }
 
-export function IconBell(props: IconProps) {
-  return (
-    <IconBase {...props}>
-      <path d="M12 4a4 4 0 0 0-4 4v3.5L6 14h12l-2-2.5V8a4 4 0 0 0-4-4Z" />
-      <path d="M10 18a2 2 0 0 0 4 0" />
-    </IconBase>
-  );
-}
-
 export function IconCheck(props: IconProps) {
   return (
     <IconBase {...props}>

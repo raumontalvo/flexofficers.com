@@ -455,11 +455,6 @@ const en: LandingContent = {
           "Track when officers clock in and clock out, including the location captured at each action. Review attendance times and open the recorded location on a map.",
       },
       {
-        title: "Real-Time Attendance Updates",
-        description:
-          "Receive notifications when officers clock in or clock out, with the officer name, shift title, and recorded time.",
-      },
-      {
         title: "Unlimited Hiring",
         description: "Accept as many officers as your shifts require.",
       },
@@ -898,11 +893,6 @@ const es: LandingContent = {
         title: "Registro de Entrada, Salida y Verificación de Ubicación",
         description:
           "Registra cuándo los oficiales marcan entrada y salida, incluyendo la ubicación capturada en cada acción. Revisa los horarios de asistencia y abre la ubicación registrada en un mapa.",
-      },
-      {
-        title: "Actualizaciones de Asistencia en Tiempo Real",
-        description:
-          "Recibe notificaciones cuando los oficiales marcan entrada o salida, con el nombre del oficial, el título del turno y la hora registrada.",
       },
       {
         title: "Contratación Ilimitada",
