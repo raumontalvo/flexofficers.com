@@ -101,6 +101,24 @@ export function IconClock(props: IconProps) {
   );
 }
 
+export function IconMapPin(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M12 21s7-4.5 7-10a7 7 0 1 0-14 0c0 5.5 7 10 7 10Z" />
+      <circle cx="12" cy="11" r="2.5" />
+    </IconBase>
+  );
+}
+
+export function IconBell(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M12 4a4 4 0 0 0-4 4v3.5L6 14h12l-2-2.5V8a4 4 0 0 0-4-4Z" />
+      <path d="M10 18a2 2 0 0 0 4 0" />
+    </IconBase>
+  );
+}
+
 export function IconCheck(props: IconProps) {
   return (
     <IconBase {...props}>
