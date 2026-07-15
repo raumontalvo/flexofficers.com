@@ -13,7 +13,7 @@ import {
 import { buildJobPageSlug } from "@/lib/job-page-slug";
 import { stripCompanyProfileMeta } from "@/lib/company-profile-meta";
 
-export const SITEMAP_BASE_URL = "https://flexofficers.com";
+export const SITEMAP_BASE_URL = "https://www.flexofficers.com";
 
 export function buildPublicShiftSitemapWhere(
   now: Date = new Date()
